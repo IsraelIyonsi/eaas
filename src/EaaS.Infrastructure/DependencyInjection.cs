@@ -22,6 +22,7 @@ public static class DependencyInjection
         // Bind settings
         services.Configure<RabbitMqSettings>(configuration.GetSection(RabbitMqSettings.SectionName));
         services.Configure<SesSettings>(configuration.GetSection(SesSettings.SectionName));
+        services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
         services.Configure<RateLimitingSettings>(configuration.GetSection(RateLimitingSettings.SectionName));
 
         // PostgreSQL with NpgsqlDataSourceBuilder (Gate 2 fix: MapEnum via data source builder)

@@ -1,5 +1,5 @@
 # Local development overrides
-# Skips Nginx/TLS, exposes ports directly
+# Skips Nginx/TLS, exposes ports directly, uses Mailpit for email
 
 services:
   api:
@@ -7,6 +7,15 @@ services:
       - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - EMAIL_PROVIDER=smtp
+      - Smtp__Host=mailpit
+      - Smtp__Port=1025
+
+  worker:
+    environment:
+      - EMAIL_PROVIDER=smtp
+      - Smtp__Host=mailpit
+      - Smtp__Port=1025
 
   dashboard:
     ports:
@@ -14,12 +23,18 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - EAAS_API_INTERNAL_URL=http://api:8080
+      - EAAS_API_KEY=eaas_live_devkey00000000000000000000000000000000
 
   webhook-processor:
     ports:
       - "5002:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+
+  # Enable Mailpit for local dev
+  mailpit:
+    profiles: []
 
   # Disable nginx and certbot for local dev
   nginx:

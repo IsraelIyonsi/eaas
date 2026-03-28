@@ -20,6 +20,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./scripts/migrate.sql:/docker-entrypoint-initdb.d/02-migrate.sql:ro
+      - ./scripts/migrate_sprint2.sql:/docker-entrypoint-initdb.d/03-migrate-sprint2.sql:ro
+      - ./scripts/migrate_sprint3.sql:/docker-entrypoint-initdb.d/04-migrate-sprint3.sql:ro
+      - ./scripts/seed-data.sql:/docker-entrypoint-initdb.d/05-seed.sql:ro
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
@@ -192,6 +196,27 @@ services:
       resources:
         limits:
           memory: 256M
+
+  # ============================================================
+  # LOCAL DEV TOOLS
+  # ============================================================
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: eaas-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"    # Web UI
+      - "1025:1025"    # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    profiles:
+      - local
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
   # ============================================================
   # REVERSE PROXY

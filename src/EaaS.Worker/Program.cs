@@ -29,14 +29,24 @@ try
         // Infrastructure services (DbContext, Redis, MassTransit consumers)
         services.AddInfrastructure(context.Configuration);
 
-        // AWS SES client
-        var sesSettings = context.Configuration.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
-        services.AddSingleton<IAmazonSimpleEmailServiceV2>(_ =>
-            new AmazonSimpleEmailServiceV2Client(
-                sesSettings.AccessKeyId,
-                sesSettings.SecretAccessKey,
-                RegionEndpoint.GetBySystemName(sesSettings.Region)));
-        services.AddSingleton<IEmailDeliveryService, SesEmailService>();
+        // Email delivery: SMTP (Mailpit) for local dev, SES for production
+        var emailProvider = context.Configuration["EMAIL_PROVIDER"] ?? "ses";
+        if (string.Equals(emailProvider, "smtp", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Information("Using SMTP email provider (Mailpit)");
+            services.AddSingleton<IEmailDeliveryService, SmtpEmailService>();
+        }
+        else
+        {
+            Log.Information("Using AWS SES email provider");
+            var sesSettings = context.Configuration.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
+            services.AddSingleton<IAmazonSimpleEmailServiceV2>(_ =>
+                new AmazonSimpleEmailServiceV2Client(
+                    sesSettings.AccessKeyId,
+                    sesSettings.SecretAccessKey,
+                    RegionEndpoint.GetBySystemName(sesSettings.Region)));
+            services.AddSingleton<IEmailDeliveryService, SesEmailService>();
+        }
 
         // Template rendering
         services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
