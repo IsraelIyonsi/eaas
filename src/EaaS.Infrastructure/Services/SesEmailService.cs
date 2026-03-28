@@ -64,7 +64,7 @@ public sealed partial class SesEmailService : IEmailDeliveryService
             var request = new GetEmailIdentityRequest { EmailIdentity = domain };
             var response = await _sesClient.GetEmailIdentityAsync(request, cancellationToken);
 
-            var isVerified = response.VerifiedForSendingStatus ?? false;
+            var isVerified = response.VerifiedForSendingStatus;
 
             var dkimStatuses = response.DkimAttributes?.Tokens?
                 .Select(t => new DkimTokenStatus(t, response.DkimAttributes.Status == DkimStatus.SUCCESS))

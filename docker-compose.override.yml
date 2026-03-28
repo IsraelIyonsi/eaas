@@ -1,0 +1,30 @@
+# Local development overrides
+# Skips Nginx/TLS, exposes ports directly
+
+services:
+  api:
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  dashboard:
+    ports:
+      - "5001:8082"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  webhook-processor:
+    ports:
+      - "5002:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  # Disable nginx and certbot for local dev
+  nginx:
+    profiles:
+      - production
+
+  certbot:
+    profiles:
+      - production

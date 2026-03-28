@@ -37,7 +37,7 @@
     <PackageVersion Include="StackExchange.Redis" Version="2.7.33" />
 
     <!-- AWS SES -->
-    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="4.0.12.5" />
+    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="3.7.509.7" />
 
     <!-- Template Engine -->
     <PackageVersion Include="Fluid.Core" Version="2.7.0" />

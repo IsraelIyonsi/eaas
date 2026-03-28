@@ -34,13 +34,7 @@ public static class MassTransitConfiguration
                 {
                     e.PrefetchCount = settings.PrefetchCount;
                     e.ConfigureConsumer<SendEmailConsumer>(context);
-
-                    // Classic durable queues (Gate 1 fix -- no quorum on single node)
-                    e.Durable = true;
-                    e.AutoDelete = false;
                 });
-
-                cfg.ConfigureEndpoints(context);
             });
         });
 
