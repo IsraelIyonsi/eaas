@@ -18,6 +18,7 @@ try
 
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
+    builder.Services.AddHealthChecks();
 
     var app = builder.Build();
 
@@ -30,6 +31,7 @@ try
     app.UseStaticFiles();
     app.UseAntiforgery();
 
+    app.MapHealthChecks("/health");
     app.MapRazorComponents<EaaS.Dashboard.Components.App>()
         .AddInteractiveServerRenderMode();
 

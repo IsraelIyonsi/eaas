@@ -36,8 +36,9 @@
     <!-- Redis -->
     <PackageVersion Include="StackExchange.Redis" Version="2.7.33" />
 
-    <!-- AWS SES -->
-    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="3.7.509.7" />
+    <!-- AWS SES — pin Core to 3.7.400.x which has net8.0 TFM -->
+    <PackageVersion Include="AWSSDK.Core" Version="3.7.400.34" />
+    <PackageVersion Include="AWSSDK.SimpleEmailV2" Version="3.7.402.4" />
 
     <!-- Template Engine -->
     <PackageVersion Include="Fluid.Core" Version="2.7.0" />

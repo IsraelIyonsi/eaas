@@ -2,7 +2,7 @@
 # EaaS - Email as a Service
 # All services on a single Hetzner CX22 VPS (2 vCPU, 4GB RAM, 40GB SSD)
 
-version: "3.9"
+
 
 services:
   # ============================================================
