@@ -8,7 +8,7 @@
 **Scope:** 10 stories, 34 story points (adjusted from backlog -- US-6.3, US-3.4, US-5.2 already done in Sprint 2)
 **Status:** Ready for Developer Handoff
 
-> **BREAKING CHANGE (v2.0):** Dashboard technology changed from Blazor Server + MudBlazor to **Next.js 15 + shadcn/ui + Tailwind CSS**. All frontend sections rewritten. Backend specs (Analytics API, Webhooks) unchanged.
+> **Dashboard Technology:** Next.js 15 + shadcn/ui + Tailwind CSS. Backend specs (Analytics API, Webhooks) unchanged.
 
 ---
 
@@ -36,11 +36,8 @@ Sprint 2 delivered:
 - Swagger/OpenAPI documentation
 - CI/CD pipeline
 
-**What exists for Dashboard:** A skeleton Blazor Server app at `src/EaaS.Dashboard/` -- **TO BE DELETED AND REPLACED** with a Next.js application at `dashboard/`. The existing Blazor skeleton contains:
-- `Program.cs` with Razor components and Serilog
-- MudBlazor package referenced in csproj (but not initialized)
-- Bare `Home.razor` placeholder page
-- No layout, no sidebar, no HttpClient to API
+**What exists for Dashboard:** A new Next.js 15 application at `dashboard/` (the old .NET skeleton has been removed). Current state:
+- Fresh Next.js 15 project with shadcn/ui and Tailwind CSS
 - Auth env vars configured in docker-compose (`DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD_HASH`)
 - API accessible at `http://api:8080` from dashboard container
 
@@ -283,7 +280,7 @@ public class WebhookDeliveryLog
 
 ### 2.4 Dashboard Bootstrap (Foundation for all UI stories)
 
-Before building any pages, the dashboard needs foundational setup. The old Blazor skeleton at `src/EaaS.Dashboard/` is deleted and replaced with a Next.js application at `dashboard/`.
+Before building any pages, the dashboard needs foundational setup. The Next.js application lives at `dashboard/`.
 
 **A. Project Structure**
 
@@ -548,12 +545,10 @@ CMD ["node", "server.js"]
 
 `next.config.ts` must include `output: "standalone"` for the Docker build.
 
-**I. Cleanup: Remove Blazor Dashboard**
+**I. Cleanup: Completed**
 
-- Delete `src/EaaS.Dashboard/` directory entirely.
-- Remove `EaaS.Dashboard` project entry from `EaaS.sln`.
-- Remove MudBlazor package reference from `Directory.Packages.props` (if present).
-- No Blazor packages should remain in the solution.
+- The old .NET dashboard project has been removed from the solution.
+- No legacy dashboard packages remain in `Directory.Packages.props`.
 
 ---
 
@@ -771,7 +766,7 @@ dotnet ef migrations add Sprint3_WebhookDeliveryLogs --project src/EaaS.Infrastr
 
 | # | Feature | Story IDs | Est. Hours | Dependencies | Rationale |
 |---|---------|-----------|------------|--------------|-----------|
-| 5 | **Dashboard Scaffolding** | -- | 2h | None | Next.js project, Tailwind, shadcn/ui, TanStack Query, API client, auth, layout, Dockerfile, docker-compose update, remove Blazor skeleton. |
+| 5 | **Dashboard Scaffolding** | -- | 2h | None | Next.js project, Tailwind, shadcn/ui, TanStack Query, API client, auth, layout, Dockerfile, docker-compose update. |
 | 6 | **Dashboard Overview** | US-7.1 | 2.5h | Analytics API (#2), Scaffolding (#5) | First real page. Establishes component patterns (StatCard, charts). |
 | 7 | **Email Log Viewer** | US-7.2 | 3h | Scaffolding (#5) | Highest-value dashboard page. Server-side table + detail drawer. |
 | 8 | **Suppression Manager UI** | US-7.6 | 1.5h | Scaffolding (#5) | Simple CRUD page. Uses patterns from email log viewer. |
@@ -810,8 +805,7 @@ Three parallel chains:
 - Create `src/components/layout/sidebar.tsx` -- navigation links
 - Create `src/types/index.ts` -- all TypeScript interfaces matching API DTOs
 - Create `dashboard/Dockerfile` (multi-stage: node build -> node:alpine runtime)
-- Update `docker-compose.yml`: replace Blazor dashboard service with Next.js
-- Delete `src/EaaS.Dashboard/` and remove from `EaaS.sln`
+- Update `docker-compose.yml` with Next.js dashboard service configuration
 
 **Phase 2: Core Pages (6h)**
 - Overview dashboard: stat cards (shadcn Card), Recharts charts, recent emails table
@@ -867,7 +861,7 @@ Items 3-4, 8-11 (webhooks, remaining dashboard pages)
 
 4. **No real-time updates in Sprint 3:** The dashboard pages fetch data on load and on user action (filter, page change). No WebSocket/SSE push updates. TanStack Query provides `refetchInterval` if we want polling later, but for Sprint 3, manual refresh is acceptable.
 
-5. **Why Next.js over Blazor:** Next.js + shadcn/ui provides a vastly larger ecosystem (npm), better developer tooling (hot reload, React DevTools), superior charting (Recharts), and a cleaner separation from the .NET backend. The Blazor skeleton had zero progress after 2 sprints. This is the correct technology decision.
+5. **Why Next.js:** Next.js + shadcn/ui provides a vastly larger ecosystem (npm), better developer tooling (hot reload, React DevTools), superior charting (Recharts), and a cleaner separation from the .NET backend. This is the correct technology decision.
 
 ### 5.3 Required Changes (incorporated above)
 
@@ -875,7 +869,7 @@ Items 3-4, 8-11 (webhooks, remaining dashboard pages)
 2. **WebhookProcessor memory:** Bump container limit from 128MB to 192MB in docker-compose.
 3. **Analytics rate limits:** The analytics endpoints should have their own rate limit (10 requests/minute) since they run aggregation queries. Add to rate limiting middleware.
 4. **Webhook delivery log retention:** Add a note that webhook delivery logs should be pruned after 30 days. Implement via the existing cleanup job pattern.
-5. **Docker-compose update:** Replace the Blazor dashboard service with a Node.js-based Next.js service (port 3000 internal, environment variables for `NEXT_PUBLIC_API_URL`, `DASHBOARD_API_KEY`, `DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD_HASH`).
+5. **Docker-compose update:** The dashboard service runs as a Node.js-based Next.js container (port 3000 internal, environment variables for `NEXT_PUBLIC_API_URL`, `DASHBOARD_API_KEY`, `DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD_HASH`).
 
 ### 5.4 Docker-Compose Dashboard Service (updated)
 

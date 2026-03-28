@@ -288,11 +288,11 @@ public record ErrorDetail(string Field, string Message);
 - **Test file:** N/A
 - **Time:** 2 min
 
-### File #10: `src/EaaS.Dashboard/EaaS.Dashboard.csproj`
+### File #10: `dashboard/package.json`
 - **Story:** US-0.1
-- **What it does:** Dashboard project file. Blazor Server. Stub only for Sprint 1.
-- **Key patterns:** `<Project Sdk="Microsoft.NET.Sdk.Web">`. NuGet: `MudBlazor`, `BCrypt.Net-Next`, `Serilog.AspNetCore`, `Serilog.Sinks.Console`. References Domain, Infrastructure, Shared. Will contain only a minimal `Program.cs` stub.
-- **Dependencies:** EaaS.Domain.csproj, EaaS.Infrastructure.csproj, EaaS.Shared.csproj
+- **What it does:** Dashboard project file. Next.js 15. Stub only for Sprint 1.
+- **Key patterns:** Next.js 15, shadcn/ui, Tailwind CSS, TanStack Query, Recharts. Standalone Node.js project outside .NET solution.
+- **Dependencies:** None (standalone Next.js project)
 - **Test file:** N/A
 - **Time:** 2 min
 
@@ -352,11 +352,11 @@ public record ErrorDetail(string Field, string Message);
 - **Test file:** N/A
 - **Time:** 5 min
 
-### File #18: `src/EaaS.Dashboard/Program.cs` (stub)
+### File #18: `dashboard/src/app/page.tsx` (stub)
 - **Story:** US-0.1
-- **What it does:** Blazor Server stub. Returns a basic page. Sprint 3+ feature.
-- **Key patterns:** `WebApplication.CreateBuilder(args)`. `builder.Services.AddRazorComponents()`. Minimal -- just compiles and serves a placeholder page.
-- **Dependencies:** EaaS.Dashboard.csproj
+- **What it does:** Next.js dashboard stub. Returns a basic placeholder page. Sprint 3+ feature.
+- **Key patterns:** React Server Component. Minimal -- just renders a placeholder page.
+- **Dependencies:** dashboard/package.json
 - **Test file:** N/A
 - **Time:** 5 min
 
@@ -388,11 +388,11 @@ public record ErrorDetail(string Field, string Message);
 - **Test file:** N/A
 - **Time:** 5 min
 
-### File #22: `src/EaaS.Dashboard/Dockerfile`
+### File #22: `dashboard/Dockerfile`
 - **Story:** US-0.1
-- **What it does:** Multi-stage Docker build for the Dashboard (stub).
-- **Key patterns:** Same pattern as API Dockerfile. Expose 8082.
-- **Dependencies:** EaaS.Dashboard.csproj
+- **What it does:** Multi-stage Docker build for the Next.js Dashboard.
+- **Key patterns:** Stage 1 (`deps`): `node:20-alpine`, install dependencies. Stage 2 (`build`): build Next.js. Stage 3 (`runtime`): `node:20-alpine`, copy standalone output. Expose 3000.
+- **Dependencies:** dashboard/package.json
 - **Test file:** N/A
 - **Time:** 5 min
 
@@ -419,7 +419,7 @@ public record ErrorDetail(string Field, string Message);
 ### File #25: `nginx/nginx.conf`
 - **Story:** US-0.1
 - **What it does:** Nginx reverse proxy config with TLS, security headers, rate limiting.
-- **Key patterns:** Exact copy of Architecture nginx config section 7. Routes: `/api/` -> api:8080, `/health` -> api:8080, `/webhooks/sns` -> webhook-processor:8081, `/track/` -> webhook-processor:8081, `/` -> dashboard:8082. WebSocket support for Blazor. `client_max_body_size 30M`.
+- **Key patterns:** Exact copy of Architecture nginx config section 7. Routes: `/api/` -> api:8080, `/health` -> api:8080, `/webhooks/sns` -> webhook-processor:8081, `/track/` -> webhook-processor:8081, `/` -> dashboard:3000. `client_max_body_size 30M`.
 - **Dependencies:** None
 - **Test file:** N/A
 - **Time:** 5 min
@@ -1869,7 +1869,7 @@ Total files: 205 items (files + verification tasks)
 | 7 | `src/EaaS.Api/EaaS.Api.csproj` | US-0.1 | 1 | 3m |
 | 8 | `src/EaaS.Worker/EaaS.Worker.csproj` | US-0.1 | 1 | 2m |
 | 9 | `src/EaaS.WebhookProcessor/EaaS.WebhookProcessor.csproj` | US-0.1 | 1 | 2m |
-| 10 | `src/EaaS.Dashboard/EaaS.Dashboard.csproj` | US-0.1 | 1 | 2m |
+| 10 | `dashboard/package.json` | US-0.1 | 1 | 2m |
 | 11 | `tests/EaaS.Api.Tests/EaaS.Api.Tests.csproj` | US-0.1 | 1 | 2m |
 | 12 | `tests/EaaS.Worker.Tests/EaaS.Worker.Tests.csproj` | US-0.1 | 1 | 2m |
 | 13 | `tests/EaaS.Infrastructure.Tests/EaaS.Infrastructure.Tests.csproj` | US-0.1 | 1 | 2m |
@@ -1877,11 +1877,11 @@ Total files: 205 items (files + verification tasks)
 | 15 | `src/EaaS.Api/Program.cs` (stub) | US-0.1 | 1 | 5m |
 | 16 | `src/EaaS.Worker/Program.cs` (stub) | US-0.1 | 1 | 5m |
 | 17 | `src/EaaS.WebhookProcessor/Program.cs` (stub) | US-0.1 | 1 | 5m |
-| 18 | `src/EaaS.Dashboard/Program.cs` (stub) | US-0.1 | 1 | 5m |
+| 18 | `dashboard/src/app/page.tsx` (stub) | US-0.1 | 1 | 5m |
 | 19 | `src/EaaS.Api/Dockerfile` | US-0.1 | 1 | 10m |
 | 20 | `src/EaaS.Worker/Dockerfile` | US-0.1 | 1 | 5m |
 | 21 | `src/EaaS.WebhookProcessor/Dockerfile` | US-0.1 | 1 | 5m |
-| 22 | `src/EaaS.Dashboard/Dockerfile` | US-0.1 | 1 | 5m |
+| 22 | `dashboard/Dockerfile` | US-0.1 | 1 | 5m |
 | 23 | `docker-compose.yml` | US-0.1 | 1 | 10m |
 | 24 | `docker-compose.override.yml` | US-0.1 | 1 | 10m |
 | 25 | `nginx/nginx.conf` | US-0.1 | 1 | 5m |

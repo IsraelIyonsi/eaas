@@ -106,7 +106,7 @@ This is well-configured:
 - Proper `depends_on` with `condition: service_healthy`
 - Localhost-only port binding for infrastructure services
 - Persistent volumes for data
-- Nginx with TLS, security headers, WebSocket support for Blazor
+- Nginx with TLS, security headers
 - Certbot for automated certificate renewal
 - RabbitMQ management UI for debugging
 
@@ -131,7 +131,7 @@ Good choices overall:
 - StackExchange.Redis
 - DnsClient for DNS verification
 - BCrypt for dashboard password hashing
-- MudBlazor for dashboard UI
+- shadcn/ui for dashboard UI
 - Testcontainers for integration tests
 
 **CONCERN: AutoMapper is unnecessary overhead.**

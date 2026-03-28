@@ -173,25 +173,25 @@ services:
 
   dashboard:
     build:
-      context: .
-      dockerfile: src/EaaS.Dashboard/Dockerfile
+      context: ./dashboard
+      dockerfile: Dockerfile
     container_name: eaas-dashboard
     restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8082
-      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
-      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
-      - Api__BaseUrl=http://api:8080
-      - Dashboard__Username=${DASHBOARD_USERNAME}
-      - Dashboard__PasswordHash=${DASHBOARD_PASSWORD_HASH}
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://api:8080
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
     deploy:
       resources:
         limits:
-          memory: 192M
+          memory: 256M
 
   # ============================================================
   # REVERSE PROXY

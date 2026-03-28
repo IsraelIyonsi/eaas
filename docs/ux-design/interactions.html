@@ -282,7 +282,7 @@
 <div class="page-header">
   <h1>EaaS Interaction Spec</h1>
   <div class="subtitle">Micro-interactions, State Machines, and Behavioral Patterns</div>
-  <div class="badge">Blazor Server + MudBlazor</div>
+  <div class="badge">Next.js 15 + shadcn/ui</div>
 </div>
 
 <!-- ==================== SECTION 1: TRANSITIONS ==================== -->
@@ -365,7 +365,7 @@
             <tr><td>Width</td><td>260px <-> 64px</td><td>cubic-bezier(0.4,0,0.2,1)</td></tr>
             <tr><td>Label opacity</td><td>1 <-> 0</td><td>ease (200ms)</td></tr>
             <tr><td>Duration</td><td>300ms</td><td>--</td></tr>
-            <tr><td>MudBlazor</td><td>MudDrawer ClipMode</td><td>--</td></tr>
+            <tr><td>shadcn/ui</td><td>shadcn Sheet</td><td>--</td></tr>
           </tbody>
         </table>
       </div>
@@ -418,7 +418,7 @@
             <tr><td>Overlay opacity</td><td>0 -> 0.6</td><td>ease (250ms)</td></tr>
             <tr><td>Dialog transform</td><td>Y(20px) -> Y(0)</td><td>cubic-bezier(0.4,0,0.2,1)</td></tr>
             <tr><td>Duration</td><td>250ms</td><td>--</td></tr>
-            <tr><td>MudBlazor</td><td>MudDialog</td><td>--</td></tr>
+            <tr><td>shadcn/ui</td><td>shadcn Dialog</td><td>--</td></tr>
           </tbody>
         </table>
       </div>
@@ -442,7 +442,7 @@
             <tr><td>Duration</td><td>300ms in, 300ms out</td><td>--</td></tr>
             <tr><td>Auto-dismiss</td><td>5000ms</td><td>--</td></tr>
             <tr><td>Border-left</td><td>4px solid (status color)</td><td>--</td></tr>
-            <tr><td>MudBlazor</td><td>MudSnackbar</td><td>--</td></tr>
+            <tr><td>shadcn/ui</td><td>shadcn Toast (sonner)</td><td>--</td></tr>
           </tbody>
         </table>
       </div>
@@ -477,7 +477,7 @@
             <tr><td>Animation</td><td>background-position sweep</td><td>ease-in-out</td></tr>
             <tr><td>Duration</td><td>1.5s infinite</td><td>--</td></tr>
             <tr><td>Gradient</td><td>#2D2F45 -> #3a3c55 -> #2D2F45</td><td>--</td></tr>
-            <tr><td>MudBlazor</td><td>MudSkeleton</td><td>--</td></tr>
+            <tr><td>shadcn/ui</td><td>Skeleton component</td><td>--</td></tr>
           </tbody>
         </table>
       </div>
@@ -496,7 +496,7 @@
     <div class="ix-card">
       <div class="ix-card-header">
         <span class="ix-card-name">Email Detail Panel</span>
-        <span class="ix-card-timing">MudDrawer</span>
+        <span class="ix-card-timing">shadcn Sheet</span>
       </div>
       <div class="ix-card-body">
         <div class="ix-card-desc">Slide-out drawer for email detail view. Opens on row click, closes on backdrop click or Escape.</div>
@@ -672,7 +672,7 @@
     <div class="ix-card">
       <div class="ix-card-header">
         <span class="ix-card-name">Date Range Selector</span>
-        <span class="ix-card-timing">MudDateRangePicker</span>
+        <span class="ix-card-timing">shadcn Calendar + Popover</span>
       </div>
       <div class="ix-card-body">
         <div class="ix-card-desc">Quick preset chips for common ranges, plus a custom date picker. Selecting a preset immediately updates the data.</div>
@@ -692,7 +692,7 @@
           <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
           <tbody>
             <tr><td>Preset click</td><td>Immediate data refresh</td><td>No confirmation needed</td></tr>
-            <tr><td>"Custom" click</td><td>Opens MudDateRangePicker</td><td>Calendar dropdown</td></tr>
+            <tr><td>"Custom" click</td><td>Opens shadcn Calendar + Popover</td><td>Calendar dropdown</td></tr>
             <tr><td>Active pill</td><td>bg: primary, color: white</td><td>Only one active at a time</td></tr>
             <tr><td>URL sync</td><td>?from=...&to=...</td><td>Shareable, bookmarkable</td></tr>
           </tbody>
@@ -704,7 +704,7 @@
     <div class="ix-card">
       <div class="ix-card-header">
         <span class="ix-card-name">Status/Reason Dropdowns</span>
-        <span class="ix-card-timing">MudSelect</span>
+        <span class="ix-card-timing">shadcn Select</span>
       </div>
       <div class="ix-card-body">
         <div class="ix-card-desc">Multi-select dropdowns for filtering by email status or suppression reason. Selected values shown as chips below.</div>
@@ -719,7 +719,7 @@
         <table class="spec-table">
           <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td>Multi-select</td><td>Checkboxes in dropdown</td><td>MudSelect MultiSelection</td></tr>
+            <tr><td>Multi-select</td><td>Checkboxes in dropdown</td><td>shadcn Select multi</td></tr>
             <tr><td>Chip dismiss</td><td>Click X removes filter</td><td>Immediate data refresh</td></tr>
             <tr><td>Clear all</td><td>"Clear filters" link</td><td>Resets all active filters</td></tr>
           </tbody>
@@ -731,7 +731,7 @@
     <div class="ix-card">
       <div class="ix-card-header">
         <span class="ix-card-name">Pagination</span>
-        <span class="ix-card-timing">MudTablePager</span>
+        <span class="ix-card-timing">Pagination component</span>
       </div>
       <div class="ix-card-body">
         <div class="ix-card-desc">Page navigation with page size dropdown. Changing page size resets to page 1. Shows total count and current range.</div>
@@ -764,7 +764,7 @@
 <!-- ==================== SECTION 4: TABLE BEHAVIORS ==================== -->
 <div class="section">
   <h2 class="section-title"><span class="num">4</span> Table Behaviors</h2>
-  <p class="section-desc">Row interactions, sorting, bulk selection, and detail expansion for MudDataGrid tables.</p>
+  <p class="section-desc">Row interactions, sorting, bulk selection, and detail expansion for shadcn Table + TanStack Query tables.</p>
 
   <div class="ix-grid">
 
@@ -780,8 +780,8 @@
           <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
           <tbody>
             <tr><td>Hover bg</td><td>#2D2F45 (elevated)</td><td>150ms transition</td></tr>
-            <tr><td>Click (Emails)</td><td>Opens MudDrawer</td><td>Slide-out from right, 480px</td></tr>
-            <tr><td>Click (Domains)</td><td>Expands row</td><td>MudExpansionPanel inline</td></tr>
+            <tr><td>Click (Emails)</td><td>Opens shadcn Sheet</td><td>Slide-out from right, 480px</td></tr>
+            <tr><td>Click (Domains)</td><td>Expands row</td><td>shadcn Accordion inline</td></tr>
             <tr><td>Cursor</td><td>pointer</td><td>Indicates clickable row</td></tr>
           </tbody>
         </table>
@@ -792,7 +792,7 @@
     <div class="ix-card">
       <div class="ix-card-header">
         <span class="ix-card-name">Column Sort</span>
-        <span class="ix-card-timing">MudDataGrid</span>
+        <span class="ix-card-timing">shadcn Table + TanStack Query</span>
       </div>
       <div class="ix-card-body">
         <div class="ix-card-desc">Click a column header to sort. First click: ascending. Second: descending. Third: removes sort. Arrow indicator shows direction.</div>
@@ -860,7 +860,7 @@
         <span class="ix-card-timing">200ms</span>
       </div>
       <div class="ix-card-body">
-        <div class="ix-card-desc">For email logs, detail shows a MudTimeline of delivery events. For domains, shows DNS records in an accordion.</div>
+        <div class="ix-card-desc">For email logs, detail shows a custom Timeline component of delivery events. For domains, shows DNS records in an accordion.</div>
         <table class="spec-table">
           <thead><tr><th>Page</th><th>Expand Behavior</th><th>Content</th></tr></thead>
           <tbody>

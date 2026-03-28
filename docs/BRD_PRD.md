@@ -38,7 +38,7 @@
 
 EaaS (Email as a Service) is a self-hosted transactional email API platform that replaces third-party SaaS email providers (Resend, SendGrid, Postmark) with fully owned infrastructure. The platform provides an HTTP API for sending transactional emails (invoices, notifications, confirmations, password resets) with built-in template rendering, delivery tracking, bounce/complaint handling, and analytics.
 
-The system runs on a single Hetzner VPS using Docker Compose, leverages AWS SES for SMTP delivery at $0.10 per 1,000 emails, and provides a Blazor Server dashboard for monitoring and management. Total operational cost is projected at $5-15/month, replacing $40+/month in recurring SaaS subscriptions.
+The system runs on a single Hetzner VPS using Docker Compose, leverages AWS SES for SMTP delivery at $0.10 per 1,000 emails, and provides a Next.js 15 dashboard for monitoring and management. Total operational cost is projected at $5-15/month, replacing $40+/month in recurring SaaS subscriptions.
 
 This is strictly a transactional email platform. It does not include campaign management, mailing list management, drag-and-drop email editors, or any marketing email functionality.
 
@@ -95,7 +95,7 @@ A single self-hosted API that all applications call to send transactional emails
 - Bounce and complaint auto-suppression list
 - API key management (create, revoke, rotate, scope per application)
 - Webhook notifications to calling applications for delivery events
-- Blazor Server dashboard for logs, analytics, domain management, and template management
+- Next.js 15 dashboard for logs, analytics, domain management, and template management
 - Message queuing via RabbitMQ for reliable async delivery
 - Redis caching for rate limiting, suppression list lookups, and template caching
 - PostgreSQL for persistent storage of logs, templates, domains, API keys, and analytics
@@ -172,7 +172,7 @@ A single self-hosted API that all applications call to send transactional emails
 | **Click tracking** | Yes | Yes | Yes | Yes | Yes |
 | **Bounce handling** | Auto-suppression | Auto | Auto | Auto | Auto |
 | **Webhooks** | Yes | Yes | Yes | Yes | Yes |
-| **Analytics dashboard** | Yes (Blazor) | Yes | Yes | Yes | Yes |
+| **Analytics dashboard** | Yes (Next.js) | Yes | Yes | Yes | Yes |
 | **Domain verification** | Yes | Yes | Yes | Yes | Yes |
 | **Dedicated IP** | No (SES shared) | Paid add-on | Paid add-on | Included (some plans) | Paid add-on |
 | **Custom retry logic** | Full control | No | No | No | No |
@@ -221,7 +221,7 @@ EaaS is a self-hosted transactional email platform consisting of three core comp
 
 1. **API Server** (.NET 8 Minimal API) - Accepts email send requests, manages templates/domains/API keys, and serves the dashboard.
 2. **Worker Service** (.NET 8 Worker Service) - Consumes messages from RabbitMQ, renders templates, delivers emails via AWS SES, and processes delivery status webhooks from SES.
-3. **Dashboard** (Blazor Server) - Web UI for viewing send logs, analytics, managing templates, domains, API keys, and the suppression list.
+3. **Dashboard** (Next.js 15) - Web UI for viewing send logs, analytics, managing templates, domains, API keys, and the suppression list.
 
 ### Architecture Overview
 
@@ -243,7 +243,7 @@ EaaS is a self-hosted transactional email platform consisting of three core comp
 |-----------|-----------|---------|
 | API Server | .NET 8 Minimal API | HTTP API, authentication, request validation |
 | Worker Service | .NET 8 Worker Service | Queue consumption, template rendering, SES delivery |
-| Dashboard | Blazor Server | Management UI, analytics, log viewer |
+| Dashboard | Next.js 15 | Management UI, analytics, log viewer |
 | Database | PostgreSQL 16 | Persistent storage (logs, templates, domains, keys) |
 | Cache | Redis 7 | Rate limiting, suppression list cache, template cache |
 | Message Queue | RabbitMQ 3.13 | Async email processing, retry with dead-letter queues |
@@ -1416,7 +1416,7 @@ GET /api/v1/analytics?start_date=2026-03-01&end_date=2026-03-27&group_by=day
 | 5 | Israel's sender reputation is clean (no prior blacklisting). | Deliverability issues from day one. Mitigation: check blacklists before launch. |
 | 6 | Liquid template syntax (via Fluid library) is sufficient for all template needs. | May need to switch to Handlebars.NET or custom engine. |
 | 7 | RabbitMQ on a single node is reliable enough for Phase 1-2. | Message loss risk. Mitigation: persistent queues with disk storage. |
-| 8 | Browser-based Blazor Server dashboard is acceptable (no mobile requirement). | If mobile monitoring is needed, would require responsive design work. |
+| 8 | Browser-based Next.js 15 dashboard is acceptable (no mobile requirement). | If mobile monitoring is needed, would require responsive design work. |
 
 ---
 
@@ -1444,7 +1444,7 @@ GET /api/v1/analytics?start_date=2026-03-01&end_date=2026-03-27&group_by=day
 | **Hetzner** | A German hosting provider offering affordable cloud VPS instances. |
 | **RabbitMQ** | An open-source message broker that implements AMQP. Used for reliable async message processing. |
 | **Minimal API** | A .NET 8 approach for building HTTP APIs with minimal boilerplate code. |
-| **Blazor Server** | A .NET framework for building interactive web UIs. Runs on the server with real-time UI updates via SignalR. |
+| **Next.js 15** | A React framework for building full-stack web applications with server-side rendering and static generation. |
 | **Docker Compose** | A tool for defining and running multi-container Docker applications using a YAML configuration file. |
 | **HSTS** | HTTP Strict Transport Security. Forces browsers to use HTTPS. |
 | **WAL** | Write-Ahead Logging. PostgreSQL's mechanism for ensuring data integrity and enabling point-in-time recovery. |

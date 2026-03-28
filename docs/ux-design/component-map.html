@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Component Map -- shadcn/ui Mapping</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --primary: #7C4DFF;
+    --secondary: #00E5FF;
+    --success: #00E676;
+    --error: #FF5252;
+    --warning: #FFD740;
+    --background: #121212;
+    --surface: #1E1E2E;
+    --paper: #27293D;
+    --elevated: #2D2F45;
+    --text-primary: #FFFFFFDE;
+    --text-secondary: #FFFFFF99;
+    --text-hint: #FFFFFF4D;
+    --border: #FFFFFF1A;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 32px;
+  }
+
+  .page-header {
+    text-align: center;
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+  .page-header .subtitle { color: var(--text-secondary); font-size: 16px; }
+  .page-header .badge {
+    display: inline-block; background: var(--primary); color: #fff;
+    padding: 4px 12px; border-radius: 20px; font-size: 11px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 16px;
+  }
+
+  /* Summary Table */
+  .summary-table {
+    width: 100%; border-collapse: collapse; margin-bottom: 48px;
+    background: var(--paper); border-radius: 12px; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .summary-table th {
+    text-align: left; padding: 14px 20px;
+    background: var(--elevated); font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-hint);
+    border-bottom: 2px solid var(--border);
+  }
+  .summary-table td {
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+    font-size: 13px; vertical-align: top;
+  }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table .page-name {
+    font-weight: 600; font-size: 14px; white-space: nowrap;
+    color: var(--primary);
+  }
+  .summary-table .route {
+    font-family: var(--mono); font-size: 12px; color: var(--secondary);
+    display: block; margin-top: 2px;
+  }
+  .comp-chip {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-family: var(--mono); font-size: 11px; margin: 2px;
+    background: var(--elevated); color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+
+  /* Page Detail Cards */
+  .page-section { margin-bottom: 64px; }
+  .page-section-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  }
+  .page-section-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--primary); color: #fff; flex-shrink: 0;
+  }
+  .page-section-title { font-size: 24px; font-weight: 700; }
+  .page-section-route { font-family: var(--mono); font-size: 13px; color: var(--secondary); }
+  .page-section-story { font-size: 12px; color: var(--text-hint); }
+
+  .comp-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 16px;
+  }
+  .comp-card {
+    background: var(--paper); border-radius: 8px;
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .comp-card-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .comp-card-name {
+    font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--secondary);
+  }
+  .comp-card-role {
+    font-size: 11px; color: var(--text-hint); background: var(--elevated);
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .comp-card-body { padding: 16px; }
+  .comp-card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+
+  .props-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .props-table th {
+    text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border);
+    color: var(--text-hint); font-weight: 600; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .props-table td {
+    padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  .props-table td:first-child { font-family: var(--mono); color: var(--warning); font-size: 11px; }
+  .props-table td:nth-child(2) { font-family: var(--mono); color: var(--text-secondary); font-size: 11px; }
+
+  /* Wireframe mini preview */
+  .wireframe {
+    background: var(--surface); border-radius: 8px; padding: 16px;
+    border: 1px dashed var(--border); margin-bottom: 16px;
+    font-size: 11px; color: var(--text-hint);
+  }
+  .wire-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: stretch; }
+  .wire-block {
+    background: var(--elevated); border-radius: 4px; padding: 8px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 10px; color: var(--text-hint);
+    border: 1px solid var(--border); min-height: 32px;
+  }
+  .wire-sidebar {
+    width: 60px; background: var(--paper); border-radius: 4px;
+    padding: 8px 4px; display: flex; flex-direction: column; gap: 4px;
+    font-size: 9px; color: var(--text-hint); border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .wire-sidebar-item { background: var(--elevated); border-radius: 2px; padding: 3px; text-align: center; }
+
+  .section-desc { color: var(--text-secondary); margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>EaaS Component Map</h1>
+  <div class="subtitle">Every Dashboard Page Mapped to shadcn/ui Components</div>
+  <div class="badge">shadcn/ui + Next.js 15</div>
+</div>
+
+<!-- ==================== SUMMARY TABLE ==================== -->
+<h2 style="font-size:20px; font-weight:700; margin-bottom:16px;">Quick Reference</h2>
+<p class="section-desc">At-a-glance mapping of each page to its primary shadcn/ui components. Click page names below for detailed specs.</p>
+
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th style="width:180px;">Page</th>
+      <th>shadcn/ui Components</th>
+      <th style="width:90px;">Story</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#overview" style="color:var(--primary); text-decoration:none;">Overview</a></span>
+        <span class="route">/dashboard</span>
+      </td>
+      <td>
+        <span class="comp-chip">CSS Grid</span>
+        <span class="comp-chip">shadcn Card</span>
+        <span class="comp-chip">shadcn Table</span>
+        <span class="comp-chip">shadcn Badge</span>
+        <span class="comp-chip">shadcn Progress</span>
+        <span class="comp-chip">Recharts</span>
+        <span class="comp-chip">Alert component</span>
+        <span class="comp-chip">Skeleton component</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.1</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#emails" style="color:var(--primary); text-decoration:none;">Emails</a></span>
+        <span class="route">/dashboard/emails</span>
+      </td>
+      <td>
+        <span class="comp-chip">shadcn Table + TanStack Query</span>
+        <span class="comp-chip">shadcn Select</span>
+        <span class="comp-chip">shadcn Calendar + Popover</span>
+        <span class="comp-chip">shadcn Sheet</span>
+        <span class="comp-chip">custom Timeline component</span>
+        <span class="comp-chip">shadcn Input</span>
+        <span class="comp-chip">shadcn Badge</span>
+        <span class="comp-chip">Pagination component</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.2</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#templates" style="color:var(--primary); text-decoration:none;">Templates</a></span>
+        <span class="route">/dashboard/templates</span>
+      </td>
+      <td>
+        <span class="comp-chip">shadcn ScrollArea + list</span>
+        <span class="comp-chip">shadcn Tabs</span>
+        <span class="comp-chip">shadcn Input</span>
+        <span class="comp-chip">shadcn Button</span>
+        <span class="comp-chip">shadcn Select</span>
+        <span class="comp-chip">shadcn Dialog</span>
+        <span class="comp-chip">shadcn Card</span>
+        <span class="comp-chip">Separator</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.3</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#domains" style="color:var(--primary); text-decoration:none;">Domains</a></span>
+        <span class="route">/dashboard/domains</span>
+      </td>
+      <td>
+        <span class="comp-chip">shadcn Table</span>
+        <span class="comp-chip">shadcn Accordion</span>
+        <span class="comp-chip">shadcn Dialog</span>
+        <span class="comp-chip">shadcn Badge</span>
+        <span class="comp-chip">shadcn Button</span>
+        <span class="comp-chip">shadcn Button variant=ghost</span>
+        <span class="comp-chip">Alert component</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.4</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#analytics" style="color:var(--primary); text-decoration:none;">Analytics</a></span>
+        <span class="route">/dashboard/analytics</span>
+      </td>
+      <td>
+        <span class="comp-chip">Recharts</span>
+        <span class="comp-chip">shadcn Calendar + Popover</span>
+        <span class="comp-chip">shadcn Card</span>
+        <span class="comp-chip">CSS Grid</span>
+        <span class="comp-chip">shadcn ToggleGroup</span>
+        <span class="comp-chip">shadcn Select</span>
+        <span class="comp-chip">shadcn Table</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.5</td>
+    </tr>
+    <tr>
+      <td>
+        <span class="page-name"><a href="#suppressions" style="color:var(--primary); text-decoration:none;">Suppressions</a></span>
+        <span class="route">/dashboard/suppressions</span>
+      </td>
+      <td>
+        <span class="comp-chip">shadcn Table + TanStack Query</span>
+        <span class="comp-chip">shadcn Dialog</span>
+        <span class="comp-chip">shadcn Badge</span>
+        <span class="comp-chip">shadcn Input</span>
+        <span class="comp-chip">shadcn Button</span>
+        <span class="comp-chip">shadcn Checkbox</span>
+        <span class="comp-chip">shadcn Toast (sonner)</span>
+      </td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-secondary);">US-7.6</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ==================== SHARED LAYOUT ==================== -->
+<div class="page-section">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Shared Layout</div>
+      <div class="page-section-route">layout.tsx</div>
+      <div class="page-section-story">Applied to all dashboard pages</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row" style="height:48px;">
+      <div class="wire-block" style="flex:1;">Next.js layout header -- Logo + "EaaS" + Spacer + shadcn Button variant=ghost (theme, notifications, profile)</div>
+    </div>
+    <div class="wire-row" style="min-height:300px;">
+      <div class="wire-sidebar">
+        <div class="wire-sidebar-item">Overview</div>
+        <div class="wire-sidebar-item">Emails</div>
+        <div class="wire-sidebar-item">Templates</div>
+        <div class="wire-sidebar-item">Domains</div>
+        <div class="wire-sidebar-item">Analytics</div>
+        <div class="wire-sidebar-item">Suppress</div>
+        <div style="flex:1;"></div>
+        <div class="wire-sidebar-item">Settings</div>
+      </div>
+      <div class="wire-block" style="flex:1;">@Body (routed page content)<br>Padding: 24px 32px</div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">App Layout</span>
+        <span class="comp-card-role">Container</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Root layout component wrapping the entire dashboard. Contains Next.js layout header, shadcn Sheet, and Main Content.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>--</td><td>--</td><td>Implicit container for child layout components</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Next.js layout header</span>
+        <span class="comp-card-role">Top Bar</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Top application bar with logo, page title, and action buttons (notifications, settings, profile).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Color</td><td>Color.Surface</td><td>#1E1E2E</td></tr>
+            <tr><td>Fixed</td><td>true</td><td>Stays at top on scroll</td></tr>
+            <tr><td>Dense</td><td>true</td><td>48px height</td></tr>
+            <tr><td>Elevation</td><td>0</td><td>Border-bottom instead</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Sheet</span>
+        <span class="comp-card-role">Sidebar Nav</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Left sidebar navigation. Collapsible via hamburger button. Contains shadcn Navigation Menu with Navigation Link items.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ClipMode</td><td>DrawerClipMode.Always</td><td>Under app bar</td></tr>
+            <tr><td>Variant</td><td>DrawerVariant.Mini</td><td>Collapses to icons</td></tr>
+            <tr><td>Width</td><td>260px</td><td>Expanded width</td></tr>
+            <tr><td>MiniWidth</td><td>64px</td><td>Collapsed width</td></tr>
+            <tr><td>Breakpoint</td><td>Breakpoint.Md</td><td>Auto-collapse on smaller screens</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Navigation Menu + Navigation Link</span>
+        <span class="comp-card-role">Navigation Items</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Navigation menu items with icons and labels. Active state highlighted with primary color.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Href</td><td>/dashboard/*</td><td>Each page route</td></tr>
+            <tr><td>Icon</td><td>Icons.Material.*</td><td>Dashboard, Email, Description, Dns, BarChart, Block</td></tr>
+            <tr><td>Match</td><td>NavLinkMatch.Prefix</td><td>Highlights parent when on child</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== OVERVIEW PAGE ==================== -->
+<div class="page-section" id="overview">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Overview Page</div>
+      <div class="page-section-route">/dashboard</div>
+      <div class="page-section-story">US-7.1 -- Dashboard Overview Page</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">Stat: Emails Sent</div>
+      <div class="wire-block" style="flex:1;">Stat: Delivery Rate</div>
+      <div class="wire-block" style="flex:1;">Stat: Bounce Rate</div>
+      <div class="wire-block" style="flex:1;">Stat: Open Rate</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:2; min-height:160px;">Recharts (Line) -- 30-day send volume</div>
+      <div class="wire-block" style="flex:1; min-height:160px;">System Health<br>shadcn Progress x3</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:2; min-height:100px;">Recent Emails -- shadcn Table (last 10)</div>
+      <div class="wire-block" style="flex:1; min-height:100px;">Alerts -- Alert component list</div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">CSS Grid + Grid Item</span>
+        <span class="comp-card-role">Layout Grid</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Responsive 12-column grid for stat cards (xs=12 sm=6 md=3) and chart + health section (md=8 + md=4).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Spacing</td><td>4</td><td>16px gap (Spacing * 4px = 16)</td></tr>
+            <tr><td>Justify</td><td>Justify.FlexStart</td><td>Left-aligned items</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Card (Stat Cards)</span>
+        <span class="comp-card-role">KPI Metrics</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">4 stat cards: Emails Sent (30d), Delivery Rate, Bounce Rate, Open Rate. Each has icon, value, label, trend, sparkline.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Elevation</td><td>0</td><td>Flat with border</td></tr>
+            <tr><td>Style</td><td>background: var(--paper)</td><td>Custom CSS class</td></tr>
+            <tr><td>Outlined</td><td>true</td><td>1px border</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Recharts (Line)</span>
+        <span class="comp-card-role">Send Volume Chart</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">30-day line chart of daily send volume. Uses the 6-color chart palette. Tooltip on hover with exact values.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ChartType</td><td>ChartType.Line</td><td>Time-series</td></tr>
+            <tr><td>ChartSeries</td><td>[sent, delivered, bounced]</td><td>Multi-series</td></tr>
+            <tr><td>Width</td><td>100%</td><td>Responsive</td></tr>
+            <tr><td>Height</td><td>180px</td><td>Fixed chart height</td></tr>
+            <tr><td>ChartOptions.YAxisLines</td><td>true</td><td>Grid lines for readability</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Progress</span>
+        <span class="comp-card-role">System Health</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Health bars for API, Worker, and Queue Depth. Color indicates status: green (healthy), yellow (degraded), red (down).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Color</td><td>Color.Success / Warning / Error</td><td>Dynamic by health</td></tr>
+            <tr><td>Value</td><td>0-100</td><td>Percentage</td></tr>
+            <tr><td>Rounded</td><td>true</td><td>Rounded caps</td></tr>
+            <tr><td>Size</td><td>Size.Small</td><td>Thin bar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Table</span>
+        <span class="comp-card-role">Recent Emails</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Last 10 emails in a compact table. Columns: status badge, recipient, subject, time. Row click navigates to email detail.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Dense</td><td>true</td><td>Compact rows</td></tr>
+            <tr><td>Hover</td><td>true</td><td>Row hover highlight</td></tr>
+            <tr><td>Striped</td><td>false</td><td>Clean look</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Alert component</span>
+        <span class="comp-card-role">Recent Alerts</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Recent system alerts: high bounce rate, domain verification failed, complaint rate warning, SES quota approaching.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Severity</td><td>Severity.Warning / Error</td><td>Color-coded by severity</td></tr>
+            <tr><td>Dense</td><td>true</td><td>Compact</td></tr>
+            <tr><td>Variant</td><td>Variant.Outlined</td><td>Outlined style</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== EMAILS PAGE ==================== -->
+<div class="page-section" id="emails">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Emails Page</div>
+      <div class="page-section-route">/dashboard/emails</div>
+      <div class="page-section-story">US-7.2 -- Email Log Viewer</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row">
+      <div class="wire-block" style="flex:2;">shadcn Input (search)</div>
+      <div class="wire-block" style="flex:1;">shadcn Select (status filter)</div>
+      <div class="wire-block" style="flex:1;">shadcn Calendar + Popover</div>
+    </div>
+    <div class="wire-row" style="min-height:250px;">
+      <div class="wire-block" style="flex:1;">
+        shadcn Table + TanStack Query<br>
+        Columns: checkbox, recipient, subject, status (shadcn Badge), sent_at, expand<br>
+        50 rows/page, sortable columns, row click opens drawer
+      </div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">Pagination component -- page nav + page size select</div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Table + TanStack Query&lt;EmailLog&gt;</span>
+        <span class="comp-card-role">Email Table</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Server-side paginated, sortable, filterable data grid. Columns: checkbox, recipient (mono), subject, status badge, sent_at (mono), expand chevron.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ServerData</td><td>LoadEmailLogs</td><td>Server-side data callback</td></tr>
+            <tr><td>RowsPerPage</td><td>50</td><td>Default page size</td></tr>
+            <tr><td>SortMode</td><td>SortMode.Single</td><td>One column at a time</td></tr>
+            <tr><td>Filterable</td><td>true</td><td>Column-level filters</td></tr>
+            <tr><td>MultiSelection</td><td>true</td><td>Checkbox column</td></tr>
+            <tr><td>Dense</td><td>true</td><td>Compact rows</td></tr>
+            <tr><td>Hover</td><td>true</td><td>Row hover effect</td></tr>
+            <tr><td>RowClick</td><td>OpenDetailDrawer</td><td>Opens slide-out</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Sheet (Detail)</span>
+        <span class="comp-card-role">Email Detail Panel</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Right-side slide-out panel showing full email detail: headers, status timeline, body preview, delivery events.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Anchor</td><td>Anchor.End</td><td>Slides from right</td></tr>
+            <tr><td>Width</td><td>480px</td><td>Fixed width</td></tr>
+            <tr><td>Overlay</td><td>true</td><td>Backdrop click closes</td></tr>
+            <tr><td>Elevation</td><td>4</td><td>Shadow on open</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">custom Timeline component</span>
+        <span class="comp-card-role">Delivery Events</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Vertical timeline inside the detail drawer showing all status transitions: queued, sent, delivered, opened, clicked.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>TimelineOrientation</td><td>Vertical</td><td>Top to bottom</td></tr>
+            <tr><td>TimelinePosition</td><td>Start</td><td>Dots on left</td></tr>
+            <tr><td>Color (per item)</td><td>Status color</td><td>Green=delivered, etc.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Select&lt;string&gt;</span>
+        <span class="comp-card-role">Status Filter</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Multi-select dropdown for filtering by email status. Options: Queued, Sending, Delivered, Bounced, Complained, Opened, Clicked, Failed.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>MultiSelection</td><td>true</td><td>Multiple statuses</td></tr>
+            <tr><td>Label</td><td>"Status"</td><td>Floating label</td></tr>
+            <tr><td>Variant</td><td>Variant.Outlined</td><td>Outlined style</td></tr>
+            <tr><td>Dense</td><td>true</td><td>Compact</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Calendar + Popover</span>
+        <span class="comp-card-role">Date Range Filter</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Date range selector with quick presets (7d, 30d, 90d) as shadcn ToggleGroup above the picker. Custom range via calendar dropdown.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Label</td><td>"Date Range"</td><td>Floating label</td></tr>
+            <tr><td>Variant</td><td>Variant.Outlined</td><td>Outlined style</td></tr>
+            <tr><td>DateRange</td><td>@_dateRange</td><td>Two-way bound</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Badge</span>
+        <span class="comp-card-role">Status Badge</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Colored status badge in each table row. Color maps to email status. Dot + label pattern.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Color</td><td>GetStatusColor(status)</td><td>Dynamic by status</td></tr>
+            <tr><td>Size</td><td>Size.Small</td><td>Compact in table</td></tr>
+            <tr><td>Variant</td><td>Variant.Filled</td><td>Tinted background</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TEMPLATES PAGE ==================== -->
+<div class="page-section" id="templates">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Templates Page</div>
+      <div class="page-section-route">/dashboard/templates</div>
+      <div class="page-section-story">US-7.3 -- Template Manager UI</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row" style="min-height:300px;">
+      <div style="width:220px; background:var(--elevated); border-radius:4px; padding:8px; display:flex; flex-direction:column; gap:4px; font-size:10px; color:var(--text-hint); border:1px solid var(--border); flex-shrink:0;">
+        <div style="font-weight:600; margin-bottom:4px;">Template List (shadcn ScrollArea + list)</div>
+        <div class="wire-sidebar-item" style="background:var(--primary); color:white;">Invoice Notification</div>
+        <div class="wire-sidebar-item">Password Reset</div>
+        <div class="wire-sidebar-item">Welcome Email</div>
+        <div class="wire-sidebar-item">Payment Confirm</div>
+        <div style="flex:1;"></div>
+        <div class="wire-sidebar-item" style="border:1px dashed var(--border);">+ New Template</div>
+      </div>
+      <div class="wire-block" style="flex:1; flex-direction:column; align-items:stretch; padding:0;">
+        <div style="padding:8px; border-bottom:1px solid var(--border); font-size:10px;">shadcn Tabs: Edit | Preview | Variables | History</div>
+        <div style="flex:1; padding:8px; font-size:10px;">
+          [Edit tab] Code editor with HTML/Liquid syntax<br>
+          shadcn Input Lines="20" or JS interop Monaco Editor<br><br>
+          [Preview tab] Rendered HTML in iframe<br>
+          [Variables tab] JSON Schema editor<br>
+          [History tab] Version list with diff
+        </div>
+        <div style="padding:8px; border-top:1px solid var(--border); text-align:right; font-size:10px;">
+          shadcn Button (Cancel) | shadcn Button (Save) -- Color.Primary
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn ScrollArea + list&lt;Template&gt;</span>
+        <span class="comp-card-role">Template Sidebar</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Sidebar list of all templates. Selected template highlighted. Shows name, version badge, and send count. Fixed width 240px.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Dense</td><td>true</td><td>Compact items</td></tr>
+            <tr><td>SelectedValue</td><td>@_selectedTemplate</td><td>Two-way bound</td></tr>
+            <tr><td>Color</td><td>Color.Primary</td><td>Active highlight</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Tabs</span>
+        <span class="comp-card-role">Editor Tabs</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Tab panel with 4 tabs: Edit (code editor), Preview (rendered HTML), Variables (schema), History (versions). Active tab has primary underline.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Rounded</td><td>true</td><td>Rounded tab indicator</td></tr>
+            <tr><td>Color</td><td>Color.Primary</td><td>Active tab color</td></tr>
+            <tr><td>PanelClass</td><td>"pa-4"</td><td>Padding on content</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Input (Code Editor)</span>
+        <span class="comp-card-role">Template Body</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Multi-line text field for HTML/Liquid template editing. Monospace font. Alternatively, use JS interop with Monaco or CodeMirror for syntax highlighting.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Lines</td><td>20</td><td>Visible rows</td></tr>
+            <tr><td>Variant</td><td>Variant.Outlined</td><td>Clear boundary</td></tr>
+            <tr><td>Style</td><td>font-family: monospace</td><td>Code font</td></tr>
+            <tr><td>Immediate</td><td>true</td><td>Debounced for preview</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Button</span>
+        <span class="comp-card-role">Actions</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Save and Cancel buttons in the template editor footer. Save shows loading spinner during API call.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Variant (Save)</td><td>Variant.Filled</td><td>Primary action</td></tr>
+            <tr><td>Color (Save)</td><td>Color.Primary</td><td>#7C4DFF</td></tr>
+            <tr><td>Variant (Cancel)</td><td>Variant.Text</td><td>Secondary action</td></tr>
+            <tr><td>Loading</td><td>@_saving</td><td>Spinner during save</td></tr>
+            <tr><td>Disabled</td><td>!_isDirty</td><td>Only when changes exist</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DOMAINS PAGE ==================== -->
+<div class="page-section" id="domains">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Domains Page</div>
+      <div class="page-section-route">/dashboard/domains</div>
+      <div class="page-section-story">US-7.4 -- Domain Manager UI</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">Page Title: Sending Domains</div>
+      <div class="wire-block" style="width:140px;">shadcn Button: + Add Domain</div>
+    </div>
+    <div class="wire-row" style="min-height:200px;">
+      <div class="wire-block" style="flex:1; flex-direction:column; align-items:stretch; padding:0;">
+        <div style="padding:8px; font-size:10px; border-bottom:1px solid var(--border);">shadcn Table header: Domain | Status | Last Verified | Actions</div>
+        <div style="padding:8px; font-size:10px; border-bottom:1px solid var(--border);">cashtrack.app | shadcn Badge(Verified) | 2h ago | Verify / Delete</div>
+        <div style="padding:4px 8px; font-size:10px; background:var(--surface);">
+          [Expanded] shadcn Accordion -- DNS Records<br>
+          TXT (SPF) | CNAME (DKIM x3) | TXT (DMARC) -- each with copy button + status
+        </div>
+        <div style="padding:8px; font-size:10px;">israeliyonsi.dev | shadcn Badge(Pending) | Never | Verify / Delete</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Table&lt;Domain&gt;</span>
+        <span class="comp-card-role">Domain List</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Table of registered domains with status, last verified timestamp, and action buttons. Rows expand to show DNS records.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Dense</td><td>true</td><td>Compact rows</td></tr>
+            <tr><td>Hover</td><td>true</td><td>Row hover effect</td></tr>
+            <tr><td>Breakpoint</td><td>Breakpoint.Sm</td><td>Responsive stacking</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Accordion</span>
+        <span class="comp-card-role">DNS Records Accordion</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Inline expansion showing all 5 DNS records (SPF, DKIM x3, DMARC). Each record row: type, name, value (copyable), status badge.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Dense</td><td>true</td><td>Compact</td></tr>
+            <tr><td>DisableGutters</td><td>true</td><td>No extra padding</td></tr>
+            <tr><td>IsExpanded</td><td>@_expanded[domain.Id]</td><td>Controlled per row</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Dialog</span>
+        <span class="comp-card-role">Add Domain</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Modal dialog for adding a new sending domain. Contains domain name input, validation, and submit button. On success, shows DNS records to configure.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>MaxWidth</td><td>MaxWidth.Small</td><td>~400px</td></tr>
+            <tr><td>FullWidth</td><td>true</td><td>Uses full MaxWidth</td></tr>
+            <tr><td>CloseButton</td><td>true</td><td>X button in header</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Badge (Status)</span>
+        <span class="comp-card-role">Domain Status</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Color-coded domain status: Verified (green), Pending (yellow), Failed (red), Suspended (orange).</div>
+        <table class="props-table">
+          <thead><tr><th>Status</th><th>Color</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Verified</td><td>Color.Success</td><td>#00E676</td></tr>
+            <tr><td>Pending</td><td>Color.Warning</td><td>#FFD740</td></tr>
+            <tr><td>Failed</td><td>Color.Error</td><td>#FF5252</td></tr>
+            <tr><td>Suspended</td><td>Color.Warning</td><td>#FF9100 (custom)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Button variant=ghost</span>
+        <span class="comp-card-role">Copy DNS Value</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Copy-to-clipboard button next to each DNS record value. Shows check icon briefly on success.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Icon</td><td>Icons.Material.Filled.ContentCopy</td><td>Default state</td></tr>
+            <tr><td>Size</td><td>Size.Small</td><td>Compact in table</td></tr>
+            <tr><td>OnClick</td><td>CopyToClipboard</td><td>JS interop navigator.clipboard</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ANALYTICS PAGE ==================== -->
+<div class="page-section" id="analytics">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Analytics Page</div>
+      <div class="page-section-route">/dashboard/analytics</div>
+      <div class="page-section-story">US-7.5 -- Analytics Dashboard with Charts</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">shadcn ToggleGroup (date presets: 7d, 30d, 90d)</div>
+      <div class="wire-block" style="flex:1;">shadcn Calendar + Popover (custom)</div>
+      <div class="wire-block" style="width:180px;">shadcn Select (filter by domain/key)</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">KPI: Total Sent</div>
+      <div class="wire-block" style="flex:1;">KPI: Delivery Rate</div>
+      <div class="wire-block" style="flex:1;">KPI: Open Rate</div>
+      <div class="wire-block" style="flex:1;">KPI: Click Rate</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1; min-height:180px;">Recharts (Line) -- Time-series: sent, delivered, bounced, complained</div>
+      <div class="wire-block" style="width:200px; min-height:180px;">Recharts (Donut) -- Status breakdown</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1; min-height:140px;">Recharts (Bar) -- Top templates by send count</div>
+      <div class="wire-block" style="flex:1; min-height:140px;">Recharts (Bar) -- Top domains by send count</div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1; min-height:100px;">shadcn Table -- Per-API-key stats</div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Recharts (Line)</span>
+        <span class="comp-card-role">Time-Series Chart</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Multi-series line chart: sent (purple), delivered (cyan), bounced (red), complained (orange). X-axis: dates. Y-axis: count. Hover tooltip with exact values.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ChartType</td><td>ChartType.Line</td><td>Time-series</td></tr>
+            <tr><td>ChartSeries</td><td>[4 series]</td><td>Sent, Delivered, Bounced, Complained</td></tr>
+            <tr><td>XAxisLabels</td><td>date strings</td><td>Grouped by day/week/month</td></tr>
+            <tr><td>ChartOptions.LineStrokeWidth</td><td>2</td><td>Readable line weight</td></tr>
+            <tr><td>Height</td><td>280px</td><td>Chart canvas height</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Recharts (Donut)</span>
+        <span class="comp-card-role">Status Breakdown</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Donut/pie chart showing delivery status distribution: delivered (green), bounced (red), complained (orange), sending (blue), queued (gray).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ChartType</td><td>ChartType.Donut</td><td>Ring chart</td></tr>
+            <tr><td>InputData</td><td>[delivered%, bounced%, ...]</td><td>Percentage values</td></tr>
+            <tr><td>InputLabels</td><td>["Delivered", "Bounced", ...]</td><td>Status names</td></tr>
+            <tr><td>Width</td><td>200px</td><td>Compact size</td></tr>
+            <tr><td>Height</td><td>200px</td><td>Square aspect</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">Recharts (Bar)</span>
+        <span class="comp-card-role">Top Templates / Domains</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Horizontal bar charts showing top 5 templates and top 5 domains by send count. Primary color for bars.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ChartType</td><td>ChartType.Bar</td><td>Horizontal bars</td></tr>
+            <tr><td>XAxisLabels</td><td>template/domain names</td><td>Top 5 by volume</td></tr>
+            <tr><td>Height</td><td>200px</td><td>Compact height</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Card (KPIs)</span>
+        <span class="comp-card-role">Summary Metrics</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">4 KPI cards: Total Sent, Delivery Rate %, Open Rate %, Click Rate %. Same stat card pattern as Overview page.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Layout</td><td>CSS Grid xs=12 sm=6 md=3</td><td>4 across on desktop</td></tr>
+            <tr><td>Data source</td><td>Analytics API (US-4.2)</td><td>Aggregated by date range</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn ToggleGroup</span>
+        <span class="comp-card-role">Date Presets</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Quick-select date range chips. Only one active at a time. "Custom" activates the shadcn Calendar + Popover.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Filter</td><td>true</td><td>Single selection mode</td></tr>
+            <tr><td>Mandatory</td><td>true</td><td>Must have one selected</td></tr>
+            <tr><td>Color</td><td>Color.Primary</td><td>Active chip color</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Table</span>
+        <span class="comp-card-role">Per-API-Key Stats</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Table showing per-application stats: API key name, prefix, total sent, delivery rate, bounce rate, last used.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Dense</td><td>true</td><td>Compact rows</td></tr>
+            <tr><td>Hover</td><td>true</td><td>Row highlight</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SUPPRESSIONS PAGE ==================== -->
+<div class="page-section" id="suppressions">
+  <div class="page-section-header">
+    <div class="page-section-icon">
+      <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M2 6l10 7 10-7v12H2V6zm0-2h20v2L12 13 2 6V4z"/><line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2"/></svg>
+    </div>
+    <div>
+      <div class="page-section-title">Suppressions Page</div>
+      <div class="page-section-route">/dashboard/suppressions</div>
+      <div class="page-section-story">US-7.6 -- Suppression List Manager UI</div>
+    </div>
+  </div>
+
+  <div class="wireframe">
+    <div class="wire-row">
+      <div class="wire-block" style="flex:2;">shadcn Input (search by email)</div>
+      <div class="wire-block" style="width:140px;">shadcn Button: + Add</div>
+      <div class="wire-block" style="width:140px;">shadcn Button: Export CSV</div>
+    </div>
+    <div class="wire-row" style="min-height:200px;">
+      <div class="wire-block" style="flex:1; flex-direction:column; align-items:stretch; padding:0;">
+        <div style="padding:8px; font-size:10px; border-bottom:1px solid var(--border);">
+          shadcn Table + TanStack Query: checkbox | Email (mono) | Reason (shadcn Badge) | Date | Source Message | Actions
+        </div>
+        <div style="padding:8px; font-size:10px; border-bottom:1px solid var(--border);">
+          [x] invalid@example.com | Hard Bounce | 2026-03-25 | msg_abc123 | Remove
+        </div>
+        <div style="padding:8px; font-size:10px; border-bottom:1px solid var(--border);">
+          [ ] spam@test.org | Complaint | 2026-03-24 | msg_def456 | Remove
+        </div>
+        <div style="padding:8px; font-size:10px;">
+          [ ] old@defunct.com | Manual | 2026-03-20 | -- | Remove
+        </div>
+      </div>
+    </div>
+    <div class="wire-row">
+      <div class="wire-block" style="flex:1;">[Bulk bar when selected] "3 selected" | Remove Selected</div>
+    </div>
+  </div>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Table + TanStack Query&lt;Suppression&gt;</span>
+        <span class="comp-card-role">Suppression Table</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Paginated table of suppressed email addresses. Columns: checkbox, email (mono font), reason chip, date, source message ID, remove button.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>ServerData</td><td>LoadSuppressions</td><td>Server-side paging</td></tr>
+            <tr><td>MultiSelection</td><td>true</td><td>Bulk select for removal</td></tr>
+            <tr><td>Filterable</td><td>true</td><td>Filter by reason column</td></tr>
+            <tr><td>Dense</td><td>true</td><td>Compact rows</td></tr>
+            <tr><td>RowsPerPage</td><td>50</td><td>Default page size</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Dialog (Add)</span>
+        <span class="comp-card-role">Manual Add</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Dialog for manually adding an email to the suppression list. Fields: email address, reason dropdown (manual, hard_bounce, complaint).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>MaxWidth</td><td>MaxWidth.ExtraSmall</td><td>~350px compact</td></tr>
+            <tr><td>CloseButton</td><td>true</td><td>X in header</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Badge (Reason)</span>
+        <span class="comp-card-role">Suppression Reason</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Color-coded reason badges in each row. Maps suppression reason to color for quick visual scanning.</div>
+        <table class="props-table">
+          <thead><tr><th>Reason</th><th>Color</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Hard Bounce</td><td>Color.Error</td><td>#FF5252</td></tr>
+            <tr><td>Soft Bounce</td><td>Color.Warning</td><td>#FFD740</td></tr>
+            <tr><td>Complaint</td><td>Color.Warning</td><td>#FF9100 (custom)</td></tr>
+            <tr><td>Manual</td><td>Color.Default</td><td>#9E9E9E</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Input (Search)</span>
+        <span class="comp-card-role">Email Search</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Search field with 300ms debounce for partial email match. Adornment icon (search). Clear button when text present.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Adornment</td><td>Adornment.Start</td><td>Search icon</td></tr>
+            <tr><td>AdornmentIcon</td><td>Icons.Material.Filled.Search</td><td>Left icon</td></tr>
+            <tr><td>Clearable</td><td>true</td><td>X button when filled</td></tr>
+            <tr><td>Immediate</td><td>true</td><td>Debounced 300ms</td></tr>
+            <tr><td>Placeholder</td><td>"Search by email..."</td><td>Hint text</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Button (Export)</span>
+        <span class="comp-card-role">CSV Export</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Exports the current suppression list (with active filters) as a CSV file download.</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Variant</td><td>Variant.Outlined</td><td>Secondary action</td></tr>
+            <tr><td>StartIcon</td><td>Icons.Material.Filled.Download</td><td>Download icon</td></tr>
+            <tr><td>Color</td><td>Color.Default</td><td>Neutral styling</td></tr>
+            <tr><td>OnClick</td><td>ExportCsv</td><td>JS interop file download</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-card-header">
+        <span class="comp-card-name">shadcn Toast (sonner)</span>
+        <span class="comp-card-role">Action Feedback</span>
+      </div>
+      <div class="comp-card-body">
+        <div class="comp-card-desc">Toast notifications for add/remove actions. "Email suppressed" (success), "3 entries removed" (info), "Removal failed" (error).</div>
+        <table class="props-table">
+          <thead><tr><th>Prop</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Severity</td><td>Severity.Success / Error</td><td>By action result</td></tr>
+            <tr><td>SnackbarConfiguration.PositionClass</td><td>Defaults.Classes.Position.TopEnd</td><td>Top-right</td></tr>
+            <tr><td>AutoHide</td><td>5000ms</td><td>Auto-dismiss</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:48px 0; border-top:1px solid var(--border); margin-top:32px; color:var(--text-hint); font-size:12px;">
+  EaaS Component Map -- shadcn/ui + Next.js 15<br>
+  Generated for Sprint 3+ Dashboard Epic (US-7.1 through US-7.6)
+</div>
+
+</body>
+</html>

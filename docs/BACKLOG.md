@@ -908,7 +908,7 @@
 
 ---
 
-### Epic 7: Dashboard (Blazor Server)
+### Epic 7: Dashboard (Next.js 15)
 
 **Description:** Web UI for monitoring email delivery, managing templates/domains, viewing analytics, and managing suppressions.
 
@@ -935,8 +935,8 @@
 5. Loads in under 2 seconds.
 
 **Grooming Notes:**
-- **Design:** Needs wireframe before implementation. Metric card layout, chart library selection (Chart.js via Blazor interop or a Blazor-native chart library like MudBlazor Charts).
-- **Engineering:** Blazor Server with SignalR for real-time updates. Use MudBlazor component library for rapid UI development.
+- **Design:** Needs wireframe before implementation. Metric card layout, chart library selection (Recharts for React-native charting).
+- **Engineering:** Next.js 15 with shadcn/ui component library and TanStack Query for data fetching.
 
 ---
 
@@ -973,7 +973,7 @@
 
 **Grooming Notes:**
 - **Design:** Two-panel layout: editor on left, preview on right. Version history as a dropdown or sidebar.
-- **Engineering:** Syntax highlighting in Blazor requires a JS interop library (Monaco Editor or CodeMirror). This is the most complex dashboard page.
+- **Engineering:** Syntax highlighting in Next.js via Monaco Editor or CodeMirror React wrappers. This is the most complex dashboard page.
 
 ---
 
@@ -1144,7 +1144,7 @@ Sprint 3+ builds on Sprint 2:
 - **Sprint 2:** Zero design work needed. All stories are API-only.
 - **Sprint 3+:** All 6 dashboard stories (US-7.1 through US-7.6) require wireframes and mockups before implementation. Flagged in each story card.
 - **Design queue for Sprint 3 prep:** Start wireframes for US-7.1 (Overview) and US-7.2 (Log Viewer) during Sprint 2 so they are ready for Sprint 3 planning.
-- **Component library recommendation:** MudBlazor for rapid Blazor UI development with built-in data tables, charts, and form components.
+- **Component library recommendation:** shadcn/ui for rapid Next.js UI development with accessible components, plus Recharts for charts and TanStack Table for data tables.
 
 ### Head of Engineering
 - **Sprint 1 is tight at 45 points for 24 hours.** The critical path is US-0.1 -> US-0.2/0.3 -> US-5.1 -> US-3.1/3.2 -> US-1.1 -> US-1.3. Everything must be built sequentially. Parallel work is possible on infrastructure stories.

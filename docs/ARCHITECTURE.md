@@ -95,7 +95,7 @@ eaas/
 │   ├── EaaS.Api/
 │   ├── EaaS.Worker/
 │   ├── EaaS.WebhookProcessor/
-│   └── EaaS.Dashboard/
+│   └── dashboard/                        # Next.js 15 dashboard (separate from .NET solution)
 └── tests/
     ├── EaaS.Api.Tests/
     ├── EaaS.Worker.Tests/
@@ -412,38 +412,33 @@ EaaS.WebhookProcessor/
 
 ---
 
-### 2.7 EaaS.Dashboard
+### 2.7 Dashboard (Next.js)
 
-Blazor Server dashboard. Deferred to Sprint 3+ per backlog. Structure defined here for completeness.
+Next.js 15 dashboard with shadcn/ui and Tailwind CSS. Deferred to Sprint 3+ per backlog. Structure defined here for completeness.
 
 ```
-EaaS.Dashboard/
-├── EaaS.Dashboard.csproj
-├── Program.cs                             # Blazor Server host builder
-├── appsettings.json
+dashboard/
+├── package.json
+├── next.config.ts
+├── tailwind.config.ts
 ├── Dockerfile
-├── wwwroot/
-│   ├── css/
-│   │   └── app.css                        # Custom styles (minimal -- uses MudBlazor theme)
-│   └── favicon.ico
-├── Components/
-│   ├── App.razor                          # Root component
-│   ├── Routes.razor                       # Router
-│   ├── Layout/
-│   │   ├── MainLayout.razor               # App shell: sidebar nav + content area
-│   │   ├── NavMenu.razor                  # Sidebar navigation (Overview, Emails, Templates, Domains, API Keys)
-│   │   └── LoginLayout.razor              # Minimal layout for login page
-│   └── Pages/
-│       ├── Login.razor                    # Username/password login (single-user, bcrypt)
-│       ├── Dashboard.razor                # Overview: key metrics cards, 30-day send chart, system health
-│       └── Emails/
-│           ├── EmailList.razor            # Paginated, filterable email log table
-│           └── EmailDetail.razor          # Full email detail: status timeline, headers, template, variables
-├── Services/
-│   ├── DashboardAuthService.cs            # Cookie-based auth, bcrypt password verification
-│   └── DashboardApiClient.cs              # Calls EaaS.Api internally for data (HttpClient, no API key -- internal network)
-└── Models/
-    └── DashboardUser.cs                   # Username, PasswordHash
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx                     # Root layout with sidebar nav + content area
+│   │   ├── page.tsx                       # Overview: key metrics cards, 30-day send chart, system health
+│   │   ├── login/
+│   │   │   └── page.tsx                   # Username/password login (single-user, bcrypt)
+│   │   └── emails/
+│   │       ├── page.tsx                   # Paginated, filterable email log table
+│   │       └── [id]/page.tsx             # Full email detail: status timeline, headers, template, variables
+│   ├── components/
+│   │   ├── ui/                            # shadcn/ui components
+│   │   ├── nav-menu.tsx                   # Sidebar navigation (Overview, Emails, Templates, Domains, API Keys)
+│   │   └── layout/
+│   │       └── main-layout.tsx            # App shell wrapper
+│   └── lib/
+│       ├── api-client.ts                  # Calls EaaS.Api internally for data (fetch, no API key -- internal network)
+│       └── auth.ts                        # Cookie-based auth, bcrypt password verification
 ```
 
 ---
@@ -1799,17 +1794,13 @@ services:
   dashboard:
     build:
       context: .
-      dockerfile: src/EaaS.Dashboard/Dockerfile
+      context: ./dashboard
+      dockerfile: Dockerfile
     container_name: eaas-dashboard
     restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8082
-      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
-      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
-      - Api__BaseUrl=http://api:8080
-      - Dashboard__Username=${DASHBOARD_USERNAME}
-      - Dashboard__PasswordHash=${DASHBOARD_PASSWORD_HASH}
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://api:8080
     depends_on:
       api:
         condition: service_healthy
@@ -1950,7 +1941,7 @@ http {
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            # Blazor Server requires WebSocket
+            # Next.js dashboard proxy
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
@@ -2186,9 +2177,6 @@ This prompts for a password, outputs the bcrypt hash, and the operator places it
     <!-- Security -->
     <PackageVersion Include="BCrypt.Net-Next" Version="4.0.3" />
 
-    <!-- Dashboard UI -->
-    <PackageVersion Include="MudBlazor" Version="6.19.1" />
-
     <!-- Testing -->
     <PackageVersion Include="xunit" Version="2.7.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
@@ -2262,12 +2250,12 @@ This prompts for a password, outputs the bcrypt hash, and the operator places it
 - `Serilog.Formatting.Compact`
 - Project references: `EaaS.Domain`, `EaaS.Infrastructure`, `EaaS.Shared`
 
-**EaaS.Dashboard:**
-- `MudBlazor`
-- `BCrypt.Net-Next`
-- `Serilog.AspNetCore`
-- `Serilog.Sinks.Console`
-- Project references: `EaaS.Domain`, `EaaS.Infrastructure`, `EaaS.Shared`
+**Dashboard (Next.js):**
+- `next` (v15)
+- `@shadcn/ui` components
+- `@tanstack/react-query`
+- `recharts`
+- `tailwindcss`
 
 ---
 
