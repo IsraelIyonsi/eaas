@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Dashboard - Low-Fidelity Wireframes</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; color: #333; }
+
+  /* Navigation tabs */
+  .tab-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: #333; display: flex; gap: 0; padding: 0 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .tab-bar .tab { padding: 12px 20px; color: #aaa; cursor: pointer; font-size: 13px; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+  .tab-bar .tab:hover { color: #fff; background: #444; }
+  .tab-bar .tab.active { color: #fff; border-bottom-color: #888; }
+  .tab-bar .logo { color: #fff; font-weight: 700; padding: 12px 20px; font-size: 14px; letter-spacing: 1px; }
+
+  /* Screen container */
+  .screen { display: none; padding: 80px 40px 40px; max-width: 1400px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* Wireframe elements */
+  .wire-box { border: 2px solid #999; background: #fff; padding: 16px; margin-bottom: 16px; position: relative; }
+  .wire-box.dashed { border-style: dashed; }
+  .wire-label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+  .wire-heading { font-size: 20px; font-weight: 700; color: #333; margin-bottom: 12px; }
+  .wire-subheading { font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; }
+  .wire-text { font-size: 13px; color: #777; line-height: 1.5; }
+
+  /* Annotation */
+  .annotation { background: #fff8cc; border: 1px solid #e6d566; padding: 8px 12px; font-size: 11px; color: #665500; margin: 8px 0; border-radius: 2px; }
+  .annotation::before { content: "NOTE: "; font-weight: 700; }
+
+  /* Layout system */
+  .layout { display: flex; gap: 0; min-height: calc(100vh - 80px); }
+  .sidebar { width: 240px; border: 2px solid #999; background: #e8e8e8; padding: 0; flex-shrink: 0; }
+  .main-content { flex: 1; padding: 0 0 0 16px; }
+
+  .sidebar .nav-item { padding: 12px 16px; border-bottom: 1px solid #ccc; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .sidebar .nav-item.active-nav { background: #d0d0d0; font-weight: 600; }
+  .sidebar .nav-item .icon-box { width: 20px; height: 20px; border: 1px solid #999; background: #ddd; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+
+  .topbar { border: 2px solid #999; background: #e0e0e0; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .topbar-title { font-weight: 700; font-size: 16px; }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .badge { border: 1px solid #999; padding: 2px 8px; font-size: 10px; background: #ddd; }
+  .user-avatar { width: 28px; height: 28px; border: 1px solid #999; background: #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+
+  /* Grid helpers */
+  .row { display: flex; gap: 16px; margin-bottom: 16px; }
+  .col { flex: 1; }
+  .col-2 { flex: 2; }
+  .col-3 { flex: 3; }
+
+  /* Stat card wireframe */
+  .stat-card { border: 2px solid #999; background: #fff; padding: 16px; text-align: center; }
+  .stat-card .stat-value { font-size: 28px; font-weight: 700; color: #333; }
+  .stat-card .stat-label { font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px; }
+  .stat-card .stat-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+  /* Health indicator */
+  .health-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .health-item { border: 1px solid #999; padding: 8px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; background: #fff; }
+  .health-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #999; }
+  .health-dot.green { background: #aaa; }
+
+  /* Table wireframe */
+  .wire-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .wire-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #999; font-weight: 600; color: #555; background: #f0f0f0; }
+  .wire-table td { padding: 10px 12px; border-bottom: 1px solid #ddd; color: #666; }
+  .wire-table tr:hover td { background: #f8f8f8; }
+
+  /* Status badge wireframe */
+  .status-badge { display: inline-block; border: 1px solid #999; padding: 2px 8px; font-size: 10px; text-transform: uppercase; }
+
+  /* Button wireframe */
+  .wire-btn { display: inline-block; border: 2px solid #999; padding: 8px 16px; font-size: 13px; background: #e0e0e0; cursor: pointer; }
+  .wire-btn.primary { background: #ccc; font-weight: 600; }
+
+  /* Input wireframe */
+  .wire-input { border: 2px solid #999; padding: 8px 12px; font-size: 13px; background: #fff; width: 100%; margin-bottom: 8px; }
+  .wire-select { border: 2px solid #999; padding: 8px 12px; font-size: 13px; background: #fff; }
+
+  /* Chart placeholder */
+  .chart-placeholder { border: 2px dashed #aaa; background: #f8f8f8; height: 200px; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 14px; }
+  .chart-placeholder.tall { height: 280px; }
+
+  /* Filter bar */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 12px; border: 2px solid #999; background: #f5f5f5; margin-bottom: 16px; }
+
+  /* Pagination */
+  .pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; font-size: 13px; color: #777; }
+  .page-nums { display: flex; gap: 4px; }
+  .page-num { width: 28px; height: 28px; border: 1px solid #999; display: flex; align-items: center; justify-content: center; font-size: 12px; background: #fff; }
+  .page-num.active-page { background: #ccc; font-weight: 700; }
+
+  /* Slide out panel */
+  .slide-panel { border: 2px solid #666; background: #fff; padding: 20px; width: 420px; flex-shrink: 0; }
+
+  /* Dialog wireframe */
+  .dialog-overlay { border: 2px dashed #999; background: #f0f0f0; padding: 24px; max-width: 500px; margin: 16px auto; }
+
+  /* Two-panel layout */
+  .split-panel { display: flex; gap: 16px; }
+  .left-panel { width: 280px; flex-shrink: 0; }
+  .right-panel { flex: 1; }
+
+  /* Timeline */
+  .timeline-item { display: flex; gap: 12px; padding: 8px 0; border-left: 2px solid #ccc; margin-left: 8px; padding-left: 16px; }
+  .timeline-dot { width: 10px; height: 10px; border: 2px solid #999; border-radius: 50%; margin-top: 4px; flex-shrink: 0; margin-left: -22px; background: #fff; }
+  .timeline-text { font-size: 12px; color: #666; }
+  .timeline-time { font-size: 11px; color: #aaa; }
+
+  /* Screen title */
+  .screen-title { font-size: 24px; font-weight: 700; color: #333; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #999; }
+  .screen-desc { font-size: 13px; color: #777; margin-bottom: 24px; }
+
+  /* Code area */
+  .code-area { border: 2px solid #999; background: #f0f0f0; padding: 12px; font-family: monospace; font-size: 12px; min-height: 200px; color: #555; }
+
+  /* Quick actions */
+  .quick-actions { display: flex; gap: 12px; }
+  .quick-action-btn { border: 2px solid #999; padding: 12px 20px; background: #fff; text-align: center; cursor: pointer; flex: 1; }
+  .quick-action-btn .qa-icon { font-size: 20px; margin-bottom: 4px; }
+  .quick-action-btn .qa-text { font-size: 12px; color: #666; }
+
+  /* DNS record display */
+  .dns-record { display: flex; gap: 8px; padding: 8px; border: 1px solid #ddd; margin-bottom: 4px; font-size: 12px; background: #f8f8f8; }
+  .dns-type { font-weight: 600; width: 60px; flex-shrink: 0; }
+  .dns-value { flex: 1; font-family: monospace; overflow: hidden; text-overflow: ellipsis; }
+  .dns-status { width: 60px; text-align: right; flex-shrink: 0; }
+
+  /* Expandable row */
+  .expand-area { border: 1px solid #ddd; background: #f8f8f8; padding: 16px; margin: 0 12px 8px; }
+
+  /* Login specific */
+  .login-container { max-width: 400px; margin: 80px auto; text-align: center; }
+  .login-box { border: 2px solid #999; background: #fff; padding: 40px 32px; }
+  .login-logo { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .login-subtitle { font-size: 14px; color: #888; margin-bottom: 32px; }
+
+  /* Tabs inside screen */
+  .inner-tabs { display: flex; gap: 0; margin-bottom: 16px; }
+  .inner-tab { padding: 10px 20px; border: 2px solid #999; border-bottom: none; background: #f0f0f0; font-size: 13px; cursor: pointer; }
+  .inner-tab.active-inner { background: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- Tab Navigation -->
+<div class="tab-bar">
+  <div class="logo">EaaS WIREFRAMES</div>
+  <div class="tab active" onclick="showScreen('login')">1. Login</div>
+  <div class="tab" onclick="showScreen('overview')">2. Overview</div>
+  <div class="tab" onclick="showScreen('emails')">3. Email Log</div>
+  <div class="tab" onclick="showScreen('templates')">4. Templates</div>
+  <div class="tab" onclick="showScreen('domains')">5. Domains</div>
+  <div class="tab" onclick="showScreen('analytics')">6. Analytics</div>
+  <div class="tab" onclick="showScreen('suppressions')">7. Suppressions</div>
+</div>
+
+<!-- ==================== SCREEN 1: LOGIN ==================== -->
+<div class="screen active" id="screen-login">
+  <div class="screen-title">Screen 1: Login</div>
+  <div class="screen-desc">Simple centered login form. No sidebar/topbar. Standalone page.</div>
+
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-logo">EaaS</div>
+      <div class="login-subtitle">Sign in to EaaS Dashboard</div>
+
+      <div style="text-align:left">
+        <div class="wire-label">Username</div>
+        <input class="wire-input" type="text" placeholder="admin" disabled>
+
+        <div class="wire-label" style="margin-top:12px">Password</div>
+        <input class="wire-input" type="password" placeholder="********" disabled>
+
+        <div style="margin-top:20px">
+          <div class="wire-btn primary" style="width:100%;text-align:center;padding:12px">Sign In</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="annotation" style="margin-top:16px; text-align:left">
+      Single admin user. Credentials stored in appsettings.json or env vars. No registration. Session-based auth via Blazor Server cookie.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 2: OVERVIEW ==================== -->
+<div class="screen" id="screen-overview">
+  <div class="screen-title">Screen 2: Overview / Home Dashboard</div>
+  <div class="screen-desc">Primary landing page after login. Shows email health at a glance. Maps to US-7.1.</div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item active-nav"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-title">Dashboard Overview</div>
+        <div class="topbar-right">
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <div class="annotation">Top stat cards row: key email metrics. Each card shows value + trend vs previous period.</div>
+
+      <!-- Stat Cards Row -->
+      <div class="row">
+        <div class="col">
+          <div class="stat-card">
+            <div class="wire-label">Total Sent</div>
+            <div class="stat-value">1,247</div>
+            <div class="stat-sub">Today: 89 | Week: 412 | Month: 1,247</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-card">
+            <div class="wire-label">Delivery Rate</div>
+            <div class="stat-value">98.2%</div>
+            <div class="stat-sub">+0.3% vs last period</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-card">
+            <div class="wire-label">Bounce Rate</div>
+            <div class="stat-value">1.4%</div>
+            <div class="stat-sub">-0.1% vs last period</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-card">
+            <div class="wire-label">Open Rate</div>
+            <div class="stat-value">42.1%</div>
+            <div class="stat-sub">+2.5% vs last period</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="stat-card">
+            <div class="wire-label">Click Rate</div>
+            <div class="stat-value">8.7%</div>
+            <div class="stat-sub">+0.4% vs last period</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Health -->
+      <div class="wire-box">
+        <div class="wire-label">System Health</div>
+        <div class="annotation">Green circle = healthy, red = down. Real-time via SignalR.</div>
+        <div class="health-row">
+          <div class="health-item"><div class="health-dot green"></div> API</div>
+          <div class="health-item"><div class="health-dot green"></div> Worker</div>
+          <div class="health-item"><div class="health-dot green"></div> RabbitMQ</div>
+          <div class="health-item"><div class="health-dot green"></div> PostgreSQL</div>
+          <div class="health-item"><div class="health-dot green"></div> Redis</div>
+        </div>
+      </div>
+
+      <!-- Recent Emails -->
+      <div class="wire-box">
+        <div class="wire-label">Recent Emails (Last 20)</div>
+        <table class="wire-table">
+          <thead>
+            <tr><th>Time</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>10:32 AM</td><td>noreply@cashtrack.ng</td><td>client@gmail.com</td><td>Invoice #INV-2024-089</td><td><span class="status-badge">DELIVERED</span></td></tr>
+            <tr><td>10:28 AM</td><td>noreply@cashtrack.ng</td><td>user@yahoo.com</td><td>Payment Confirmation</td><td><span class="status-badge">DELIVERED</span></td></tr>
+            <tr><td>10:15 AM</td><td>israel@cashtrack.ng</td><td>new@user.com</td><td>Welcome to CashTrack</td><td><span class="status-badge">SENDING</span></td></tr>
+            <tr><td>09:58 AM</td><td>noreply@cashtrack.ng</td><td>bounced@invalid.com</td><td>Invoice #INV-2024-088</td><td><span class="status-badge">BOUNCED</span></td></tr>
+            <tr><td>09:45 AM</td><td>noreply@cashtrack.ng</td><td>test@example.com</td><td>Password Reset</td><td><span class="status-badge">QUEUED</span></td></tr>
+          </tbody>
+        </table>
+        <div class="annotation">Clickable rows navigate to full email detail in the Email Log screen.</div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="wire-box">
+        <div class="wire-label">Quick Actions</div>
+        <div class="quick-actions">
+          <div class="quick-action-btn">
+            <div class="qa-icon">[+]</div>
+            <div class="qa-text">Send Test Email</div>
+          </div>
+          <div class="quick-action-btn">
+            <div class="qa-icon">[T]</div>
+            <div class="qa-text">Create Template</div>
+          </div>
+          <div class="quick-action-btn">
+            <div class="qa-icon">[D]</div>
+            <div class="qa-text">Add Domain</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 3: EMAIL LOG ==================== -->
+<div class="screen" id="screen-emails">
+  <div class="screen-title">Screen 3: Email Log Viewer</div>
+  <div class="screen-desc">Searchable, filterable table of all emails. Click any row for detail slide-out. Maps to US-7.2 and US-4.1.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item active-nav"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Email Log</div>
+        <div class="topbar-right">
+          <div class="wire-btn">Export CSV</div>
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="wire-label" style="margin:0">Filters:</div>
+        <select class="wire-select" disabled><option>Status: All</option></select>
+        <input class="wire-input" style="width:140px;margin:0" placeholder="Date from" disabled>
+        <input class="wire-input" style="width:140px;margin:0" placeholder="Date to" disabled>
+        <input class="wire-input" style="width:160px;margin:0" placeholder="From email..." disabled>
+        <input class="wire-input" style="width:160px;margin:0" placeholder="To email..." disabled>
+        <input class="wire-input" style="width:120px;margin:0" placeholder="Tags..." disabled>
+        <select class="wire-select" disabled><option>Template: All</option></select>
+        <input class="wire-input" style="width:120px;margin:0" placeholder="Batch ID..." disabled>
+        <div class="wire-btn primary">Apply</div>
+        <div class="wire-btn">Clear</div>
+      </div>
+      <div class="annotation">MudDataGrid server-side filtering. Each filter maps to API query params (status, from, to, date_from, date_to, tags, template_id, batch_id).</div>
+
+      <!-- Main content: table + slide-out -->
+      <div style="display:flex; gap:16px;">
+        <div style="flex:1;">
+          <!-- Data Table -->
+          <div class="wire-box" style="padding:0;">
+            <table class="wire-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th><th>From</th><th>To</th><th>Subject</th><th>Status</th><th>Events</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background:#f0f0f0;">
+                  <td>2026-03-27 10:32</td><td>noreply@cashtrack.ng</td><td>client@gmail.com</td><td>Invoice #INV-2024-089</td><td><span class="status-badge">DELIVERED</span></td><td>4</td><td>[View]</td>
+                </tr>
+                <tr><td>2026-03-27 10:28</td><td>noreply@cashtrack.ng</td><td>user@yahoo.com</td><td>Payment Confirmation</td><td><span class="status-badge">DELIVERED</span></td><td>3</td><td>[View]</td></tr>
+                <tr><td>2026-03-27 10:15</td><td>israel@cashtrack.ng</td><td>new@user.com</td><td>Welcome to CashTrack</td><td><span class="status-badge">SENDING</span></td><td>2</td><td>[View]</td></tr>
+                <tr><td>2026-03-27 09:58</td><td>noreply@cashtrack.ng</td><td>bounced@invalid.com</td><td>Invoice #INV-2024-088</td><td><span class="status-badge">BOUNCED</span></td><td>3</td><td>[View]</td></tr>
+                <tr><td>2026-03-27 09:45</td><td>noreply@cashtrack.ng</td><td>test@example.com</td><td>Password Reset</td><td><span class="status-badge">QUEUED</span></td><td>1</td><td>[View]</td></tr>
+                <tr><td>2026-03-27 09:30</td><td>noreply@cashtrack.ng</td><td>admin@corp.co</td><td>Invoice #INV-2024-087</td><td><span class="status-badge">DELIVERED</span></td><td>5</td><td>[View]</td></tr>
+                <tr><td>2026-03-27 09:12</td><td>israel@cashtrack.ng</td><td>team@partner.io</td><td>Monthly Statement</td><td><span class="status-badge">DELIVERED</span></td><td>4</td><td>[View]</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination">
+            <div>Showing 1-20 of 1,247 emails</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span>Page size:</span>
+              <select class="wire-select" disabled><option>20</option></select>
+              <div class="page-nums">
+                <div class="page-num active-page">1</div>
+                <div class="page-num">2</div>
+                <div class="page-num">3</div>
+                <div class="page-num">...</div>
+                <div class="page-num">63</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide-out Detail Panel -->
+        <div class="slide-panel">
+          <div class="wire-label">Email Detail (Slide-out Panel)</div>
+          <div class="annotation">Opens when user clicks a row. MudDrawer component, right-aligned.</div>
+
+          <div style="margin-top:12px;">
+            <div class="wire-subheading">Invoice #INV-2024-089</div>
+            <div class="wire-text">
+              <strong>Message ID:</strong> eaas_a8f3b2c1<br>
+              <strong>From:</strong> noreply@cashtrack.ng<br>
+              <strong>To:</strong> client@gmail.com<br>
+              <strong>CC:</strong> accounts@cashtrack.ng<br>
+              <strong>Template:</strong> Invoice Notification<br>
+              <strong>Batch:</strong> batch_x9k2m4<br>
+              <strong>Tags:</strong> invoice, cashtrack<br>
+              <strong>Status:</strong> <span class="status-badge">DELIVERED</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="wire-label">Event Timeline</div>
+            <div class="annotation">Shows progression: Queued -> Sent -> Delivered -> Opened -> Clicked. Each event from EmailEvent table.</div>
+            <div style="margin-top:8px;">
+              <div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">Queued</div><div class="timeline-time">10:32:01 AM</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">Sent to SES</div><div class="timeline-time">10:32:03 AM</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">Delivered</div><div class="timeline-time">10:32:08 AM</div></div></div>
+              <div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">Opened (Chrome, Windows)</div><div class="timeline-time">10:45:22 AM</div></div></div>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="wire-label">Raw Metadata</div>
+            <div class="code-area" style="min-height:80px; font-size:11px;">
+              {<br>
+              &nbsp;&nbsp;"ses_message_id": "01020...",<br>
+              &nbsp;&nbsp;"tracking_id": "trk_a8f3...",<br>
+              &nbsp;&nbsp;"track_opens": true,<br>
+              &nbsp;&nbsp;"track_clicks": true<br>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 4: TEMPLATES ==================== -->
+<div class="screen" id="screen-templates">
+  <div class="screen-title">Screen 4: Template Manager</div>
+  <div class="screen-desc">Two-panel layout: template list (left) + editor/preview (right). Maps to US-7.3, US-2.1-2.5.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item active-nav"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Template Manager</div>
+        <div class="topbar-right">
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <div class="split-panel">
+        <!-- Left: Template List -->
+        <div class="left-panel">
+          <div class="wire-box" style="min-height:500px;">
+            <div class="wire-btn primary" style="width:100%;text-align:center;margin-bottom:12px;">+ New Template</div>
+            <input class="wire-input" placeholder="Search templates..." disabled>
+
+            <div style="margin-top:8px;">
+              <div style="padding:10px; border:1px solid #999; background:#e0e0e0; margin-bottom:4px; cursor:pointer;">
+                <div style="font-weight:600; font-size:13px;">Invoice Notification</div>
+                <div style="font-size:11px; color:#888;">v3 | Updated 2h ago</div>
+              </div>
+              <div style="padding:10px; border:1px solid #ddd; margin-bottom:4px; cursor:pointer;">
+                <div style="font-weight:600; font-size:13px;">Payment Confirmation</div>
+                <div style="font-size:11px; color:#888;">v2 | Updated 1d ago</div>
+              </div>
+              <div style="padding:10px; border:1px solid #ddd; margin-bottom:4px; cursor:pointer;">
+                <div style="font-weight:600; font-size:13px;">Welcome Email</div>
+                <div style="font-size:11px; color:#888;">v1 | Updated 3d ago</div>
+              </div>
+              <div style="padding:10px; border:1px solid #ddd; margin-bottom:4px; cursor:pointer;">
+                <div style="font-weight:600; font-size:13px;">Password Reset</div>
+                <div style="font-size:11px; color:#888;">v1 | Updated 5d ago</div>
+              </div>
+              <div style="padding:10px; border:1px solid #ddd; margin-bottom:4px; cursor:pointer;">
+                <div style="font-weight:600; font-size:13px;">Monthly Statement</div>
+                <div style="font-size:11px; color:#888;">v2 | Updated 1w ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Template Editor -->
+        <div class="right-panel">
+          <div class="wire-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div>
+                <div class="wire-subheading">Invoice Notification</div>
+                <div style="font-size:11px; color:#888;">Version 3 | Last updated: 2026-03-27 08:15 AM</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div class="wire-btn primary">Save</div>
+                <div class="wire-btn" style="color:red;">Delete</div>
+              </div>
+            </div>
+
+            <div class="wire-label">Template Name</div>
+            <input class="wire-input" value="Invoice Notification" disabled>
+
+            <div class="wire-label">Subject Template</div>
+            <input class="wire-input" value="Invoice {{invoice_number}} from {{company_name}}" disabled>
+
+            <!-- Inner tabs: Editor / Preview -->
+            <div class="inner-tabs" style="margin-top:12px;">
+              <div class="inner-tab active-inner">HTML Editor</div>
+              <div class="inner-tab">Text Body</div>
+              <div class="inner-tab">Preview</div>
+            </div>
+
+            <div class="code-area" style="min-height:250px;">
+              &lt;html&gt;<br>
+              &lt;body&gt;<br>
+              &nbsp;&nbsp;&lt;h1&gt;Invoice {{invoice_number}}&lt;/h1&gt;<br>
+              &nbsp;&nbsp;&lt;p&gt;Dear {{customer_name}},&lt;/p&gt;<br>
+              &nbsp;&nbsp;&lt;p&gt;Amount due: {{amount}}&lt;/p&gt;<br>
+              &nbsp;&nbsp;&lt;a href="{{payment_url}}"&gt;Pay Now&lt;/a&gt;<br>
+              &lt;/body&gt;<br>
+              &lt;/html&gt;
+            </div>
+            <div class="annotation">Monaco Editor or CodeMirror via JS interop. Liquid/HTML syntax highlighting.</div>
+
+            <!-- Variables Helper -->
+            <div style="margin-top:12px;">
+              <div class="wire-label">Detected Variables</div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;">
+                <span class="badge">{{invoice_number}}</span>
+                <span class="badge">{{company_name}}</span>
+                <span class="badge">{{customer_name}}</span>
+                <span class="badge">{{amount}}</span>
+                <span class="badge">{{payment_url}}</span>
+              </div>
+              <div class="annotation">Auto-parsed from template body. Clicking a variable copies it. Used for preview with sample data via POST /api/v1/templates/{id}/preview.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 5: DOMAINS ==================== -->
+<div class="screen" id="screen-domains">
+  <div class="screen-title">Screen 5: Domain Manager</div>
+  <div class="screen-desc">Domain list with expandable DNS records and verification status. Maps to US-7.4, US-3.1-3.3.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item active-nav"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Domain Manager</div>
+        <div class="topbar-right">
+          <div class="wire-btn primary">+ Add Domain</div>
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <!-- Domain Table -->
+      <div class="wire-box" style="padding:0;">
+        <table class="wire-table">
+          <thead>
+            <tr><th>Domain</th><th>Status</th><th>Added</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>cashtrack.ng</td><td><span class="status-badge" style="background:#ddd;">VERIFIED</span></td><td>2026-03-20</td><td>[Verify] [Remove]</td></tr>
+            <tr><td colspan="4" style="padding:0;">
+              <div class="expand-area">
+                <div class="wire-label">DNS Records</div>
+                <div class="annotation">Expanded view. MudExpansionPanel or MudCollapse component.</div>
+                <div class="dns-record"><div class="dns-type">SPF</div><div class="dns-value">v=spf1 include:amazonses.com ~all</div><div class="dns-status" style="color:green;">OK</div></div>
+                <div class="dns-record"><div class="dns-type">DKIM</div><div class="dns-value">k=rsa; p=MIGfMA0GCSqGS...</div><div class="dns-status" style="color:green;">OK</div></div>
+                <div class="dns-record"><div class="dns-type">DMARC</div><div class="dns-value">v=DMARC1; p=quarantine; rua=mailto:...</div><div class="dns-status" style="color:green;">OK</div></div>
+              </div>
+            </td></tr>
+            <tr><td>mail.israeliyonsi.dev</td><td><span class="status-badge" style="background:#eee;">PENDING</span></td><td>2026-03-25</td><td>[Verify] [Remove]</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add Domain Dialog -->
+      <div style="margin-top:24px;">
+        <div class="wire-label">Add Domain Dialog (MudDialog)</div>
+        <div class="dialog-overlay">
+          <div class="wire-subheading">Add Sending Domain</div>
+          <div style="margin-top:12px;">
+            <div class="wire-label">Domain Name</div>
+            <input class="wire-input" placeholder="e.g. notifications.myapp.com" disabled>
+          </div>
+          <div style="margin-top:12px;">
+            <div class="wire-btn primary">Add Domain</div>
+            <div class="wire-btn" style="margin-left:8px;">Cancel</div>
+          </div>
+          <div class="annotation">After adding, dialog shows required DNS records to configure. User copies these to their DNS provider, then clicks "Verify" on the domain list.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 6: ANALYTICS ==================== -->
+<div class="screen" id="screen-analytics">
+  <div class="screen-title">Screen 6: Analytics Dashboard</div>
+  <div class="screen-desc">Charts and KPIs for email performance over time. Maps to US-7.5 and US-4.2.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item active-nav"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Analytics</div>
+        <div class="topbar-right">
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <!-- Date Range Selector -->
+      <div class="filter-bar">
+        <div class="wire-label" style="margin:0;">Period:</div>
+        <div class="wire-btn" style="background:#ccc;">Last 7 days</div>
+        <div class="wire-btn">Last 30 days</div>
+        <div class="wire-btn">Last 90 days</div>
+        <div class="wire-btn">Custom</div>
+        <input class="wire-input" style="width:120px;margin:0;" placeholder="From" disabled>
+        <input class="wire-input" style="width:120px;margin:0;" placeholder="To" disabled>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="annotation">KPI cards with % change vs previous equivalent period. Color coded: green=good trend, red=bad trend.</div>
+      <div class="row">
+        <div class="col"><div class="stat-card"><div class="wire-label">Sent</div><div class="stat-value">3,412</div><div class="stat-sub">+12% vs prev</div></div></div>
+        <div class="col"><div class="stat-card"><div class="wire-label">Delivered</div><div class="stat-value">3,351</div><div class="stat-sub">98.2%</div></div></div>
+        <div class="col"><div class="stat-card"><div class="wire-label">Bounced</div><div class="stat-value">48</div><div class="stat-sub">1.4%</div></div></div>
+        <div class="col"><div class="stat-card"><div class="wire-label">Complained</div><div class="stat-value">2</div><div class="stat-sub">0.06%</div></div></div>
+        <div class="col"><div class="stat-card"><div class="wire-label">Opened</div><div class="stat-value">1,435</div><div class="stat-sub">42.1%</div></div></div>
+        <div class="col"><div class="stat-card"><div class="wire-label">Clicked</div><div class="stat-value">297</div><div class="stat-sub">8.7%</div></div></div>
+      </div>
+
+      <!-- Chart Row 1: Volume -->
+      <div class="wire-box">
+        <div class="wire-label">Delivery Volume Over Time (Daily)</div>
+        <div class="chart-placeholder tall">
+          [Line/Bar Chart] -- X: dates (Mar 20-27) | Y: email count<br>
+          Stacked bars: delivered (green), bounced (red), failed (orange)<br>
+          <br>MudChart or Chart.js via JS interop
+        </div>
+      </div>
+
+      <!-- Chart Row 2: Rates -->
+      <div class="row">
+        <div class="col">
+          <div class="wire-box">
+            <div class="wire-label">Delivery Rate + Bounce Rate Over Time</div>
+            <div class="chart-placeholder">
+              [Dual-axis Line Chart]<br>
+              Left Y: Delivery % (green line)<br>
+              Right Y: Bounce % (red line)<br>
+              X: dates
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="wire-box">
+            <div class="wire-label">Open Rate + Click Rate Over Time</div>
+            <div class="chart-placeholder">
+              [Dual-axis Line Chart]<br>
+              Left Y: Open % (blue line)<br>
+              Right Y: Click % (purple line)<br>
+              X: dates
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Tables -->
+      <div class="row">
+        <div class="col">
+          <div class="wire-box">
+            <div class="wire-label">Top Performing Templates</div>
+            <table class="wire-table">
+              <thead><tr><th>Template</th><th>Sent</th><th>Open %</th><th>Click %</th></tr></thead>
+              <tbody>
+                <tr><td>Invoice Notification</td><td>1,240</td><td>48.2%</td><td>12.1%</td></tr>
+                <tr><td>Payment Confirmation</td><td>890</td><td>51.3%</td><td>5.2%</td></tr>
+                <tr><td>Welcome Email</td><td>456</td><td>65.1%</td><td>22.8%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col">
+          <div class="wire-box">
+            <div class="wire-label">Top Bounce Recipients</div>
+            <table class="wire-table">
+              <thead><tr><th>Email</th><th>Bounces</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td>invalid@nowhere.com</td><td>5</td><td>Hard</td></tr>
+                <tr><td>old@deleted.org</td><td>3</td><td>Hard</td></tr>
+                <tr><td>full@mailbox.net</td><td>2</td><td>Soft</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCREEN 7: SUPPRESSIONS ==================== -->
+<div class="screen" id="screen-suppressions">
+  <div class="screen-title">Screen 7: Suppression Manager</div>
+  <div class="screen-desc">Manage suppressed email addresses. Search, add, remove, bulk import. Maps to US-7.6 and US-6.3.</div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div style="padding:16px; font-weight:700; font-size:14px; border-bottom:2px solid #999;">EaaS</div>
+      <div class="nav-item"><div class="icon-box">D</div> Dashboard</div>
+      <div class="nav-item"><div class="icon-box">E</div> Emails</div>
+      <div class="nav-item"><div class="icon-box">T</div> Templates</div>
+      <div class="nav-item"><div class="icon-box">D</div> Domains</div>
+      <div class="nav-item"><div class="icon-box">A</div> Analytics</div>
+      <div class="nav-item active-nav"><div class="icon-box">S</div> Suppressions</div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title">Suppression List</div>
+        <div class="topbar-right">
+          <div class="wire-btn">Bulk Import CSV</div>
+          <div class="wire-btn primary">+ Add Suppression</div>
+          <div class="badge">PRODUCTION</div>
+          <div class="user-avatar">I</div>
+        </div>
+      </div>
+
+      <!-- Search/Filter -->
+      <div class="filter-bar">
+        <input class="wire-input" style="width:300px;margin:0;" placeholder="Search by email address..." disabled>
+        <select class="wire-select" disabled>
+          <option>Reason: All</option>
+          <option>Hard Bounce</option>
+          <option>Complaint</option>
+          <option>Manual</option>
+        </select>
+        <div class="wire-btn primary">Search</div>
+      </div>
+
+      <!-- Suppression Table -->
+      <div class="wire-box" style="padding:0;">
+        <table class="wire-table">
+          <thead>
+            <tr><th>Email Address</th><th>Reason</th><th>Source Message</th><th>Suppressed Date</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>bounced@invalid.com</td><td><span class="status-badge">HARD_BOUNCE</span></td><td>eaas_a8f3b2c1</td><td>2026-03-27 09:58</td><td>[Remove]</td></tr>
+            <tr><td>spam@reporter.com</td><td><span class="status-badge">COMPLAINT</span></td><td>eaas_c4d5e6f7</td><td>2026-03-26 14:22</td><td>[Remove]</td></tr>
+            <tr><td>donotmail@request.com</td><td><span class="status-badge">MANUAL</span></td><td>--</td><td>2026-03-25 10:00</td><td>[Remove]</td></tr>
+            <tr><td>old@deleted.org</td><td><span class="status-badge">HARD_BOUNCE</span></td><td>eaas_g8h9i0j1</td><td>2026-03-24 16:45</td><td>[Remove]</td></tr>
+            <tr><td>full@mailbox.net</td><td><span class="status-badge">SOFT_BOUNCE</span></td><td>eaas_k2l3m4n5</td><td>2026-03-23 11:30</td><td>[Remove]</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div>Showing 1-20 of 42 suppressed addresses</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="page-nums">
+            <div class="page-num active-page">1</div>
+            <div class="page-num">2</div>
+            <div class="page-num">3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Suppression Dialog -->
+      <div style="margin-top:24px;">
+        <div class="wire-label">Add Suppression Dialog (MudDialog)</div>
+        <div class="dialog-overlay">
+          <div class="wire-subheading">Add Suppression</div>
+          <div style="margin-top:12px;">
+            <div class="wire-label">Email Address</div>
+            <input class="wire-input" placeholder="user@example.com" disabled>
+            <div class="wire-label">Reason</div>
+            <select class="wire-select" style="width:100%;" disabled>
+              <option>Manual</option>
+            </select>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="wire-btn primary">Add to Suppression List</div>
+            <div class="wire-btn" style="margin-left:8px;">Cancel</div>
+          </div>
+          <div class="annotation">POST /api/v1/suppressions with email_address and reason=manual. Validates email format, checks for duplicates.</div>
+        </div>
+      </div>
+
+      <!-- Bulk Import -->
+      <div style="margin-top:16px;">
+        <div class="wire-label">Bulk Import Dialog (MudDialog)</div>
+        <div class="dialog-overlay">
+          <div class="wire-subheading">Bulk Import Suppressions</div>
+          <div style="margin-top:12px;">
+            <div class="wire-box dashed" style="text-align:center; padding:32px; color:#888;">
+              [Drop CSV file here or click to browse]<br>
+              <span style="font-size:11px;">Format: email_address,reason (one per line)</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="wire-btn primary">Import</div>
+            <div class="wire-btn" style="margin-left:8px;">Cancel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

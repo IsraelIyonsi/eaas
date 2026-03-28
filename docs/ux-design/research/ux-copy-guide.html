@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Dashboard - UX Copy Guide</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-tertiary: #242836;
+    --bg-card: #1e2230;
+    --border: #2d3348;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0b0;
+    --text-muted: #6b7280;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-cyan: #06b6d4;
+    --accent-orange: #f97316;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .header p { color: var(--text-secondary); font-size: 14px; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .nav-tab:hover { color: var(--text-primary); }
+  .nav-tab.active { background: var(--bg-primary); color: var(--accent-blue); border-color: var(--accent-blue); }
+
+  .section { display: none; padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .section-intro {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .section-intro h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .section-intro p { font-size: 14px; color: var(--text-secondary); }
+
+  .copy-group {
+    margin-bottom: 24px;
+  }
+
+  .copy-group-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .copy-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    transition: all 0.15s;
+  }
+
+  .copy-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  .copy-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .copy-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    min-width: 100px;
+    flex-shrink: 0;
+    padding-top: 2px;
+    font-weight: 600;
+  }
+
+  .copy-value {
+    font-size: 14px;
+    color: var(--text-primary);
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .copy-value:hover::after {
+    content: 'Click to copy';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 10px;
+    color: var(--accent-blue);
+    opacity: 0.7;
+  }
+
+  .copy-value.copied::after {
+    content: 'Copied!';
+    color: var(--accent-green);
+    opacity: 1;
+  }
+
+  .copy-text {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  .copy-context {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+  }
+
+  .badge-queued { background: rgba(107, 114, 128, 0.2); color: var(--text-muted); }
+  .badge-sending { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+  .badge-delivered { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+  .badge-bounced { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+  .badge-complained { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+  .badge-failed { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+  .badge-opened { background: rgba(139, 92, 246, 0.2); color: var(--accent-purple); }
+  .badge-clicked { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); }
+
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .status-table th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+
+  .status-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(45, 51, 72, 0.5);
+    font-size: 13px;
+    color: var(--text-secondary);
+    vertical-align: top;
+  }
+
+  .status-table tr:hover td {
+    background: rgba(59, 130, 246, 0.03);
+  }
+
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+
+  .button-sample {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .button-sample.primary { border-color: var(--accent-blue); color: var(--accent-blue); }
+  .button-sample.danger { border-color: var(--accent-red); color: var(--accent-red); }
+  .button-sample.secondary { color: var(--text-secondary); }
+  .button-sample.success { border-color: var(--accent-green); color: var(--accent-green); }
+
+  .tooltip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+  }
+
+  .tooltip-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+  }
+
+  .tooltip-trigger {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    margin-bottom: 4px;
+  }
+
+  .tooltip-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 6px;
+    border-left: 3px solid var(--accent-blue);
+  }
+
+  .voice-principles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .voice-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+
+  .voice-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .voice-card p { font-size: 13px; color: var(--text-secondary); }
+  .voice-example { font-size: 12px; color: var(--accent-green); margin-top: 8px; font-style: italic; }
+  .voice-avoid { font-size: 12px; color: var(--accent-red); margin-top: 4px; font-style: italic; }
+
+  @media (max-width: 768px) {
+    .header, .section { padding: 16px; }
+    .copy-row { flex-direction: column; gap: 4px; }
+    .button-grid { grid-template-columns: 1fr 1fr; }
+    .tooltip-grid { grid-template-columns: 1fr; }
+    .voice-principles { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EaaS Dashboard - UX Copy Guide</h1>
+  <p>Comprehensive copy reference for all dashboard screens, messages, labels, and interaction states</p>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showSection('voice')">Voice &amp; Tone</div>
+    <div class="nav-tab" onclick="showSection('pages')">Page Titles</div>
+    <div class="nav-tab" onclick="showSection('empty')">Empty States</div>
+    <div class="nav-tab" onclick="showSection('errors')">Error Messages</div>
+    <div class="nav-tab" onclick="showSection('success')">Success Messages</div>
+    <div class="nav-tab" onclick="showSection('buttons')">Button Labels</div>
+    <div class="nav-tab" onclick="showSection('statuses')">Status Labels</div>
+    <div class="nav-tab" onclick="showSection('tooltips')">Tooltips</div>
+    <div class="nav-tab" onclick="showSection('dialogs')">Confirmations</div>
+    <div class="nav-tab" onclick="showSection('loading')">Loading States</div>
+  </div>
+</div>
+
+<!-- VOICE & TONE -->
+<div id="voice" class="section active">
+  <div class="section-intro">
+    <h2>Voice and Tone Principles</h2>
+    <p>EaaS is a developer tool. The voice is technical, direct, and confident. No marketing fluff, no unnecessary words. Every message should help the user take action or understand status.</p>
+  </div>
+
+  <div class="voice-principles">
+    <div class="voice-card">
+      <h3>Direct</h3>
+      <p>Say what happened and what to do next. No filler words.</p>
+      <div class="voice-example">Do: "Domain verified. You can now send from this domain."</div>
+      <div class="voice-avoid">Avoid: "Great news! Your domain has been successfully verified and is now ready for use!"</div>
+    </div>
+    <div class="voice-card">
+      <h3>Technical</h3>
+      <p>Use precise terminology. The user is a senior developer.</p>
+      <div class="voice-example">Do: "550 5.1.1 - Mailbox does not exist (hard bounce)"</div>
+      <div class="voice-avoid">Avoid: "This email could not be delivered to the recipient."</div>
+    </div>
+    <div class="voice-card">
+      <h3>Actionable</h3>
+      <p>Every error message must suggest what to do next.</p>
+      <div class="voice-example">Do: "DKIM record not found. Add the CNAME record below to your DNS provider."</div>
+      <div class="voice-avoid">Avoid: "Verification failed."</div>
+    </div>
+    <div class="voice-card">
+      <h3>Honest</h3>
+      <p>Show exact values, expected vs actual. No ambiguity.</p>
+      <div class="voice-example">Do: "Expected: v=spf1 include:amazonses.com ~all | Found: v=spf1 ~all"</div>
+      <div class="voice-avoid">Avoid: "Your SPF record appears to be incorrect."</div>
+    </div>
+    <div class="voice-card">
+      <h3>Consistent</h3>
+      <p>Same action = same verb everywhere. Same object = same noun.</p>
+      <div class="voice-example">Do: Always "Create" for new, "Save" for update, "Delete" for remove.</div>
+      <div class="voice-avoid">Avoid: Mixing "Add", "New", "Create", "Make" for the same action.</div>
+    </div>
+    <div class="voice-card">
+      <h3>Concise</h3>
+      <p>Fewer words is better. If it can be a status badge, it should be.</p>
+      <div class="voice-example">Do: "Delivered" badge, "2.1% bounce rate"</div>
+      <div class="voice-avoid">Avoid: "This email was successfully delivered to the recipient's mail server."</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE TITLES -->
+<div id="pages" class="section">
+  <div class="section-intro">
+    <h2>Page Titles and Descriptions</h2>
+    <p>Each page has a title (H1 in the content area) and a short description displayed below it. The browser tab title follows the format: "[Page] - EaaS".</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Main Pages</div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Overview</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Overview</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">System health and email sending activity at a glance.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Overview - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Email Logs</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Email Logs</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Search and filter all sent emails. Click any row to view full delivery details.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Email Logs - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Templates</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Templates</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Manage email templates with Liquid syntax and variable schemas.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Templates - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Template Editor</div></div>
+      <div class="copy-row"><div class="copy-label">Title (New)</div><div class="copy-value" onclick="copyText(this)">Create Template</div></div>
+      <div class="copy-row"><div class="copy-label">Title (Edit)</div><div class="copy-value" onclick="copyText(this)">Edit Template: {template_name}</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">{template_name} - Templates - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Domains</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Domains</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Register and verify sending domains. Configure SPF, DKIM, and DMARC records.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Domains - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Analytics</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Analytics</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Delivery performance, engagement tracking, and sending trends.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Analytics - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Suppressions</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Suppression List</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Addresses blocked from receiving emails due to bounces, complaints, or manual suppression.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Suppressions - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>API Keys</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">API Keys</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Create and manage API keys for your applications. Keys authenticate requests to the EaaS API.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">API Keys - EaaS</div></div>
+    </div>
+
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Email Detail</div></div>
+      <div class="copy-row"><div class="copy-label">Title</div><div class="copy-value" onclick="copyText(this)">Email Detail</div></div>
+      <div class="copy-row"><div class="copy-label">Description</div><div class="copy-value" onclick="copyText(this)">Full delivery timeline and diagnostics for message {message_id}.</div></div>
+      <div class="copy-row"><div class="copy-label">Tab Title</div><div class="copy-value" onclick="copyText(this)">Email {message_id_short} - EaaS</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY STATES -->
+<div id="empty" class="section">
+  <div class="section-intro">
+    <h2>Empty States</h2>
+    <p>Each empty state includes: an icon or illustration, a headline, a description, and a primary call to action. The tone is helpful and instructional, not apologetic.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Email Logs - No Emails</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No emails sent yet</strong><br><br>
+        When you send your first email through the API, it will appear here with full delivery tracking.<br><br>
+        <em>Button: View API Documentation</em>
+      </div>
+      <div class="copy-context">Shown when the email logs table has zero entries. Primary CTA directs to Swagger docs.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Email Logs - No Results (Filtered)</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No emails match your filters</strong><br><br>
+        Try adjusting the date range, status, or search terms.<br><br>
+        <em>Button: Clear Filters</em>
+      </div>
+      <div class="copy-context">Shown when filters return zero results but the table has data.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Templates - No Templates</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No templates yet</strong><br><br>
+        Templates let you reuse email layouts with dynamic variables. Create your first template or use the API to send raw HTML.<br><br>
+        <em>Button: Create Template</em>
+      </div>
+      <div class="copy-context">Shown when the templates list is empty. Explains the value of templates.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Domains - No Domains</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No sending domains configured</strong><br><br>
+        Add a domain to start sending emails. You will need to add SPF, DKIM, and DMARC records to your DNS provider.<br><br>
+        <em>Button: Add Domain</em>
+      </div>
+      <div class="copy-context">Shown when no domains are registered. Makes DNS requirement clear upfront.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Analytics - No Data</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No analytics data available</strong><br><br>
+        Analytics will populate once emails start being sent. Data is aggregated daily.<br><br>
+        <em>Button: View Email Logs</em>
+      </div>
+      <div class="copy-context">Shown when analytics API returns empty data for the selected range.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Suppressions - Empty List</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No suppressed addresses</strong><br><br>
+        Addresses that hard bounce or receive complaints are automatically added here. You can also manually suppress addresses.<br><br>
+        <em>Button: Add Suppression</em>
+      </div>
+      <div class="copy-context">Shown when suppression list is empty. Explains auto-suppression behavior.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">API Keys - No Keys</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No API keys created</strong><br><br>
+        Create an API key to authenticate your applications. Each key can be scoped to specific sending domains.<br><br>
+        <em>Button: Create API Key</em>
+      </div>
+      <div class="copy-context">Shown when no API keys exist. Unlikely scenario since a seed key bootstraps the system.</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Template Version History - No Versions</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>No version history</strong><br><br>
+        Version history will appear after you save changes to this template.
+      </div>
+      <div class="copy-context">Shown in the version history panel for newly created templates with only one version.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ERROR MESSAGES -->
+<div id="errors" class="section">
+  <div class="section-intro">
+    <h2>Error Messages</h2>
+    <p>Error messages follow the pattern: What happened + Why + What to do. Technical details are included since the user is a developer. Color: red text or red-bordered container.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Authentication Errors</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Invalid login credentials</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Invalid username or password. Please try again.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Too many failed login attempts</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Too many failed attempts. Please try again in 15 minutes.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Session expired</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Your session has expired. Please sign in again.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">API / System Errors</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>API server unreachable</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Unable to connect to the EaaS API. Check that the API server is running and try again.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>API returns 500</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Server error. The API returned an unexpected error. Check the application logs for details.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>API returns 429 (rate limited)</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Rate limit exceeded. Please wait a moment before retrying.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Worker service down</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Worker service is not responding. Emails are queued but not being processed. Check Docker container status.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Database connection failed</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Database connection failed. PostgreSQL may be down or unreachable. Check container health.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Validation Errors</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Template name already exists</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">A template named "{name}" already exists. Choose a different name.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Template size exceeds limit</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template exceeds the 512KB size limit. Current size: {size}KB. Reduce the template content.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Liquid syntax error</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template syntax error at line {line}: {error_detail}. Check your Liquid template syntax.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Invalid domain format</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Invalid domain format. Enter a valid domain name (e.g., notifications.example.com).</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Duplicate domain</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Domain "{domain}" is already registered.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Invalid email in suppression</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Invalid email address format. Enter a valid email (e.g., user@example.com).</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Address already suppressed</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">This address is already on the suppression list (reason: {reason}, since {date}).</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>API key name empty</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">API key name is required. Use a descriptive name (e.g., "CashTrack Production").</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Domain Verification Errors</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>DNS record not found</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">{record_type} record not found. Add the following record to your DNS provider: {expected_value}</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>DNS record mismatch</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">{record_type} record mismatch. Expected: {expected} | Found: {actual}</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>DNS propagation delay</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">DNS changes can take up to 48 hours to propagate. Try verifying again later.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Alert Messages (Dashboard Overview)</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Bounce rate above 2%</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Bounce rate at {rate}%. Investigate bounced emails to protect sender reputation.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Complaint rate above 0.08%</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Complaint rate at {rate}% (warning threshold: 0.08%). SES suspends sending at 0.1%.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Complaint rate above 0.1%</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">CRITICAL: Complaint rate at {rate}%. Sending paused to prevent SES account suspension. Review complained emails immediately.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Trigger</div><div>Domain verification failed on recheck</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Domain "{domain}" failed daily verification. Sending from this domain is suspended until DNS records are corrected.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MESSAGES -->
+<div id="success" class="section">
+  <div class="section-intro">
+    <h2>Success Messages</h2>
+    <p>Success messages are brief confirmations displayed as toast notifications (auto-dismiss after 5 seconds) or inline success banners. Color: green.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Template Operations</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Template created</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template "{name}" created successfully.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Template updated</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template "{name}" saved. Version {version}.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Template deleted</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template "{name}" deleted. It can be restored within 30 days.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Template restored</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Template "{name}" restored successfully.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Domain Operations</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Domain added</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Domain "{domain}" added. Configure the DNS records below, then click Verify.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Domain verified</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Domain "{domain}" verified. You can now send emails from this domain.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Domain removed</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Domain "{domain}" removed. Emails can no longer be sent from this domain.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Suppression Operations</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Suppression added</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">"{email}" added to suppression list. Future sends to this address will be blocked.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Suppression removed</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Suppression removed for "{email}". Emails can now be sent to this address.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>CSV exported</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Suppression list exported. {count} entries saved to suppressions.csv.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">API Key Operations</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>API key created</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">API key "{name}" created. Copy the key now. It will not be shown again.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>API key revoked</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">API key "{name}" revoked. Any application using this key will receive 401 errors.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>API key rotated</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">API key "{name}" rotated. The old key will remain active for 24 hours. Copy the new key now.</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Clipboard Operations</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>DNS record copied</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Copied to clipboard.</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>All DNS records copied</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">All DNS records copied to clipboard.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BUTTON LABELS -->
+<div id="buttons" class="section">
+  <div class="section-intro">
+    <h2>Button Labels</h2>
+    <p>Consistent verb usage across the entire dashboard. Primary actions use strong verbs. Destructive actions use red styling. All buttons use sentence case.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Primary Actions (Blue)</div>
+    <div class="button-grid">
+      <div class="button-sample primary">Create Template</div>
+      <div class="button-sample primary">Create API Key</div>
+      <div class="button-sample primary">Add Domain</div>
+      <div class="button-sample primary">Add Suppression</div>
+      <div class="button-sample primary">Save Template</div>
+      <div class="button-sample primary">Sign In</div>
+      <div class="button-sample primary">Verify Now</div>
+      <div class="button-sample primary">Preview</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Destructive Actions (Red)</div>
+    <div class="button-grid">
+      <div class="button-sample danger">Delete Template</div>
+      <div class="button-sample danger">Remove Domain</div>
+      <div class="button-sample danger">Revoke Key</div>
+      <div class="button-sample danger">Remove Suppression</div>
+      <div class="button-sample danger">Remove Anyway</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Secondary Actions (Gray)</div>
+    <div class="button-grid">
+      <div class="button-sample secondary">Cancel</div>
+      <div class="button-sample secondary">Clear Filters</div>
+      <div class="button-sample secondary">Export CSV</div>
+      <div class="button-sample secondary">Copy</div>
+      <div class="button-sample secondary">Copy All</div>
+      <div class="button-sample secondary">Discard Changes</div>
+      <div class="button-sample secondary">Rotate Key</div>
+      <div class="button-sample secondary">Restore</div>
+      <div class="button-sample secondary">View API Docs</div>
+      <div class="button-sample secondary">Refresh</div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Verb Consistency Rules</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Create</div><div>New resource that did not exist: templates, API keys</div></div>
+      <div class="copy-row"><div class="copy-label">Add</div><div>Register/include an existing thing: domains, suppressions</div></div>
+      <div class="copy-row"><div class="copy-label">Save</div><div>Persist changes to an existing resource: template edits</div></div>
+      <div class="copy-row"><div class="copy-label">Delete</div><div>Soft-delete a resource (recoverable): templates</div></div>
+      <div class="copy-row"><div class="copy-label">Remove</div><div>Permanently remove or unregister: domains, suppressions</div></div>
+      <div class="copy-row"><div class="copy-label">Revoke</div><div>Disable access permanently: API keys</div></div>
+      <div class="copy-row"><div class="copy-label">Verify</div><div>Check correctness: domain DNS records</div></div>
+      <div class="copy-row"><div class="copy-label">Export</div><div>Download data: CSV files</div></div>
+      <div class="copy-row"><div class="copy-label">Rotate</div><div>Replace with new while keeping old temporarily: API keys</div></div>
+      <div class="copy-row"><div class="copy-label">Restore</div><div>Recover a soft-deleted resource: templates</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS LABELS -->
+<div id="statuses" class="section">
+  <div class="section-intro">
+    <h2>Status Labels</h2>
+    <p>Consistent status badges used across email logs, domain management, and system health. Each status has a defined color and short definition.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Email Delivery Statuses</div>
+    <div class="copy-card" style="overflow-x:auto">
+      <table class="status-table">
+        <thead><tr><th>Badge</th><th>Label</th><th>Definition</th><th>Color</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-queued">Queued</span></td><td>Queued</td><td>Email accepted by the API and waiting in the message queue for processing.</td><td>Gray (#6b7280)</td></tr>
+          <tr><td><span class="badge badge-sending">Sending</span></td><td>Sending</td><td>Worker has picked up the message and is delivering it to AWS SES.</td><td>Blue (#3b82f6)</td></tr>
+          <tr><td><span class="badge badge-delivered">Delivered</span></td><td>Delivered</td><td>AWS SES confirmed the email was accepted by the recipient's mail server.</td><td>Green (#10b981)</td></tr>
+          <tr><td><span class="badge badge-bounced">Bounced</span></td><td>Bounced</td><td>Email permanently rejected by the recipient's mail server (hard bounce).</td><td>Red (#ef4444)</td></tr>
+          <tr><td><span class="badge badge-complained">Complained</span></td><td>Complained</td><td>Recipient marked the email as spam. Address auto-suppressed.</td><td>Yellow (#f59e0b)</td></tr>
+          <tr><td><span class="badge badge-failed">Failed</span></td><td>Failed</td><td>Email could not be sent due to a system error (template rendering, SES error).</td><td>Red (#ef4444)</td></tr>
+          <tr><td><span class="badge badge-opened">Opened</span></td><td>Opened</td><td>Recipient loaded the tracking pixel. May undercount due to email client blocking.</td><td>Purple (#8b5cf6)</td></tr>
+          <tr><td><span class="badge badge-clicked">Clicked</span></td><td>Clicked</td><td>Recipient clicked a tracked link in the email body.</td><td>Cyan (#06b6d4)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Domain Verification Statuses</div>
+    <div class="copy-card" style="overflow-x:auto">
+      <table class="status-table">
+        <thead><tr><th>Badge</th><th>Label</th><th>Definition</th><th>Color</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge" style="background:rgba(245,158,11,0.2); color:var(--accent-yellow)">Pending</span></td><td>Pending Verification</td><td>Domain added but DNS records have not been verified yet.</td><td>Yellow</td></tr>
+          <tr><td><span class="badge" style="background:rgba(16,185,129,0.2); color:var(--accent-green)">Verified</span></td><td>Verified</td><td>All DNS records (SPF, DKIM, DMARC) are correctly configured.</td><td>Green</td></tr>
+          <tr><td><span class="badge" style="background:rgba(239,68,68,0.2); color:var(--accent-red)">Failed</span></td><td>Verification Failed</td><td>One or more DNS records are missing or incorrect.</td><td>Red</td></tr>
+          <tr><td><span class="badge" style="background:rgba(239,68,68,0.2); color:var(--accent-red)">Suspended</span></td><td>Suspended</td><td>Previously verified domain failed daily re-verification. Sending is blocked.</td><td>Red</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">System Health Statuses</div>
+    <div class="copy-card" style="overflow-x:auto">
+      <table class="status-table">
+        <thead><tr><th>Badge</th><th>Label</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge" style="background:rgba(16,185,129,0.2); color:var(--accent-green)">Healthy</span></td><td>Healthy</td><td>Component is running and responding within expected latency.</td></tr>
+          <tr><td><span class="badge" style="background:rgba(245,158,11,0.2); color:var(--accent-yellow)">Degraded</span></td><td>Degraded</td><td>Component is responding but with elevated latency or partial failures.</td></tr>
+          <tr><td><span class="badge" style="background:rgba(239,68,68,0.2); color:var(--accent-red)">Down</span></td><td>Down</td><td>Component is not responding or returned a critical error.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Suppression Reason Labels</div>
+    <div class="copy-card" style="overflow-x:auto">
+      <table class="status-table">
+        <thead><tr><th>Label</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td>Hard Bounce</td><td>Recipient address does not exist (550 permanent failure from mail server).</td></tr>
+          <tr><td>Soft Bounce Limit</td><td>Address soft-bounced 3 consecutive times with different messages.</td></tr>
+          <tr><td>Complaint</td><td>Recipient marked an email as spam via their email client.</td></tr>
+          <tr><td>Manual</td><td>Manually added by the dashboard user.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">API Key Statuses</div>
+    <div class="copy-card" style="overflow-x:auto">
+      <table class="status-table">
+        <thead><tr><th>Badge</th><th>Label</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge" style="background:rgba(16,185,129,0.2); color:var(--accent-green)">Active</span></td><td>Active</td><td>Key is valid and accepting requests.</td></tr>
+          <tr><td><span class="badge" style="background:rgba(245,158,11,0.2); color:var(--accent-yellow)">Rotating</span></td><td>Rotating</td><td>Key has been rotated. Old key valid for grace period (24h).</td></tr>
+          <tr><td><span class="badge" style="background:rgba(239,68,68,0.2); color:var(--accent-red)">Revoked</span></td><td>Revoked</td><td>Key has been permanently disabled. Returns 401 on use.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIPS -->
+<div id="tooltips" class="section">
+  <div class="section-intro">
+    <h2>Tooltip Text</h2>
+    <p>Tooltips appear on hover over stat cards, status badges, and informational icons. They provide brief context or definitions. Max length: 120 characters.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Overview Stat Card Tooltips</div>
+    <div class="tooltip-grid">
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Emails Sent</div>
+        <div class="tooltip-text">Total emails accepted by the API and enqueued for delivery in the selected period.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Delivery Rate</div>
+        <div class="tooltip-text">Percentage of sent emails confirmed delivered by the recipient's mail server.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Bounce Rate</div>
+        <div class="tooltip-text">Percentage of sent emails permanently rejected. Keep below 2% to protect sender reputation.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Complaint Rate</div>
+        <div class="tooltip-text">Percentage of delivered emails marked as spam by recipients. SES suspends at 0.1%.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Open Rate</div>
+        <div class="tooltip-text">Percentage of delivered emails where the tracking pixel was loaded. Undercounts due to image blocking.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Click Rate</div>
+        <div class="tooltip-text">Percentage of delivered emails where at least one tracked link was clicked.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">System Health Tooltips</div>
+    <div class="tooltip-grid">
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">API Status</div>
+        <div class="tooltip-text">HTTP API server health. Green when responding within normal latency.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Worker Status</div>
+        <div class="tooltip-text">Background worker processing the email queue. Red means emails are queued but not being sent.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Queue Depth</div>
+        <div class="tooltip-text">Number of emails waiting to be processed. High values indicate a processing backlog.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">PostgreSQL</div>
+        <div class="tooltip-text">Primary database for logs, templates, domains, and API keys.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Redis</div>
+        <div class="tooltip-text">Cache layer for rate limiting, suppression lookups, and template caching.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">RabbitMQ</div>
+        <div class="tooltip-text">Message queue for async email processing with retry and dead-letter support.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Domain Page Tooltips</div>
+    <div class="tooltip-grid">
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">SPF Record</div>
+        <div class="tooltip-text">Sender Policy Framework. Authorizes mail servers to send on behalf of your domain.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">DKIM Records</div>
+        <div class="tooltip-text">DomainKeys Identified Mail. Cryptographic signatures proving emails are unaltered.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">DMARC Record</div>
+        <div class="tooltip-text">Domain-based Message Authentication. Tells mail servers what to do with failed SPF/DKIM checks.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Template Editor Tooltips</div>
+    <div class="tooltip-grid">
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Variables Schema</div>
+        <div class="tooltip-text">JSON Schema defining expected template variables. Validated at send time to catch missing data.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Version History</div>
+        <div class="tooltip-text">Last 10 saved versions of this template. Compare changes between versions.</div>
+      </div>
+      <div class="tooltip-card">
+        <div class="tooltip-trigger">Send Count</div>
+        <div class="tooltip-text">Total number of emails sent using this template across all time.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMATION DIALOGS -->
+<div id="dialogs" class="section">
+  <div class="section-intro">
+    <h2>Confirmation Dialogs</h2>
+    <p>All destructive or irreversible actions require confirmation. Dialogs include: title, description (explaining consequences), confirm button (red for destructive), and cancel button.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Delete Template</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Delete "{template_name}"?</strong><br><br>
+        This template will be moved to trash. Emails referencing this template will fail with a 404 error. You can restore it within 30 days.<br><br>
+        <em style="color:var(--accent-red)">Button: Delete Template</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Remove Domain</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Remove domain "{domain}"?</strong><br><br>
+        This will remove the domain from AWS SES and prevent all future sends from addresses on this domain. Emails already in the queue for this domain will be rejected. This action cannot be undone.<br><br>
+        <em style="color:var(--accent-red)">Button: Remove Domain</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Revoke API Key</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Revoke API key "{key_name}"?</strong><br><br>
+        Any application using this key (prefix: {key_prefix}...) will immediately receive 401 Unauthorized errors. Emails already in the queue will continue processing. This action cannot be undone.<br><br>
+        <em style="color:var(--accent-red)">Button: Revoke Key</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Remove Suppression (Hard Bounce / Complaint)</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Remove suppression for "{email}"?</strong><br><br>
+        This address was suppressed due to: {reason} on {date}. Removing it will allow future emails to be sent to this address, which may result in additional bounces and hurt your sender reputation.<br><br>
+        <em style="color:var(--accent-red)">Button: Remove Anyway</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Remove Suppression (Manual)</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Remove suppression for "{email}"?</strong><br><br>
+        This will re-enable email sending to this address.<br><br>
+        <em style="color:var(--accent-red)">Button: Remove Suppression</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Discard Template Changes</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Discard unsaved changes?</strong><br><br>
+        You have unsaved changes to this template. Leaving this page will discard all changes since your last save.<br><br>
+        <em style="color:var(--accent-red)">Button: Discard Changes</em> &nbsp; <em>Button: Continue Editing</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Rotate API Key</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>Rotate API key "{key_name}"?</strong><br><br>
+        A new key will be generated. The current key (prefix: {key_prefix}...) will remain valid for 24 hours to allow migration. After that, it will be automatically revoked.<br><br>
+        <em>Button: Rotate Key</em> &nbsp; <em>Button: Cancel</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">API Key Created (One-Time Display)</div>
+    <div class="copy-card">
+      <div class="copy-text">
+        <strong>API key created</strong><br><br>
+        Copy this key now. For security, it will not be displayed again.<br><br>
+        <code style="background:var(--bg-tertiary); padding:8px 12px; border-radius:4px; display:block; margin:8px 0; color:var(--accent-green); font-size:13px;">eaas_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code>
+        <em>Button: Copy Key</em> &nbsp; <em>Button: Done</em>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING STATES -->
+<div id="loading" class="section">
+  <div class="section-intro">
+    <h2>Loading States</h2>
+    <p>Loading messages are shown while data is being fetched. Use skeleton loaders for table content and spinner with text for action confirmations. Keep messages specific to what is loading.</p>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Page Loading Messages</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Overview</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading dashboard...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Email Logs</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading email logs...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Templates</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading templates...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Template Editor</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading template...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Domains</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading domains...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Analytics</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading analytics...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Suppressions</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading suppression list...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>API Keys</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading API keys...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Page</div><div>Email Detail</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Loading email details...</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Action Loading Messages</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Verifying domain</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Verifying DNS records...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Saving template</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Saving template...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Previewing template</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Rendering preview...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Creating API key</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Generating API key...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Rotating API key</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Rotating API key...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Adding domain</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Registering domain with AWS SES...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Exporting suppressions</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Exporting suppression list...</div></div>
+    </div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Action</div><div>Signing in</div></div>
+      <div class="copy-row"><div class="copy-label">Message</div><div class="copy-value" onclick="copyText(this)">Signing in...</div></div>
+    </div>
+  </div>
+
+  <div class="copy-group">
+    <div class="copy-group-header">Loading State Guidelines</div>
+    <div class="copy-card">
+      <div class="copy-row"><div class="copy-label">Pattern</div><div>Use skeleton loaders (pulsing gray rectangles) for table rows and stat cards during initial page load.</div></div>
+      <div class="copy-row"><div class="copy-label">Pattern</div><div>Use inline spinner + text for action confirmations (save, verify, create).</div></div>
+      <div class="copy-row"><div class="copy-label">Pattern</div><div>Disable the triggering button during action loading to prevent double-submission.</div></div>
+      <div class="copy-row"><div class="copy-label">Pattern</div><div>If loading takes more than 10 seconds, show: "This is taking longer than expected. Please wait..."</div></div>
+      <div class="copy-row"><div class="copy-label">Pattern</div><div>If loading fails after timeout (30s), show the relevant error message from the Errors section.</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSection(sectionId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const sectionIds = ['voice','pages','empty','errors','success','buttons','statuses','tooltips','dialogs','loading'];
+  const idx = sectionIds.indexOf(sectionId);
+  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function copyText(el) {
+  const text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    el.classList.add('copied');
+    setTimeout(() => el.classList.remove('copied'), 1500);
+  });
+}
+</script>
+
+</body>
+</html>

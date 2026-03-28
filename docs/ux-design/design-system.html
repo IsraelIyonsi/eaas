@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Design System Specification</title>
+<style>
+  :root {
+    /* Primary Palette */
+    --primary: #7C4DFF;
+    --primary-light: #B47CFF;
+    --primary-dark: #5A35CC;
+    --secondary: #00E5FF;
+    --secondary-light: #6EFFFF;
+    --secondary-dark: #00B2CC;
+
+    /* Status Colors */
+    --success: #00E676;
+    --error: #FF5252;
+    --warning: #FFD740;
+    --info: #448AFF;
+
+    /* Surfaces */
+    --background: #121212;
+    --surface: #1E1E2E;
+    --paper: #27293D;
+    --elevated: #2D2F45;
+    --elevated-2: #34364E;
+
+    /* Text */
+    --text-primary: #FFFFFFDE;
+    --text-secondary: #FFFFFF99;
+    --text-disabled: #FFFFFF61;
+    --text-hint: #FFFFFF4D;
+
+    /* Borders */
+    --border: #FFFFFF1A;
+    --border-hover: #FFFFFF33;
+
+    /* Email Status Colors */
+    --status-delivered: #00E676;
+    --status-bounced: #FF5252;
+    --status-sending: #448AFF;
+    --status-queued: #9E9E9E;
+    --status-complained: #FF9100;
+    --status-opened: #B47CFF;
+    --status-clicked: #00E5FF;
+    --status-failed: #FF1744;
+
+    /* Chart Palette */
+    --chart-1: #7C4DFF;
+    --chart-2: #00E5FF;
+    --chart-3: #00E676;
+    --chart-4: #FFD740;
+    --chart-5: #FF5252;
+    --chart-6: #FF9100;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.5);
+    --shadow-xl: 0 20px 40px rgba(0,0,0,0.6);
+
+    /* Font */
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: var(--space-xl);
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  /* Layout */
+  .page-header {
+    text-align: center;
+    padding: var(--space-3xl) 0 var(--space-2xl);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--space-2xl);
+  }
+  .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: var(--space-sm); }
+  .page-header .subtitle { color: var(--text-secondary); font-size: 16px; }
+  .page-header .badge {
+    display: inline-block; background: var(--primary); color: #fff;
+    padding: 4px 12px; border-radius: 20px; font-size: 11px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: var(--space-md);
+  }
+
+  .section {
+    margin-bottom: var(--space-3xl);
+  }
+  .section-title {
+    font-size: 28px; font-weight: 700; margin-bottom: var(--space-xs);
+    display: flex; align-items: center; gap: var(--space-sm);
+  }
+  .section-title .num {
+    font-size: 12px; background: var(--primary); color: #fff;
+    width: 28px; height: 28px; display: inline-flex; align-items: center;
+    justify-content: center; border-radius: 50%; font-weight: 700;
+  }
+  .section-desc {
+    color: var(--text-secondary); margin-bottom: var(--space-lg); font-size: 14px;
+  }
+
+  .subsection { margin-bottom: var(--space-xl); }
+  .subsection-title { font-size: 18px; font-weight: 600; margin-bottom: var(--space-md); color: var(--text-primary); }
+
+  /* Color Swatches */
+  .swatch-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-md);
+  }
+  .swatch {
+    background: var(--paper); border-radius: var(--radius-md);
+    overflow: hidden; border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .swatch:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .swatch-color {
+    height: 80px; display: flex; align-items: flex-end; padding: var(--space-sm);
+  }
+  .swatch-info { padding: var(--space-sm) var(--space-md); }
+  .swatch-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .swatch-hex { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .swatch-usage { font-size: 11px; color: var(--text-hint); margin-top: 4px; }
+
+  /* Typography Samples */
+  .type-sample {
+    background: var(--paper); border-radius: var(--radius-md);
+    padding: var(--space-lg); margin-bottom: var(--space-md);
+    border: 1px solid var(--border); display: flex; justify-content: space-between;
+    align-items: baseline; flex-wrap: wrap; gap: var(--space-md);
+  }
+  .type-preview { flex: 1; min-width: 200px; }
+  .type-meta {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+    text-align: right; white-space: nowrap;
+  }
+  .type-meta div { margin-bottom: 2px; }
+
+  /* Spacing Ruler */
+  .spacing-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-md);
+  }
+  .spacing-item {
+    background: var(--paper); border-radius: var(--radius-md);
+    padding: var(--space-md); border: 1px solid var(--border); text-align: center;
+  }
+  .spacing-bar {
+    background: var(--primary); border-radius: 2px; height: 8px;
+    margin: var(--space-sm) auto; opacity: 0.8;
+  }
+  .spacing-label { font-weight: 600; font-size: 13px; }
+  .spacing-value { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .spacing-alias { font-size: 11px; color: var(--text-hint); }
+
+  /* Component Specs */
+  .component-spec {
+    background: var(--paper); border-radius: var(--radius-lg);
+    border: 1px solid var(--border); margin-bottom: var(--space-xl);
+    overflow: hidden;
+  }
+  .component-header {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .component-name { font-weight: 700; font-size: 16px; }
+  .component-tag {
+    font-size: 11px; background: var(--elevated); padding: 3px 10px;
+    border-radius: 20px; color: var(--text-secondary); font-family: var(--font-mono);
+  }
+  .component-body { padding: var(--space-lg); }
+  .component-preview {
+    background: var(--surface); border-radius: var(--radius-md);
+    padding: var(--space-lg); margin-bottom: var(--space-lg);
+    border: 1px dashed var(--border);
+    position: relative;
+  }
+
+  /* Stat Card Component */
+  .stat-card {
+    background: var(--paper); border-radius: var(--radius-md);
+    padding: var(--space-lg); min-width: 200px; max-width: 260px;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+  }
+  .stat-card-icon {
+    width: 40px; height: 40px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: var(--space-sm);
+  }
+  .stat-card-value { font-size: 32px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
+  .stat-card-label { font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+  .stat-card-trend { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+  .stat-card-trend.up { color: var(--success); }
+  .stat-card-trend.down { color: var(--error); }
+  .stat-card-sparkline {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 40px; opacity: 0.15;
+  }
+
+  /* Status Badge */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: 12px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+
+  /* Email Row */
+  .email-row {
+    display: grid; grid-template-columns: 32px 1fr 140px 120px 100px 60px;
+    align-items: center; gap: var(--space-md); padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border); font-size: 13px;
+    transition: background 0.15s;
+  }
+  .email-row:hover { background: var(--elevated); }
+  .email-row .checkbox { width: 16px; height: 16px; border: 2px solid var(--border-hover); border-radius: 3px; }
+  .email-row .recipient { font-weight: 500; }
+  .email-row .subject { color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .email-row .time { color: var(--text-hint); font-size: 12px; font-family: var(--font-mono); }
+
+  /* Domain Card */
+  .domain-card {
+    background: var(--paper); border-radius: var(--radius-md);
+    border: 1px solid var(--border); max-width: 420px; overflow: hidden;
+  }
+  .domain-card-header {
+    padding: var(--space-md) var(--space-lg);
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .domain-card-name { font-weight: 600; font-size: 15px; }
+  .domain-dns { padding: var(--space-md) var(--space-lg); }
+  .domain-dns-record {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: var(--space-sm) 0; border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .domain-dns-record:last-child { border-bottom: none; }
+  .domain-dns-type { font-family: var(--font-mono); font-weight: 600; width: 60px; }
+  .domain-dns-value { flex: 1; font-family: var(--font-mono); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 var(--space-sm); }
+
+  /* Template Card */
+  .template-card {
+    background: var(--paper); border-radius: var(--radius-md);
+    border: 1px solid var(--border); max-width: 320px; padding: var(--space-lg);
+  }
+  .template-card-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .template-card-subject { font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-md); }
+  .template-card-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-hint); }
+
+  /* Chart Card */
+  .chart-card {
+    background: var(--paper); border-radius: var(--radius-md);
+    border: 1px solid var(--border); max-width: 520px; overflow: hidden;
+  }
+  .chart-card-header {
+    padding: var(--space-md) var(--space-lg);
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .chart-card-title { font-weight: 600; font-size: 15px; }
+  .chart-card-pills { display: flex; gap: 4px; }
+  .chart-pill {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px;
+    font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+    color: var(--text-secondary); background: transparent; transition: all 0.15s;
+  }
+  .chart-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .chart-card-body { padding: var(--space-lg); }
+  .chart-area {
+    height: 180px; background: var(--surface); border-radius: var(--radius-sm);
+    display: flex; align-items: flex-end; padding: var(--space-sm);
+    gap: 2px; position: relative;
+  }
+  .chart-bar {
+    flex: 1; border-radius: 2px 2px 0 0; min-width: 4px;
+    transition: opacity 0.15s;
+  }
+  .chart-bar:hover { opacity: 0.8; }
+  .chart-legend {
+    display: flex; gap: var(--space-lg); padding-top: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .chart-legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Annotation Labels */
+  .anno {
+    position: absolute; font-size: 10px; font-family: var(--font-mono);
+    color: var(--warning); white-space: nowrap; pointer-events: none;
+  }
+  .anno-line {
+    position: absolute; border: 1px dashed var(--warning); opacity: 0.4;
+  }
+
+  /* Dimensions Table */
+  .dims-table {
+    width: 100%; border-collapse: collapse; font-size: 13px; margin-top: var(--space-md);
+  }
+  .dims-table th {
+    text-align: left; padding: var(--space-sm) var(--space-md);
+    border-bottom: 2px solid var(--border); color: var(--text-secondary);
+    font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .dims-table td {
+    padding: var(--space-sm) var(--space-md); border-bottom: 1px solid var(--border);
+  }
+  .dims-table td:nth-child(2) { font-family: var(--font-mono); color: var(--secondary); }
+
+  /* Flex helpers */
+  .flex { display: flex; }
+  .flex-wrap { flex-wrap: wrap; }
+  .gap-sm { gap: var(--space-sm); }
+  .gap-md { gap: var(--space-md); }
+  .gap-lg { gap: var(--space-lg); }
+
+  /* Tab navigation */
+  .tab-nav {
+    display: flex; gap: 0; border-bottom: 2px solid var(--border);
+    margin-bottom: var(--space-xl); position: sticky; top: 0;
+    background: var(--background); z-index: 10; padding-top: var(--space-sm);
+  }
+  .tab-btn {
+    padding: var(--space-sm) var(--space-lg);
+    background: none; border: none; color: var(--text-secondary);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all 0.2s; font-family: var(--font-family);
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Utility */
+  .mono { font-family: var(--font-mono); }
+  .code { background: var(--elevated); padding: 2px 6px; border-radius: 3px; font-family: var(--font-mono); font-size: 12px; }
+
+  /* Surface hierarchy demo */
+  .surface-demo {
+    display: flex; gap: var(--space-md); flex-wrap: wrap;
+  }
+  .surface-block {
+    width: 160px; height: 100px; border-radius: var(--radius-md);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; font-size: 12px; border: 1px solid var(--border);
+  }
+  .surface-label { font-weight: 600; margin-bottom: 4px; }
+  .surface-hex { font-family: var(--font-mono); font-size: 11px; color: var(--text-hint); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>EaaS Design System</h1>
+  <div class="subtitle">Email as a Service -- Blazor Server Dashboard</div>
+  <div class="badge">MudBlazor + Dark Theme</div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('colors')">Colors</button>
+  <button class="tab-btn" onclick="showTab('typography')">Typography</button>
+  <button class="tab-btn" onclick="showTab('spacing')">Spacing</button>
+  <button class="tab-btn" onclick="showTab('components')">Components</button>
+</nav>
+
+<!-- ==================== COLORS ==================== -->
+<div id="colors" class="tab-content active">
+  <div class="section">
+    <h2 class="section-title"><span class="num">1</span> Color Tokens</h2>
+    <p class="section-desc">Complete color palette for the EaaS dashboard. All colors are designed for WCAG AA contrast on dark backgrounds.</p>
+
+    <!-- Primary Palette -->
+    <div class="subsection">
+      <h3 class="subsection-title">Primary Palette</h3>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#7C4DFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Primary</div>
+            <div class="swatch-hex">#7C4DFF &middot; rgb(124, 77, 255)</div>
+            <div class="swatch-usage">CTA buttons, active nav, links, focus rings</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#B47CFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Primary Light</div>
+            <div class="swatch-hex">#B47CFF &middot; rgb(180, 124, 255)</div>
+            <div class="swatch-usage">Hover states, selected items, subtle accents</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#5A35CC"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Primary Dark</div>
+            <div class="swatch-hex">#5A35CC &middot; rgb(90, 53, 204)</div>
+            <div class="swatch-usage">Active/pressed states, dark accents</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E5FF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Secondary</div>
+            <div class="swatch-hex">#00E5FF &middot; rgb(0, 229, 255)</div>
+            <div class="swatch-usage">Secondary actions, links, data highlights</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#6EFFFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Secondary Light</div>
+            <div class="swatch-hex">#6EFFFF &middot; rgb(110, 255, 255)</div>
+            <div class="swatch-usage">Hover on secondary, sparkline highlights</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00B2CC"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Secondary Dark</div>
+            <div class="swatch-hex">#00B2CC &middot; rgb(0, 178, 204)</div>
+            <div class="swatch-usage">Pressed state on secondary elements</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status / Feedback Colors -->
+    <div class="subsection">
+      <h3 class="subsection-title">Status / Feedback Colors</h3>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E676"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Success</div>
+            <div class="swatch-hex">#00E676 &middot; rgb(0, 230, 118)</div>
+            <div class="swatch-usage">Success toasts, verified badges, positive trends</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF5252"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Error</div>
+            <div class="swatch-hex">#FF5252 &middot; rgb(255, 82, 82)</div>
+            <div class="swatch-usage">Error messages, destructive actions, negative trends</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFD740"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Warning</div>
+            <div class="swatch-hex">#FFD740 &middot; rgb(255, 215, 64)</div>
+            <div class="swatch-usage">Warnings, pending states, caution alerts</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#448AFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Info</div>
+            <div class="swatch-hex">#448AFF &middot; rgb(68, 138, 255)</div>
+            <div class="swatch-usage">Informational toasts, help icons, tips</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background Hierarchy -->
+    <div class="subsection">
+      <h3 class="subsection-title">Background Hierarchy</h3>
+      <div class="surface-demo">
+        <div class="surface-block" style="background:#121212">
+          <span class="surface-label">Background</span>
+          <span class="surface-hex">#121212</span>
+        </div>
+        <div class="surface-block" style="background:#1E1E2E">
+          <span class="surface-label">Surface</span>
+          <span class="surface-hex">#1E1E2E</span>
+        </div>
+        <div class="surface-block" style="background:#27293D">
+          <span class="surface-label">Paper</span>
+          <span class="surface-hex">#27293D</span>
+        </div>
+        <div class="surface-block" style="background:#2D2F45">
+          <span class="surface-label">Elevated</span>
+          <span class="surface-hex">#2D2F45</span>
+        </div>
+        <div class="surface-block" style="background:#34364E">
+          <span class="surface-label">Elevated 2</span>
+          <span class="surface-hex">#34364E</span>
+        </div>
+      </div>
+      <table class="dims-table" style="max-width:600px; margin-top:var(--space-lg)">
+        <thead><tr><th>Level</th><th>Hex</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td>Background</td><td>#121212</td><td>Page body, app background</td></tr>
+          <tr><td>Surface</td><td>#1E1E2E</td><td>Sidebar, main content area</td></tr>
+          <tr><td>Paper</td><td>#27293D</td><td>Cards, panels, tables</td></tr>
+          <tr><td>Elevated</td><td>#2D2F45</td><td>Dropdowns, tooltips, popovers</td></tr>
+          <tr><td>Elevated 2</td><td>#34364E</td><td>Nested elevated content, hover on elevated</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Email Status Colors -->
+    <div class="subsection">
+      <h3 class="subsection-title">Email Status Colors</h3>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E676"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Delivered</div>
+            <div class="swatch-hex">#00E676</div>
+            <div class="swatch-usage">Email successfully delivered to recipient</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF5252"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Bounced</div>
+            <div class="swatch-hex">#FF5252</div>
+            <div class="swatch-usage">Hard bounce, permanent delivery failure</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#448AFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Sending</div>
+            <div class="swatch-hex">#448AFF</div>
+            <div class="swatch-usage">Email currently being processed by SES</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#9E9E9E"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Queued</div>
+            <div class="swatch-hex">#9E9E9E</div>
+            <div class="swatch-usage">Email waiting in RabbitMQ queue</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF9100"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Complained</div>
+            <div class="swatch-hex">#FF9100</div>
+            <div class="swatch-usage">Recipient marked email as spam</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#B47CFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Opened</div>
+            <div class="swatch-hex">#B47CFF</div>
+            <div class="swatch-usage">Tracking pixel loaded, email opened</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E5FF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Clicked</div>
+            <div class="swatch-hex">#00E5FF</div>
+            <div class="swatch-usage">Recipient clicked a tracked link</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF1744"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Failed</div>
+            <div class="swatch-hex">#FF1744</div>
+            <div class="swatch-usage">Send failure after retries exhausted</div>
+          </div>
+        </div>
+      </div>
+      <!-- Status badge samples -->
+      <div style="margin-top:var(--space-lg); display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+        <span class="status-badge" style="background:#00E67620; color:#00E676"><span class="status-dot" style="background:#00E676"></span>Delivered</span>
+        <span class="status-badge" style="background:#FF525220; color:#FF5252"><span class="status-dot" style="background:#FF5252"></span>Bounced</span>
+        <span class="status-badge" style="background:#448AFF20; color:#448AFF"><span class="status-dot" style="background:#448AFF"></span>Sending</span>
+        <span class="status-badge" style="background:#9E9E9E20; color:#9E9E9E"><span class="status-dot" style="background:#9E9E9E"></span>Queued</span>
+        <span class="status-badge" style="background:#FF910020; color:#FF9100"><span class="status-dot" style="background:#FF9100"></span>Complained</span>
+        <span class="status-badge" style="background:#B47CFF20; color:#B47CFF"><span class="status-dot" style="background:#B47CFF"></span>Opened</span>
+        <span class="status-badge" style="background:#00E5FF20; color:#00E5FF"><span class="status-dot" style="background:#00E5FF"></span>Clicked</span>
+        <span class="status-badge" style="background:#FF174420; color:#FF1744"><span class="status-dot" style="background:#FF1744"></span>Failed</span>
+      </div>
+    </div>
+
+    <!-- Chart Palette -->
+    <div class="subsection">
+      <h3 class="subsection-title">Chart Palette (6-Color Time-Series)</h3>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#7C4DFF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 1 - Sent</div>
+            <div class="swatch-hex">#7C4DFF</div>
+            <div class="swatch-usage">Total sent volume (primary metric)</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E5FF"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 2 - Delivered</div>
+            <div class="swatch-hex">#00E5FF</div>
+            <div class="swatch-usage">Successfully delivered</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#00E676"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 3 - Opened</div>
+            <div class="swatch-hex">#00E676</div>
+            <div class="swatch-usage">Open engagement metric</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFD740"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 4 - Clicked</div>
+            <div class="swatch-hex">#FFD740</div>
+            <div class="swatch-usage">Click engagement metric</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF5252"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 5 - Bounced</div>
+            <div class="swatch-hex">#FF5252</div>
+            <div class="swatch-usage">Bounce rate trendline</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF9100"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Chart 6 - Complained</div>
+            <div class="swatch-hex">#FF9100</div>
+            <div class="swatch-usage">Complaint rate trendline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text Colors -->
+    <div class="subsection">
+      <h3 class="subsection-title">Text Colors</h3>
+      <div class="swatch-grid">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFFFFFDE; height:50px"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Text Primary</div>
+            <div class="swatch-hex">#FFFFFFDE (87% white)</div>
+            <div class="swatch-usage">Body text, headings, primary labels</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFFFFF99; height:50px"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Text Secondary</div>
+            <div class="swatch-hex">#FFFFFF99 (60% white)</div>
+            <div class="swatch-usage">Descriptions, metadata, captions</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFFFFF61; height:50px"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Text Disabled</div>
+            <div class="swatch-hex">#FFFFFF61 (38% white)</div>
+            <div class="swatch-usage">Disabled buttons, inactive fields</div>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FFFFFF4D; height:50px"></div>
+          <div class="swatch-info">
+            <div class="swatch-name">Text Hint</div>
+            <div class="swatch-hex">#FFFFFF4D (30% white)</div>
+            <div class="swatch-usage">Placeholder text, timestamps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== TYPOGRAPHY ==================== -->
+<div id="typography" class="tab-content">
+  <div class="section">
+    <h2 class="section-title"><span class="num">2</span> Typography</h2>
+    <p class="section-desc">Inter for UI text. JetBrains Mono for code, email addresses, message IDs, and API keys. All sizes on a modular scale.</p>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Heading Scale</h3>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:40px; font-weight:800; line-height:1.15; letter-spacing:-1px;">Dashboard Overview</div>
+        <div class="type-meta">
+          <div>H1</div>
+          <div>40px / 800</div>
+          <div>line-height: 1.15</div>
+          <div>letter-spacing: -1px</div>
+          <div>Usage: Page titles</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:32px; font-weight:700; line-height:1.2; letter-spacing:-0.5px;">Email Analytics</div>
+        <div class="type-meta">
+          <div>H2</div>
+          <div>32px / 700</div>
+          <div>line-height: 1.2</div>
+          <div>letter-spacing: -0.5px</div>
+          <div>Usage: Section titles</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:24px; font-weight:600; line-height:1.25;">Template Manager</div>
+        <div class="type-meta">
+          <div>H3</div>
+          <div>24px / 600</div>
+          <div>line-height: 1.25</div>
+          <div>Usage: Card group titles</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:20px; font-weight:600; line-height:1.3;">Domain Configuration</div>
+        <div class="type-meta">
+          <div>H4</div>
+          <div>20px / 600</div>
+          <div>line-height: 1.3</div>
+          <div>Usage: Card titles, dialog titles</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:16px; font-weight:600; line-height:1.4;">Delivery Statistics</div>
+        <div class="type-meta">
+          <div>H5</div>
+          <div>16px / 600</div>
+          <div>line-height: 1.4</div>
+          <div>Usage: Sub-section labels</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:14px; font-weight:600; line-height:1.4; text-transform:uppercase; letter-spacing:0.5px;">Filter Options</div>
+        <div class="type-meta">
+          <div>H6</div>
+          <div>14px / 600</div>
+          <div>line-height: 1.4</div>
+          <div>text-transform: uppercase</div>
+          <div>letter-spacing: 0.5px</div>
+          <div>Usage: Overline labels</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Body Text</h3>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:16px; font-weight:400; line-height:1.6;">
+          Transactional emails sent via the EaaS API are queued in RabbitMQ and delivered through AWS SES.
+        </div>
+        <div class="type-meta">
+          <div>Body 1</div>
+          <div>16px / 400</div>
+          <div>line-height: 1.6</div>
+          <div>Usage: Paragraphs, descriptions</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:14px; font-weight:400; line-height:1.6;">
+          Each email is validated, enqueued, and delivered independently with full delivery tracking.
+        </div>
+        <div class="type-meta">
+          <div>Body 2</div>
+          <div>14px / 400</div>
+          <div>line-height: 1.6</div>
+          <div>Usage: Table cells, form help text</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:12px; font-weight:400; line-height:1.5; color:var(--text-secondary);">
+          Last verified 2 hours ago &middot; Next check in 22 hours
+        </div>
+        <div class="type-meta">
+          <div>Caption</div>
+          <div>12px / 400</div>
+          <div>line-height: 1.5</div>
+          <div>color: text-secondary</div>
+          <div>Usage: Timestamps, metadata</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-size:11px; font-weight:600; line-height:1.4; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-hint);">
+          Status &middot; Recipient &middot; Sent At
+        </div>
+        <div class="type-meta">
+          <div>Label</div>
+          <div>11px / 600</div>
+          <div>uppercase, tracking: 0.8px</div>
+          <div>color: text-hint</div>
+          <div>Usage: Table headers, form labels</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Monospace (Code / Technical Data)</h3>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-family:var(--font-mono); font-size:14px; font-weight:400; line-height:1.5;">
+          israel@cashtrack.app
+        </div>
+        <div class="type-meta">
+          <div>Mono Body</div>
+          <div>JetBrains Mono 14px</div>
+          <div>Usage: Email addresses</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-family:var(--font-mono); font-size:13px; font-weight:400; line-height:1.5; color:var(--secondary);">
+          msg_a1b2c3d4e5f6789
+        </div>
+        <div class="type-meta">
+          <div>Mono ID</div>
+          <div>JetBrains Mono 13px</div>
+          <div>color: secondary</div>
+          <div>Usage: Message IDs, batch IDs</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-family:var(--font-mono); font-size:13px; font-weight:500; line-height:1.5; color:var(--warning);">
+          eaas_live_x7k9m2p4...
+        </div>
+        <div class="type-meta">
+          <div>Mono Key</div>
+          <div>JetBrains Mono 13px / 500</div>
+          <div>color: warning</div>
+          <div>Usage: API key prefixes</div>
+        </div>
+      </div>
+
+      <div class="type-sample">
+        <div class="type-preview" style="font-family:var(--font-mono); font-size:12px; font-weight:400; line-height:1.6; color:var(--text-secondary);">
+          v=spf1 include:amazonses.com ~all
+        </div>
+        <div class="type-meta">
+          <div>Mono DNS</div>
+          <div>JetBrains Mono 12px</div>
+          <div>color: text-secondary</div>
+          <div>Usage: DNS records, technical values</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SPACING ==================== -->
+<div id="spacing" class="tab-content">
+  <div class="section">
+    <h2 class="section-title"><span class="num">3</span> Spacing System</h2>
+    <p class="section-desc">4px base grid. All spacing values are multiples of 4. Consistent rhythm across the entire dashboard.</p>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Spacing Scale</h3>
+      <div class="spacing-grid">
+        <div class="spacing-item">
+          <div class="spacing-label">XS</div>
+          <div class="spacing-bar" style="width:4px"></div>
+          <div class="spacing-value">4px</div>
+          <div class="spacing-alias">--space-xs</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">SM</div>
+          <div class="spacing-bar" style="width:8px"></div>
+          <div class="spacing-value">8px</div>
+          <div class="spacing-alias">--space-sm</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">MD</div>
+          <div class="spacing-bar" style="width:16px"></div>
+          <div class="spacing-value">16px</div>
+          <div class="spacing-alias">--space-md</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">LG</div>
+          <div class="spacing-bar" style="width:24px"></div>
+          <div class="spacing-value">24px</div>
+          <div class="spacing-alias">--space-lg</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">XL</div>
+          <div class="spacing-bar" style="width:32px"></div>
+          <div class="spacing-value">32px</div>
+          <div class="spacing-alias">--space-xl</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">2XL</div>
+          <div class="spacing-bar" style="width:48px"></div>
+          <div class="spacing-value">48px</div>
+          <div class="spacing-alias">--space-2xl</div>
+        </div>
+        <div class="spacing-item">
+          <div class="spacing-label">3XL</div>
+          <div class="spacing-bar" style="width:64px"></div>
+          <div class="spacing-value">64px</div>
+          <div class="spacing-alias">--space-3xl</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Component Spacing Rules</h3>
+      <table class="dims-table" style="max-width:700px;">
+        <thead><tr><th>Context</th><th>Value</th><th>Token</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Page margin (sides)</td><td>32px</td><td>--space-xl</td><td>Content area left/right padding</td></tr>
+          <tr><td>Page margin (top)</td><td>24px</td><td>--space-lg</td><td>Below top app bar</td></tr>
+          <tr><td>Section gap</td><td>32px</td><td>--space-xl</td><td>Between major sections</td></tr>
+          <tr><td>Card padding</td><td>24px</td><td>--space-lg</td><td>Inner padding on all cards</td></tr>
+          <tr><td>Card gap (grid)</td><td>16px</td><td>--space-md</td><td>Between cards in a grid</td></tr>
+          <tr><td>Table cell padding</td><td>8px 16px</td><td>sm / md</td><td>Vertical / horizontal</td></tr>
+          <tr><td>Table header padding</td><td>12px 16px</td><td>-- / md</td><td>Slightly more vertical than cells</td></tr>
+          <tr><td>Form field gap</td><td>16px</td><td>--space-md</td><td>Between form fields</td></tr>
+          <tr><td>Button padding</td><td>8px 16px</td><td>sm / md</td><td>Default size buttons</td></tr>
+          <tr><td>Button gap (inline)</td><td>8px</td><td>--space-sm</td><td>Between adjacent buttons</td></tr>
+          <tr><td>Chip padding</td><td>4px 12px</td><td>xs / --</td><td>Status badges and filter chips</td></tr>
+          <tr><td>Icon-to-text gap</td><td>8px</td><td>--space-sm</td><td>Between icon and adjacent label</td></tr>
+          <tr><td>Sidebar width</td><td>260px</td><td>fixed</td><td>Collapsed: 64px</td></tr>
+          <tr><td>Sidebar item padding</td><td>12px 16px</td><td>-- / md</td><td>Navigation list items</td></tr>
+          <tr><td>Dialog padding</td><td>24px</td><td>--space-lg</td><td>All modal dialogs</td></tr>
+          <tr><td>Toast padding</td><td>16px</td><td>--space-md</td><td>Notification toasts</td></tr>
+          <tr><td>Drawer width</td><td>480px</td><td>fixed</td><td>Email detail slide-out panel</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="subsection">
+      <h3 class="subsection-title">Border Radius Scale</h3>
+      <div style="display:flex; gap:var(--space-lg); flex-wrap:wrap; margin-top:var(--space-md);">
+        <div style="text-align:center;">
+          <div style="width:80px; height:80px; background:var(--paper); border:1px solid var(--border); border-radius:4px; margin-bottom:var(--space-sm);"></div>
+          <div style="font-size:13px; font-weight:600;">SM</div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">4px</div>
+          <div style="font-size:10px; color:var(--text-hint);">Chips, badges</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px; height:80px; background:var(--paper); border:1px solid var(--border); border-radius:8px; margin-bottom:var(--space-sm);"></div>
+          <div style="font-size:13px; font-weight:600;">MD</div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">8px</div>
+          <div style="font-size:10px; color:var(--text-hint);">Cards, inputs</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px; height:80px; background:var(--paper); border:1px solid var(--border); border-radius:12px; margin-bottom:var(--space-sm);"></div>
+          <div style="font-size:13px; font-weight:600;">LG</div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">12px</div>
+          <div style="font-size:10px; color:var(--text-hint);">Panels, dialogs</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px; height:80px; background:var(--paper); border:1px solid var(--border); border-radius:16px; margin-bottom:var(--space-sm);"></div>
+          <div style="font-size:13px; font-weight:600;">XL</div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">16px</div>
+          <div style="font-size:10px; color:var(--text-hint);">Large containers</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="width:80px; height:80px; background:var(--paper); border:1px solid var(--border); border-radius:50%; margin-bottom:var(--space-sm);"></div>
+          <div style="font-size:13px; font-weight:600;">Full</div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">50%</div>
+          <div style="font-size:10px; color:var(--text-hint);">Avatars, dots</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== COMPONENTS ==================== -->
+<div id="components" class="tab-content">
+  <div class="section">
+    <h2 class="section-title"><span class="num">4</span> Component Specifications</h2>
+    <p class="section-desc">Annotated component specs for the EaaS dashboard. Each component shows structure, dimensions, padding, and color mapping.</p>
+
+    <!-- Stat Card -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Stat Card</span>
+        <span class="component-tag">MudCard + custom layout</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:#7C4DFF30; color:#7C4DFF;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              </div>
+              <div class="stat-card-value">12,847</div>
+              <div class="stat-card-label">Emails Sent (30d)</div>
+              <div class="stat-card-trend up">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+                +12.3% vs last period
+              </div>
+              <svg class="stat-card-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none">
+                <polyline fill="none" stroke="#7C4DFF" stroke-width="2" points="0,30 20,28 40,25 60,20 80,22 100,15 120,18 140,10 160,12 180,8 200,5"/>
+                <polygon fill="#7C4DFF" points="0,40 0,30 20,28 40,25 60,20 80,22 100,15 120,18 140,10 160,12 180,8 200,5 200,40"/>
+              </svg>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:#00E67630; color:#00E676;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              </div>
+              <div class="stat-card-value">98.4%</div>
+              <div class="stat-card-label">Delivery Rate</div>
+              <div class="stat-card-trend up">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+                +0.3% vs last period
+              </div>
+              <svg class="stat-card-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none">
+                <polyline fill="none" stroke="#00E676" stroke-width="2" points="0,15 20,14 40,16 60,12 80,10 100,11 120,8 140,9 160,7 180,6 200,5"/>
+                <polygon fill="#00E676" points="0,40 0,15 20,14 40,16 60,12 80,10 100,11 120,8 140,9 160,7 180,6 200,5 200,40"/>
+              </svg>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:#FF525230; color:#FF5252;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              </div>
+              <div class="stat-card-value">1.2%</div>
+              <div class="stat-card-label">Bounce Rate</div>
+              <div class="stat-card-trend down">
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                -0.4% vs last period
+              </div>
+              <svg class="stat-card-sparkline" viewBox="0 0 200 40" preserveAspectRatio="none">
+                <polyline fill="none" stroke="#FF5252" stroke-width="2" points="0,20 20,22 40,18 60,25 80,20 100,28 120,22 140,30 160,25 180,28 200,32"/>
+                <polygon fill="#FF5252" points="0,40 0,20 20,22 40,18 60,25 80,20 100,28 120,22 140,30 160,25 180,28 200,32 200,40"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Card width</td><td>flex (min 200px)</td><td>Fills grid column equally</td></tr>
+            <tr><td>Card padding</td><td>24px</td><td>All sides</td></tr>
+            <tr><td>Card border-radius</td><td>8px</td><td>--radius-md</td></tr>
+            <tr><td>Card background</td><td>#27293D</td><td>--paper</td></tr>
+            <tr><td>Icon container</td><td>40x40px, radius 8px</td><td>Background: status color at 20% opacity</td></tr>
+            <tr><td>Value font</td><td>32px / 700</td><td>Inter, text-primary</td></tr>
+            <tr><td>Label font</td><td>13px / 400</td><td>Inter, text-secondary</td></tr>
+            <tr><td>Trend font</td><td>12px / 600</td><td>Green for positive, red for negative</td></tr>
+            <tr><td>Sparkline height</td><td>40px</td><td>Positioned absolute at bottom, 15% opacity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Status Badge</span>
+        <span class="component-tag">MudChip variant</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div style="display:flex; gap:var(--space-sm); flex-wrap:wrap;">
+            <span class="status-badge" style="background:#00E67620; color:#00E676"><span class="status-dot" style="background:#00E676"></span>Delivered</span>
+            <span class="status-badge" style="background:#FF525220; color:#FF5252"><span class="status-dot" style="background:#FF5252"></span>Bounced</span>
+            <span class="status-badge" style="background:#448AFF20; color:#448AFF"><span class="status-dot" style="background:#448AFF"></span>Sending</span>
+            <span class="status-badge" style="background:#9E9E9E20; color:#9E9E9E"><span class="status-dot" style="background:#9E9E9E"></span>Queued</span>
+            <span class="status-badge" style="background:#FF910020; color:#FF9100"><span class="status-dot" style="background:#FF9100"></span>Complained</span>
+            <span class="status-badge" style="background:#B47CFF20; color:#B47CFF"><span class="status-dot" style="background:#B47CFF"></span>Opened</span>
+            <span class="status-badge" style="background:#00E5FF20; color:#00E5FF"><span class="status-dot" style="background:#00E5FF"></span>Clicked</span>
+            <span class="status-badge" style="background:#FF174420; color:#FF1744"><span class="status-dot" style="background:#FF1744"></span>Failed</span>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Padding</td><td>4px 12px</td><td>Compact pill shape</td></tr>
+            <tr><td>Border-radius</td><td>20px</td><td>Full pill</td></tr>
+            <tr><td>Font size</td><td>12px / 600</td><td>Inter, semi-bold</td></tr>
+            <tr><td>Dot size</td><td>8x8px</td><td>Circular, solid status color</td></tr>
+            <tr><td>Dot-to-text gap</td><td>6px</td><td></td></tr>
+            <tr><td>Background</td><td>Status color at 12% opacity</td><td>e.g. #00E67620</td></tr>
+            <tr><td>Text color</td><td>Status color at full</td><td>Ensures readability on dark bg</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Email Row -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Email Row (Table)</span>
+        <span class="component-tag">MudDataGrid row</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div style="background:var(--paper); border-radius:var(--radius-md); overflow:hidden;">
+            <div style="display:grid; grid-template-columns:32px 200px 1fr 120px 100px 80px; align-items:center; gap:16px; padding:12px 16px; border-bottom:2px solid var(--border); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-hint);">
+              <div></div><div>Recipient</div><div>Subject</div><div>Status</div><div>Sent At</div><div></div>
+            </div>
+            <div style="display:grid; grid-template-columns:32px 200px 1fr 120px 100px 80px; align-items:center; gap:16px; padding:8px 16px; border-bottom:1px solid var(--border); font-size:13px; transition:background 0.15s; cursor:pointer;" onmouseover="this.style.background='var(--elevated)'" onmouseout="this.style.background='transparent'">
+              <div style="width:16px; height:16px; border:2px solid var(--border-hover); border-radius:3px;"></div>
+              <div style="font-family:var(--font-mono); font-size:13px;">john@acme.com</div>
+              <div style="color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Your invoice #1042 is ready</div>
+              <div><span class="status-badge" style="background:#00E67620; color:#00E676; font-size:11px; padding:3px 8px;"><span class="status-dot" style="background:#00E676; width:6px; height:6px;"></span>Delivered</span></div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-hint);">14:32:08</div>
+              <div style="color:var(--text-hint); cursor:pointer;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:32px 200px 1fr 120px 100px 80px; align-items:center; gap:16px; padding:8px 16px; border-bottom:1px solid var(--border); font-size:13px;" onmouseover="this.style.background='var(--elevated)'" onmouseout="this.style.background='transparent'">
+              <div style="width:16px; height:16px; border:2px solid var(--border-hover); border-radius:3px;"></div>
+              <div style="font-family:var(--font-mono); font-size:13px;">sarah@startup.io</div>
+              <div style="color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Payment confirmation for order #892</div>
+              <div><span class="status-badge" style="background:#FF525220; color:#FF5252; font-size:11px; padding:3px 8px;"><span class="status-dot" style="background:#FF5252; width:6px; height:6px;"></span>Bounced</span></div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-hint);">14:28:41</div>
+              <div style="color:var(--text-hint); cursor:pointer;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </div>
+            </div>
+            <div style="display:grid; grid-template-columns:32px 200px 1fr 120px 100px 80px; align-items:center; gap:16px; padding:8px 16px; font-size:13px;" onmouseover="this.style.background='var(--elevated)'" onmouseout="this.style.background='transparent'">
+              <div style="width:16px; height:16px; border:2px solid var(--border-hover); border-radius:3px;"></div>
+              <div style="font-family:var(--font-mono); font-size:13px;">dev@example.org</div>
+              <div style="color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Welcome to CashTrack! Verify your email</div>
+              <div><span class="status-badge" style="background:#B47CFF20; color:#B47CFF; font-size:11px; padding:3px 8px;"><span class="status-dot" style="background:#B47CFF; width:6px; height:6px;"></span>Opened</span></div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-hint);">14:15:02</div>
+              <div style="color:var(--text-hint); cursor:pointer;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Row height</td><td>~44px</td><td>Compact mode for data density</td></tr>
+            <tr><td>Cell padding</td><td>8px 16px</td><td>Vertical / horizontal</td></tr>
+            <tr><td>Header padding</td><td>12px 16px</td><td>Slightly taller</td></tr>
+            <tr><td>Border</td><td>1px solid #FFFFFF1A</td><td>Between rows</td></tr>
+            <tr><td>Hover bg</td><td>#2D2F45</td><td>--elevated</td></tr>
+            <tr><td>Checkbox</td><td>16x16px</td><td>2px border, radius 3px</td></tr>
+            <tr><td>Recipient font</td><td>Mono 13px</td><td>Email addresses always mono</td></tr>
+            <tr><td>Subject font</td><td>13px, text-secondary</td><td>Truncated with ellipsis</td></tr>
+            <tr><td>Expand arrow</td><td>16x16px</td><td>Chevron right, text-hint color</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Domain Card -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Domain Card</span>
+        <span class="component-tag">MudCard + MudExpansionPanel</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div class="domain-card">
+            <div class="domain-card-header">
+              <div>
+                <div class="domain-card-name">notifications.cashtrack.app</div>
+                <div style="font-size:11px; color:var(--text-hint); margin-top:2px;">Last verified: 2h ago</div>
+              </div>
+              <span class="status-badge" style="background:#00E67620; color:#00E676; font-size:11px; padding:3px 10px;"><span class="status-dot" style="background:#00E676; width:6px; height:6px;"></span>Verified</span>
+            </div>
+            <div class="domain-dns">
+              <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-hint); margin-bottom:var(--space-sm);">DNS Records</div>
+              <div class="domain-dns-record">
+                <span class="domain-dns-type">TXT</span>
+                <span class="domain-dns-value">v=spf1 include:amazonses.com ~all</span>
+                <span class="status-badge" style="background:#00E67620; color:#00E676; font-size:10px; padding:2px 8px;"><span class="status-dot" style="background:#00E676; width:5px; height:5px;"></span>OK</span>
+              </div>
+              <div class="domain-dns-record">
+                <span class="domain-dns-type">CNAME</span>
+                <span class="domain-dns-value">abc123._domainkey.cashtrack.app</span>
+                <span class="status-badge" style="background:#00E67620; color:#00E676; font-size:10px; padding:2px 8px;"><span class="status-dot" style="background:#00E676; width:5px; height:5px;"></span>OK</span>
+              </div>
+              <div class="domain-dns-record">
+                <span class="domain-dns-type">CNAME</span>
+                <span class="domain-dns-value">def456._domainkey.cashtrack.app</span>
+                <span class="status-badge" style="background:#00E67620; color:#00E676; font-size:10px; padding:2px 8px;"><span class="status-dot" style="background:#00E676; width:5px; height:5px;"></span>OK</span>
+              </div>
+              <div class="domain-dns-record">
+                <span class="domain-dns-type">CNAME</span>
+                <span class="domain-dns-value">ghi789._domainkey.cashtrack.app</span>
+                <span class="status-badge" style="background:#FFD74020; color:#FFD740; font-size:10px; padding:2px 8px;"><span class="status-dot" style="background:#FFD740; width:5px; height:5px;"></span>Pending</span>
+              </div>
+              <div class="domain-dns-record">
+                <span class="domain-dns-type">TXT</span>
+                <span class="domain-dns-value">v=DMARC1; p=quarantine; rua=mailto:...</span>
+                <span class="status-badge" style="background:#00E67620; color:#00E676; font-size:10px; padding:2px 8px;"><span class="status-dot" style="background:#00E676; width:5px; height:5px;"></span>OK</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Card max-width</td><td>420px</td><td>In grid: fills column</td></tr>
+            <tr><td>Header padding</td><td>16px 24px</td><td>md / lg</td></tr>
+            <tr><td>Domain name font</td><td>15px / 600</td><td>Inter</td></tr>
+            <tr><td>DNS section padding</td><td>16px 24px</td><td>md / lg</td></tr>
+            <tr><td>DNS record row</td><td>8px 0 padding</td><td>With 1px bottom border</td></tr>
+            <tr><td>DNS type</td><td>Mono 12px / 600</td><td>Fixed 60px width</td></tr>
+            <tr><td>DNS value</td><td>Mono 12px, text-secondary</td><td>Truncated with ellipsis</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Template Card -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Template Card</span>
+        <span class="component-tag">MudCard / MudListItem</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div style="display:flex; gap:var(--space-md); flex-wrap:wrap;">
+            <div class="template-card">
+              <div class="template-card-name">Invoice Notification</div>
+              <div class="template-card-subject">Subject: Your invoice #{{ invoice_number }} is ready</div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-hint); background:var(--surface); padding:var(--space-sm); border-radius:var(--radius-sm); margin-bottom:var(--space-md); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                &lt;h1&gt;Invoice #{{ invoice_number }}&lt;/h1&gt;...
+              </div>
+              <div class="template-card-meta">
+                <span>v3 &middot; 1,247 sends</span>
+                <span>Updated 2d ago</span>
+              </div>
+            </div>
+            <div class="template-card">
+              <div class="template-card-name">Password Reset</div>
+              <div class="template-card-subject">Subject: Reset your {{ app_name }} password</div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-hint); background:var(--surface); padding:var(--space-sm); border-radius:var(--radius-sm); margin-bottom:var(--space-md); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                &lt;p&gt;Hi {{ user_name }}, click below...&lt;/p&gt;...
+              </div>
+              <div class="template-card-meta">
+                <span>v1 &middot; 89 sends</span>
+                <span>Updated 14d ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Card padding</td><td>24px</td><td>All sides</td></tr>
+            <tr><td>Card max-width</td><td>320px</td><td>In grid: fills column</td></tr>
+            <tr><td>Name font</td><td>15px / 600</td><td>Inter</td></tr>
+            <tr><td>Subject font</td><td>13px / 400, text-secondary</td><td>Truncated if long</td></tr>
+            <tr><td>Code preview</td><td>Mono 11px, text-hint</td><td>bg: surface, 8px padding, radius 4px</td></tr>
+            <tr><td>Meta font</td><td>11px, text-hint</td><td>Version, send count, last updated</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chart Card -->
+    <div class="component-spec">
+      <div class="component-header">
+        <span class="component-name">Chart Card</span>
+        <span class="component-tag">MudCard + MudChart</span>
+      </div>
+      <div class="component-body">
+        <div class="component-preview">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-card-title">Send Volume</span>
+              <div class="chart-card-pills">
+                <button class="chart-pill" onclick="this.parentElement.querySelectorAll('.chart-pill').forEach(p=>p.classList.remove('active'));this.classList.add('active')">7d</button>
+                <button class="chart-pill active" onclick="this.parentElement.querySelectorAll('.chart-pill').forEach(p=>p.classList.remove('active'));this.classList.add('active')">30d</button>
+                <button class="chart-pill" onclick="this.parentElement.querySelectorAll('.chart-pill').forEach(p=>p.classList.remove('active'));this.classList.add('active')">90d</button>
+              </div>
+            </div>
+            <div class="chart-card-body">
+              <div class="chart-area" id="demoChart"></div>
+              <div class="chart-legend">
+                <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#7C4DFF"></span>Sent</div>
+                <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#00E5FF"></span>Delivered</div>
+                <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#00E676"></span>Opened</div>
+                <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#FF5252"></span>Bounced</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="dims-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Card border-radius</td><td>8px</td><td>--radius-md</td></tr>
+            <tr><td>Header padding</td><td>16px 24px</td><td>Title left, pills right</td></tr>
+            <tr><td>Title font</td><td>15px / 600</td><td>Inter</td></tr>
+            <tr><td>Date pill</td><td>11px / 500</td><td>4px 10px padding, 20px radius</td></tr>
+            <tr><td>Active pill</td><td>bg: primary, color: white</td><td>Border color matches primary</td></tr>
+            <tr><td>Chart area height</td><td>180px</td><td>bg: surface, radius 4px</td></tr>
+            <tr><td>Chart body padding</td><td>24px</td><td>Around chart + legend</td></tr>
+            <tr><td>Legend dot</td><td>10x10px, radius 2px</td><td>Matches chart series color</td></tr>
+            <tr><td>Legend font</td><td>12px, text-secondary</td><td>Items with 24px gap</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Tab switching
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Generate demo chart bars
+const chart = document.getElementById('demoChart');
+if (chart) {
+  const days = 30;
+  for (let i = 0; i < days; i++) {
+    const h = 20 + Math.random() * 140;
+    const bar = document.createElement('div');
+    bar.className = 'chart-bar';
+    bar.style.height = h + 'px';
+    bar.style.background = '#7C4DFF';
+    bar.title = 'Day ' + (i + 1) + ': ' + Math.floor(h * 3) + ' emails';
+    chart.appendChild(bar);
+  }
+}
+</script>
+
+</body>
+</html>

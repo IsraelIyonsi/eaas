@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Interaction Specification</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --primary: #7C4DFF;
+    --secondary: #00E5FF;
+    --success: #00E676;
+    --error: #FF5252;
+    --warning: #FFD740;
+    --background: #121212;
+    --surface: #1E1E2E;
+    --paper: #27293D;
+    --elevated: #2D2F45;
+    --text-primary: #FFFFFFDE;
+    --text-secondary: #FFFFFF99;
+    --text-hint: #FFFFFF4D;
+    --border: #FFFFFF1A;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 32px;
+  }
+
+  .page-header {
+    text-align: center;
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .page-header h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+  .page-header .subtitle { color: var(--text-secondary); font-size: 16px; }
+  .page-header .badge {
+    display: inline-block; background: var(--primary); color: #fff;
+    padding: 4px 12px; border-radius: 20px; font-size: 11px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 16px;
+  }
+
+  .section { margin-bottom: 64px; }
+  .section-title {
+    font-size: 28px; font-weight: 700; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .num {
+    font-size: 12px; background: var(--primary); color: #fff;
+    width: 28px; height: 28px; display: inline-flex; align-items: center;
+    justify-content: center; border-radius: 50%; font-weight: 700;
+  }
+  .section-desc { color: var(--text-secondary); margin-bottom: 24px; }
+
+  /* Interaction Cards */
+  .ix-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .ix-card {
+    background: var(--paper); border-radius: 12px;
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .ix-card-header {
+    padding: 16px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ix-card-name { font-weight: 600; font-size: 15px; }
+  .ix-card-timing {
+    font-family: var(--mono); font-size: 11px; color: var(--secondary);
+    background: #00E5FF15; padding: 3px 8px; border-radius: 20px;
+  }
+  .ix-card-body { padding: 24px; }
+  .ix-card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+  /* Demo Areas */
+  .demo-area {
+    background: var(--surface); border-radius: 8px; padding: 24px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100px; position: relative; overflow: hidden;
+  }
+
+  /* Easing Visualizer */
+  .easing-bar {
+    height: 6px; background: var(--primary); border-radius: 3px;
+    width: 0;
+  }
+  .easing-bar.animate { width: 100%; }
+
+  /* State Machine Diagrams */
+  .state-diagram {
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .state-node {
+    padding: 8px 14px; border-radius: 8px; font-size: 12px;
+    font-weight: 600; white-space: nowrap; border: 2px solid;
+  }
+  .state-node.active { box-shadow: 0 0 12px rgba(124,77,255,0.4); }
+  .state-arrow {
+    color: var(--text-hint); font-size: 18px; padding: 0 6px;
+    display: flex; align-items: center;
+  }
+  .state-arrow svg { width: 20px; height: 20px; fill: var(--text-hint); }
+
+  /* Spec Table */
+  .spec-table {
+    width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px;
+  }
+  .spec-table th {
+    text-align: left; padding: 8px 16px; border-bottom: 2px solid var(--border);
+    color: var(--text-hint); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .spec-table td { padding: 8px 16px; border-bottom: 1px solid var(--border); }
+  .spec-table td:nth-child(2) { font-family: var(--mono); color: var(--secondary); font-size: 12px; }
+  .spec-table td:nth-child(3) { font-family: var(--mono); color: var(--warning); font-size: 12px; }
+
+  /* Interactive Demos */
+  .demo-btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    font-family: var(--font); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; color: #fff;
+    background: var(--primary);
+  }
+  .demo-btn:hover { background: #9370FF; transform: translateY(-1px); }
+  .demo-btn:active { transform: translateY(0); }
+  .demo-btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+
+  /* Transition demos */
+  .fade-demo { transition: opacity 200ms ease; }
+  .fade-demo.hidden { opacity: 0; }
+
+  .slide-demo {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--paper); border-radius: 8px; padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .slide-demo.collapsed { transform: translateX(-200px); opacity: 0; }
+
+  .elevation-demo {
+    transition: box-shadow 200ms ease, transform 200ms ease;
+    background: var(--paper); border-radius: 8px; padding: 20px;
+    border: 1px solid var(--border); cursor: pointer; text-align: center;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .elevation-demo:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    transform: translateY(-2px);
+    border-color: var(--primary);
+  }
+
+  .modal-demo-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 250ms ease;
+  }
+  .modal-demo-overlay.visible { opacity: 1; pointer-events: auto; }
+  .modal-demo-content {
+    background: var(--paper); border-radius: 12px; padding: 32px;
+    max-width: 400px; width: 90%; border: 1px solid var(--border);
+    transform: translateY(20px);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .modal-demo-overlay.visible .modal-demo-content { transform: translateY(0); }
+
+  .toast-demo {
+    position: fixed; top: 16px; right: -400px;
+    background: var(--paper); border-radius: 8px; padding: 16px 20px;
+    border-left: 4px solid var(--success); z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    transition: right 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; align-items: center; gap: 12px; max-width: 360px;
+  }
+  .toast-demo.visible { right: 16px; }
+  .toast-demo .toast-icon { color: var(--success); font-size: 20px; }
+  .toast-demo .toast-text { font-size: 13px; }
+  .toast-demo .toast-title { font-weight: 600; margin-bottom: 2px; }
+  .toast-demo .toast-msg { color: var(--text-secondary); font-size: 12px; }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, var(--elevated) 25%, #3a3c55 50%, var(--elevated) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Search demo */
+  .search-input {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 16px; color: var(--text-primary);
+    font-family: var(--font); font-size: 14px; width: 100%;
+    transition: border-color 200ms;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--primary); }
+  .search-input::placeholder { color: var(--text-hint); }
+
+  .search-wrapper { position: relative; }
+  .search-clear {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-hint); cursor: pointer;
+    font-size: 16px; display: none; padding: 4px;
+  }
+  .search-clear.visible { display: block; }
+
+  /* Date pills */
+  .date-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+  .date-pill {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px;
+    font-weight: 500; cursor: pointer; border: 1px solid var(--border);
+    color: var(--text-secondary); background: transparent;
+    transition: all 0.15s; font-family: var(--font);
+  }
+  .date-pill:hover { border-color: var(--primary); color: var(--text-primary); }
+  .date-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* Sort indicators */
+  .sort-header {
+    display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-hint); user-select: none;
+    padding: 8px 0; transition: color 0.15s;
+  }
+  .sort-header:hover { color: var(--text-primary); }
+  .sort-header.active { color: var(--primary); }
+  .sort-arrow { font-size: 14px; transition: transform 0.2s; }
+  .sort-header.desc .sort-arrow { transform: rotate(180deg); }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; gap: 8px; }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-secondary); font-family: var(--font);
+    font-size: 13px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--primary); color: var(--text-primary); }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Bulk Select Bar */
+  .bulk-bar {
+    background: var(--primary); border-radius: 8px; padding: 10px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; font-weight: 500; max-width: 500px;
+    opacity: 0; transform: translateY(8px);
+    transition: all 250ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .bulk-bar.visible { opacity: 1; transform: translateY(0); }
+  .bulk-bar-actions { display: flex; gap: 8px; }
+  .bulk-action-btn {
+    padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3);
+    background: transparent; color: #fff; font-family: var(--font);
+    font-size: 12px; cursor: pointer; transition: background 0.15s;
+  }
+  .bulk-action-btn:hover { background: rgba(255,255,255,0.15); }
+
+  .subsection { margin-bottom: 32px; }
+  .subsection-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>EaaS Interaction Spec</h1>
+  <div class="subtitle">Micro-interactions, State Machines, and Behavioral Patterns</div>
+  <div class="badge">Blazor Server + MudBlazor</div>
+</div>
+
+<!-- ==================== SECTION 1: TRANSITIONS ==================== -->
+<div class="section">
+  <h2 class="section-title"><span class="num">1</span> Transitions &amp; Animations</h2>
+  <p class="section-desc">All transitions use cubic-bezier(0.4, 0, 0.2, 1) (Material standard easing) unless otherwise noted. Click the demos to see each transition live.</p>
+
+  <div class="ix-grid">
+
+    <!-- Page Fade -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Page Transition</span>
+        <span class="ix-card-timing">200ms ease</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">New page content fades in on route change. No layout shift during transition.</div>
+        <div class="demo-area">
+          <div id="fadeTarget" class="fade-demo" style="text-align:center;">
+            <div style="font-size:24px; font-weight:700; margin-bottom:4px;">Dashboard Overview</div>
+            <div style="font-size:12px; color:var(--text-secondary);">Page content appears</div>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:12px;">
+          <button class="demo-btn" onclick="
+            const t=document.getElementById('fadeTarget');
+            t.classList.add('hidden');
+            setTimeout(()=>t.classList.remove('hidden'),400);
+          ">Play Fade</button>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Opacity</td><td>0 -> 1</td><td>ease</td></tr>
+            <tr><td>Duration</td><td>200ms</td><td>--</td></tr>
+            <tr><td>Trigger</td><td>NavigationManager route change</td><td>--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Sidebar Collapse -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Sidebar Collapse/Expand</span>
+        <span class="ix-card-timing">300ms ease</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Sidebar width transitions between 260px (expanded) and 64px (collapsed). Labels fade, icons remain.</div>
+        <div class="demo-area" style="gap:12px; justify-content:flex-start; overflow:hidden;">
+          <div id="sidebarDemo" style="width:200px; background:var(--paper); border-radius:8px; padding:12px; transition:width 300ms cubic-bezier(0.4,0,0.2,1); overflow:hidden; border:1px solid var(--border);">
+            <div style="display:flex; align-items:center; gap:12px; padding:8px; white-space:nowrap;">
+              <svg width="18" height="18" fill="var(--primary)" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+              <span id="sideLabel1" style="transition:opacity 200ms;">Overview</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; padding:8px; white-space:nowrap;">
+              <svg width="18" height="18" fill="var(--text-secondary)" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+              <span id="sideLabel2" style="transition:opacity 200ms;">Emails</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; padding:8px; white-space:nowrap;">
+              <svg width="18" height="18" fill="var(--text-secondary)" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+              <span id="sideLabel3" style="transition:opacity 200ms;">Templates</span>
+            </div>
+          </div>
+          <div style="flex:1; font-size:12px; color:var(--text-hint); text-align:center;">Main content area</div>
+        </div>
+        <div style="text-align:center; margin-top:12px;">
+          <button class="demo-btn" onclick="
+            const s=document.getElementById('sidebarDemo');
+            const collapsed=s.style.width==='64px';
+            s.style.width=collapsed?'200px':'64px';
+            ['sideLabel1','sideLabel2','sideLabel3'].forEach(id=>{
+              document.getElementById(id).style.opacity=collapsed?'1':'0';
+            });
+          ">Toggle Sidebar</button>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Width</td><td>260px <-> 64px</td><td>cubic-bezier(0.4,0,0.2,1)</td></tr>
+            <tr><td>Label opacity</td><td>1 <-> 0</td><td>ease (200ms)</td></tr>
+            <tr><td>Duration</td><td>300ms</td><td>--</td></tr>
+            <tr><td>MudBlazor</td><td>MudDrawer ClipMode</td><td>--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Card Hover -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Card Hover Elevation</span>
+        <span class="ix-card-timing">200ms ease</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Cards lift on hover with increased shadow and border highlight. Provides tactile feedback for clickable cards.</div>
+        <div class="demo-area" style="gap:16px;">
+          <div class="elevation-demo">
+            <div style="font-weight:600; margin-bottom:4px;">Stat Card</div>
+            Hover me
+          </div>
+          <div class="elevation-demo">
+            <div style="font-weight:600; margin-bottom:4px;">Domain Card</div>
+            Hover me
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Rest</th><th>Hover</th></tr></thead>
+          <tbody>
+            <tr><td>box-shadow</td><td>0 1px 3px rgba(0,0,0,0.4)</td><td>0 8px 24px rgba(0,0,0,0.5)</td></tr>
+            <tr><td>transform</td><td>translateY(0)</td><td>translateY(-2px)</td></tr>
+            <tr><td>border-color</td><td>#FFFFFF1A</td><td>#7C4DFF</td></tr>
+            <tr><td>Duration</td><td>200ms</td><td>ease</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Modal Open/Close</span>
+        <span class="ix-card-timing">250ms slide-up</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Overlay fades in while dialog slides up from below. Closing reverses. Backdrop click or Escape key dismisses.</div>
+        <div style="text-align:center; margin-top:8px;">
+          <button class="demo-btn" onclick="document.getElementById('modalDemo').classList.add('visible')">Open Modal</button>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Overlay opacity</td><td>0 -> 0.6</td><td>ease (250ms)</td></tr>
+            <tr><td>Dialog transform</td><td>Y(20px) -> Y(0)</td><td>cubic-bezier(0.4,0,0.2,1)</td></tr>
+            <tr><td>Duration</td><td>250ms</td><td>--</td></tr>
+            <tr><td>MudBlazor</td><td>MudDialog</td><td>--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Toast Notification</span>
+        <span class="ix-card-timing">300ms + 5s auto-dismiss</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Slides in from right edge. Auto-dismisses after 5 seconds. Hover pauses the dismiss timer. Click X to dismiss immediately.</div>
+        <div style="text-align:center; margin-top:8px;">
+          <button class="demo-btn" onclick="showToast()">Show Toast</button>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Enter</td><td>right: -400px -> 16px</td><td>cubic-bezier(0.4,0,0.2,1)</td></tr>
+            <tr><td>Duration</td><td>300ms in, 300ms out</td><td>--</td></tr>
+            <tr><td>Auto-dismiss</td><td>5000ms</td><td>--</td></tr>
+            <tr><td>Border-left</td><td>4px solid (status color)</td><td>--</td></tr>
+            <tr><td>MudBlazor</td><td>MudSnackbar</td><td>--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Skeleton -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Skeleton Shimmer</span>
+        <span class="ix-card-timing">1.5s infinite</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Loading placeholder with left-to-right shimmer animation. Matches the shape of the content being loaded.</div>
+        <div class="demo-area" style="flex-direction:column; gap:12px; align-items:stretch;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div class="skeleton" style="width:40px; height:40px; border-radius:8px; flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div class="skeleton" style="width:60%; height:14px; margin-bottom:8px;"></div>
+              <div class="skeleton" style="width:40%; height:10px;"></div>
+            </div>
+          </div>
+          <div class="skeleton" style="width:100%; height:60px;"></div>
+          <div style="display:flex; gap:8px;">
+            <div class="skeleton" style="flex:1; height:10px;"></div>
+            <div class="skeleton" style="flex:1; height:10px;"></div>
+            <div class="skeleton" style="flex:2; height:10px;"></div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Property</th><th>Value</th><th>Easing</th></tr></thead>
+          <tbody>
+            <tr><td>Animation</td><td>background-position sweep</td><td>ease-in-out</td></tr>
+            <tr><td>Duration</td><td>1.5s infinite</td><td>--</td></tr>
+            <tr><td>Gradient</td><td>#2D2F45 -> #3a3c55 -> #2D2F45</td><td>--</td></tr>
+            <tr><td>MudBlazor</td><td>MudSkeleton</td><td>--</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 2: STATE MACHINES ==================== -->
+<div class="section">
+  <h2 class="section-title"><span class="num">2</span> State Machines</h2>
+  <p class="section-desc">Finite state diagrams for key interactive elements. Each state is clearly defined with allowed transitions.</p>
+
+  <div class="ix-grid">
+
+    <!-- Email Detail Panel -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Email Detail Panel</span>
+        <span class="ix-card-timing">MudDrawer</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Slide-out drawer for email detail view. Opens on row click, closes on backdrop click or Escape.</div>
+        <div class="demo-area">
+          <div class="state-diagram">
+            <div class="state-node active" style="border-color:#9E9E9E; color:#9E9E9E; background:#9E9E9E15;">Closed</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#FFD740; color:#FFD740; background:#FFD74015;">Opening</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#00E676; color:#00E676; background:#00E67615;">Open</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#FFD740; color:#FFD740; background:#FFD74015;">Closing</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#9E9E9E; color:#9E9E9E; background:#9E9E9E15;">Closed</div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Transition</th><th>Trigger</th><th>Duration</th></tr></thead>
+          <tbody>
+            <tr><td>Closed -> Opening</td><td>Row click</td><td>0ms</td></tr>
+            <tr><td>Opening -> Open</td><td>Slide complete</td><td>300ms</td></tr>
+            <tr><td>Open -> Closing</td><td>Backdrop / Esc / X</td><td>0ms</td></tr>
+            <tr><td>Closing -> Closed</td><td>Slide complete</td><td>250ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Template Editor -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Template Editor</span>
+        <span class="ix-card-timing">US-7.3</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Editor state flow from viewing through editing to saving. Unsaved changes trigger a confirmation on navigate-away.</div>
+        <div class="demo-area">
+          <div class="state-diagram">
+            <div class="state-node" style="border-color:#448AFF; color:#448AFF; background:#448AFF15;">Viewing</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#FFD740; color:#FFD740; background:#FFD74015;">Editing</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#7C4DFF; color:#7C4DFF; background:#7C4DFF15;">Saving</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#00E676; color:#00E676; background:#00E67615;">Saved</div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Transition</th><th>Trigger</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td>Viewing -> Editing</td><td>Edit button / field focus</td><td>Enable code editor, show Save/Cancel</td></tr>
+            <tr><td>Editing -> Saving</td><td>Save button click</td><td>Disable inputs, show spinner on button</td></tr>
+            <tr><td>Saving -> Saved</td><td>API 200 response</td><td>Success toast, version incremented</td></tr>
+            <tr><td>Saved -> Viewing</td><td>Auto (1.5s delay)</td><td>Button text: "Saved" -> "Edit"</td></tr>
+            <tr><td>Saving -> Editing</td><td>API error</td><td>Error toast, re-enable inputs</td></tr>
+            <tr><td>Editing -> Viewing</td><td>Cancel button</td><td>Confirm if dirty, discard changes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Domain Verification -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Domain Verification</span>
+        <span class="ix-card-timing">US-7.4</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Domain lifecycle from unverified through checking to verified or failed. Periodic re-verification can revert status.</div>
+        <div class="demo-area">
+          <div class="state-diagram">
+            <div class="state-node" style="border-color:#FF5252; color:#FF5252; background:#FF525215;">Unverified</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#FFD740; color:#FFD740; background:#FFD74015;">Checking</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#00E676; color:#00E676; background:#00E67615;">Verified</div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Transition</th><th>Trigger</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td>Unverified -> Checking</td><td>"Verify Now" button</td><td>Button becomes spinner, disable click</td></tr>
+            <tr><td>Checking -> Verified</td><td>All DNS records pass</td><td>Green badge, success toast</td></tr>
+            <tr><td>Checking -> Failed</td><td>One+ DNS records fail</td><td>Red badge, show expected vs actual</td></tr>
+            <tr><td>Verified -> Checking</td><td>Daily re-verification</td><td>Background, no UI change until result</td></tr>
+            <tr><td>Verified -> Suspended</td><td>Re-check fails</td><td>Orange badge, alert on dashboard</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Filter Bar Mobile -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Filter Bar (Mobile)</span>
+        <span class="ix-card-timing">250ms</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">On smaller viewports, filters collapse behind a toggle button. Expands as a dropdown panel.</div>
+        <div class="demo-area">
+          <div class="state-diagram">
+            <div class="state-node" style="border-color:#9E9E9E; color:#9E9E9E; background:#9E9E9E15;">Collapsed</div>
+            <div class="state-arrow"><svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></div>
+            <div class="state-node" style="border-color:#00E676; color:#00E676; background:#00E67615;">Expanded</div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Transition</th><th>Trigger</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td>Collapsed -> Expanded</td><td>Filter icon button</td><td>Panel slides down (250ms)</td></tr>
+            <tr><td>Expanded -> Collapsed</td><td>Apply / backdrop / icon</td><td>Panel slides up (200ms)</td></tr>
+            <tr><td>Active filter count</td><td>Badge on icon</td><td>Shows number of active filters</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 3: FORM BEHAVIORS ==================== -->
+<div class="section">
+  <h2 class="section-title"><span class="num">3</span> Form Behaviors</h2>
+  <p class="section-desc">Input field interactions, search debouncing, date range selection, and filter controls.</p>
+
+  <div class="ix-grid">
+
+    <!-- Search -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Search Input</span>
+        <span class="ix-card-timing">300ms debounce</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Search triggers API call after 300ms of no typing. Clear button appears when text is present. Escape clears the field.</div>
+        <div class="demo-area" style="flex-direction:column; gap:8px; align-items:stretch;">
+          <div class="search-wrapper">
+            <input type="text" class="search-input" placeholder="Search emails by recipient or subject..." id="searchDemo"
+              oninput="
+                const clear=document.getElementById('searchClear');
+                clear.classList.toggle('visible', this.value.length>0);
+                clearTimeout(window._searchDebounce);
+                const indicator=document.getElementById('searchIndicator');
+                indicator.textContent='Typing...';
+                indicator.style.color='var(--warning)';
+                window._searchDebounce=setTimeout(()=>{
+                  indicator.textContent=this.value?'Searching: '+this.value:'Idle';
+                  indicator.style.color='var(--secondary)';
+                },300);
+              ">
+            <button class="search-clear" id="searchClear" onclick="
+              document.getElementById('searchDemo').value='';
+              this.classList.remove('visible');
+              document.getElementById('searchIndicator').textContent='Cleared';
+              document.getElementById('searchIndicator').style.color='var(--text-hint)';
+            ">x</button>
+          </div>
+          <div id="searchIndicator" style="font-size:11px; font-family:var(--mono); color:var(--text-hint); text-align:center;">Idle</div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Debounce delay</td><td>300ms</td><td>Resets on each keystroke</td></tr>
+            <tr><td>Clear button</td><td>visible when value.length > 0</td><td>Clears input + resets results</td></tr>
+            <tr><td>Escape key</td><td>Clears input</td><td>Also blurs the field</td></tr>
+            <tr><td>Min chars</td><td>2</td><td>No API call for single char</td></tr>
+            <tr><td>Focus</td><td>border-color: primary</td><td>200ms transition</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Date Range -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Date Range Selector</span>
+        <span class="ix-card-timing">MudDateRangePicker</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Quick preset chips for common ranges, plus a custom date picker. Selecting a preset immediately updates the data.</div>
+        <div class="demo-area" style="flex-direction:column; gap:12px;">
+          <div class="date-pills">
+            <button class="date-pill" onclick="selectPill(this)">Today</button>
+            <button class="date-pill active" onclick="selectPill(this)">7d</button>
+            <button class="date-pill" onclick="selectPill(this)">30d</button>
+            <button class="date-pill" onclick="selectPill(this)">90d</button>
+            <button class="date-pill" onclick="selectPill(this)">Custom</button>
+          </div>
+          <div id="dateOutput" style="font-size:12px; font-family:var(--mono); color:var(--text-secondary);">
+            Range: 2026-03-20 to 2026-03-27 (7 days)
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Preset click</td><td>Immediate data refresh</td><td>No confirmation needed</td></tr>
+            <tr><td>"Custom" click</td><td>Opens MudDateRangePicker</td><td>Calendar dropdown</td></tr>
+            <tr><td>Active pill</td><td>bg: primary, color: white</td><td>Only one active at a time</td></tr>
+            <tr><td>URL sync</td><td>?from=...&to=...</td><td>Shareable, bookmarkable</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dropdown Filter -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Status/Reason Dropdowns</span>
+        <span class="ix-card-timing">MudSelect</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Multi-select dropdowns for filtering by email status or suppression reason. Selected values shown as chips below.</div>
+        <div class="demo-area" style="flex-direction:column; gap:8px; align-items:stretch;">
+          <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-hint);">Status Filter</div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            <span class="status-badge" style="background:#00E67620; color:#00E676; cursor:pointer;" onclick="this.remove()"><span class="status-dot" style="background:#00E676"></span>Delivered <span style="margin-left:4px; opacity:0.6;">x</span></span>
+            <span class="status-badge" style="background:#FF525220; color:#FF5252; cursor:pointer;" onclick="this.remove()"><span class="status-dot" style="background:#FF5252"></span>Bounced <span style="margin-left:4px; opacity:0.6;">x</span></span>
+            <span class="status-badge" style="background:var(--elevated); color:var(--text-hint); cursor:pointer; border:1px dashed var(--border);">+ Add filter</span>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Multi-select</td><td>Checkboxes in dropdown</td><td>MudSelect MultiSelection</td></tr>
+            <tr><td>Chip dismiss</td><td>Click X removes filter</td><td>Immediate data refresh</td></tr>
+            <tr><td>Clear all</td><td>"Clear filters" link</td><td>Resets all active filters</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Pagination</span>
+        <span class="ix-card-timing">MudTablePager</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Page navigation with page size dropdown. Changing page size resets to page 1. Shows total count and current range.</div>
+        <div class="demo-area" style="flex-direction:column; gap:12px;">
+          <div style="font-size:12px; color:var(--text-secondary);">Showing 1-50 of 1,247 emails</div>
+          <div class="pagination">
+            <button class="page-btn" disabled>&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn" onclick="this.parentElement.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');">2</button>
+            <button class="page-btn" onclick="this.parentElement.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');">3</button>
+            <span style="color:var(--text-hint);">...</span>
+            <button class="page-btn" onclick="this.parentElement.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');">25</button>
+            <button class="page-btn">&gt;</button>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Default page size</td><td>50</td><td>Options: 10, 25, 50, 100</td></tr>
+            <tr><td>Page size change</td><td>Resets to page 1</td><td>Prevents empty-page state</td></tr>
+            <tr><td>Active page</td><td>bg: primary, color: white</td><td>Only one active</td></tr>
+            <tr><td>Disabled nav</td><td>30% opacity, no cursor</td><td>Prev on page 1, Next on last</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 4: TABLE BEHAVIORS ==================== -->
+<div class="section">
+  <h2 class="section-title"><span class="num">4</span> Table Behaviors</h2>
+  <p class="section-desc">Row interactions, sorting, bulk selection, and detail expansion for MudDataGrid tables.</p>
+
+  <div class="ix-grid">
+
+    <!-- Row Hover + Click -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Row Hover &amp; Click</span>
+        <span class="ix-card-timing">150ms</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Rows highlight on hover. Click opens the detail drawer (email) or expands an inline panel (domain DNS).</div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Hover bg</td><td>#2D2F45 (elevated)</td><td>150ms transition</td></tr>
+            <tr><td>Click (Emails)</td><td>Opens MudDrawer</td><td>Slide-out from right, 480px</td></tr>
+            <tr><td>Click (Domains)</td><td>Expands row</td><td>MudExpansionPanel inline</td></tr>
+            <tr><td>Cursor</td><td>pointer</td><td>Indicates clickable row</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Column Sort -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Column Sort</span>
+        <span class="ix-card-timing">MudDataGrid</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Click a column header to sort. First click: ascending. Second: descending. Third: removes sort. Arrow indicator shows direction.</div>
+        <div class="demo-area" style="gap:24px;">
+          <span class="sort-header active" onclick="this.classList.toggle('desc')" title="Click to toggle">
+            Sent At <span class="sort-arrow">&#x25B2;</span>
+          </span>
+          <span class="sort-header" onclick="this.classList.toggle('active')">
+            Recipient <span class="sort-arrow">&#x25B2;</span>
+          </span>
+          <span class="sort-header" onclick="this.classList.toggle('active')">
+            Status <span class="sort-arrow">&#x25B2;</span>
+          </span>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Default sort</td><td>sent_at DESC</td><td>Most recent first</td></tr>
+            <tr><td>Cycle</td><td>none -> ASC -> DESC -> none</td><td>Single column sort only</td></tr>
+            <tr><td>Indicator</td><td>Arrow rotates 180deg</td><td>200ms transition</td></tr>
+            <tr><td>Active color</td><td>Primary (#7C4DFF)</td><td>Inactive: text-hint</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Bulk Select -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Bulk Selection</span>
+        <span class="ix-card-timing">250ms slide</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">Checkbox column enables multi-select. When items are selected, a floating action bar slides in with bulk operations.</div>
+        <div class="demo-area" style="flex-direction:column; gap:12px; align-items:stretch;">
+          <div style="display:flex; align-items:center; gap:12px; font-size:13px;">
+            <input type="checkbox" id="bulkCheck" onchange="document.getElementById('bulkBar').classList.toggle('visible',this.checked)">
+            <label for="bulkCheck" style="cursor:pointer;">Select 3 items to trigger bulk bar</label>
+          </div>
+          <div class="bulk-bar" id="bulkBar">
+            <span>3 selected</span>
+            <div class="bulk-bar-actions">
+              <button class="bulk-action-btn">Resend</button>
+              <button class="bulk-action-btn">Export</button>
+              <button class="bulk-action-btn" style="border-color:var(--error); color:var(--error);">Delete</button>
+            </div>
+          </div>
+        </div>
+        <table class="spec-table">
+          <thead><tr><th>Behavior</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Header checkbox</td><td>Selects all on page</td><td>Indeterminate if partial</td></tr>
+            <tr><td>Bar animation</td><td>opacity 0->1, Y(8)->Y(0)</td><td>250ms cubic-bezier</td></tr>
+            <tr><td>Bar position</td><td>Sticky above table</td><td>Scrolls with table</td></tr>
+            <tr><td>Deselect all</td><td>Bar disappears</td><td>Same animation reversed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Row Expand -->
+    <div class="ix-card">
+      <div class="ix-card-header">
+        <span class="ix-card-name">Row Expand (Detail)</span>
+        <span class="ix-card-timing">200ms</span>
+      </div>
+      <div class="ix-card-body">
+        <div class="ix-card-desc">For email logs, detail shows a MudTimeline of delivery events. For domains, shows DNS records in an accordion.</div>
+        <table class="spec-table">
+          <thead><tr><th>Page</th><th>Expand Behavior</th><th>Content</th></tr></thead>
+          <tbody>
+            <tr><td>Emails</td><td>Drawer (right, 480px)</td><td>Timeline: queued -> sent -> delivered -> opened</td></tr>
+            <tr><td>Domains</td><td>Inline expansion (200ms)</td><td>DNS records table with copy buttons</td></tr>
+            <tr><td>Suppressions</td><td>Drawer (right, 400px)</td><td>Source email detail, reason, date</td></tr>
+            <tr><td>Templates</td><td>Full page navigation</td><td>Editor + preview layout</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Demo -->
+<div class="modal-demo-overlay" id="modalDemo" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="modal-demo-content">
+    <div style="font-size:18px; font-weight:600; margin-bottom:8px;">Add Sending Domain</div>
+    <div style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Enter the domain you want to register for sending transactional emails.</div>
+    <input type="text" class="search-input" placeholder="e.g. notifications.cashtrack.app" style="margin-bottom:16px;">
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button class="demo-btn secondary" onclick="document.getElementById('modalDemo').classList.remove('visible')">Cancel</button>
+      <button class="demo-btn" onclick="document.getElementById('modalDemo').classList.remove('visible');showToast()">Add Domain</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Demo -->
+<div class="toast-demo" id="toastDemo">
+  <div class="toast-icon">
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+  </div>
+  <div class="toast-text">
+    <div class="toast-title">Domain Added</div>
+    <div class="toast-msg">Configure the DNS records shown below to verify.</div>
+  </div>
+</div>
+
+<script>
+function selectPill(el) {
+  el.parentElement.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const ranges = { 'Today':'2026-03-27 (1 day)', '7d':'2026-03-20 to 2026-03-27 (7 days)', '30d':'2026-02-25 to 2026-03-27 (30 days)', '90d':'2025-12-27 to 2026-03-27 (90 days)', 'Custom':'Select dates...' };
+  document.getElementById('dateOutput').textContent = 'Range: ' + (ranges[el.textContent] || el.textContent);
+}
+
+let toastTimer;
+function showToast() {
+  const toast = document.getElementById('toastDemo');
+  clearTimeout(toastTimer);
+  toast.classList.add('visible');
+  toastTimer = setTimeout(() => toast.classList.remove('visible'), 5000);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalDemo').classList.remove('visible');
+    document.getElementById('toastDemo').classList.remove('visible');
+  }
+});
+</script>
+
+</body>
+</html>

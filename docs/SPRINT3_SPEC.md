@@ -1,12 +1,14 @@
 # EaaS - Sprint 3 Technical Specification
 
-**Version:** 1.0
+**Version:** 2.0
 **Date:** 2026-03-27
 **Author:** Senior Architect
 **Reviewer:** Staff Engineer (Gate 1)
 **Sprint:** 3
 **Scope:** 10 stories, 34 story points (adjusted from backlog -- US-6.3, US-3.4, US-5.2 already done in Sprint 2)
 **Status:** Ready for Developer Handoff
+
+> **BREAKING CHANGE (v2.0):** Dashboard technology changed from Blazor Server + MudBlazor to **Next.js 15 + shadcn/ui + Tailwind CSS**. All frontend sections rewritten. Backend specs (Analytics API, Webhooks) unchanged.
 
 ---
 
@@ -34,11 +36,11 @@ Sprint 2 delivered:
 - Swagger/OpenAPI documentation
 - CI/CD pipeline
 
-**What exists for Dashboard:** A skeleton Blazor Server app at `src/EaaS.Dashboard/` with:
+**What exists for Dashboard:** A skeleton Blazor Server app at `src/EaaS.Dashboard/` -- **TO BE DELETED AND REPLACED** with a Next.js application at `dashboard/`. The existing Blazor skeleton contains:
 - `Program.cs` with Razor components and Serilog
 - MudBlazor package referenced in csproj (but not initialized)
 - Bare `Home.razor` placeholder page
-- No MudBlazor layout, no sidebar, no HttpClient to API
+- No layout, no sidebar, no HttpClient to API
 - Auth env vars configured in docker-compose (`DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD_HASH`)
 - API accessible at `http://api:8080` from dashboard container
 
@@ -281,127 +283,277 @@ public class WebhookDeliveryLog
 
 ### 2.4 Dashboard Bootstrap (Foundation for all UI stories)
 
-Before building any pages, the dashboard needs foundational setup:
+Before building any pages, the dashboard needs foundational setup. The old Blazor skeleton at `src/EaaS.Dashboard/` is deleted and replaced with a Next.js application at `dashboard/`.
 
-**A. MudBlazor Initialization**
+**A. Project Structure**
 
-Update `Program.cs`:
-```csharp
-builder.Services.AddMudServices();
+```
+dashboard/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── layout.tsx          # Root layout with sidebar
+│   │   ├── page.tsx            # Overview dashboard (/)
+│   │   ├── login/page.tsx      # Login page
+│   │   ├── emails/
+│   │   │   ├── page.tsx        # Email log viewer
+│   │   │   └── [id]/page.tsx   # Email detail
+│   │   ├── templates/
+│   │   │   ├── page.tsx        # Template manager
+│   │   │   └── [id]/page.tsx   # Template editor
+│   │   ├── domains/page.tsx    # Domain manager
+│   │   ├── analytics/page.tsx  # Analytics dashboard
+│   │   └── suppressions/page.tsx # Suppression manager
+│   ├── components/
+│   │   ├── ui/                 # shadcn/ui components (auto-generated)
+│   │   ├── layout/             # Sidebar, AppShell, TopBar
+│   │   ├── emails/             # Email-specific components
+│   │   ├── templates/          # Template-specific components
+│   │   ├── domains/            # Domain-specific components
+│   │   ├── analytics/          # Chart components
+│   │   └── suppressions/       # Suppression-specific components
+│   ├── lib/
+│   │   ├── api.ts              # API client (typed fetch wrapper)
+│   │   ├── auth.ts             # Auth context/hooks
+│   │   ├── query-keys.ts       # React Query key factory
+│   │   └── utils.ts            # Utilities (cn helper, formatters)
+│   └── types/
+│       └── index.ts            # TypeScript interfaces matching API DTOs
+├── public/
+├── tailwind.config.ts
+├── next.config.ts
+├── components.json             # shadcn/ui config
+├── package.json
+├── tsconfig.json
+├── Dockerfile
+└── .env.local
 ```
 
-Update `App.razor` -- add MudBlazor CSS/JS in `<head>`:
-```html
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-<link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
-```
-Before closing `</body>`:
-```html
-<script src="_content/MudBlazor/MudBlazor.min.js"></script>
-```
+**B. Tech Stack**
 
-Update `_Imports.razor`:
-```razor
-@using MudBlazor
-```
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Next.js | 15 | App Router, Server Components where possible |
+| TypeScript | 5.x | Strict mode enabled |
+| Tailwind CSS | 4 | Utility-first styling |
+| shadcn/ui | latest | UI component library (Radix UI primitives) |
+| Recharts | 2.x | Analytics charts (line, bar, pie, area) |
+| TanStack Query | 5.x | Data fetching, caching, background refetch |
+| Lucide React | latest | Icon library |
+| next-themes | latest | Light/dark mode support |
 
-**B. HttpClient to API**
+**C. shadcn/ui Components to Install**
 
-Register in `Program.cs`:
-```csharp
-builder.Services.AddHttpClient("EaaSApi", client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["Api:BaseUrl"] ?? "http://api:8080");
-});
+```bash
+npx shadcn@latest init
+npx shadcn@latest add button card dialog drawer dropdown-menu input label \
+  select table tabs badge toast skeleton sheet separator scroll-area \
+  popover command calendar chart avatar alert tooltip
 ```
 
-Create `Services/ApiClient.cs` -- a typed wrapper around `HttpClient` that calls the EaaS API endpoints. Methods:
-- `GetAnalyticsSummaryAsync(DateOnly from, DateOnly to)` -> summary DTO
-- `GetAnalyticsTimelineAsync(DateOnly from, DateOnly to, string granularity)` -> timeline DTO
-- `GetEmailsAsync(EmailFilterDto filters)` -> paginated emails
-- `GetEmailAsync(string messageId)` -> single email
-- `GetTemplatesAsync(string? search, int page, int pageSize)` -> paginated templates
-- `GetTemplateAsync(Guid id)` -> single template
-- `CreateTemplateAsync(CreateTemplateDto dto)` -> template
-- `UpdateTemplateAsync(Guid id, UpdateTemplateDto dto)` -> template
-- `DeleteTemplateAsync(Guid id)` -> void
-- `PreviewTemplateAsync(Guid id, Dictionary<string,string> variables)` -> preview DTO
-- `GetDomainsAsync()` -> paginated domains
-- `VerifyDomainAsync(Guid id)` -> domain
-- `GetSuppressionsAsync(string? search, string? reason, int page, int pageSize)` -> paginated suppressions
-- `AddSuppressionAsync(string email, string reason)` -> suppression
-- `RemoveSuppressionAsync(Guid id)` -> void
-- `GetWebhooksAsync()` -> paginated webhooks
+**D. API Client (`src/lib/api.ts`)**
+
+Typed fetch wrapper with error handling:
+
+```typescript
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+class ApiClient {
+  private apiKey: string | null = null;
+
+  setApiKey(key: string) { this.apiKey = key; }
+
+  async get<T>(path: string, params?: Record<string, string>): Promise<T> {
+    const url = new URL(`${API_BASE}${path}`);
+    if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+    const res = await fetch(url.toString(), {
+      headers: this.headers(),
+      credentials: "include",
+    });
+
+    if (!res.ok) throw new ApiError(res.status, await res.text());
+    const json: ApiResponse<T> = await res.json();
+    if (!json.success) throw new ApiError(400, json.error ?? "Unknown error");
+    return json.data;
+  }
+
+  async post<T>(path: string, body?: unknown): Promise<T> { /* similar */ }
+  async put<T>(path: string, body?: unknown): Promise<T> { /* similar */ }
+  async delete<T>(path: string): Promise<T> { /* similar */ }
+
+  private headers(): HeadersInit {
+    const h: HeadersInit = { "Content-Type": "application/json" };
+    if (this.apiKey) h["Authorization"] = `Bearer ${this.apiKey}`;
+    return h;
+  }
+}
+
+export const api = new ApiClient();
+```
+
+Methods (via TanStack Query hooks in each page):
+- `getAnalyticsSummary(dateFrom, dateTo)` -> summary DTO
+- `getAnalyticsTimeline(dateFrom, dateTo, granularity)` -> timeline DTO
+- `getEmails(filters)` -> paginated emails
+- `getEmail(messageId)` -> single email
+- `getTemplates(search, page, pageSize)` -> paginated templates
+- `getTemplate(id)` -> single template
+- `createTemplate(dto)` -> template
+- `updateTemplate(id, dto)` -> template
+- `deleteTemplate(id)` -> void
+- `previewTemplate(id, variables)` -> preview DTO
+- `getDomains()` -> paginated domains
+- `verifyDomain(id)` -> domain
+- `getSuppressions(search, reason, page, pageSize)` -> paginated suppressions
+- `addSuppression(email, reason)` -> suppression
+- `removeSuppression(id)` -> void
+- `getWebhooks()` -> paginated webhooks
 
 All methods deserialize the standard `{ success, data }` envelope.
 
-**C. Simple Auth Middleware**
+**E. TanStack Query Setup**
 
-The dashboard uses cookie auth with a single admin password:
-- Login page at `/login`.
-- POST form with password.
-- Compare BCrypt hash against `DASHBOARD_PASSWORD_HASH` env var.
-- Set auth cookie on success.
-- Protect all other pages with `[Authorize]`.
+```typescript
+// src/app/providers.tsx
+"use client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-Implementation:
-- Add cookie authentication in `Program.cs`.
-- Create `Components/Pages/Login.razor` with a MudBlazor form.
-- Add `AuthorizeView` wrapper in `MainLayout.razor`.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,       // 30s before refetch
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-**D. Sidebar Layout**
-
-Replace `MainLayout.razor` with MudBlazor layout:
-```razor
-@inherits LayoutComponentBase
-
-<MudThemeProvider />
-<MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
-
-<MudLayout>
-    <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
-                       Edge="Edge.Start" OnClick="ToggleDrawer" />
-        <MudText Typo="Typo.h6" Class="ml-3">EaaS Dashboard</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit"
-                       Href="/logout" />
-    </MudAppBar>
-
-    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu />
-    </MudDrawer>
-
-    <MudMainContent Class="pa-4">
-        @Body
-    </MudMainContent>
-</MudLayout>
-
-@code {
-    bool _drawerOpen = true;
-    void ToggleDrawer() => _drawerOpen = !_drawerOpen;
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+    </QueryClientProvider>
+  );
 }
 ```
 
-Create `Components/Layout/NavMenu.razor`:
-```razor
-<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All"
-                Icon="@Icons.Material.Filled.Dashboard">Overview</MudNavLink>
-    <MudNavLink Href="/emails" Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Email">Email Logs</MudNavLink>
-    <MudNavLink Href="/templates" Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Description">Templates</MudNavLink>
-    <MudNavLink Href="/domains" Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Dns">Domains</MudNavLink>
-    <MudNavLink Href="/analytics" Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Analytics">Analytics</MudNavLink>
-    <MudNavLink Href="/suppressions" Match="NavLinkMatch.Prefix"
-                Icon="@Icons.Material.Filled.Block">Suppressions</MudNavLink>
-</MudNavMenu>
+**F. Authentication**
+
+Simple cookie-based auth with a single admin password:
+
+- Login page at `/login` -- client component with email/password form using shadcn Input + Button.
+- POST to `/api/auth/login` (Next.js API route) with password.
+- API route compares BCrypt hash against `DASHBOARD_PASSWORD_HASH` env var.
+- On success, set an HTTP-only secure cookie with a signed JWT (or simple session token).
+- Middleware (`src/middleware.ts`) checks the cookie on all routes except `/login`.
+- Redirect to `/login` if unauthenticated.
+
+```typescript
+// src/middleware.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get("eaas_session")?.value;
+  if (!token && !request.nextUrl.pathname.startsWith("/login")) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};
 ```
+
+**G. App Shell Layout (`src/app/layout.tsx`)**
+
+Root layout with collapsible sidebar navigation + top bar:
+
+```tsx
+// src/app/layout.tsx
+import { Providers } from "./providers";
+import { AppShell } from "@/components/layout/app-shell";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <Providers>
+          <AppShell>{children}</AppShell>
+        </Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+**Sidebar Navigation (`src/components/layout/sidebar.tsx`):**
+
+```tsx
+const navItems = [
+  { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/emails", label: "Email Logs", icon: Mail },
+  { href: "/templates", label: "Templates", icon: FileText },
+  { href: "/domains", label: "Domains", icon: Globe },
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/suppressions", label: "Suppressions", icon: ShieldBan },
+];
+```
+
+Uses shadcn `Sheet` for mobile (responsive drawer) and a fixed sidebar on desktop. Active route highlighted via `usePathname()`.
+
+**H. Docker Integration**
+
+Dockerfile (`dashboard/Dockerfile`) -- multi-stage build:
+
+```dockerfile
+# Stage 1: Install dependencies
+FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --production=false
+
+# Stage 2: Build
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build
+
+# Stage 3: Production runtime
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000
+CMD ["node", "server.js"]
+```
+
+`next.config.ts` must include `output: "standalone"` for the Docker build.
+
+**I. Cleanup: Remove Blazor Dashboard**
+
+- Delete `src/EaaS.Dashboard/` directory entirely.
+- Remove `EaaS.Dashboard` project entry from `EaaS.sln`.
+- Remove MudBlazor package reference from `Directory.Packages.props` (if present).
+- No Blazor packages should remain in the solution.
 
 ---
 
@@ -410,7 +562,7 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/`
 
 **Layout:**
-- Row 1: 6 stat cards (Total Sent, Delivered, Bounced, Complained, Opened, Clicked) -- each with count + rate + trend arrow.
+- Row 1: 6 stat cards (Total Sent, Delivered, Bounced, Complained, Opened, Clicked) -- each with count + rate + trend icon.
 - Row 2: Line chart (daily send volume, last 30 days) + Pie chart (delivery status breakdown).
 - Row 3: Recent emails table (last 10) + System health panel.
 
@@ -421,14 +573,15 @@ Create `Components/Layout/NavMenu.razor`:
 - `GET /health` from API for system health (direct HTTP call).
 
 **Components:**
-- `Components/Pages/Home.razor` -- the page.
-- `Components/Dashboard/StatCard.razor` -- reusable stat card (title, value, rate, icon, color).
-- Use `MudChart` (built into MudBlazor) for line and pie charts.
-- Use `MudSimpleTable` for recent emails.
-- Use `MudAlert` for system health status.
+- `src/app/page.tsx` -- the overview page (server component shell, client data islands).
+- `src/components/analytics/stat-card.tsx` -- reusable stat card using shadcn `Card`. Props: `title`, `value`, `rate`, `icon`, `trend` ("up" | "down" | "flat"), `color`.
+- `src/components/analytics/send-volume-chart.tsx` -- Recharts `LineChart` / `AreaChart` for time-series.
+- `src/components/analytics/status-breakdown-chart.tsx` -- Recharts `PieChart` for delivery status.
+- `src/components/emails/recent-emails-table.tsx` -- shadcn `Table` for last 10 emails.
+- `src/components/layout/health-panel.tsx` -- shadcn `Alert` for system health status.
 
-**Status Badges:** Use `MudChip` with colors:
-- `Delivered` = green, `Bounced` = red, `Complained` = orange, `Queued` = blue, `Failed` = red dark.
+**Status Badges:** Use shadcn `Badge` with variants:
+- `Delivered` = green (`bg-green-100 text-green-800`), `Bounced` = red, `Complained` = orange, `Queued` = blue, `Failed` = red dark.
 
 ---
 
@@ -437,23 +590,25 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/emails`
 
 **Layout:**
-- Filter bar (top): Status dropdown, date range picker, search text field, template dropdown, "Apply" button.
-- Data table: `MudDataGrid<EmailDto>` with server-side pagination, sorting.
-- Columns: Status (chip), To, Subject, Template, Created At, Sent At.
-- Click row -> detail dialog (`MudDialog`).
+- Filter bar (top): Status select (shadcn `Select`), date range picker (shadcn `Calendar` + `Popover`), search input (shadcn `Input`), template select, "Apply" button.
+- Data table: shadcn `Table` with custom server-side pagination, sorting. Use TanStack Query with `keepPreviousData: true` for smooth page transitions.
+- Columns: Status (Badge), To, Subject, Template, Created At, Sent At.
+- Click row -> opens detail drawer (shadcn `Sheet` side panel).
 
-**Detail Dialog Contents:**
+**Detail Drawer Contents:**
 - Full email metadata (from, to, cc, bcc, subject, template, batch, tags).
-- Status timeline (events table: queued -> sent -> delivered -> opened).
-- HTML body preview (rendered in an iframe or `MudMarkup`).
+- Status timeline (event list: queued -> sent -> delivered -> opened) with timestamps.
+- HTML body preview (rendered in a sandboxed `<iframe srcDoc={html} />`).
 
 **Data Source:** `GET /api/v1/emails?status={}&date_from={}&date_to={}&to={}&page={}&page_size=50&sort_by={}&sort_dir={}`
 
 **Implementation:**
-- `Components/Pages/Emails.razor` -- page with filter bar and grid.
-- `Components/Emails/EmailDetailDialog.razor` -- MudDialog showing full detail.
-- `Components/Emails/EmailStatusChip.razor` -- reusable status badge.
-- Server-side pagination: on page change / filter change, call API with updated params.
+- `src/app/emails/page.tsx` -- page with filter bar and table.
+- `src/components/emails/email-filter-bar.tsx` -- filter controls row.
+- `src/components/emails/email-table.tsx` -- data table with pagination.
+- `src/components/emails/email-detail-sheet.tsx` -- shadcn Sheet (side drawer) showing full detail.
+- `src/components/emails/email-status-badge.tsx` -- reusable status Badge.
+- Server-side pagination: on page change / filter change, update URL search params and refetch via TanStack Query.
 
 ---
 
@@ -462,11 +617,11 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/templates`
 
 **Layout:**
-- Template list (left/main): `MudDataGrid` with Name, Version, Updated At, actions.
-- Actions per row: Edit, Preview, Delete.
-- "New Template" button -> create dialog.
-- Edit/Create dialog: `MudDialog` with form fields (name, subject template, HTML body textarea, text body textarea, variables schema).
-- Preview panel: after saving, "Preview" button opens a dialog with variable inputs + rendered output.
+- Template list (main): shadcn `Table` with Name, Version, Updated At, actions column.
+- Actions per row: Edit, Preview, Delete (via shadcn `DropdownMenu`).
+- "New Template" button -> create dialog (shadcn `Dialog`).
+- Edit/Create dialog: shadcn `Dialog` with form fields (shadcn `Input` for name, `Input` for subject template, `Textarea` for HTML body, `Textarea` for text body, JSON editor for variables schema).
+- Preview panel: after saving, "Preview" button opens a dialog with variable inputs + rendered HTML output in an iframe.
 
 **Data Sources:**
 - `GET /api/v1/templates?search={}&page={}&page_size=20`
@@ -476,10 +631,10 @@ Create `Components/Layout/NavMenu.razor`:
 - `POST /api/v1/templates/{id}/preview` (preview)
 
 **Implementation:**
-- `Components/Pages/Templates.razor` -- list page.
-- `Components/Templates/TemplateFormDialog.razor` -- create/edit MudDialog with form.
-- `Components/Templates/TemplatePreviewDialog.razor` -- preview with variable inputs + rendered HTML display.
-- For HTML body input, use a `MudTextField` with `Lines="12"` (multi-line). Full code editor (Monaco/CodeMirror) is a Sprint 4 enhancement -- not worth the JS interop complexity now.
+- `src/app/templates/page.tsx` -- list page.
+- `src/components/templates/template-form-dialog.tsx` -- create/edit Dialog with form.
+- `src/components/templates/template-preview-dialog.tsx` -- preview with variable inputs + rendered HTML display.
+- For HTML body input, use a shadcn `Textarea` with monospace font and generous height. Full code editor (Monaco/CodeMirror) is a Sprint 4 enhancement -- not worth the bundle size now.
 
 ---
 
@@ -488,11 +643,11 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/domains`
 
 **Layout:**
-- Domain list: `MudDataGrid` with Domain Name, Status (chip), Verified At, actions.
-- Status chips: `Verified` = green, `PendingVerification` = yellow, `Failed` = red.
-- Click row -> expand to show DNS records table (`MudSimpleTable`) with Type, Name, Value, copy button.
-- "Verify Now" button per domain -> calls verify endpoint, shows result.
-- "Add Domain" button -> dialog with domain name input.
+- Domain list: shadcn `Table` with Domain Name, Status (Badge), Verified At, actions.
+- Status badges: `Verified` = green, `PendingVerification` = yellow, `Failed` = red.
+- Click row -> expand to show DNS records (collapsible row using shadcn `Collapsible` or inline expand) with Type, Name, Value, copy button (shadcn `Button` with copy icon).
+- "Verify Now" button per domain -> calls verify endpoint, shows toast result.
+- "Add Domain" button -> Dialog with domain name input.
 
 **Data Sources:**
 - `GET /api/v1/domains`
@@ -500,9 +655,9 @@ Create `Components/Layout/NavMenu.razor`:
 - `POST /api/v1/domains/{id}/verify` (verify)
 
 **Implementation:**
-- `Components/Pages/Domains.razor` -- list page with expandable rows.
-- `Components/Domains/AddDomainDialog.razor` -- MudDialog with domain name input.
-- `Components/Domains/DnsRecordTable.razor` -- table of DNS records with copy-to-clipboard.
+- `src/app/domains/page.tsx` -- list page with expandable rows.
+- `src/components/domains/add-domain-dialog.tsx` -- Dialog with domain name input.
+- `src/components/domains/dns-record-table.tsx` -- table of DNS records with copy-to-clipboard.
 
 ---
 
@@ -511,20 +666,20 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/analytics`
 
 **Layout:**
-- Date range selector (top bar): `MudDateRangePicker` with presets (7d, 30d, 90d).
+- Date range selector (top bar): shadcn `Calendar` inside a `Popover` with preset buttons (7d, 30d, 90d).
 - Row 1: Same 6 stat cards as overview (but for selected date range).
-- Row 2: Time-series line chart (sent, delivered, bounced over time) -- `MudChart` with `ChartType.Line`.
-- Row 3: Donut chart (delivery status breakdown) + Bar chart (top 5 templates by send count).
+- Row 2: Time-series line chart (sent, delivered, bounced over time) -- Recharts `LineChart` with tooltips and legend.
+- Row 3: Donut chart (delivery status breakdown, Recharts `PieChart`) + Bar chart (top 5 templates by send count, Recharts `BarChart`).
 
 **Data Sources:**
 - `GET /api/v1/analytics/summary?date_from={}&date_to={}`
 - `GET /api/v1/analytics/timeline?date_from={}&date_to={}&granularity=day`
 
 **Implementation:**
-- `Components/Pages/Analytics.razor` -- full page.
-- Reuse `StatCard.razor` component from overview.
-- Use `MudChart` (line + donut). MudBlazor charts are sufficient for this scope.
-- Date range change triggers re-fetch of both endpoints.
+- `src/app/analytics/page.tsx` -- full page.
+- Reuse `stat-card.tsx` component from overview.
+- Recharts provides interactive tooltips, legends, responsive containers, and animation out of the box -- far superior to basic chart libraries.
+- Date range change triggers re-fetch of both endpoints via TanStack Query key invalidation.
 
 ---
 
@@ -533,11 +688,11 @@ Create `Components/Layout/NavMenu.razor`:
 **Route:** `/suppressions`
 
 **Layout:**
-- Search bar + reason filter dropdown + "Add Suppression" button.
-- `MudDataGrid` with Email, Reason (chip), Source Message, Suppressed At, Delete action.
-- Reason chips: `HardBounce` = red, `Complaint` = orange, `Manual` = blue.
-- "Add Suppression" -> dialog with email input.
-- Delete -> confirmation dialog -> calls remove endpoint.
+- Search bar (shadcn `Input`) + reason filter (shadcn `Select`) + "Add Suppression" button.
+- shadcn `Table` with Email, Reason (Badge), Source Message, Suppressed At, Delete action.
+- Reason badges: `HardBounce` = red, `Complaint` = orange, `Manual` = blue.
+- "Add Suppression" -> Dialog with email input + reason select.
+- Delete -> confirmation Dialog -> calls remove endpoint, shows toast.
 
 **Data Sources:**
 - `GET /api/v1/suppressions?search={}&reason={}&page={}&page_size=50`
@@ -545,8 +700,8 @@ Create `Components/Layout/NavMenu.razor`:
 - `DELETE /api/v1/suppressions/{id}` (remove)
 
 **Implementation:**
-- `Components/Pages/Suppressions.razor` -- list page.
-- `Components/Suppressions/AddSuppressionDialog.razor` -- MudDialog with email + reason inputs.
+- `src/app/suppressions/page.tsx` -- list page.
+- `src/components/suppressions/add-suppression-dialog.tsx` -- Dialog with email + reason inputs.
 
 ---
 
@@ -611,13 +766,18 @@ dotnet ef migrations add Sprint3_WebhookDeliveryLogs --project src/EaaS.Infrastr
 | 2 | **Analytics API** | US-4.2 | 2h | Migration (#1) | Dashboard charts depend on this. Backend-only, well-defined scope. |
 | 3 | **Webhook CRUD** | US-8.1, US-8.3 | 2.5h | None | Standard CRUD endpoints, straightforward. Webhook entity already exists. |
 | 4 | **Webhook Dispatch** | US-8.2 | 4h | Webhook CRUD (#3), Migration (#1) | Most complex backend task. Touches WebhookProcessor + Worker. |
-| 5 | **Dashboard Bootstrap** | -- | 2h | None | MudBlazor init, layout, nav, HttpClient, auth. Foundation for all 6 pages. |
-| 6 | **Dashboard Overview** | US-7.1 | 2.5h | Analytics API (#2), Bootstrap (#5) | First real page. Establishes component patterns (StatCard, charts). |
-| 7 | **Email Log Viewer** | US-7.2 | 3h | Bootstrap (#5) | Highest-value dashboard page. Server-side grid + detail dialog. |
-| 8 | **Suppression Manager UI** | US-7.6 | 1.5h | Bootstrap (#5) | Simple CRUD page. Uses patterns from email log viewer. |
-| 9 | **Domain Manager UI** | US-7.4 | 2h | Bootstrap (#5) | Expandable rows + DNS record display. Medium complexity. |
-| 10 | **Template Manager UI** | US-7.3 | 3h | Bootstrap (#5) | Most complex UI page (form dialogs, preview). |
-| 11 | **Analytics Dashboard** | US-7.5 | 2.5h | Analytics API (#2), Bootstrap (#5) | Charts page. Reuses StatCard from overview. |
+
+**--- Backend complete. Dashboard begins. ---**
+
+| # | Feature | Story IDs | Est. Hours | Dependencies | Rationale |
+|---|---------|-----------|------------|--------------|-----------|
+| 5 | **Dashboard Scaffolding** | -- | 2h | None | Next.js project, Tailwind, shadcn/ui, TanStack Query, API client, auth, layout, Dockerfile, docker-compose update, remove Blazor skeleton. |
+| 6 | **Dashboard Overview** | US-7.1 | 2.5h | Analytics API (#2), Scaffolding (#5) | First real page. Establishes component patterns (StatCard, charts). |
+| 7 | **Email Log Viewer** | US-7.2 | 3h | Scaffolding (#5) | Highest-value dashboard page. Server-side table + detail drawer. |
+| 8 | **Suppression Manager UI** | US-7.6 | 1.5h | Scaffolding (#5) | Simple CRUD page. Uses patterns from email log viewer. |
+| 9 | **Domain Manager UI** | US-7.4 | 2h | Scaffolding (#5) | Expandable rows + DNS record display. Medium complexity. |
+| 10 | **Template Manager UI** | US-7.3 | 3h | Scaffolding (#5) | Most complex UI page (form dialogs, preview). |
+| 11 | **Analytics Dashboard** | US-7.5 | 2.5h | Analytics API (#2), Scaffolding (#5) | Charts page. Reuses StatCard from overview. |
 
 **Total estimated: ~25.5 hours of development time**
 
@@ -626,29 +786,60 @@ dotnet ef migrations add Sprint3_WebhookDeliveryLogs --project src/EaaS.Infrastr
 ```
 Migration (#1) --> Analytics API (#2) --> Dashboard Overview (#6) --> Analytics Dashboard (#11)
                                      \
-Dashboard Bootstrap (#5) -----------> Email Log Viewer (#7) --> Suppression (#8) --> Domain (#9) --> Template (#10)
+Dashboard Scaffolding (#5) ---------> Email Log Viewer (#7) --> Suppression (#8) --> Domain (#9) --> Template (#10)
 
 Webhook CRUD (#3) --> Webhook Dispatch (#4)
 ```
 
 Three parallel chains:
 1. **Analytics chain:** Migration -> Analytics API -> Overview page -> Analytics page
-2. **Dashboard pages chain:** Bootstrap -> Email Logs -> Suppressions -> Domains -> Templates
+2. **Dashboard pages chain:** Scaffolding -> Email Logs -> Suppressions -> Domains -> Templates
 3. **Webhooks chain:** CRUD -> Dispatch (independent of dashboard)
+
+### Phase Breakdown (for developer orientation)
+
+**Phase 1: Dashboard Scaffolding (2h)**
+- `npx create-next-app@latest dashboard --typescript --tailwind --app --src-dir`
+- Initialize shadcn/ui: `npx shadcn@latest init` + install all listed components
+- Install TanStack Query, Recharts, Lucide React, next-themes
+- Create `src/lib/api.ts` -- typed fetch wrapper
+- Create `src/lib/auth.ts` -- auth context + middleware
+- Create `src/app/login/page.tsx` -- login form
+- Create `src/app/api/auth/login/route.ts` -- auth API route (BCrypt compare)
+- Create `src/components/layout/app-shell.tsx` -- sidebar + top bar
+- Create `src/components/layout/sidebar.tsx` -- navigation links
+- Create `src/types/index.ts` -- all TypeScript interfaces matching API DTOs
+- Create `dashboard/Dockerfile` (multi-stage: node build -> node:alpine runtime)
+- Update `docker-compose.yml`: replace Blazor dashboard service with Next.js
+- Delete `src/EaaS.Dashboard/` and remove from `EaaS.sln`
+
+**Phase 2: Core Pages (6h)**
+- Overview dashboard: stat cards (shadcn Card), Recharts charts, recent emails table
+- Email log viewer: filter bar, data table with pagination, detail Sheet (side drawer)
+- Template manager: CRUD dialogs, code textarea, preview iframe
+
+**Phase 3: Remaining Pages (4h)**
+- Domain manager: list, DNS records table, add/verify dialogs
+- Analytics: KPI cards, Recharts time-series (LineChart), status donut (PieChart), template bar chart
+- Suppression manager: search, add dialog, remove with confirmation
+
+**Phase 4: Analytics API + Webhooks (6h)**
+- Same as original spec -- these are backend, no frontend technology impact
 
 ### Priority Tiers
 
 **Tier 1 -- Must Ship (core dashboard value):**
-Items 1-2, 5-7 (migration, analytics API, bootstrap, overview, email logs)
+Items 1-2, 5-7 (migration, analytics API, scaffolding, overview, email logs)
 
 **Tier 2 -- High Value:**
 Items 3-4, 8-11 (webhooks, remaining dashboard pages)
 
 **Tier 3 -- Can Defer to Sprint 4:**
-- Code editor for templates (Monaco/CodeMirror JS interop)
+- Code editor for templates (Monaco/CodeMirror)
 - Template version history diff view
 - CSV export for suppressions
 - Webhook delivery log viewer in dashboard
+- Real-time updates via WebSocket/SSE
 
 ---
 
@@ -658,36 +849,70 @@ Items 3-4, 8-11 (webhooks, remaining dashboard pages)
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| **MudBlazor charts are limited** | Medium | MudBlazor's built-in `MudChart` supports line, bar, pie, donut. It lacks interactive tooltips and zoom. Acceptable for Sprint 3. If charts need more interactivity, add Chart.js via JS interop in Sprint 4. Do NOT add Chart.js now -- it doubles the charting complexity. |
-| **Dashboard-to-API auth gap** | Medium | Dashboard calls API internally without an API key. The API requires `Authorization: Bearer` header. **REQUIRED FIX:** Either (a) create a system-level API key for the dashboard at startup and inject it into HttpClient, or (b) add an internal-only bypass that trusts requests from the docker network. Option (a) is cleaner -- use a seeded "dashboard" API key with full read access. Store the key hash in config. |
+| **Next.js SSR complexity** | Low | Use `"use client"` for all data-fetching pages (stat cards, tables, charts). Server Components only for static layout shells. Keep it simple -- no RSC data fetching patterns that could confuse debugging. |
+| **CORS between Next.js and .NET API** | Medium | Two options: (a) Proxy API calls through Next.js API routes (`/api/proxy/[...path]`) to avoid CORS entirely, or (b) configure CORS on the .NET API to allow the dashboard origin. **Option (a) is preferred** -- it keeps the API key server-side and avoids exposing it to the browser. |
+| **Dashboard-to-API auth gap** | Medium | Dashboard calls API internally without an API key. The API requires `Authorization: Bearer` header. **REQUIRED FIX:** Create a system-level API key for the dashboard and inject it into the Next.js server-side proxy. The API key is stored as `DASHBOARD_API_KEY` env var in the dashboard container. Never exposed to the browser. All API calls go through Next.js API routes which attach the key server-side. |
 | **WebhookProcessor needs RabbitMQ** | Low | WebhookProcessor currently has no MassTransit dependency. Adding it is straightforward but increases its memory footprint. The 128MB container limit should be bumped to 192MB. |
 | **Analytics query performance** | Low | Aggregating over the entire emails table with `GROUP BY` could be slow at scale. For Sprint 3 volumes (<10K emails), direct queries are fine. Add a materialized view or pre-computed daily aggregates in Sprint 4 if needed. The `idx_emails_analytics` index covers the hot path. |
 | **Webhook retry storms** | Low | If a user's endpoint is permanently down, 5 retries x N events could create a retry backlog. MassTransit's built-in retry with exponential backoff handles this well. After final failure, the message goes to the error queue, not re-retried. |
+| **Node.js memory on CX22** | Low | Next.js standalone output is lightweight (~30MB). The 192MB container limit is generous. Monitor with `docker stats`. |
 
 ### 5.2 Architecture Concerns
 
-1. **Dashboard-API communication pattern:** The dashboard calls the API over HTTP, not directly to the database. This is correct -- keeps the dashboard as a pure UI layer. However, for the health check panel, the dashboard should call the API's `/health` endpoint rather than independently checking postgres/redis. Single source of truth.
+1. **Dashboard-API communication pattern:** The dashboard calls the API over HTTP via Next.js API route proxies, not directly from the browser. This keeps the API key server-side and avoids CORS issues. The proxy pattern also allows the dashboard to add request logging and error normalization.
 
 2. **Webhook dispatch decoupling:** Publishing `WebhookDispatchMessage` from WebhookProcessor to Worker via RabbitMQ is the right pattern. It keeps the webhook HTTP dispatch logic in the Worker (which already has retry infrastructure) rather than bloating the WebhookProcessor. The WebhookProcessor stays focused on inbound SNS + tracking.
 
-3. **Template editor simplification:** The spec correctly defers Monaco/CodeMirror to Sprint 4. A multi-line `MudTextField` is sufficient for editing HTML/Liquid templates. The preview dialog gives immediate feedback. This avoids 4+ hours of JS interop setup.
+3. **Template editor simplification:** The spec correctly defers Monaco/CodeMirror to Sprint 4. A monospace `<textarea>` is sufficient for editing HTML/Liquid templates. The preview dialog gives immediate feedback. This avoids significant bundle size increase.
 
-4. **No real-time updates in Sprint 3:** The dashboard pages fetch data on load and on user action (filter, page change). No SignalR push updates. This is acceptable for Sprint 3. Real-time updates (new email arrives, status changes) can be added in Sprint 4 with SignalR + MudBlazor's `StateHasChanged`.
+4. **No real-time updates in Sprint 3:** The dashboard pages fetch data on load and on user action (filter, page change). No WebSocket/SSE push updates. TanStack Query provides `refetchInterval` if we want polling later, but for Sprint 3, manual refresh is acceptable.
+
+5. **Why Next.js over Blazor:** Next.js + shadcn/ui provides a vastly larger ecosystem (npm), better developer tooling (hot reload, React DevTools), superior charting (Recharts), and a cleaner separation from the .NET backend. The Blazor skeleton had zero progress after 2 sprints. This is the correct technology decision.
 
 ### 5.3 Required Changes (incorporated above)
 
-1. **Dashboard API key:** Add a seeded system API key for the dashboard's HttpClient (see Risk table). The `ApiClient` service must include `Authorization: Bearer {dashboard_api_key}` on all requests.
+1. **Dashboard API proxy:** All browser-to-API calls go through Next.js API routes (`src/app/api/proxy/[...path]/route.ts`). The proxy attaches the `DASHBOARD_API_KEY` header. No API key in the browser.
 2. **WebhookProcessor memory:** Bump container limit from 128MB to 192MB in docker-compose.
 3. **Analytics rate limits:** The analytics endpoints should have their own rate limit (10 requests/minute) since they run aggregation queries. Add to rate limiting middleware.
 4. **Webhook delivery log retention:** Add a note that webhook delivery logs should be pruned after 30 days. Implement via the existing cleanup job pattern.
+5. **Docker-compose update:** Replace the Blazor dashboard service with a Node.js-based Next.js service (port 3000 internal, environment variables for `NEXT_PUBLIC_API_URL`, `DASHBOARD_API_KEY`, `DASHBOARD_USERNAME`, `DASHBOARD_PASSWORD_HASH`).
 
-### 5.4 Approval
+### 5.4 Docker-Compose Dashboard Service (updated)
 
-**Gate 1 PASSED** with the 4 required changes above incorporated into the spec.
+```yaml
+dashboard:
+  build:
+    context: ./dashboard
+    dockerfile: Dockerfile
+  container_name: eaas-dashboard
+  restart: unless-stopped
+  environment:
+    - NODE_ENV=production
+    - NEXT_PUBLIC_API_URL=http://api:8080
+    - DASHBOARD_API_KEY=${DASHBOARD_API_KEY}
+    - DASHBOARD_USERNAME=${DASHBOARD_USERNAME}
+    - DASHBOARD_PASSWORD_HASH=${DASHBOARD_PASSWORD_HASH}
+  depends_on:
+    api:
+      condition: service_healthy
+  ports:
+    - "127.0.0.1:3000:3000"
+  deploy:
+    resources:
+      limits:
+        memory: 192M
+```
+
+### 5.5 Approval
+
+**Gate 1 PASSED** with the 5 required changes above incorporated into the spec.
 
 The scope is achievable in a 24-hour sprint because:
-- 6 dashboard pages are UI-only (calling existing API endpoints via HttpClient).
+- 6 dashboard pages are UI-only (calling existing API endpoints via API proxy).
 - Analytics API is 2 straightforward aggregation endpoints.
 - Webhook CRUD is standard -- entity already exists.
 - Webhook dispatch is the only complex piece, and MassTransit handles the heavy lifting (retry, DLQ).
-- MudBlazor provides pre-built components (data grid, charts, dialogs, chips) that eliminate custom CSS/JS work.
+- shadcn/ui provides pre-built, accessible, beautifully styled components (tables, dialogs, badges, cards, charts) that eliminate custom CSS work.
+- Recharts provides interactive, responsive charts with tooltips and legends out of the box.
+- TanStack Query handles caching, background refetch, loading/error states, and pagination seamlessly.
+- Next.js App Router provides file-based routing, middleware auth, and API route proxies with zero configuration overhead.

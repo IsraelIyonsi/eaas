@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Dashboard - User Flows</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-tertiary: #242836;
+    --bg-card: #1e2230;
+    --border: #2d3348;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0b0;
+    --text-muted: #6b7280;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-cyan: #06b6d4;
+    --accent-orange: #f97316;
+    --step-bg: #1e2230;
+    --decision-bg: #2a1f3d;
+    --error-bg: #2d1f1f;
+    --success-bg: #1a2e25;
+    --screen-bg: #1a2538;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .nav-tab:hover { color: var(--text-primary); background: var(--bg-card); }
+  .nav-tab.active {
+    background: var(--bg-primary);
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    border-bottom: 2px solid var(--bg-primary);
+  }
+
+  .flow-container {
+    padding: 32px 40px;
+    display: none;
+  }
+
+  .flow-container.active { display: block; }
+
+  .flow-meta {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .meta-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .meta-value {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .flow-diagram {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+    position: relative;
+  }
+
+  .flow-step {
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+  }
+
+  .step-card {
+    border-radius: 10px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .step-card.screen {
+    background: var(--screen-bg);
+    border-left: 4px solid var(--accent-blue);
+  }
+
+  .step-card.action {
+    background: var(--step-bg);
+    border-left: 4px solid var(--accent-cyan);
+  }
+
+  .step-card.decision {
+    background: var(--decision-bg);
+    border-left: 4px solid var(--accent-purple);
+  }
+
+  .step-card.error {
+    background: var(--error-bg);
+    border-left: 4px solid var(--accent-red);
+  }
+
+  .step-card.success {
+    background: var(--success-bg);
+    border-left: 4px solid var(--accent-green);
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 10px;
+  }
+
+  .screen .step-number { background: var(--accent-blue); color: #fff; }
+  .action .step-number { background: var(--accent-cyan); color: #fff; }
+  .decision .step-number { background: var(--accent-purple); color: #fff; }
+  .error .step-number { background: var(--accent-red); color: #fff; }
+  .success .step-number { background: var(--accent-green); color: #fff; }
+
+  .step-type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-left: 8px;
+  }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  .step-description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .step-details {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+
+  .step-details ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .step-details li {
+    padding: 2px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .step-details li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  .connector {
+    width: 2px;
+    height: 28px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .connector::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -4px;
+    width: 10px;
+    height: 10px;
+    border-left: 2px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    transform: rotate(-45deg);
+  }
+
+  .branch-container {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .branch {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .branch-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+
+  .branch-label.yes { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+  .branch-label.no { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  .api-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .header, .flow-container { padding: 16px; }
+    .branch-container { flex-direction: column; }
+    .flow-step { max-width: 100%; }
+    .branch-container { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EaaS Dashboard - User Flows</h1>
+  <p>Interactive flow diagrams covering all primary user journeys through the Blazor Server dashboard</p>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showFlow('flow1')">Flow 1: Login &rarr; Overview</div>
+    <div class="nav-tab" onclick="showFlow('flow2')">Flow 2: Investigate Bounce</div>
+    <div class="nav-tab" onclick="showFlow('flow3')">Flow 3: Create &amp; Send Template</div>
+    <div class="nav-tab" onclick="showFlow('flow4')">Flow 4: Add Domain</div>
+    <div class="nav-tab" onclick="showFlow('flow5')">Flow 5: Monitor Analytics</div>
+    <div class="nav-tab" onclick="showFlow('flow6')">Flow 6: Manage Suppressions</div>
+  </div>
+</div>
+
+<!-- FLOW 1 -->
+<div id="flow1" class="flow-container active">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Assess email health at a glance</div></div>
+    <div class="meta-item"><div class="meta-label">Frequency</div><div class="meta-value">Weekly</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.1</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">1</span><span class="step-type">Screen</span>
+        <div class="step-title">Login Page</div>
+        <div class="step-description">User navigates to the EaaS Dashboard URL. Presented with authentication form.</div>
+        <div class="step-details"><ul>
+          <li>Username/password fields</li>
+          <li>"Remember me" checkbox</li>
+          <li>EaaS branding and version number</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">2</span><span class="step-type">Action</span>
+        <div class="step-title">Enter Credentials &amp; Submit</div>
+        <div class="step-description">User enters username and password, clicks "Sign In".</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">3</span><span class="step-type">Decision</span>
+        <div class="step-title">Authentication Valid?</div>
+        <div class="step-description">System validates credentials against stored hash.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Invalid</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Authentication Failed</div>
+            <div class="step-description">"Invalid username or password. Please try again."</div>
+            <div class="step-details"><ul>
+              <li>Password field cleared</li>
+              <li>Focus returns to username field</li>
+              <li>After 5 failed attempts: "Too many attempts. Please try again in 15 minutes."</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Valid</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">4</span><span class="step-type">Success</span>
+            <div class="step-title">Redirect to Dashboard Overview</div>
+            <div class="step-description">Session cookie set. User redirected to /dashboard.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">5</span><span class="step-type">Screen</span>
+        <div class="step-title">Dashboard Overview</div>
+        <div class="step-description">Main landing page showing system health and key metrics.</div>
+        <div class="api-badge">GET /api/v1/analytics</div>
+        <div class="api-badge">GET /health</div>
+        <div class="api-badge">GET /api/v1/logs?limit=10</div>
+        <div class="step-details"><ul>
+          <li>Stat cards: Total Sent (today/7d/30d), Delivery Rate, Bounce Rate, Complaint Rate, Open Rate, Click Rate</li>
+          <li>Line chart: daily send volume (last 30 days)</li>
+          <li>System health indicators: API status, Worker status, Queue depth</li>
+          <li>Recent alerts panel: high bounce rate, complaint threshold warnings, domain verification failures</li>
+          <li>Recent emails table: last 10 sent emails with status badges</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">6</span><span class="step-type">Action</span>
+        <div class="step-title">Review Health Status &amp; Recent Emails</div>
+        <div class="step-description">User scans stat cards for anomalies, checks system health indicators, and reviews recent email activity. Flow complete.</div>
+        <div class="step-details"><ul>
+          <li>Hover stat cards for tooltip with trend comparison</li>
+          <li>Click any stat card to navigate to filtered analytics view</li>
+          <li>Click any email row to navigate to email detail in log viewer</li>
+          <li>Click alert to navigate to relevant management page</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 2 -->
+<div id="flow2" class="flow-container">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Identify why bounce rate is high and remediate</div></div>
+    <div class="meta-item"><div class="meta-label">Trigger</div><div class="meta-value">Bounce rate alert on overview</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.1, US-7.2, US-7.6</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">1</span><span class="step-type">Screen</span>
+        <div class="step-title">Dashboard Overview</div>
+        <div class="step-description">User notices the Bounce Rate stat card is highlighted red (above 2% threshold). An alert reads "Bounce rate at 4.2% - investigate recommended."</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">2</span><span class="step-type">Action</span>
+        <div class="step-title">Click Bounce Rate Card or Alert</div>
+        <div class="step-description">User clicks the bounce rate stat card or the alert link to investigate.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">3</span><span class="step-type">Screen</span>
+        <div class="step-title">Email Log Viewer (Pre-filtered: Bounced)</div>
+        <div class="step-description">Navigates to the email logs page with status filter pre-set to "Bounced".</div>
+        <div class="api-badge">GET /api/v1/logs?status=bounced&sort=sent_at:desc</div>
+        <div class="step-details"><ul>
+          <li>Table columns: Recipient, Subject, Sent At, Bounce Type, Bounce Reason</li>
+          <li>Status filter chip shows "Bounced" active</li>
+          <li>Date range defaults to last 7 days</li>
+          <li>Pagination: 50 rows per page</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">4</span><span class="step-type">Action</span>
+        <div class="step-title">Click a Bounced Email Row</div>
+        <div class="step-description">User clicks on a specific bounced email to see the full detail.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">5</span><span class="step-type">Screen</span>
+        <div class="step-title">Email Detail View</div>
+        <div class="step-description">Full detail of the selected email including all status transitions and bounce diagnostics.</div>
+        <div class="api-badge">GET /api/v1/logs/{message_id}</div>
+        <div class="step-details"><ul>
+          <li>Status timeline: Queued &rarr; Sent &rarr; Bounced (with timestamps)</li>
+          <li>Bounce reason: "550 5.1.1 The email account does not exist"</li>
+          <li>Bounce type: Hard Bounce (Permanent)</li>
+          <li>Recipient address, sender, subject, template used</li>
+          <li>Link to suppression entry (if auto-suppressed)</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">6</span><span class="step-type">Decision</span>
+        <div class="step-title">Is This Address Already Suppressed?</div>
+        <div class="step-description">User checks if the bounced address was auto-added to the suppression list.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label yes">Yes - Auto-Suppressed</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">7a</span><span class="step-type">Success</span>
+            <div class="step-title">Suppression Confirmed</div>
+            <div class="step-description">Address was automatically suppressed. No further sends will be attempted. User can continue reviewing other bounced emails.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label no">No - Not Suppressed</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card action">
+            <span class="step-number">7b</span><span class="step-type">Action</span>
+            <div class="step-title">Navigate to Suppression List</div>
+            <div class="step-description">User clicks "View Suppression List" link from the detail view to manually add the address.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">8</span><span class="step-type">Screen</span>
+        <div class="step-title">Suppression List Manager</div>
+        <div class="step-description">User reviews the full suppression list, can search for the address, or manually add it.</div>
+        <div class="api-badge">GET /api/v1/suppressions</div>
+        <div class="step-details"><ul>
+          <li>Search bar to find specific addresses</li>
+          <li>Table: Email, Reason, Suppressed At, Source Email</li>
+          <li>"Add Suppression" button for manual entries</li>
+          <li>Bulk select and remove option</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 3 -->
+<div id="flow3" class="flow-container">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Create a reusable email template and test it</div></div>
+    <div class="meta-item"><div class="meta-label">Frequency</div><div class="meta-value">Monthly</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.3, US-2.1, US-2.5</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">1</span><span class="step-type">Screen</span>
+        <div class="step-title">Template Manager - List View</div>
+        <div class="step-description">User navigates to Templates via the sidebar. Sees all existing templates listed.</div>
+        <div class="api-badge">GET /api/v1/templates</div>
+        <div class="step-details"><ul>
+          <li>Table: Name, Version, Send Count, Last Updated</li>
+          <li>"Create Template" primary action button</li>
+          <li>Search bar for filtering by name</li>
+          <li>Sort by created/updated date</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">2</span><span class="step-type">Action</span>
+        <div class="step-title">Click "Create Template"</div>
+        <div class="step-description">User clicks the primary action button to start creating a new template.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">3</span><span class="step-type">Screen</span>
+        <div class="step-title">Template Editor</div>
+        <div class="step-description">Full-screen editor with split panes: code editor on left, live preview on right.</div>
+        <div class="step-details"><ul>
+          <li>Template name field (required)</li>
+          <li>Subject template field with Liquid variable support</li>
+          <li>HTML body editor with syntax highlighting for Liquid/HTML</li>
+          <li>Optional plain text body editor</li>
+          <li>Variable schema editor: define expected variables and types</li>
+          <li>Preview panel (collapsed by default)</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">4</span><span class="step-type">Action</span>
+        <div class="step-title">Write HTML Template with Variables</div>
+        <div class="step-description">User writes the template HTML using Liquid syntax. Example: {{ customer_name }}, {{ invoice_total }}. Defines variable schema.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">5</span><span class="step-type">Decision</span>
+        <div class="step-title">Template Syntax Valid?</div>
+        <div class="step-description">Editor performs real-time Liquid syntax validation as the user types.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Syntax Error</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Syntax Validation Error</div>
+            <div class="step-description">"Template syntax error at line 14: unexpected end of tag." Inline error markers in the editor.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Valid</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card action">
+            <span class="step-number">6</span><span class="step-type">Action</span>
+            <div class="step-title">Click "Preview" and Enter Sample Data</div>
+            <div class="step-description">User expands the preview panel and enters sample variable values to see rendered output.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">7</span><span class="step-type">Screen</span>
+        <div class="step-title">Template Preview Panel</div>
+        <div class="step-description">Live rendered preview of the template with the sample variables applied.</div>
+        <div class="api-badge">POST /api/v1/templates/{id}/preview</div>
+        <div class="step-details"><ul>
+          <li>Rendered subject line displayed at top</li>
+          <li>Full HTML preview in iframe</li>
+          <li>Missing variables highlighted with warning markers</li>
+          <li>Sample variable input form auto-generated from schema</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">8</span><span class="step-type">Action</span>
+        <div class="step-title">Click "Save Template"</div>
+        <div class="step-description">User is satisfied with the preview and clicks Save.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">9</span><span class="step-type">Decision</span>
+        <div class="step-title">Save Successful?</div>
+        <div class="step-description">System validates and persists the template.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Validation Failed</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Save Failed</div>
+            <div class="step-description">"Template name already exists" or "Template exceeds 512KB limit." User corrects and retries.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Saved</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">10</span><span class="step-type">Success</span>
+            <div class="step-title">Template Saved Successfully</div>
+            <div class="step-description">"Template 'Invoice Notification' created successfully." Toast notification. Redirected to template list.</div>
+            <div class="api-badge">POST /api/v1/templates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">11</span><span class="step-type">Action</span>
+        <div class="step-title">Navigate to API Documentation</div>
+        <div class="step-description">User clicks "API Docs" in sidebar or copies the template_id from the success message to use in API calls.</div>
+        <div class="step-details"><ul>
+          <li>API docs show how to send using template_id</li>
+          <li>Code example: POST /api/v1/emails/send with template_id and variables</li>
+          <li>Copy-ready cURL command</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 4 -->
+<div id="flow4" class="flow-container">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Add and verify a new sending domain</div></div>
+    <div class="meta-item"><div class="meta-label">Frequency</div><div class="meta-value">Rare (per new application)</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.4, US-3.1, US-3.2</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">1</span><span class="step-type">Screen</span>
+        <div class="step-title">Domain Manager - List View</div>
+        <div class="step-description">User navigates to Domains via sidebar. Sees all registered domains with color-coded verification status.</div>
+        <div class="api-badge">GET /api/v1/domains</div>
+        <div class="step-details"><ul>
+          <li>Table: Domain, Status (green/yellow/red badge), Last Verified, DNS Records</li>
+          <li>"Add Domain" primary action button</li>
+          <li>Status legend: Verified (green), Pending (yellow), Failed (red)</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">2</span><span class="step-type">Action</span>
+        <div class="step-title">Click "Add Domain"</div>
+        <div class="step-description">User clicks the primary action button. A modal dialog appears.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">3</span><span class="step-type">Screen</span>
+        <div class="step-title">Add Domain Modal</div>
+        <div class="step-description">Modal with a single input field for the domain name.</div>
+        <div class="step-details"><ul>
+          <li>Domain name input (e.g., "notifications.cashtrack.app")</li>
+          <li>Format hint: "Enter a domain or subdomain"</li>
+          <li>"Add Domain" submit button</li>
+          <li>"Cancel" secondary button</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">4</span><span class="step-type">Action</span>
+        <div class="step-title">Enter Domain Name &amp; Submit</div>
+        <div class="step-description">User types the domain name and clicks "Add Domain".</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">5</span><span class="step-type">Decision</span>
+        <div class="step-title">Domain Valid &amp; Not Duplicate?</div>
+        <div class="step-description">System validates format and checks for duplicates.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Invalid/Duplicate</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Domain Rejected</div>
+            <div class="step-description">"Invalid domain format" or "This domain is already registered." User corrects input.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Accepted</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card screen">
+            <span class="step-number">6</span><span class="step-type">Screen</span>
+            <div class="step-title">DNS Records Display</div>
+            <div class="step-description">System generates required DNS records via SES and displays them.</div>
+            <div class="api-badge">POST /api/v1/domains</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">7</span><span class="step-type">Screen</span>
+        <div class="step-title">DNS Records Configuration Guide</div>
+        <div class="step-description">All 5 DNS records displayed in a copyable format with instructions.</div>
+        <div class="step-details"><ul>
+          <li>SPF TXT Record - with copy button</li>
+          <li>DKIM CNAME Record 1 - with copy button</li>
+          <li>DKIM CNAME Record 2 - with copy button</li>
+          <li>DKIM CNAME Record 3 - with copy button</li>
+          <li>DMARC TXT Record - with copy button</li>
+          <li>"Copy All" button for bulk copy</li>
+          <li>Instructions: "Add these records to your DNS provider, then click Verify."</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">8</span><span class="step-type">Action</span>
+        <div class="step-title">Configure DNS Records (External)</div>
+        <div class="step-description">User goes to their DNS provider (Cloudflare, Route53, etc.) and adds the records. This step happens outside the dashboard.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">9</span><span class="step-type">Action</span>
+        <div class="step-title">Click "Verify Now"</div>
+        <div class="step-description">User returns to the dashboard and clicks the "Verify Now" button on the domain.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">10</span><span class="step-type">Decision</span>
+        <div class="step-title">All DNS Records Verified?</div>
+        <div class="step-description">System checks SPF, DKIM, and DMARC records against expected values.</div>
+        <div class="api-badge">POST /api/v1/domains/{id}/verify</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Partial/Failed</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Verification Failed</div>
+            <div class="step-description">Individual record results shown: SPF (verified), DKIM (failed - expected vs actual), DMARC (pending). "DNS propagation can take up to 48 hours. Try again later."</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - All Verified</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">11</span><span class="step-type">Success</span>
+            <div class="step-title">Domain Verified</div>
+            <div class="step-description">"Domain 'notifications.cashtrack.app' verified successfully. You can now send emails from this domain." Green status badge applied.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 5 -->
+<div id="flow5" class="flow-container">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Analyze delivery trends and identify problematic templates</div></div>
+    <div class="meta-item"><div class="meta-label">Frequency</div><div class="meta-value">Weekly</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.5, US-4.2</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">1</span><span class="step-type">Action</span>
+        <div class="step-title">Navigate to Analytics</div>
+        <div class="step-description">User clicks "Analytics" in the sidebar navigation.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">2</span><span class="step-type">Screen</span>
+        <div class="step-title">Analytics Dashboard</div>
+        <div class="step-description">Full analytics view with charts and date range controls. Default view shows last 30 days.</div>
+        <div class="api-badge">GET /api/v1/analytics?group_by=day&range=30d</div>
+        <div class="step-details"><ul>
+          <li>Date range selector with presets: Today, 7d, 30d, 90d, Custom</li>
+          <li>Time-series line chart: daily sends, deliveries, bounces, complaints</li>
+          <li>Donut chart: delivery status breakdown (Delivered, Bounced, Complained, Failed)</li>
+          <li>Bar chart: top sending templates by volume</li>
+          <li>Bar chart: top sending domains by volume</li>
+          <li>Table: per-API-key sending statistics</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">3</span><span class="step-type">Action</span>
+        <div class="step-title">Set Custom Date Range</div>
+        <div class="step-description">User selects "Custom" and sets a date range to compare two weeks of performance.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">4</span><span class="step-type">Screen</span>
+        <div class="step-title">Analytics - Filtered View</div>
+        <div class="step-description">Charts refresh with the selected date range. User compares delivery rate vs bounce rate trends over the period.</div>
+        <div class="api-badge">GET /api/v1/analytics?from=2026-03-13&to=2026-03-27&group_by=day</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">5</span><span class="step-type">Action</span>
+        <div class="step-title">Identify Problematic Template</div>
+        <div class="step-description">User notices one template has a significantly higher bounce rate in the "Top Templates" bar chart. Clicks the template bar to drill down.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">6</span><span class="step-type">Screen</span>
+        <div class="step-title">Analytics - Template Drilldown</div>
+        <div class="step-description">Filtered analytics view showing metrics for the selected template only.</div>
+        <div class="api-badge">GET /api/v1/analytics?template_id={id}&group_by=day</div>
+        <div class="step-details"><ul>
+          <li>Template-specific delivery rate, bounce rate, open rate, click rate</li>
+          <li>Time-series chart for this template's performance</li>
+          <li>Link to view all email logs for this template</li>
+          <li>Link to edit this template</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">7</span><span class="step-type">Decision</span>
+        <div class="step-title">Action Required?</div>
+        <div class="step-description">User determines whether the template or recipient list needs attention.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label yes">Yes - Edit Template</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card action">
+            <span class="step-number">8a</span><span class="step-type">Action</span>
+            <div class="step-title">Click "Edit Template"</div>
+            <div class="step-description">Navigates to the template editor (see Flow 3) to fix template issues.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - View Logs</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card action">
+            <span class="step-number">8b</span><span class="step-type">Action</span>
+            <div class="step-title">Click "View Logs"</div>
+            <div class="step-description">Navigates to email log viewer filtered by this template (see Flow 2).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOW 6 -->
+<div id="flow6" class="flow-container">
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-blue)"></div> Screen</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-cyan)"></div> User Action</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-purple)"></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-red)"></div> Error State</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-green)"></div> Success State</div>
+  </div>
+
+  <div class="flow-meta">
+    <div class="meta-item"><div class="meta-label">Persona</div><div class="meta-value">Israel (Owner)</div></div>
+    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">Search, remove, and add suppression entries</div></div>
+    <div class="meta-item"><div class="meta-label">Frequency</div><div class="meta-value">As needed</div></div>
+    <div class="meta-item"><div class="meta-label">Related Stories</div><div class="meta-value">US-7.6, US-6.3</div></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">1</span><span class="step-type">Action</span>
+        <div class="step-title">Navigate to Suppressions</div>
+        <div class="step-description">User clicks "Suppressions" in the sidebar navigation.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">2</span><span class="step-type">Screen</span>
+        <div class="step-title">Suppression List Manager</div>
+        <div class="step-description">Full suppression list with search, filter, and management controls.</div>
+        <div class="api-badge">GET /api/v1/suppressions</div>
+        <div class="step-details"><ul>
+          <li>Search bar: search by email address (partial match)</li>
+          <li>Table: Email, Reason (hard_bounce/complaint/manual), Suppressed At, Source Email</li>
+          <li>Checkbox selection for bulk operations</li>
+          <li>"Add Suppression" button</li>
+          <li>"Export CSV" button</li>
+          <li>Pagination controls</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">3</span><span class="step-type">Action</span>
+        <div class="step-title">Search for an Address</div>
+        <div class="step-description">User types a partial email address into the search bar. Results filter in real-time.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">4</span><span class="step-type">Decision</span>
+        <div class="step-title">Address Found in Suppression List?</div>
+        <div class="step-description">System searches the suppression list for matching entries.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Not Found</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card screen">
+            <span class="step-number">5a</span><span class="step-type">Screen</span>
+            <div class="step-title">Empty Search Results</div>
+            <div class="step-description">"No suppressed addresses match your search." Table shows empty state.</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Found</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card action">
+            <span class="step-number">5b</span><span class="step-type">Action</span>
+            <div class="step-title">Click "Remove" on the Entry</div>
+            <div class="step-description">User clicks the remove button on the found suppression entry.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">6</span><span class="step-type">Decision</span>
+        <div class="step-title">Was This a Hard Bounce or Complaint?</div>
+        <div class="step-description">System checks the suppression reason to determine if a warning is needed.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label yes">Yes - Warning Required</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card screen">
+            <span class="step-number">7a</span><span class="step-type">Screen</span>
+            <div class="step-title">Confirmation Dialog with Warning</div>
+            <div class="step-description">"This address was suppressed due to a hard bounce. Removing it will allow future sends, which may hurt your sender reputation. Are you sure?"</div>
+            <div class="step-details"><ul>
+              <li>"Remove Anyway" danger button</li>
+              <li>"Cancel" secondary button</li>
+              <li>Original bounce reason and date shown</li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label no">No - Manual Entry</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">7b</span><span class="step-type">Success</span>
+            <div class="step-title">Suppression Removed</div>
+            <div class="step-description">"Suppression removed for user@example.com. Emails can now be sent to this address."</div>
+            <div class="api-badge">DELETE /api/v1/suppressions/{email}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">8</span><span class="step-type">Action</span>
+        <div class="step-title">Click "Add Suppression"</div>
+        <div class="step-description">User now wants to manually suppress a different address. Clicks "Add Suppression" button.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card screen">
+        <span class="step-number">9</span><span class="step-type">Screen</span>
+        <div class="step-title">Add Suppression Modal</div>
+        <div class="step-description">Modal form for manually adding an email to the suppression list.</div>
+        <div class="step-details"><ul>
+          <li>Email address input (required)</li>
+          <li>Reason dropdown: Manual, Known Invalid, User Request, Other</li>
+          <li>Optional notes field</li>
+          <li>"Add to Suppression List" submit button</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card action">
+        <span class="step-number">10</span><span class="step-type">Action</span>
+        <div class="step-title">Enter Address &amp; Submit</div>
+        <div class="step-description">User enters the email address, selects a reason, and clicks submit.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="flow-step">
+      <div class="step-card decision">
+        <span class="step-number">11</span><span class="step-type">Decision</span>
+        <div class="step-title">Valid Email &amp; Not Already Suppressed?</div>
+        <div class="step-description">System validates the email format and checks for duplicates.</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="branch-container">
+      <div class="branch">
+        <span class="branch-label no">No - Invalid/Duplicate</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card error">
+            <span class="step-number">!</span><span class="step-type">Error</span>
+            <div class="step-title">Suppression Failed</div>
+            <div class="step-description">"Invalid email format" or "This address is already suppressed."</div>
+          </div>
+        </div>
+      </div>
+      <div class="branch">
+        <span class="branch-label yes">Yes - Added</span>
+        <div class="connector"></div>
+        <div class="flow-step" style="max-width:100%">
+          <div class="step-card success">
+            <span class="step-number">12</span><span class="step-type">Success</span>
+            <div class="step-title">Suppression Added</div>
+            <div class="step-description">"spam@example.com added to suppression list. Future sends to this address will be blocked."</div>
+            <div class="api-badge">POST /api/v1/suppressions</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showFlow(flowId) {
+    document.querySelectorAll('.flow-container').forEach(f => f.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(flowId).classList.add('active');
+    const tabs = document.querySelectorAll('.nav-tab');
+    const flowIndex = ['flow1','flow2','flow3','flow4','flow5','flow6'].indexOf(flowId);
+    if (flowIndex >= 0 && tabs[flowIndex]) tabs[flowIndex].classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>

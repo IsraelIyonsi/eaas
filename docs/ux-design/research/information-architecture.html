@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Dashboard - Information Architecture</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d27;
+    --bg-tertiary: #242836;
+    --bg-card: #1e2230;
+    --border: #2d3348;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0b0;
+    --text-muted: #6b7280;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-purple: #8b5cf6;
+    --accent-cyan: #06b6d4;
+    --accent-orange: #f97316;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 40px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .header p { color: var(--text-secondary); font-size: 14px; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-top: 16px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    border-radius: 8px 8px 0 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { background: var(--bg-primary); color: var(--accent-blue); border-color: var(--accent-blue); }
+
+  .view { display: none; padding: 32px 40px; }
+  .view.active { display: block; }
+
+  /* SITEMAP VIEW */
+  .sitemap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .sitemap-level {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 1200px;
+  }
+
+  .sitemap-node {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    min-width: 200px;
+    max-width: 280px;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .sitemap-node:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  }
+
+  .sitemap-node.selected {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  }
+
+  .node-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .node-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .node-path { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+
+  .priority-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .priority-badge.p0 { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+  .priority-badge.p1 { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+  .priority-badge.p2 { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+
+  .level-connector {
+    width: 2px;
+    height: 24px;
+    background: var(--border);
+    margin: 0 auto;
+  }
+
+  .level-label {
+    text-align: center;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    margin-top: 4px;
+  }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    margin-top: 32px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+  }
+
+  .detail-panel.visible { display: block; }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-title { font-size: 20px; font-weight: 700; }
+  .detail-path { font-size: 12px; color: var(--text-muted); font-family: monospace; margin-top: 4px; }
+
+  .detail-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .detail-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .section-content { font-size: 13px; color: var(--text-secondary); }
+  .section-content ul { list-style: none; padding: 0; }
+  .section-content li { padding: 4px 0; padding-left: 16px; position: relative; }
+  .section-content li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .action-primary li::before { background: var(--accent-green); }
+  .action-secondary li::before { background: var(--accent-blue); }
+  .action-tertiary li::before { background: var(--text-muted); }
+  .data-list li::before { background: var(--accent-cyan); }
+  .api-list li::before { background: var(--accent-purple); }
+
+  .api-endpoint {
+    display: inline-block;
+    font-size: 11px;
+    font-family: monospace;
+    background: rgba(139, 92, 246, 0.12);
+    color: var(--accent-purple);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 4px;
+  }
+
+  .full-width { grid-column: 1 / -1; }
+
+  /* NAVIGATION HIERARCHY VIEW */
+  .nav-tree {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .nav-group {
+    margin-bottom: 24px;
+  }
+
+  .nav-group-header {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    padding-left: 12px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .nav-item:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-tertiary);
+  }
+
+  .nav-item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .nav-item-text { flex: 1; }
+  .nav-item-name { font-size: 14px; font-weight: 500; }
+  .nav-item-desc { font-size: 11px; color: var(--text-muted); }
+  .nav-item-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .relationships-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .rel-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .rel-card-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .rel-arrow { color: var(--accent-blue); font-size: 12px; margin: 4px 0; }
+  .rel-item { font-size: 12px; color: var(--text-secondary); padding: 2px 0; }
+
+  @media (max-width: 768px) {
+    .header, .view { padding: 16px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .sitemap-level { flex-direction: column; align-items: center; }
+    .sitemap-node { max-width: 100%; min-width: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EaaS Dashboard - Information Architecture</h1>
+  <p>Interactive sitemap, navigation hierarchy, and page-level content specifications</p>
+  <div class="tabs">
+    <div class="tab active" onclick="showView('sitemap')">Sitemap</div>
+    <div class="tab" onclick="showView('navigation')">Navigation Hierarchy</div>
+    <div class="tab" onclick="showView('relationships')">Page Relationships</div>
+  </div>
+</div>
+
+<!-- SITEMAP VIEW -->
+<div id="sitemap" class="view active">
+  <div class="sitemap">
+    <div class="level-label">Level 0 - Entry Point</div>
+    <div class="sitemap-level">
+      <div class="sitemap-node" onclick="showDetail('login')">
+        <div class="node-icon" style="background:rgba(239,68,68,0.15); color:var(--accent-red)">&#128274;</div>
+        <div class="node-title">Login</div>
+        <div class="node-path">/login</div>
+        <span class="priority-badge p0">P0</span>
+      </div>
+    </div>
+
+    <div class="level-connector"></div>
+    <div class="level-label">Level 1 - Main Dashboard</div>
+    <div class="sitemap-level">
+      <div class="sitemap-node" onclick="showDetail('overview')">
+        <div class="node-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue)">&#128200;</div>
+        <div class="node-title">Dashboard Overview</div>
+        <div class="node-path">/dashboard</div>
+        <span class="priority-badge p0">P0</span>
+      </div>
+    </div>
+
+    <div class="level-connector"></div>
+    <div class="level-label">Level 1 - Primary Sections</div>
+    <div class="sitemap-level">
+      <div class="sitemap-node" onclick="showDetail('emails')">
+        <div class="node-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">&#9993;</div>
+        <div class="node-title">Email Logs</div>
+        <div class="node-path">/dashboard/emails</div>
+        <span class="priority-badge p0">P0</span>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('templates')">
+        <div class="node-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple)">&#128196;</div>
+        <div class="node-title">Templates</div>
+        <div class="node-path">/dashboard/templates</div>
+        <span class="priority-badge p1">P1</span>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('domains')">
+        <div class="node-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">&#127760;</div>
+        <div class="node-title">Domains</div>
+        <div class="node-path">/dashboard/domains</div>
+        <span class="priority-badge p1">P1</span>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('analytics')">
+        <div class="node-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-yellow)">&#128202;</div>
+        <div class="node-title">Analytics</div>
+        <div class="node-path">/dashboard/analytics</div>
+        <span class="priority-badge p1">P1</span>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('suppressions')">
+        <div class="node-icon" style="background:rgba(239,68,68,0.15); color:var(--accent-red)">&#128683;</div>
+        <div class="node-title">Suppressions</div>
+        <div class="node-path">/dashboard/suppressions</div>
+        <span class="priority-badge p2">P2</span>
+      </div>
+    </div>
+
+    <div class="level-connector"></div>
+    <div class="level-label">Level 2 - Detail / Editor Views</div>
+    <div class="sitemap-level">
+      <div class="sitemap-node" onclick="showDetail('email-detail')">
+        <div class="node-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">&#128269;</div>
+        <div class="node-title">Email Detail</div>
+        <div class="node-path">/dashboard/emails/{id}</div>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('template-editor')">
+        <div class="node-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple)">&#9998;</div>
+        <div class="node-title">Template Editor</div>
+        <div class="node-path">/dashboard/templates/{id}/edit</div>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('domain-detail')">
+        <div class="node-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">&#128736;</div>
+        <div class="node-title">Domain Detail</div>
+        <div class="node-path">/dashboard/domains/{id}</div>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('api-keys')">
+        <div class="node-icon" style="background:rgba(249,115,22,0.15); color:var(--accent-orange)">&#128273;</div>
+        <div class="node-title">API Keys</div>
+        <div class="node-path">/dashboard/api-keys</div>
+      </div>
+      <div class="sitemap-node" onclick="showDetail('api-docs')">
+        <div class="node-icon" style="background:rgba(107,114,128,0.15); color:var(--text-muted)">&#128218;</div>
+        <div class="node-title">API Documentation</div>
+        <div class="node-path">/swagger</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="detail-panel" class="detail-panel"></div>
+</div>
+
+<!-- NAVIGATION VIEW -->
+<div id="navigation" class="view">
+  <div class="nav-tree">
+    <div class="nav-group">
+      <div class="nav-group-header">Main Navigation (Sidebar)</div>
+      <div class="nav-item" onclick="showDetail('overview')">
+        <div class="nav-item-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-blue)">&#128200;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Overview</div>
+          <div class="nav-item-desc">System health, key metrics, recent activity</div>
+        </div>
+        <span class="nav-item-badge" style="background:rgba(59,130,246,0.15); color:var(--accent-blue)">Default Landing</span>
+      </div>
+      <div class="nav-item" onclick="showDetail('emails')">
+        <div class="nav-item-icon" style="background:rgba(6,182,212,0.15); color:var(--accent-cyan)">&#9993;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Email Logs</div>
+          <div class="nav-item-desc">Search, filter, and view email delivery history</div>
+        </div>
+      </div>
+      <div class="nav-item" onclick="showDetail('templates')">
+        <div class="nav-item-icon" style="background:rgba(139,92,246,0.15); color:var(--accent-purple)">&#128196;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Templates</div>
+          <div class="nav-item-desc">Create, edit, and preview email templates</div>
+        </div>
+      </div>
+      <div class="nav-item" onclick="showDetail('domains')">
+        <div class="nav-item-icon" style="background:rgba(16,185,129,0.15); color:var(--accent-green)">&#127760;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Domains</div>
+          <div class="nav-item-desc">Manage sending domains and DNS verification</div>
+        </div>
+      </div>
+      <div class="nav-item" onclick="showDetail('analytics')">
+        <div class="nav-item-icon" style="background:rgba(245,158,11,0.15); color:var(--accent-yellow)">&#128202;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Analytics</div>
+          <div class="nav-item-desc">Delivery trends, charts, and performance data</div>
+        </div>
+      </div>
+      <div class="nav-item" onclick="showDetail('suppressions')">
+        <div class="nav-item-icon" style="background:rgba(239,68,68,0.15); color:var(--accent-red)">&#128683;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">Suppressions</div>
+          <div class="nav-item-desc">Bounced and complained addresses blocked from sending</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-header">Settings (Sidebar, lower section)</div>
+      <div class="nav-item" onclick="showDetail('api-keys')">
+        <div class="nav-item-icon" style="background:rgba(249,115,22,0.15); color:var(--accent-orange)">&#128273;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">API Keys</div>
+          <div class="nav-item-desc">Create, rotate, and revoke application API keys</div>
+        </div>
+      </div>
+      <div class="nav-item" onclick="showDetail('api-docs')">
+        <div class="nav-item-icon" style="background:rgba(107,114,128,0.15); color:var(--text-muted)">&#128218;</div>
+        <div class="nav-item-text">
+          <div class="nav-item-name">API Docs</div>
+          <div class="nav-item-desc">Interactive Swagger/OpenAPI documentation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RELATIONSHIPS VIEW -->
+<div id="relationships" class="view">
+  <div class="relationships-grid">
+    <div class="rel-card">
+      <div class="rel-card-title">Overview &harr; Email Logs</div>
+      <div class="rel-item">Click stat card (bounce rate, delivery rate) &rarr; Filtered log view</div>
+      <div class="rel-item">Click recent email row &rarr; Email detail view</div>
+      <div class="rel-item">Click alert &rarr; Relevant management page</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Overview &harr; Analytics</div>
+      <div class="rel-item">Click any stat card &rarr; Analytics filtered to that metric</div>
+      <div class="rel-item">30-day chart on overview is a summary of full analytics</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Email Logs &harr; Email Detail</div>
+      <div class="rel-item">Click any email row &rarr; Full email detail view</div>
+      <div class="rel-item">Detail view shows status timeline, bounce reason, template used</div>
+      <div class="rel-item">Back button returns to filtered log view</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Email Detail &harr; Suppressions</div>
+      <div class="rel-item">Bounced email detail links to suppression entry</div>
+      <div class="rel-item">"View in Suppression List" link on bounced/complained emails</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Email Detail &harr; Templates</div>
+      <div class="rel-item">Email detail shows which template was used</div>
+      <div class="rel-item">"View Template" link navigates to template editor</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Templates &harr; Template Editor</div>
+      <div class="rel-item">Click template row &rarr; Template editor/detail</div>
+      <div class="rel-item">"Create Template" &rarr; Blank editor</div>
+      <div class="rel-item">Save in editor &rarr; Return to template list</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Templates &harr; API Docs</div>
+      <div class="rel-item">Template editor shows template_id for API use</div>
+      <div class="rel-item">API docs reference template sending examples</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Analytics &harr; Email Logs</div>
+      <div class="rel-item">Drill into template performance &rarr; Filtered email logs</div>
+      <div class="rel-item">Click chart data point &rarr; Logs for that day</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Analytics &harr; Templates</div>
+      <div class="rel-item">Template performance chart links to template editor</div>
+      <div class="rel-item">"Edit Template" from analytics drilldown</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Domains &harr; Domain Detail</div>
+      <div class="rel-item">Click domain row &rarr; DNS records and verification detail</div>
+      <div class="rel-item">"Verify Now" triggers verification from detail view</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">Domains &harr; Overview</div>
+      <div class="rel-item">Domain verification failure alerts on overview</div>
+      <div class="rel-item">Click alert &rarr; Domain detail page</div>
+    </div>
+    <div class="rel-card">
+      <div class="rel-card-title">API Keys &harr; Analytics</div>
+      <div class="rel-item">Per-key sending stats shown in analytics</div>
+      <div class="rel-item">Click key name in analytics &rarr; API key detail</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const pages = {
+  login: {
+    title: 'Login', path: '/login',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Authentication form (username + password)', 'EaaS branding and logo', 'Version number', 'Error messages'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Sign In'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Remember Me toggle'] },
+      { title: 'Data Displayed', type: 'data-list', items: ['None (no API data needed)'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['POST /auth/login (session-based authentication)'] }
+    ]
+  },
+  overview: {
+    title: 'Dashboard Overview', path: '/dashboard',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Stat cards: Sent Today/7d/30d, Delivery Rate, Bounce Rate, Complaint Rate, Open Rate, Click Rate', 'System health: API status, Worker status, Queue depth', 'Send volume line chart (30 days)', 'Active alerts panel', 'Recent emails table (last 10)'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Click stat card to drill into analytics', 'Click email row to view detail', 'Click alert to navigate to relevant page'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Change stat card time range (today/7d/30d)', 'Refresh data'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['Toggle chart zoom', 'Dismiss alert'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/analytics?range=30d (stat cards + chart)', 'GET /health (system health indicators)', 'GET /api/v1/logs?limit=10&sort=sent_at:desc (recent emails)'] }
+    ]
+  },
+  emails: {
+    title: 'Email Logs', path: '/dashboard/emails',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Filterable email log table', 'Filter bar: Status, Date Range, Recipient, Sender, Template, API Key', 'Table columns: Recipient, Subject, Status Badge, Sent At, Delivered At', 'Pagination controls', 'Total count indicator'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Click row to view email detail', 'Apply filters', 'Search by subject or recipient'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Sort by column', 'Change page size', 'Clear all filters'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['Export filtered results', 'Copy message_id'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/logs?status={s}&from_date={d}&to_date={d}&to={email}&page={n}'] }
+    ]
+  },
+  'email-detail': {
+    title: 'Email Detail', path: '/dashboard/emails/{id}',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Status timeline: Queued > Sent > Delivered/Bounced/Opened/Clicked', 'Email metadata: To, From, Subject, Sent At, message_id', 'Bounce/complaint diagnostics (if applicable)', 'Template reference (if template-based send)', 'Variables passed (if template-based)', 'Open/click tracking events'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Navigate back to email logs', 'View suppression entry (if bounced)'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['View template used', 'Copy message_id', 'Resend email'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/logs/{message_id}'] }
+    ]
+  },
+  templates: {
+    title: 'Templates', path: '/dashboard/templates',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Template list table: Name, Version, Send Count, Last Updated', 'Search/filter bar', 'Pagination'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Create Template (opens editor)', 'Click row to edit template'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Search by name', 'Sort by column', 'Delete template (soft delete)'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['Restore deleted template', 'Duplicate template', 'Copy template_id'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/templates?page={n}&sort={field}', 'DELETE /api/v1/templates/{id}', 'PATCH /api/v1/templates/{id}/restore'] }
+    ]
+  },
+  'template-editor': {
+    title: 'Template Editor', path: '/dashboard/templates/{id}/edit',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Template name field', 'Subject template field (Liquid syntax)', 'HTML body code editor with syntax highlighting', 'Plain text body editor (optional, collapsible)', 'Variable schema editor', 'Live preview panel (collapsible)', 'Version history (last 10 versions)'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Save Template', 'Preview with sample data'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['View version history', 'View diff between versions', 'Toggle preview panel'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['Copy template_id', 'Discard changes', 'Switch to plain text editor'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/templates/{id}', 'POST /api/v1/templates (create)', 'PUT /api/v1/templates/{id} (update)', 'POST /api/v1/templates/{id}/preview'] }
+    ]
+  },
+  domains: {
+    title: 'Domains', path: '/dashboard/domains',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Domain list: Domain Name, Status Badge (green/yellow/red), Last Verified, Email Count', 'Status legend'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Add Domain (opens modal)', 'Click row to view domain detail'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Verify Now (per domain)', 'Remove domain'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/domains', 'POST /api/v1/domains', 'DELETE /api/v1/domains/{id}'] }
+    ]
+  },
+  'domain-detail': {
+    title: 'Domain Detail', path: '/dashboard/domains/{id}',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Domain name and overall status', 'Individual DNS records: Type, Name, Value, Status (verified/pending/failed)', 'Copy buttons per record and "Copy All"', 'Expected vs actual values for failed records', 'Last verified timestamp', 'Next scheduled verification'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Verify Now', 'Copy DNS records'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Remove domain', 'Navigate back to domain list'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/domains/{id}', 'POST /api/v1/domains/{id}/verify'] }
+    ]
+  },
+  analytics: {
+    title: 'Analytics', path: '/dashboard/analytics',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Date range selector (Today, 7d, 30d, 90d, Custom)', 'Time-series line chart: sends, deliveries, bounces, complaints', 'Donut chart: delivery status breakdown', 'Bar chart: top templates by volume', 'Bar chart: top domains by volume', 'Table: per-API-key statistics'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Change date range', 'Click chart element to drill down'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Filter by domain, API key, or template', 'Toggle chart type (daily/weekly/monthly)', 'Export chart data'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['Hover for tooltip values', 'Toggle data series visibility'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/analytics?group_by={period}&from={date}&to={date}&domain={d}&template_id={id}&api_key_id={id}'] }
+    ]
+  },
+  suppressions: {
+    title: 'Suppressions', path: '/dashboard/suppressions',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Search bar (partial email match)', 'Suppression table: Email, Reason (badge), Suppressed At, Source Email', 'Checkbox selection column', 'Total suppressed count'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Search for address', 'Add Suppression (opens modal)', 'Remove selected suppressions'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Export as CSV', 'Bulk select/deselect', 'Filter by reason'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['View source email for auto-suppressed entries', 'Sort by date'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/suppressions?search={email}&page={n}', 'POST /api/v1/suppressions', 'DELETE /api/v1/suppressions/{email}'] }
+    ]
+  },
+  'api-keys': {
+    title: 'API Keys', path: '/dashboard/api-keys',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['API key table: Name, Prefix (eaas_live_xxxx...), Created At, Last Used, Status, Send Count', 'Never display full key after creation'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Create API Key (shows key once)', 'Revoke key'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Rotate key', 'Copy key prefix'] },
+      { title: 'Tertiary Actions', type: 'action-tertiary', items: ['View per-key analytics', 'Edit key name', 'Edit allowed domains'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['GET /api/v1/api-keys', 'POST /api/v1/api-keys', 'DELETE /api/v1/api-keys/{id}', 'POST /api/v1/api-keys/{id}/rotate'] }
+    ]
+  },
+  'api-docs': {
+    title: 'API Documentation', path: '/swagger',
+    content: [
+      { title: 'Content Priority', type: 'data-list', items: ['Interactive Swagger UI', 'All endpoint documentation with examples', 'Request/response model schemas', 'Authentication guide (Bearer token)', 'Exportable OpenAPI 3.0 spec'] },
+      { title: 'Primary Actions', type: 'action-primary', items: ['Try endpoint (interactive testing)', 'Browse endpoints by section'] },
+      { title: 'Secondary Actions', type: 'action-secondary', items: ['Export OpenAPI spec as JSON', 'Copy cURL commands'] },
+      { title: 'API Endpoints', type: 'api-list', items: ['Self-referential: /swagger/v1/swagger.json'] }
+    ]
+  }
+};
+
+function showDetail(pageId) {
+  const page = pages[pageId];
+  if (!page) return;
+
+  document.querySelectorAll('.sitemap-node').forEach(n => n.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  const panel = document.getElementById('detail-panel');
+  let html = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-title">${page.title}</div>
+        <div class="detail-path">${page.path}</div>
+      </div>
+      <button class="detail-close" onclick="hideDetail()">&times;</button>
+    </div>
+    <div class="detail-grid">`;
+
+  page.content.forEach(section => {
+    const fullWidth = section.title === 'Content Priority' ? ' full-width' : '';
+    html += `<div class="detail-section${fullWidth}">
+      <div class="section-title">${section.title}</div>
+      <div class="section-content ${section.type}"><ul>`;
+    section.items.forEach(item => {
+      html += `<li>${item}</li>`;
+    });
+    html += `</ul></div></div>`;
+  });
+
+  html += '</div>';
+  panel.innerHTML = html;
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function hideDetail() {
+  document.getElementById('detail-panel').classList.remove('visible');
+  document.querySelectorAll('.sitemap-node').forEach(n => n.classList.remove('selected'));
+}
+
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  const idx = ['sitemap','navigation','relationships'].indexOf(viewId);
+  if (idx >= 0) tabs[idx].classList.add('active');
+}
+</script>
+
+</body>
+</html>

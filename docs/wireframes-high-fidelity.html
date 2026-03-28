@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Dashboard - High-Fidelity Mockups</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+  :root {
+    --primary: #7C4DFF;
+    --primary-hover: #9C7CFF;
+    --primary-dark: #5C2DDF;
+    --secondary: #00E5FF;
+    --success: #00E676;
+    --error: #FF5252;
+    --warning: #FFD740;
+    --info: #448AFF;
+    --surface: #1E1E2E;
+    --surface-light: #252538;
+    --paper: #27293D;
+    --paper-hover: #2F3152;
+    --paper-light: #313350;
+    --text-primary: #E0E0E0;
+    --text-secondary: #9E9E9E;
+    --text-disabled: #616161;
+    --divider: #373956;
+    --border: #3A3C5A;
+    --overlay: rgba(0,0,0,0.5);
+    --radius: 4px;
+    --radius-lg: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Roboto', sans-serif; background: var(--surface); color: var(--text-primary); font-size: 14px; line-height: 1.5; }
+
+  /* ===== TAB NAVIGATION ===== */
+  .screen-tabs { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #0D0D1A; display: flex; align-items: center; padding: 0 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.5); height: 44px; }
+  .screen-tabs .st-label { color: var(--primary); font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding-right: 24px; border-right: 1px solid #333; margin-right: 8px; }
+  .screen-tabs .st-tab { padding: 10px 16px; color: var(--text-secondary); cursor: pointer; font-size: 12px; font-weight: 500; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .screen-tabs .st-tab:hover { color: var(--text-primary); background: rgba(124,77,255,0.1); }
+  .screen-tabs .st-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* ===== LAYOUT ===== */
+  .screen { display: none; padding-top: 44px; }
+  .screen.active { display: block; }
+
+  .app-layout { display: flex; min-height: calc(100vh - 44px); }
+
+  /* Sidebar */
+  .app-sidebar { width: 240px; background: var(--paper); border-right: 1px solid var(--divider); flex-shrink: 0; display: flex; flex-direction: column; }
+  .sidebar-brand { padding: 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--divider); }
+  .sidebar-brand .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #fff; }
+  .sidebar-brand .brand-text { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .sidebar-brand .brand-sub { font-size: 10px; color: var(--text-secondary); }
+
+  .nav-section { padding: 12px 0; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 400; border-left: 3px solid transparent; }
+  .nav-item:hover { background: rgba(124,77,255,0.08); color: var(--text-primary); }
+  .nav-item.active { background: rgba(124,77,255,0.12); color: var(--primary); border-left-color: var(--primary); font-weight: 500; }
+  .nav-item svg { width: 20px; height: 20px; fill: currentColor; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+
+  /* Top App Bar */
+  .app-bar { height: 56px; background: var(--paper); border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .app-bar-title { font-size: 18px; font-weight: 500; }
+  .app-bar-actions { display: flex; align-items: center; gap: 16px; }
+  .env-badge { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .env-badge.prod { background: rgba(0,230,118,0.15); color: var(--success); }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 20px; background: var(--surface-light); cursor: pointer; }
+  .user-chip:hover { background: var(--paper-hover); }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #B47CFF); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; }
+  .user-name { font-size: 13px; color: var(--text-primary); }
+
+  /* Main content area */
+  .app-main { flex: 1; background: var(--surface); overflow-y: auto; }
+  .content-area { padding: 24px; max-width: 1400px; }
+
+  /* ===== COMPONENTS ===== */
+
+  /* MudCard */
+  .mud-card { background: var(--paper); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .mud-card-header { padding: 16px 20px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; }
+  .mud-card-content { padding: 20px; }
+  .mud-card-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Stat Cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--paper); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .stat-card.purple::before { background: var(--primary); }
+  .stat-card.cyan::before { background: var(--secondary); }
+  .stat-card.green::before { background: var(--success); }
+  .stat-card.red::before { background: var(--error); }
+  .stat-card.amber::before { background: var(--warning); }
+  .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-card .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .stat-card .stat-change { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .stat-card .stat-change.up { color: var(--success); }
+  .stat-card .stat-change.down { color: var(--error); }
+  .stat-card .stat-sub { font-size: 11px; color: var(--text-disabled); margin-top: 4px; }
+
+  /* KPI grid for analytics */
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: var(--paper); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow); text-align: center; }
+  .kpi-card .kpi-value { font-size: 24px; font-weight: 700; }
+  .kpi-card .kpi-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .kpi-card .kpi-pct { font-size: 11px; color: var(--text-disabled); margin-top: 2px; }
+  .kpi-card .kpi-change { font-size: 11px; margin-top: 4px; }
+
+  /* Health Bar */
+  .health-bar { display: flex; gap: 12px; flex-wrap: wrap; }
+  .health-chip { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--surface-light); border-radius: 20px; font-size: 13px; }
+  .health-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .health-dot.ok { background: var(--success); box-shadow: 0 0 6px rgba(0,230,118,0.4); }
+  .health-dot.err { background: var(--error); box-shadow: 0 0 6px rgba(255,82,82,0.4); }
+
+  /* MudDataGrid / Table */
+  .mud-table { width: 100%; border-collapse: collapse; }
+  .mud-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--divider); background: var(--paper); }
+  .mud-table td { padding: 12px 16px; border-bottom: 1px solid var(--divider); color: var(--text-primary); font-size: 13px; }
+  .mud-table tr:hover td { background: var(--paper-hover); }
+  .mud-table tr.selected td { background: rgba(124,77,255,0.1); }
+
+  /* Status Badges */
+  .badge-status { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-status.delivered { background: rgba(0,230,118,0.15); color: var(--success); }
+  .badge-status.bounced { background: rgba(255,82,82,0.15); color: var(--error); }
+  .badge-status.sending { background: rgba(68,138,255,0.15); color: var(--info); }
+  .badge-status.queued { background: rgba(158,158,158,0.15); color: var(--text-secondary); }
+  .badge-status.failed { background: rgba(255,82,82,0.15); color: var(--error); }
+  .badge-status.complained { background: rgba(255,215,64,0.15); color: var(--warning); }
+  .badge-status.verified { background: rgba(0,230,118,0.15); color: var(--success); }
+  .badge-status.pending { background: rgba(255,215,64,0.15); color: var(--warning); }
+  .badge-status.hard_bounce { background: rgba(255,82,82,0.15); color: var(--error); }
+  .badge-status.complaint { background: rgba(255,215,64,0.15); color: var(--warning); }
+  .badge-status.manual { background: rgba(124,77,255,0.15); color: var(--primary); }
+  .badge-status.soft_bounce { background: rgba(255,152,0,0.15); color: #FF9800; }
+  .badge-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Buttons */
+  .mud-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.5px; }
+  .mud-btn.primary { background: var(--primary); color: #fff; }
+  .mud-btn.primary:hover { background: var(--primary-hover); }
+  .mud-btn.outlined { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+  .mud-btn.outlined:hover { background: rgba(124,77,255,0.08); }
+  .mud-btn.text { background: transparent; color: var(--text-secondary); }
+  .mud-btn.text:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+  .mud-btn.error { background: transparent; color: var(--error); }
+  .mud-btn.error:hover { background: rgba(255,82,82,0.08); }
+  .mud-btn.sm { padding: 4px 12px; font-size: 11px; }
+  .mud-icon-btn { width: 36px; height: 36px; border-radius: 50%; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .mud-icon-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+
+  /* Inputs */
+  .mud-input { background: var(--surface-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; color: var(--text-primary); font-size: 13px; font-family: 'Roboto', sans-serif; width: 100%; transition: border-color 0.15s; }
+  .mud-input:focus { outline: none; border-color: var(--primary); }
+  .mud-input::placeholder { color: var(--text-disabled); }
+  .mud-select { background: var(--surface-light); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; color: var(--text-primary); font-size: 13px; font-family: 'Roboto', sans-serif; -webkit-appearance: none; cursor: pointer; }
+  .mud-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+
+  /* Filter Bar */
+  .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; padding: 16px; background: var(--paper); border-radius: var(--radius-lg); margin-bottom: 16px; box-shadow: var(--shadow); }
+
+  /* Chip */
+  .mud-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 16px; font-size: 12px; background: rgba(124,77,255,0.15); color: var(--primary); }
+
+  /* Pagination */
+  .mud-pagination { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; font-size: 13px; color: var(--text-secondary); }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btn { width: 32px; height: 32px; border-radius: var(--radius); background: transparent; border: 1px solid var(--border); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+  .page-btn:hover { background: var(--paper-hover); }
+  .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* Chart Placeholder */
+  .chart-area { background: var(--paper); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .chart-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .chart-canvas { position: relative; width: 100%; }
+
+  /* SVG Charts */
+  .chart-svg { width: 100%; }
+
+  /* Timeline */
+  .timeline { padding: 0; }
+  .tl-item { display: flex; gap: 16px; padding-bottom: 20px; position: relative; }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-line { position: absolute; left: 15px; top: 30px; bottom: 0; width: 2px; background: var(--divider); }
+  .tl-item:last-child .tl-line { display: none; }
+  .tl-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; z-index: 1; }
+  .tl-dot.queued { background: rgba(158,158,158,0.2); color: var(--text-secondary); }
+  .tl-dot.sent { background: rgba(68,138,255,0.2); color: var(--info); }
+  .tl-dot.delivered { background: rgba(0,230,118,0.2); color: var(--success); }
+  .tl-dot.opened { background: rgba(124,77,255,0.2); color: var(--primary); }
+  .tl-dot.clicked { background: rgba(0,229,255,0.2); color: var(--secondary); }
+  .tl-dot.bounced { background: rgba(255,82,82,0.2); color: var(--error); }
+  .tl-content { flex: 1; }
+  .tl-title { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .tl-time { font-size: 11px; color: var(--text-disabled); margin-top: 2px; }
+  .tl-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Slide-out Panel / Drawer */
+  .drawer { width: 440px; background: var(--paper); border-left: 1px solid var(--divider); flex-shrink: 0; box-shadow: -4px 0 16px rgba(0,0,0,0.3); overflow-y: auto; max-height: calc(100vh - 100px); }
+  .drawer-header { padding: 20px; border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: flex-start; }
+  .drawer-body { padding: 20px; }
+  .drawer-section { margin-bottom: 20px; }
+  .drawer-label { font-size: 11px; color: var(--text-disabled); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 500; }
+
+  /* Template Editor */
+  .editor-split { display: flex; gap: 16px; }
+  .editor-list { width: 280px; flex-shrink: 0; }
+  .editor-main { flex: 1; }
+  .tpl-item { padding: 12px 16px; border-radius: var(--radius); cursor: pointer; margin-bottom: 4px; transition: all 0.15s; }
+  .tpl-item:hover { background: var(--paper-hover); }
+  .tpl-item.selected { background: rgba(124,77,255,0.12); border-left: 3px solid var(--primary); }
+  .tpl-item .tpl-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .tpl-item .tpl-meta { font-size: 11px; color: var(--text-disabled); margin-top: 2px; }
+  .code-editor { background: #1A1A2E; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; color: #E0E0E0; min-height: 280px; line-height: 1.6; overflow-x: auto; }
+  .code-editor .tag { color: #FF7043; }
+  .code-editor .attr { color: #FFD740; }
+  .code-editor .str { color: #69F0AE; }
+  .code-editor .var { color: #40C4FF; }
+  .code-editor .comment { color: #616161; }
+
+  /* Tab buttons */
+  .tab-group { display: flex; gap: 0; border-bottom: 1px solid var(--divider); margin-bottom: 16px; }
+  .tab-btn { padding: 10px 20px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* DNS Records */
+  .dns-card { background: var(--surface-light); border-radius: var(--radius); padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .dns-type { background: var(--paper-light); padding: 4px 10px; border-radius: var(--radius); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--secondary); min-width: 56px; text-align: center; }
+  .dns-value { flex: 1; font-family: 'Consolas', monospace; font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dns-check { font-size: 16px; }
+
+  /* Dialog */
+  .dialog-backdrop { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--radius-lg); padding: 0; max-width: 480px; margin: 24px auto; box-shadow: var(--shadow-lg); overflow: hidden; }
+  .dialog-header { padding: 20px 24px; border-bottom: 1px solid var(--divider); }
+  .dialog-header h3 { font-size: 18px; font-weight: 500; }
+  .dialog-body { padding: 24px; }
+  .dialog-actions { padding: 16px 24px; border-top: 1px solid var(--divider); display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* Row / Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+
+  /* Quick Actions */
+  .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .quick-card { background: var(--paper); border-radius: var(--radius-lg); padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; border: 1px solid transparent; }
+  .quick-card:hover { border-color: var(--primary); background: var(--paper-hover); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(124,77,255,0.2); }
+  .quick-card .qc-icon { font-size: 24px; margin-bottom: 8px; }
+  .quick-card .qc-text { font-size: 13px; color: var(--text-secondary); }
+
+  /* Skeleton loading */
+  .skeleton { background: linear-gradient(90deg, var(--surface-light) 25%, var(--paper-hover) 50%, var(--surface-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius); }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* Login Screen */
+  .login-bg { min-height: calc(100vh - 44px); display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0D0D1A 0%, var(--surface) 50%, #1A0D2E 100%); }
+  .login-card { width: 420px; background: var(--paper); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .login-header { padding: 40px 40px 24px; text-align: center; }
+  .login-logo { width: 64px; height: 64px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 22px; color: #fff; margin: 0 auto 16px; }
+  .login-title { font-size: 22px; font-weight: 500; color: var(--text-primary); }
+  .login-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .login-body { padding: 0 40px 40px; }
+  .login-field { margin-bottom: 20px; }
+
+  /* File upload area */
+  .upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 32px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .upload-zone:hover { border-color: var(--primary); background: rgba(124,77,255,0.05); }
+
+  /* Expand row */
+  .expand-content { background: var(--surface-light); padding: 16px 20px; }
+
+  /* Date range pills */
+  .date-pills { display: flex; gap: 4px; }
+  .date-pill { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: var(--surface-light); color: var(--text-secondary); border: 1px solid var(--border); }
+  .date-pill:hover { background: var(--paper-hover); color: var(--text-primary); }
+  .date-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  /* Info row */
+  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--divider); font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--text-secondary); }
+  .info-val { color: var(--text-primary); font-weight: 500; }
+
+  /* Metadata block */
+  .meta-block { background: #1A1A2E; border-radius: var(--radius); padding: 12px; font-family: 'Consolas', monospace; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+  /* Preview area */
+  .preview-frame { background: #fff; border-radius: var(--radius); padding: 20px; color: #333; min-height: 200px; }
+</style>
+</head>
+<body>
+
+<!-- Screen Tab Navigation -->
+<div class="screen-tabs">
+  <div class="st-label">EaaS Mockups</div>
+  <div class="st-tab active" onclick="switchScreen('login', this)">Login</div>
+  <div class="st-tab" onclick="switchScreen('overview', this)">Overview</div>
+  <div class="st-tab" onclick="switchScreen('emails', this)">Email Log</div>
+  <div class="st-tab" onclick="switchScreen('templates', this)">Templates</div>
+  <div class="st-tab" onclick="switchScreen('domains', this)">Domains</div>
+  <div class="st-tab" onclick="switchScreen('analytics', this)">Analytics</div>
+  <div class="st-tab" onclick="switchScreen('suppressions', this)">Suppressions</div>
+  <div class="st-tab" onclick="switchScreen('loading', this)">Loading States</div>
+</div>
+
+<!-- ===================== SCREEN 1: LOGIN ===================== -->
+<div class="screen active" id="s-login">
+  <div class="login-bg">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">E</div>
+        <div class="login-title">EaaS Dashboard</div>
+        <div class="login-subtitle">Sign in to manage your email infrastructure</div>
+      </div>
+      <div class="login-body">
+        <div class="login-field">
+          <div class="mud-label">Username</div>
+          <input class="mud-input" type="text" placeholder="admin" disabled>
+        </div>
+        <div class="login-field">
+          <div class="mud-label">Password</div>
+          <input class="mud-input" type="password" placeholder="Enter password" disabled>
+        </div>
+        <button class="mud-btn primary" style="width:100%; justify-content:center; padding: 12px; font-size: 14px; margin-top: 8px;">Sign In</button>
+        <div style="text-align:center; margin-top:16px; font-size:12px; color:var(--text-disabled);">
+          Single-user admin access. Session-based authentication.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 2: OVERVIEW ===================== -->
+<div class="screen" id="s-overview">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <div class="app-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">E</div>
+        <div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Dashboard Overview</div>
+        <div class="app-bar-actions">
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip">
+            <div class="user-avatar">I</div>
+            <div class="user-name">Israel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+          <div class="stat-card purple">
+            <div class="stat-label">Total Sent</div>
+            <div class="stat-value">1,247</div>
+            <div class="stat-sub">Today: 89 | Week: 412</div>
+            <div class="stat-change up">&#9650; 12% vs last month</div>
+          </div>
+          <div class="stat-card cyan">
+            <div class="stat-label">Delivery Rate</div>
+            <div class="stat-value">98.2%</div>
+            <div class="stat-sub">1,225 of 1,247</div>
+            <div class="stat-change up">&#9650; 0.3% vs last period</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-label">Bounce Rate</div>
+            <div class="stat-value">1.4%</div>
+            <div class="stat-sub">17 bounced</div>
+            <div class="stat-change up">&#9660; 0.1% improved</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Open Rate</div>
+            <div class="stat-value">42.1%</div>
+            <div class="stat-sub">515 opened</div>
+            <div class="stat-change up">&#9650; 2.5% vs last period</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Click Rate</div>
+            <div class="stat-value">8.7%</div>
+            <div class="stat-sub">107 clicked</div>
+            <div class="stat-change up">&#9650; 0.4% vs last period</div>
+          </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="mud-card mb-24">
+          <div class="mud-card-header">
+            <div class="mud-card-title">System Health</div>
+            <span style="font-size:12px; color:var(--success);">All Systems Operational</span>
+          </div>
+          <div class="mud-card-content">
+            <div class="health-bar">
+              <div class="health-chip"><div class="health-dot ok"></div> API Server</div>
+              <div class="health-chip"><div class="health-dot ok"></div> Worker</div>
+              <div class="health-chip"><div class="health-dot ok"></div> RabbitMQ</div>
+              <div class="health-chip"><div class="health-dot ok"></div> PostgreSQL</div>
+              <div class="health-chip"><div class="health-dot ok"></div> Redis</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Emails -->
+        <div class="mud-card mb-24">
+          <div class="mud-card-header">
+            <div class="mud-card-title">Recent Emails</div>
+            <button class="mud-btn text sm">View All</button>
+          </div>
+          <table class="mud-table">
+            <thead>
+              <tr><th>Time</th><th>From</th><th>To</th><th>Subject</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <tr><td style="white-space:nowrap;">10:32 AM</td><td>noreply@cashtrack.ng</td><td>client@gmail.com</td><td>Invoice #INV-2024-089</td><td><span class="badge-status delivered">Delivered</span></td></tr>
+              <tr><td>10:28 AM</td><td>noreply@cashtrack.ng</td><td>user@yahoo.com</td><td>Payment Confirmation</td><td><span class="badge-status delivered">Delivered</span></td></tr>
+              <tr><td>10:15 AM</td><td>israel@cashtrack.ng</td><td>new@user.com</td><td>Welcome to CashTrack</td><td><span class="badge-status sending">Sending</span></td></tr>
+              <tr><td>09:58 AM</td><td>noreply@cashtrack.ng</td><td>bounced@invalid.com</td><td>Invoice #INV-2024-088</td><td><span class="badge-status bounced">Bounced</span></td></tr>
+              <tr><td>09:45 AM</td><td>noreply@cashtrack.ng</td><td>test@example.com</td><td>Password Reset</td><td><span class="badge-status queued">Queued</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mud-card">
+          <div class="mud-card-header"><div class="mud-card-title">Quick Actions</div></div>
+          <div class="mud-card-content">
+            <div class="quick-grid">
+              <div class="quick-card">
+                <div class="qc-icon" style="color:var(--primary);">&#9993;</div>
+                <div class="qc-text">Send Test Email</div>
+              </div>
+              <div class="quick-card">
+                <div class="qc-icon" style="color:var(--secondary);">&#9998;</div>
+                <div class="qc-text">Create Template</div>
+              </div>
+              <div class="quick-card">
+                <div class="qc-icon" style="color:var(--success);">&#9775;</div>
+                <div class="qc-text">Add Domain</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 3: EMAIL LOG ===================== -->
+<div class="screen" id="s-emails">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Email Log</div>
+        <div class="app-bar-actions">
+          <button class="mud-btn outlined sm">Export CSV</button>
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <select class="mud-select" style="width:120px;" disabled><option>Status: All</option></select>
+          <input class="mud-input" style="width:130px;" placeholder="Date from" disabled>
+          <input class="mud-input" style="width:130px;" placeholder="Date to" disabled>
+          <input class="mud-input" style="width:150px;" placeholder="From email..." disabled>
+          <input class="mud-input" style="width:150px;" placeholder="To email..." disabled>
+          <input class="mud-input" style="width:100px;" placeholder="Tags" disabled>
+          <select class="mud-select" style="width:130px;" disabled><option>Template: All</option></select>
+          <input class="mud-input" style="width:110px;" placeholder="Batch ID" disabled>
+          <button class="mud-btn primary sm">Apply</button>
+          <button class="mud-btn text sm">Clear</button>
+        </div>
+
+        <div style="display:flex; gap:0;">
+          <!-- Table -->
+          <div style="flex:1;">
+            <div class="mud-card" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);">
+              <table class="mud-table">
+                <thead>
+                  <tr><th>Timestamp</th><th>From</th><th>To</th><th>Subject</th><th>Status</th><th>Events</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr class="selected">
+                    <td style="white-space:nowrap;">2026-03-27 10:32</td><td>noreply@cashtrack.ng</td><td>client@gmail.com</td><td>Invoice #INV-2024-089</td><td><span class="badge-status delivered">Delivered</span></td><td>4</td><td><button class="mud-btn text sm">Detail</button></td>
+                  </tr>
+                  <tr><td>2026-03-27 10:28</td><td>noreply@cashtrack.ng</td><td>user@yahoo.com</td><td>Payment Confirmation</td><td><span class="badge-status delivered">Delivered</span></td><td>3</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 10:15</td><td>israel@cashtrack.ng</td><td>new@user.com</td><td>Welcome to CashTrack</td><td><span class="badge-status sending">Sending</span></td><td>2</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 09:58</td><td>noreply@cashtrack.ng</td><td>bounced@invalid.com</td><td>Invoice #INV-2024-088</td><td><span class="badge-status bounced">Bounced</span></td><td>3</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 09:45</td><td>noreply@cashtrack.ng</td><td>test@example.com</td><td>Password Reset</td><td><span class="badge-status queued">Queued</span></td><td>1</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 09:30</td><td>noreply@cashtrack.ng</td><td>admin@corp.co</td><td>Invoice #INV-2024-087</td><td><span class="badge-status delivered">Delivered</span></td><td>5</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 09:12</td><td>israel@cashtrack.ng</td><td>team@partner.io</td><td>Monthly Statement</td><td><span class="badge-status delivered">Delivered</span></td><td>4</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                  <tr><td>2026-03-27 08:55</td><td>noreply@cashtrack.ng</td><td>vip@client.com</td><td>Payment Received</td><td><span class="badge-status delivered">Delivered</span></td><td>3</td><td><button class="mud-btn text sm">Detail</button></td></tr>
+                </tbody>
+              </table>
+              <div class="mud-pagination">
+                <span>Showing 1-20 of 1,247</span>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <select class="mud-select" style="width:70px;" disabled><option>20</option></select>
+                  <div class="page-btns">
+                    <div class="page-btn active">1</div>
+                    <div class="page-btn">2</div>
+                    <div class="page-btn">3</div>
+                    <div class="page-btn">...</div>
+                    <div class="page-btn">63</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detail Drawer -->
+          <div class="drawer">
+            <div class="drawer-header">
+              <div>
+                <div style="font-size:16px; font-weight:500;">Invoice #INV-2024-089</div>
+                <div style="font-size:12px; color:var(--text-disabled); margin-top:4px;">eaas_a8f3b2c1</div>
+              </div>
+              <span class="badge-status delivered">Delivered</span>
+            </div>
+            <div class="drawer-body">
+              <div class="drawer-section">
+                <div class="drawer-label">Email Details</div>
+                <div class="info-row"><span class="info-key">From</span><span class="info-val">noreply@cashtrack.ng</span></div>
+                <div class="info-row"><span class="info-key">To</span><span class="info-val">client@gmail.com</span></div>
+                <div class="info-row"><span class="info-key">CC</span><span class="info-val">accounts@cashtrack.ng</span></div>
+                <div class="info-row"><span class="info-key">Template</span><span class="info-val">Invoice Notification</span></div>
+                <div class="info-row"><span class="info-key">Batch</span><span class="info-val">batch_x9k2m4</span></div>
+                <div class="info-row"><span class="info-key">Tags</span><span class="info-val"><span class="mud-chip">invoice</span> <span class="mud-chip">cashtrack</span></span></div>
+                <div class="info-row"><span class="info-key">Track Opens</span><span class="info-val" style="color:var(--success);">Enabled</span></div>
+                <div class="info-row"><span class="info-key">Track Clicks</span><span class="info-val" style="color:var(--success);">Enabled</span></div>
+              </div>
+
+              <div class="drawer-section">
+                <div class="drawer-label">Event Timeline</div>
+                <div class="timeline">
+                  <div class="tl-item">
+                    <div class="tl-dot queued">Q</div>
+                    <div class="tl-line"></div>
+                    <div class="tl-content">
+                      <div class="tl-title">Queued</div>
+                      <div class="tl-time">2026-03-27 10:32:01 AM</div>
+                    </div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot sent">S</div>
+                    <div class="tl-line"></div>
+                    <div class="tl-content">
+                      <div class="tl-title">Sent to SES</div>
+                      <div class="tl-time">2026-03-27 10:32:03 AM</div>
+                      <div class="tl-detail">SES ID: 01020192...</div>
+                    </div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot delivered">D</div>
+                    <div class="tl-line"></div>
+                    <div class="tl-content">
+                      <div class="tl-title">Delivered</div>
+                      <div class="tl-time">2026-03-27 10:32:08 AM</div>
+                      <div class="tl-detail">SMTP 250 OK</div>
+                    </div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot opened">O</div>
+                    <div class="tl-content">
+                      <div class="tl-title">Opened</div>
+                      <div class="tl-time">2026-03-27 10:45:22 AM</div>
+                      <div class="tl-detail">Chrome 120, Windows 11</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="drawer-section">
+                <div class="drawer-label">Raw Metadata</div>
+                <div class="meta-block">
+{<br>
+&nbsp;&nbsp;"ses_message_id": "010201928abc...",<br>
+&nbsp;&nbsp;"tracking_id": "trk_a8f3b2c1d4e5",<br>
+&nbsp;&nbsp;"track_opens": true,<br>
+&nbsp;&nbsp;"track_clicks": true,<br>
+&nbsp;&nbsp;"created_at": "2026-03-27T10:32:01Z"<br>
+}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 4: TEMPLATES ===================== -->
+<div class="screen" id="s-templates">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Template Manager</div>
+        <div class="app-bar-actions">
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <div class="editor-split">
+          <!-- Template List Panel -->
+          <div class="editor-list">
+            <div class="mud-card" style="min-height:600px;">
+              <div style="padding:16px;">
+                <button class="mud-btn primary" style="width:100%; justify-content:center;">+ New Template</button>
+                <input class="mud-input" style="margin-top:12px;" placeholder="Search templates..." disabled>
+              </div>
+              <div style="padding:0 8px;">
+                <div class="tpl-item selected">
+                  <div class="tpl-name">Invoice Notification</div>
+                  <div class="tpl-meta">v3 -- Updated 2h ago -- 1,240 sent</div>
+                </div>
+                <div class="tpl-item">
+                  <div class="tpl-name">Payment Confirmation</div>
+                  <div class="tpl-meta">v2 -- Updated 1d ago -- 890 sent</div>
+                </div>
+                <div class="tpl-item">
+                  <div class="tpl-name">Welcome Email</div>
+                  <div class="tpl-meta">v1 -- Updated 3d ago -- 456 sent</div>
+                </div>
+                <div class="tpl-item">
+                  <div class="tpl-name">Password Reset</div>
+                  <div class="tpl-meta">v1 -- Updated 5d ago -- 312 sent</div>
+                </div>
+                <div class="tpl-item">
+                  <div class="tpl-name">Monthly Statement</div>
+                  <div class="tpl-meta">v2 -- Updated 1w ago -- 178 sent</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Editor Panel -->
+          <div class="editor-main">
+            <div class="mud-card">
+              <div class="mud-card-header">
+                <div>
+                  <span style="font-size:16px; font-weight:500;">Invoice Notification</span>
+                  <span class="mud-chip" style="margin-left:12px;">v3</span>
+                  <div style="font-size:11px; color:var(--text-disabled); margin-top:4px;">Last updated: 2026-03-27 08:15 AM</div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="mud-btn primary">Save</button>
+                  <button class="mud-btn error">Delete</button>
+                </div>
+              </div>
+              <div class="mud-card-content">
+                <div class="mb-16">
+                  <div class="mud-label">Template Name</div>
+                  <input class="mud-input" value="Invoice Notification" disabled>
+                </div>
+                <div class="mb-16">
+                  <div class="mud-label">Subject Template</div>
+                  <input class="mud-input" value="Invoice {{invoice_number}} from {{company_name}}" disabled>
+                </div>
+
+                <div class="tab-group">
+                  <button class="tab-btn active">HTML Editor</button>
+                  <button class="tab-btn">Text Body</button>
+                  <button class="tab-btn" onclick="document.getElementById('editor-view').style.display='none';document.getElementById('preview-view').style.display='block';this.classList.add('active');this.previousElementSibling.previousElementSibling.classList.remove('active');">Preview</button>
+                </div>
+
+                <div id="editor-view">
+                  <div class="code-editor">
+<span class="tag">&lt;html&gt;</span><br>
+<span class="tag">&lt;body</span> <span class="attr">style=</span><span class="str">"font-family: Arial, sans-serif;"</span><span class="tag">&gt;</span><br>
+&nbsp;&nbsp;<span class="tag">&lt;div</span> <span class="attr">style=</span><span class="str">"max-width: 600px; margin: 0 auto;"</span><span class="tag">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;h1</span> <span class="attr">style=</span><span class="str">"color: #333;"</span><span class="tag">&gt;</span>Invoice <span class="var">{{invoice_number}}</span><span class="tag">&lt;/h1&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;p&gt;</span>Dear <span class="var">{{customer_name}}</span>,<span class="tag">&lt;/p&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;p&gt;</span>Please find attached your invoice.<span class="tag">&lt;/p&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;table</span> <span class="attr">style=</span><span class="str">"width:100%; border-collapse:collapse;"</span><span class="tag">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;tr&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;td&gt;</span>Amount Due<span class="tag">&lt;/td&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;td</span> <span class="attr">style=</span><span class="str">"font-weight: bold;"</span><span class="tag">&gt;</span><span class="var">{{amount}}</span><span class="tag">&lt;/td&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;/tr&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;/table&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;a</span> <span class="attr">href=</span><span class="str">"<span class="var">{{payment_url}}</span>"</span><span class="tag">&gt;</span>Pay Now<span class="tag">&lt;/a&gt;</span><br>
+&nbsp;&nbsp;<span class="tag">&lt;/div&gt;</span><br>
+<span class="tag">&lt;/body&gt;</span><br>
+<span class="tag">&lt;/html&gt;</span>
+                  </div>
+                </div>
+
+                <div id="preview-view" style="display:none;">
+                  <div class="preview-frame">
+                    <h1 style="color:#333; font-size:24px;">Invoice INV-2024-089</h1>
+                    <p>Dear John Doe,</p>
+                    <p>Please find attached your invoice.</p>
+                    <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+                      <tr><td style="padding:8px; border:1px solid #ddd;">Amount Due</td><td style="padding:8px; border:1px solid #ddd; font-weight:bold;">NGN 150,000.00</td></tr>
+                    </table>
+                    <a href="#" style="display:inline-block; padding:12px 24px; background:#7C4DFF; color:#fff; text-decoration:none; border-radius:4px;">Pay Now</a>
+                  </div>
+                </div>
+
+                <!-- Variables -->
+                <div class="mt-16">
+                  <div class="mud-label">Detected Variables</div>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                    <span class="mud-chip">invoice_number</span>
+                    <span class="mud-chip">company_name</span>
+                    <span class="mud-chip">customer_name</span>
+                    <span class="mud-chip">amount</span>
+                    <span class="mud-chip">payment_url</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 5: DOMAINS ===================== -->
+<div class="screen" id="s-domains">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Domain Manager</div>
+        <div class="app-bar-actions">
+          <button class="mud-btn primary">+ Add Domain</button>
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Domain Table -->
+        <div class="mud-card mb-24">
+          <table class="mud-table">
+            <thead><tr><th>Domain</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:500;">cashtrack.ng</td>
+                <td><span class="badge-status verified">Verified</span></td>
+                <td>2026-03-20</td>
+                <td>
+                  <button class="mud-btn text sm">Verify</button>
+                  <button class="mud-btn error sm">Remove</button>
+                </td>
+              </tr>
+              <tr><td colspan="4" style="padding:0;">
+                <div class="expand-content">
+                  <div class="mud-label" style="margin-bottom:12px;">DNS Records</div>
+                  <div class="dns-card">
+                    <div class="dns-type">SPF</div>
+                    <div class="dns-value">v=spf1 include:amazonses.com ~all</div>
+                    <div class="dns-check" style="color:var(--success);">&#10003;</div>
+                  </div>
+                  <div class="dns-card">
+                    <div class="dns-type">DKIM</div>
+                    <div class="dns-value">selector1._domainkey.cashtrack.ng CNAME selector1-cashtrack-ng.dkim.amazonses.com</div>
+                    <div class="dns-check" style="color:var(--success);">&#10003;</div>
+                  </div>
+                  <div class="dns-card">
+                    <div class="dns-type">DMARC</div>
+                    <div class="dns-value">v=DMARC1; p=quarantine; rua=mailto:dmarc@cashtrack.ng</div>
+                    <div class="dns-check" style="color:var(--success);">&#10003;</div>
+                  </div>
+                </div>
+              </td></tr>
+              <tr>
+                <td style="font-weight:500;">mail.israeliyonsi.dev</td>
+                <td><span class="badge-status pending">Pending</span></td>
+                <td>2026-03-25</td>
+                <td>
+                  <button class="mud-btn text sm">Verify</button>
+                  <button class="mud-btn error sm">Remove</button>
+                </td>
+              </tr>
+              <tr><td colspan="4" style="padding:0;">
+                <div class="expand-content">
+                  <div class="mud-label" style="margin-bottom:12px;">DNS Records -- Awaiting Configuration</div>
+                  <div class="dns-card">
+                    <div class="dns-type">SPF</div>
+                    <div class="dns-value">v=spf1 include:amazonses.com ~all</div>
+                    <div class="dns-check" style="color:var(--error);">&#10007;</div>
+                  </div>
+                  <div class="dns-card">
+                    <div class="dns-type">DKIM</div>
+                    <div class="dns-value">selector1._domainkey.mail.israeliyonsi.dev CNAME ...</div>
+                    <div class="dns-check" style="color:var(--error);">&#10007;</div>
+                  </div>
+                  <div class="dns-card">
+                    <div class="dns-type">DMARC</div>
+                    <div class="dns-value">v=DMARC1; p=none; rua=mailto:dmarc@israeliyonsi.dev</div>
+                    <div class="dns-check" style="color:var(--error);">&#10007;</div>
+                  </div>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Add Domain Dialog Preview -->
+        <div class="dialog-backdrop">
+          <div class="dialog-header">
+            <h3>Add Sending Domain</h3>
+          </div>
+          <div class="dialog-body">
+            <div class="mud-label">Domain Name</div>
+            <input class="mud-input" placeholder="e.g. notifications.myapp.com" disabled>
+            <div style="font-size:12px; color:var(--text-disabled); margin-top:8px;">
+              After adding, you will need to configure the DNS records shown below at your DNS provider.
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="mud-btn text">Cancel</button>
+            <button class="mud-btn primary">Add Domain</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 6: ANALYTICS ===================== -->
+<div class="screen" id="s-analytics">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Analytics</div>
+        <div class="app-bar-actions">
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Date Range -->
+        <div class="filter-bar" style="justify-content:space-between;">
+          <div class="date-pills">
+            <div class="date-pill active">Last 7 days</div>
+            <div class="date-pill">Last 30 days</div>
+            <div class="date-pill">Last 90 days</div>
+            <div class="date-pill">Custom</div>
+          </div>
+          <span style="font-size:12px; color:var(--text-disabled);">Mar 20 - Mar 27, 2026</span>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">Sent</div><div class="kpi-value" style="color:var(--primary);">3,412</div><div class="kpi-change" style="color:var(--success);">&#9650; 12%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Delivered</div><div class="kpi-value" style="color:var(--success);">3,351</div><div class="kpi-pct">98.2%</div><div class="kpi-change" style="color:var(--success);">&#9650; 0.3%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Bounced</div><div class="kpi-value" style="color:var(--error);">48</div><div class="kpi-pct">1.4%</div><div class="kpi-change" style="color:var(--success);">&#9660; 0.1%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Complained</div><div class="kpi-value" style="color:var(--warning);">2</div><div class="kpi-pct">0.06%</div><div class="kpi-change" style="color:var(--success);">&#9660; 0.02%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Opened</div><div class="kpi-value" style="color:var(--info);">1,435</div><div class="kpi-pct">42.1%</div><div class="kpi-change" style="color:var(--success);">&#9650; 2.5%</div></div>
+          <div class="kpi-card"><div class="kpi-label">Clicked</div><div class="kpi-value" style="color:var(--secondary);">297</div><div class="kpi-pct">8.7%</div><div class="kpi-change" style="color:var(--success);">&#9650; 0.4%</div></div>
+        </div>
+
+        <!-- Chart: Volume Over Time -->
+        <div class="chart-area mb-16">
+          <div class="chart-title">Delivery Volume Over Time</div>
+          <div class="chart-canvas">
+            <svg class="chart-svg" viewBox="0 0 900 220" style="width:100%;height:220px;">
+              <!-- Grid lines -->
+              <line x1="40" y1="20" x2="40" y2="180" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="180" x2="880" y2="180" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="140" x2="880" y2="140" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="100" x2="880" y2="100" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="60" x2="880" y2="60" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+
+              <!-- Y axis labels -->
+              <text x="35" y="185" fill="#9E9E9E" font-size="10" text-anchor="end">0</text>
+              <text x="35" y="145" fill="#9E9E9E" font-size="10" text-anchor="end">200</text>
+              <text x="35" y="105" fill="#9E9E9E" font-size="10" text-anchor="end">400</text>
+              <text x="35" y="65" fill="#9E9E9E" font-size="10" text-anchor="end">600</text>
+
+              <!-- Bars: Delivered (green) -->
+              <rect x="70" y="60" width="80" height="120" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="190" y="50" width="80" height="130" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="310" y="70" width="80" height="110" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="430" y="40" width="80" height="140" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="550" y="55" width="80" height="125" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="670" y="45" width="80" height="135" fill="rgba(0,230,118,0.6)" rx="2"/>
+              <rect x="790" y="30" width="80" height="150" fill="rgba(0,230,118,0.6)" rx="2"/>
+
+              <!-- Bars: Bounced overlay (red) - small slice at top -->
+              <rect x="70" y="56" width="80" height="4" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="190" y="46" width="80" height="4" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="310" y="67" width="80" height="3" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="430" y="36" width="80" height="4" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="550" y="52" width="80" height="3" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="670" y="42" width="80" height="3" fill="rgba(255,82,82,0.8)" rx="2"/>
+              <rect x="790" y="26" width="80" height="4" fill="rgba(255,82,82,0.8)" rx="2"/>
+
+              <!-- X axis labels -->
+              <text x="110" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 21</text>
+              <text x="230" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 22</text>
+              <text x="350" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 23</text>
+              <text x="470" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 24</text>
+              <text x="590" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 25</text>
+              <text x="710" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 26</text>
+              <text x="830" y="200" fill="#9E9E9E" font-size="10" text-anchor="middle">Mar 27</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="grid-2 mb-16">
+          <div class="chart-area">
+            <div class="chart-title">Delivery Rate + Bounce Rate</div>
+            <svg class="chart-svg" viewBox="0 0 420 180" style="width:100%;height:180px;">
+              <line x1="40" y1="20" x2="40" y2="150" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="150" x2="400" y2="150" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="110" x2="400" y2="110" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="70" x2="400" y2="70" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="30" x2="400" y2="30" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <!-- Delivery rate line (green) -->
+              <polyline points="60,35 110,32 160,38 210,30 260,33 310,31 360,28" fill="none" stroke="#00E676" stroke-width="2"/>
+              <circle cx="360" cy="28" r="4" fill="#00E676"/>
+              <!-- Bounce rate line (red) -->
+              <polyline points="60,142 110,140 160,143 210,139 260,141 310,140 360,138" fill="none" stroke="#FF5252" stroke-width="2"/>
+              <circle cx="360" cy="138" r="4" fill="#FF5252"/>
+              <!-- Labels -->
+              <text x="35" y="155" fill="#9E9E9E" font-size="9" text-anchor="end">0%</text>
+              <text x="35" y="35" fill="#9E9E9E" font-size="9" text-anchor="end">100%</text>
+              <!-- Legend -->
+              <rect x="100" y="165" width="10" height="3" fill="#00E676"/><text x="115" y="170" fill="#9E9E9E" font-size="9">Delivery</text>
+              <rect x="200" y="165" width="10" height="3" fill="#FF5252"/><text x="215" y="170" fill="#9E9E9E" font-size="9">Bounce</text>
+            </svg>
+          </div>
+          <div class="chart-area">
+            <div class="chart-title">Open Rate + Click Rate</div>
+            <svg class="chart-svg" viewBox="0 0 420 180" style="width:100%;height:180px;">
+              <line x1="40" y1="20" x2="40" y2="150" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="150" x2="400" y2="150" stroke="#373956" stroke-width="1"/>
+              <line x1="40" y1="110" x2="400" y2="110" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="70" x2="400" y2="70" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <line x1="40" y1="30" x2="400" y2="30" stroke="#373956" stroke-width="0.5" stroke-dasharray="4"/>
+              <!-- Open rate (purple) -->
+              <polyline points="60,92 110,88 160,95 210,85 260,82 310,80 360,75" fill="none" stroke="#7C4DFF" stroke-width="2"/>
+              <circle cx="360" cy="75" r="4" fill="#7C4DFF"/>
+              <!-- Click rate (cyan) -->
+              <polyline points="60,138 110,136 160,140 210,135 260,134 310,132 360,130" fill="none" stroke="#00E5FF" stroke-width="2"/>
+              <circle cx="360" cy="130" r="4" fill="#00E5FF"/>
+              <!-- Labels -->
+              <text x="35" y="155" fill="#9E9E9E" font-size="9" text-anchor="end">0%</text>
+              <text x="35" y="35" fill="#9E9E9E" font-size="9" text-anchor="end">100%</text>
+              <!-- Legend -->
+              <rect x="100" y="165" width="10" height="3" fill="#7C4DFF"/><text x="115" y="170" fill="#9E9E9E" font-size="9">Open Rate</text>
+              <rect x="210" y="165" width="10" height="3" fill="#00E5FF"/><text x="225" y="170" fill="#9E9E9E" font-size="9">Click Rate</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Bottom Tables -->
+        <div class="grid-2">
+          <div class="mud-card">
+            <div class="mud-card-header"><div class="mud-card-title">Top Performing Templates</div></div>
+            <table class="mud-table">
+              <thead><tr><th>Template</th><th>Sent</th><th>Open %</th><th>Click %</th></tr></thead>
+              <tbody>
+                <tr><td>Invoice Notification</td><td>1,240</td><td style="color:var(--success);">48.2%</td><td style="color:var(--secondary);">12.1%</td></tr>
+                <tr><td>Payment Confirmation</td><td>890</td><td style="color:var(--success);">51.3%</td><td style="color:var(--secondary);">5.2%</td></tr>
+                <tr><td>Welcome Email</td><td>456</td><td style="color:var(--success);">65.1%</td><td style="color:var(--secondary);">22.8%</td></tr>
+                <tr><td>Password Reset</td><td>312</td><td style="color:var(--success);">38.5%</td><td style="color:var(--secondary);">31.2%</td></tr>
+                <tr><td>Monthly Statement</td><td>178</td><td style="color:var(--success);">44.9%</td><td style="color:var(--secondary);">7.3%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mud-card">
+            <div class="mud-card-header"><div class="mud-card-title">Top Bounce Recipients</div></div>
+            <table class="mud-table">
+              <thead><tr><th>Email</th><th>Bounces</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td>invalid@nowhere.com</td><td>5</td><td><span class="badge-status hard_bounce">Hard</span></td></tr>
+                <tr><td>old@deleted.org</td><td>3</td><td><span class="badge-status hard_bounce">Hard</span></td></tr>
+                <tr><td>full@mailbox.net</td><td>2</td><td><span class="badge-status soft_bounce">Soft</span></td></tr>
+                <tr><td>expired@corp.co</td><td>2</td><td><span class="badge-status hard_bounce">Hard</span></td></tr>
+                <tr><td>typo@gmial.com</td><td>1</td><td><span class="badge-status hard_bounce">Hard</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 7: SUPPRESSIONS ===================== -->
+<div class="screen" id="s-suppressions">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Suppression List</div>
+        <div class="app-bar-actions">
+          <button class="mud-btn outlined sm">Bulk Import CSV</button>
+          <button class="mud-btn primary">+ Add Suppression</button>
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <!-- Search / Filter -->
+        <div class="filter-bar">
+          <input class="mud-input" style="width:320px;" placeholder="Search by email address..." disabled>
+          <select class="mud-select" style="width:160px;" disabled>
+            <option>Reason: All</option>
+          </select>
+          <button class="mud-btn primary sm">Search</button>
+        </div>
+
+        <!-- Table -->
+        <div class="mud-card mb-16">
+          <table class="mud-table">
+            <thead><tr><th>Email Address</th><th>Reason</th><th>Source Message</th><th>Suppressed Date</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>bounced@invalid.com</td><td><span class="badge-status hard_bounce">Hard Bounce</span></td><td style="font-family:monospace; font-size:12px;">eaas_a8f3b2c1</td><td>2026-03-27 09:58</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+              <tr><td>spam@reporter.com</td><td><span class="badge-status complaint">Complaint</span></td><td style="font-family:monospace; font-size:12px;">eaas_c4d5e6f7</td><td>2026-03-26 14:22</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+              <tr><td>donotmail@request.com</td><td><span class="badge-status manual">Manual</span></td><td style="color:var(--text-disabled);">--</td><td>2026-03-25 10:00</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+              <tr><td>old@deleted.org</td><td><span class="badge-status hard_bounce">Hard Bounce</span></td><td style="font-family:monospace; font-size:12px;">eaas_g8h9i0j1</td><td>2026-03-24 16:45</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+              <tr><td>full@mailbox.net</td><td><span class="badge-status soft_bounce">Soft Bounce</span></td><td style="font-family:monospace; font-size:12px;">eaas_k2l3m4n5</td><td>2026-03-23 11:30</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+              <tr><td>expired@corp.co</td><td><span class="badge-status hard_bounce">Hard Bounce</span></td><td style="font-family:monospace; font-size:12px;">eaas_p6q7r8s9</td><td>2026-03-22 08:15</td><td><button class="mud-btn error sm">Remove</button></td></tr>
+            </tbody>
+          </table>
+          <div class="mud-pagination">
+            <span>Showing 1-20 of 42 suppressed addresses</span>
+            <div class="page-btns">
+              <div class="page-btn active">1</div>
+              <div class="page-btn">2</div>
+              <div class="page-btn">3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Suppression Dialog -->
+        <div class="dialog-backdrop">
+          <div class="dialog-header"><h3>Add Suppression</h3></div>
+          <div class="dialog-body">
+            <div class="mb-16">
+              <div class="mud-label">Email Address</div>
+              <input class="mud-input" placeholder="user@example.com" disabled>
+            </div>
+            <div>
+              <div class="mud-label">Reason</div>
+              <select class="mud-select" style="width:100%;" disabled><option>Manual</option></select>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="mud-btn text">Cancel</button>
+            <button class="mud-btn primary">Add to Suppression List</button>
+          </div>
+        </div>
+
+        <!-- Bulk Import Dialog -->
+        <div class="dialog-backdrop mt-24">
+          <div class="dialog-header"><h3>Bulk Import Suppressions</h3></div>
+          <div class="dialog-body">
+            <div class="upload-zone">
+              <div style="font-size:24px; color:var(--text-disabled); margin-bottom:8px;">&#128194;</div>
+              <div style="color:var(--text-secondary);">Drop CSV file here or click to browse</div>
+              <div style="font-size:12px; color:var(--text-disabled); margin-top:4px;">Format: email_address,reason (one per line)</div>
+            </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="mud-btn text">Cancel</button>
+            <button class="mud-btn primary">Import</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN 8: LOADING STATES ===================== -->
+<div class="screen" id="s-loading">
+  <div class="app-layout">
+    <div class="app-sidebar">
+      <div class="sidebar-brand"><div class="brand-icon">E</div><div><div class="brand-text">EaaS</div><div class="brand-sub">Email as a Service</div></div></div>
+      <div class="nav-section">
+        <div class="nav-item active"><span style="width:20px;text-align:center;">&#9632;</span> Dashboard</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9993;</span> Emails</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9998;</span> Templates</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9775;</span> Domains</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9733;</span> Analytics</div>
+        <div class="nav-item"><span style="width:20px;text-align:center;">&#9940;</span> Suppressions</div>
+      </div>
+    </div>
+    <div class="app-main">
+      <div class="app-bar">
+        <div class="app-bar-title">Loading States Reference</div>
+        <div class="app-bar-actions">
+          <div class="env-badge prod">Production</div>
+          <div class="user-chip"><div class="user-avatar">I</div><div class="user-name">Israel</div></div>
+        </div>
+      </div>
+      <div class="content-area">
+        <div style="font-size:13px; color:var(--text-secondary); margin-bottom:24px;">
+          Skeleton loading states shown below. Use MudSkeleton components during data fetching.
+        </div>
+
+        <!-- Skeleton Stat Cards -->
+        <div style="margin-bottom:24px;">
+          <div class="mud-label" style="margin-bottom:12px;">Stat Cards -- Loading</div>
+          <div class="stat-grid">
+            <div class="stat-card"><div class="skeleton" style="width:80px;height:12px;margin-bottom:12px;"></div><div class="skeleton" style="width:100px;height:32px;margin-bottom:8px;"></div><div class="skeleton" style="width:120px;height:10px;"></div></div>
+            <div class="stat-card"><div class="skeleton" style="width:80px;height:12px;margin-bottom:12px;"></div><div class="skeleton" style="width:100px;height:32px;margin-bottom:8px;"></div><div class="skeleton" style="width:120px;height:10px;"></div></div>
+            <div class="stat-card"><div class="skeleton" style="width:80px;height:12px;margin-bottom:12px;"></div><div class="skeleton" style="width:100px;height:32px;margin-bottom:8px;"></div><div class="skeleton" style="width:120px;height:10px;"></div></div>
+            <div class="stat-card"><div class="skeleton" style="width:80px;height:12px;margin-bottom:12px;"></div><div class="skeleton" style="width:100px;height:32px;margin-bottom:8px;"></div><div class="skeleton" style="width:120px;height:10px;"></div></div>
+            <div class="stat-card"><div class="skeleton" style="width:80px;height:12px;margin-bottom:12px;"></div><div class="skeleton" style="width:100px;height:32px;margin-bottom:8px;"></div><div class="skeleton" style="width:120px;height:10px;"></div></div>
+          </div>
+        </div>
+
+        <!-- Skeleton Table -->
+        <div style="margin-bottom:24px;">
+          <div class="mud-label" style="margin-bottom:12px;">Data Table -- Loading</div>
+          <div class="mud-card">
+            <div style="padding:16px;">
+              <div style="display:flex;gap:12px;margin-bottom:16px;">
+                <div class="skeleton" style="width:100%;height:40px;"></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div class="skeleton" style="width:100%;height:20px;"></div>
+                <div class="skeleton" style="width:100%;height:20px;"></div>
+                <div class="skeleton" style="width:100%;height:20px;"></div>
+                <div class="skeleton" style="width:100%;height:20px;"></div>
+                <div class="skeleton" style="width:100%;height:20px;"></div>
+                <div class="skeleton" style="width:85%;height:20px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skeleton Chart -->
+        <div>
+          <div class="mud-label" style="margin-bottom:12px;">Chart -- Loading</div>
+          <div class="chart-area">
+            <div class="skeleton" style="width:200px;height:14px;margin-bottom:16px;"></div>
+            <div class="skeleton" style="width:100%;height:200px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchScreen(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.st-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-' + name).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
