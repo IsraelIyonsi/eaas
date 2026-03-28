@@ -13,6 +13,7 @@ public static class MassTransitConfiguration
         services.AddMassTransit(bus =>
         {
             bus.AddConsumer<SendEmailConsumer>();
+            bus.AddConsumer<WebhookDispatchConsumer>();
 
             bus.UsingRabbitMq((context, cfg) =>
             {
@@ -34,6 +35,19 @@ public static class MassTransitConfiguration
                 {
                     e.PrefetchCount = settings.PrefetchCount;
                     e.ConfigureConsumer<SendEmailConsumer>(context);
+                });
+
+                cfg.ReceiveEndpoint("eaas-webhook-dispatch", e =>
+                {
+                    e.PrefetchCount = settings.PrefetchCount;
+                    e.UseMessageRetry(r =>
+                        r.Intervals(
+                            TimeSpan.FromSeconds(10),
+                            TimeSpan.FromSeconds(30),
+                            TimeSpan.FromSeconds(90),
+                            TimeSpan.FromSeconds(270),
+                            TimeSpan.FromSeconds(810)));
+                    e.ConfigureConsumer<WebhookDispatchConsumer>(context);
                 });
             });
         });

@@ -2,8 +2,10 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
+using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,12 +15,14 @@ public sealed partial class ComplaintHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<ComplaintHandler> _logger;
 
-    public ComplaintHandler(AppDbContext dbContext, ICacheService cacheService, ILogger<ComplaintHandler> logger)
+    public ComplaintHandler(AppDbContext dbContext, ICacheService cacheService, IPublishEndpoint publishEndpoint, ILogger<ComplaintHandler> logger)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -90,6 +94,21 @@ public sealed partial class ComplaintHandler
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Publish webhook dispatch message
+        await _publishEndpoint.Publish(new WebhookDispatchMessage
+        {
+            TenantId = email.TenantId,
+            EventType = "complained",
+            EmailId = email.Id,
+            MessageId = email.MessageId,
+            Data = JsonSerializer.Serialize(new
+            {
+                complaintFeedbackType = complaint.ComplaintFeedbackType,
+                recipients = complaint.ComplainedRecipients.Select(r => r.EmailAddress)
+            }),
+            Timestamp = DateTime.UtcNow
+        }, cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Complaint notification has no complaint data for SES message {MessageId}")]

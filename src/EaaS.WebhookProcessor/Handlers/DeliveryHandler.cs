@@ -1,8 +1,10 @@
 using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
+using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -11,11 +13,13 @@ namespace EaaS.WebhookProcessor.Handlers;
 public sealed partial class DeliveryHandler
 {
     private readonly AppDbContext _dbContext;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<DeliveryHandler> _logger;
 
-    public DeliveryHandler(AppDbContext dbContext, ILogger<DeliveryHandler> logger)
+    public DeliveryHandler(AppDbContext dbContext, IPublishEndpoint publishEndpoint, ILogger<DeliveryHandler> logger)
     {
         _dbContext = dbContext;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -68,6 +72,21 @@ public sealed partial class DeliveryHandler
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Publish webhook dispatch message
+        await _publishEndpoint.Publish(new WebhookDispatchMessage
+        {
+            TenantId = email.TenantId,
+            EventType = "delivered",
+            EmailId = email.Id,
+            MessageId = email.MessageId,
+            Data = JsonSerializer.Serialize(new
+            {
+                recipient = email.ToEmails,
+                subject = email.Subject
+            }),
+            Timestamp = DateTime.UtcNow
+        }, cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Delivery notification has no delivery data for SES message {MessageId}")]

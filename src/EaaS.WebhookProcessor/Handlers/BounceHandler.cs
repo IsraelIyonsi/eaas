@@ -2,8 +2,10 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
+using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,12 +15,14 @@ public sealed partial class BounceHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
+    private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<BounceHandler> _logger;
 
-    public BounceHandler(AppDbContext dbContext, ICacheService cacheService, ILogger<BounceHandler> logger)
+    public BounceHandler(AppDbContext dbContext, ICacheService cacheService, IPublishEndpoint publishEndpoint, ILogger<BounceHandler> logger)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
+        _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
 
@@ -108,6 +112,22 @@ public sealed partial class BounceHandler
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Publish webhook dispatch message
+        await _publishEndpoint.Publish(new WebhookDispatchMessage
+        {
+            TenantId = email.TenantId,
+            EventType = "bounced",
+            EmailId = email.Id,
+            MessageId = email.MessageId,
+            Data = JsonSerializer.Serialize(new
+            {
+                bounceType = bounce.BounceType,
+                bounceSubType = bounce.BounceSubType,
+                recipients = bounce.BouncedRecipients.Select(r => r.EmailAddress)
+            }),
+            Timestamp = DateTime.UtcNow
+        }, cancellationToken);
     }
 
     private async Task SuppressRecipient(

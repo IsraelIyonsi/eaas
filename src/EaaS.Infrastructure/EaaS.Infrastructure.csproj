@@ -11,6 +11,7 @@
     <PackageReference Include="DnsClient" />
     <PackageReference Include="AngleSharp" />
     <PackageReference Include="MimeKit" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
 

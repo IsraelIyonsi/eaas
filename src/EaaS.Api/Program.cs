@@ -7,8 +7,10 @@ using EaaS.Api.Commands;
 using EaaS.Api.Features.ApiKeys;
 using EaaS.Api.Features.Domains;
 using EaaS.Api.Features.Emails;
+using EaaS.Api.Features.Analytics;
 using EaaS.Api.Features.Suppressions;
 using EaaS.Api.Features.Templates;
+using EaaS.Api.Features.Webhooks;
 using EaaS.Api.Middleware;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure;
@@ -80,6 +82,10 @@ try
     builder.Services.AddAuthentication(ApiKeyAuthHandler.SchemeName)
         .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeyAuthHandler.SchemeName, null);
     builder.Services.AddAuthorization();
+
+    // HTTP client for webhook testing
+    builder.Services.AddHttpClient("WebhookTest");
+    builder.Services.AddHttpClient("WebhookDispatch");
 
     // Exception handler
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -198,6 +204,26 @@ try
     ListSuppressionsEndpoint.Map(suppressionsGroup);
     AddSuppressionEndpoint.Map(suppressionsGroup);
     RemoveSuppressionEndpoint.Map(suppressionsGroup);
+
+    // Analytics endpoints
+    var analyticsGroup = app.MapGroup("/api/v1/analytics")
+        .RequireAuthorization()
+        .WithTags("Analytics");
+
+    GetAnalyticsSummaryEndpoint.Map(analyticsGroup);
+    GetAnalyticsTimelineEndpoint.Map(analyticsGroup);
+
+    // Webhook endpoints
+    var webhooksGroup = app.MapGroup("/api/v1/webhooks")
+        .RequireAuthorization()
+        .WithTags("Webhooks");
+
+    CreateWebhookEndpoint.Map(webhooksGroup);
+    ListWebhooksEndpoint.Map(webhooksGroup);
+    GetWebhookEndpoint.Map(webhooksGroup);
+    UpdateWebhookEndpoint.Map(webhooksGroup);
+    DeleteWebhookEndpoint.Map(webhooksGroup);
+    TestWebhookEndpoint.Map(webhooksGroup);
 
     app.Run();
 }

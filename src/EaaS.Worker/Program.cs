@@ -40,6 +40,9 @@ try
 
         // Template rendering
         services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
+
+        // HTTP client for webhook dispatch
+        services.AddHttpClient("WebhookDispatch");
     });
 
     var host = builder.Build();
