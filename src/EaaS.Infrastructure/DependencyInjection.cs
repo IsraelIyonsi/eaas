@@ -16,7 +16,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool includeMassTransit = true)
     {
         // Bind settings
         services.Configure<RabbitMqSettings>(configuration.GetSection(RabbitMqSettings.SectionName));
@@ -60,8 +61,9 @@ public static class DependencyInjection
         services.AddScoped<TrackingPixelInjector>();
         services.AddScoped<ClickTrackingLinkRewriter>();
 
-        // MassTransit with RabbitMQ
-        services.AddMassTransitWithRabbitMq();
+        // MassTransit with RabbitMQ (skip for services that don't need queue processing)
+        if (includeMassTransit)
+            services.AddMassTransitWithRabbitMq();
 
         return services;
     }
