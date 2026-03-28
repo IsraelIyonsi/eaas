@@ -1,0 +1,144 @@
+using System.Text.Json;
+using EaaS.Domain.Entities;
+using EaaS.Domain.Enums;
+using EaaS.Domain.Interfaces;
+using EaaS.Infrastructure.Messaging.Contracts;
+using EaaS.Infrastructure.Persistence;
+using MassTransit;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace EaaS.Api.Features.Emails;
+
+public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEmailResult>
+{
+    private readonly AppDbContext _dbContext;
+    private readonly ICacheService _cacheService;
+    private readonly IPublishEndpoint _publishEndpoint;
+
+    public SendEmailHandler(
+        AppDbContext dbContext,
+        ICacheService cacheService,
+        IPublishEndpoint publishEndpoint)
+    {
+        _dbContext = dbContext;
+        _cacheService = cacheService;
+        _publishEndpoint = publishEndpoint;
+    }
+
+    public async Task<SendEmailResult> Handle(SendEmailCommand request, CancellationToken cancellationToken)
+    {
+        // 0. Check rate limit per API key
+        var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        if (!isAllowed)
+            throw new InvalidOperationException("Rate limit exceeded. Maximum 100 sends per minute per API key.");
+
+        // 1. Check idempotency key
+        if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
+        {
+            var idempotencyValue = await _cacheService.GetIdempotencyKeyAsync(
+                request.TenantId, request.IdempotencyKey, cancellationToken);
+
+            if (idempotencyValue is not null)
+            {
+                var cached = JsonSerializer.Deserialize<IdempotencyData>(idempotencyValue);
+                if (cached is not null)
+                    return new SendEmailResult(cached.Id, cached.MessageId, "queued");
+            }
+        }
+
+        // 2. Verify from address belongs to a verified domain for this tenant
+        var fromDomain = request.From.Split('@').Last().ToLowerInvariant();
+        var domainVerified = await _dbContext.Domains
+            .AsNoTracking()
+            .AnyAsync(d => d.TenantId == request.TenantId
+                           && d.DomainName == fromDomain
+                           && d.Status == DomainStatus.Verified, cancellationToken);
+
+        if (!domainVerified)
+            throw new InvalidOperationException($"Domain '{fromDomain}' is not verified for this tenant.");
+
+        // 3. Check all recipients against suppression list
+        foreach (var recipient in request.To)
+        {
+            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(
+                request.TenantId, recipient, cancellationToken);
+
+            if (!isSuppressed)
+            {
+                // Also check DB suppression
+                var recipientLower = recipient.ToLowerInvariant();
+                isSuppressed = await _dbContext.SuppressionEntries
+                    .AsNoTracking()
+                    .AnyAsync(s => s.TenantId == request.TenantId
+                                   && s.EmailAddress == recipientLower, cancellationToken);
+            }
+
+            if (isSuppressed)
+                throw new InvalidOperationException($"Recipient '{recipient}' is on the suppression list.");
+        }
+
+        // 4. Create Email entity
+        var email = new Email
+        {
+            Id = Guid.NewGuid(),
+            TenantId = request.TenantId,
+            ApiKeyId = request.ApiKeyId,
+            MessageId = $"eaas_{Guid.NewGuid():N}",
+            FromEmail = request.From,
+            ToEmails = JsonSerializer.Serialize(request.To),
+            Subject = request.Subject ?? string.Empty,
+            HtmlBody = request.HtmlBody,
+            TextBody = request.TextBody,
+            TemplateId = request.TemplateId,
+            Variables = request.Variables is not null ? JsonSerializer.Serialize(request.Variables) : null,
+            Tags = request.Tags?.ToArray() ?? Array.Empty<string>(),
+            Metadata = request.Metadata is not null ? JsonSerializer.Serialize(request.Metadata) : "{}",
+            Status = EmailStatus.Queued,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _dbContext.Emails.Add(email);
+
+        // Add queued event
+        _dbContext.EmailEvents.Add(new EmailEvent
+        {
+            Id = Guid.NewGuid(),
+            EmailId = email.Id,
+            EventType = EventType.Queued,
+            Data = "{}",
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // 5. Publish to MassTransit queue
+        await _publishEndpoint.Publish(new SendEmailMessage
+        {
+            EmailId = email.Id,
+            TenantId = email.TenantId,
+            From = email.FromEmail,
+            To = JsonSerializer.Serialize(request.To),
+            Subject = email.Subject,
+            HtmlBody = email.HtmlBody,
+            TextBody = email.TextBody,
+            TemplateId = email.TemplateId,
+            Variables = email.Variables,
+            Tags = email.Tags,
+            Metadata = email.Metadata
+        }, cancellationToken);
+
+        // 6. Store idempotency key
+        if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
+        {
+            var data = JsonSerializer.Serialize(new IdempotencyData(email.Id, email.MessageId));
+            await _cacheService.SetIdempotencyKeyAsync(
+                request.TenantId, request.IdempotencyKey, data, cancellationToken);
+        }
+
+        return new SendEmailResult(email.Id, email.MessageId, "queued");
+    }
+
+    private sealed record IdempotencyData(Guid Id, string MessageId);
+}

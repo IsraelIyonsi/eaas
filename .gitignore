@@ -1,71 +1,55 @@
-# .NET
+## .NET
 bin/
 obj/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
-*.userprefs
 
-# Build results
+## Visual Studio
+.vs/
+*.rsuser
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
 [Dd]ebug/
 [Rr]elease/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
 
-# NuGet
-*.nupkg
-*.snupkg
+## NuGet
 **/[Pp]ackages/*
 !**/[Pp]ackages/build/
-*.nuget.props
-*.nuget.targets
-project.lock.json
+*.nupkg
+*.snupkg
+**/[Ll]ib/
 
-# IDE
-.vs/
-.vscode/
+## IDE
 .idea/
+.vscode/
 *.swp
 *.swo
-*~
 
-# OS
-Thumbs.db
-ehthumbs.db
-Desktop.ini
+## OS
 .DS_Store
+Thumbs.db
 
-# Docker
-docker-compose.override.yml
-
-# Environment
+## Environment & Secrets
 .env
-.env.local
-.env.production
-appsettings.Development.json
+!.env.example
 appsettings.Production.json
-
-# Secrets
 *.pfx
 *.key
 *.pem
 
-# Test results
-TestResults/
+## Docker
+docker/nginx/ssl/
+
+## Test results
 coverage/
+TestResults/
+*.trx
 *.coverage
 *.coveragexml
 
-# Misc
+## Misc
 *.log
 *.tmp
 *.bak

@@ -1,0 +1,236 @@
+# docker-compose.yml
+# EaaS - Email as a Service
+# All services on a single Hetzner CX22 VPS (2 vCPU, 4GB RAM, 40GB SSD)
+
+version: "3.9"
+
+services:
+  # ============================================================
+  # INFRASTRUCTURE
+  # ============================================================
+
+  postgres:
+    image: postgres:16.2-alpine
+    container_name: eaas-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: eaas
+      POSTGRES_USER: eaas_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eaas_app -d eaas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: eaas-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 128mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: eaas-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: eaas_app
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: eaas
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ============================================================
+  # APPLICATION SERVICES
+  # ============================================================
+
+  api:
+    build:
+      context: .
+      dockerfile: src/EaaS.Api/Dockerfile
+    container_name: eaas-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=eaas_app
+      - RabbitMq__Password=${RABBITMQ_PASSWORD}
+      - RabbitMq__VirtualHost=eaas
+      - Ses__Region=${AWS_REGION}
+      - Ses__AccessKeyId=${AWS_ACCESS_KEY_ID}
+      - Ses__SecretAccessKey=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/EaaS.Worker/Dockerfile
+    container_name: eaas-worker
+    restart: unless-stopped
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=eaas_app
+      - RabbitMq__Password=${RABBITMQ_PASSWORD}
+      - RabbitMq__VirtualHost=eaas
+      - Ses__Region=${AWS_REGION}
+      - Ses__AccessKeyId=${AWS_ACCESS_KEY_ID}
+      - Ses__SecretAccessKey=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  webhook-processor:
+    build:
+      context: .
+      dockerfile: src/EaaS.WebhookProcessor/Dockerfile
+    container_name: eaas-webhook-processor
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8081
+      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
+      - Tracking__BaseUrl=https://email.israeliyonsi.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: src/EaaS.Dashboard/Dockerfile
+    container_name: eaas-dashboard
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8082
+      - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
+      - Api__BaseUrl=http://api:8080
+      - Dashboard__Username=${DASHBOARD_USERNAME}
+      - Dashboard__PasswordHash=${DASHBOARD_PASSWORD_HASH}
+    depends_on:
+      api:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+
+  # ============================================================
+  # REVERSE PROXY
+  # ============================================================
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: eaas-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_data:/var/www/certbot:ro
+    depends_on:
+      - api
+      - webhook-processor
+      - dashboard
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+  # ============================================================
+  # TLS CERTIFICATE MANAGEMENT
+  # ============================================================
+
+  certbot:
+    image: certbot/certbot:v2.9.0
+    container_name: eaas-certbot
+    volumes:
+      - ./docker/nginx/ssl:/etc/letsencrypt
+      - certbot_data:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  certbot_data:
