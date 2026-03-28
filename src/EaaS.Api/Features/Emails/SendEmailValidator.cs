@@ -11,8 +11,9 @@ public sealed class SendEmailValidator : AbstractValidator<SendEmailCommand>
             .EmailAddress().WithMessage("From must be a valid email address.");
 
         RuleFor(x => x.To)
+            .NotNull().WithMessage("At least one recipient is required.")
             .NotEmpty().WithMessage("At least one recipient is required.")
-            .Must(to => to.Count <= 50).WithMessage("Maximum 50 recipients allowed.");
+            .Must(to => to is null || to.Count <= 50).WithMessage("Maximum 50 recipients allowed.");
 
         RuleForEach(x => x.To)
             .NotEmpty().WithMessage("Recipient email must not be empty.")
