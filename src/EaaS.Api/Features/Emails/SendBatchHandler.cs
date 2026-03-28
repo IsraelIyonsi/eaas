@@ -29,17 +29,11 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
 
     public async Task<SendBatchResult> Handle(SendBatchCommand request, CancellationToken cancellationToken)
     {
-        // Rate limit check: count all emails against rate limit
+        // Rate limit: single atomic check for the entire batch
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var emailCount = request.Emails.Count;
-
-        // Check if we have enough budget for all emails
-        for (var i = 0; i < emailCount; i++)
-        {
-            var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
-            if (!isAllowed)
-                throw new InvalidOperationException($"Rate limit exceeded. Maximum 100 sends per minute per API key. Batch of {emailCount} emails exceeds remaining budget.");
-        }
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        if (!isAllowed)
+            throw new InvalidOperationException($"Rate limit exceeded. Maximum 100 sends per minute per API key.");
 
         var batchId = $"batch_{GenerateShortId()}";
         var results = new List<BatchEmailResultItem>();
@@ -115,9 +109,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     CreatedAt = DateTime.UtcNow
                 });
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
-
-                // Publish to queue
+                // Queue publish (will be sent after batch save)
                 await _publishEndpoint.Publish(new SendEmailMessage
                 {
                     EmailId = email.Id,
@@ -144,6 +136,10 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                 rejected++;
             }
         }
+
+        // Single batch save for all accepted emails
+        if (accepted > 0)
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new SendBatchResult(batchId, request.Emails.Count, accepted, rejected, results);
     }

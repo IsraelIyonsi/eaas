@@ -138,8 +138,11 @@ public sealed partial class SnsMessageHandler
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
             return false;
 
+        // Must be HTTPS from SNS cert endpoint with .pem extension
         return uri.Scheme == "https"
-               && uri.Host.EndsWith(".amazonaws.com", StringComparison.OrdinalIgnoreCase);
+               && uri.Host.EndsWith(".amazonaws.com", StringComparison.OrdinalIgnoreCase)
+               && uri.Host.StartsWith("sns.", StringComparison.OrdinalIgnoreCase)
+               && uri.AbsolutePath.EndsWith(".pem", StringComparison.OrdinalIgnoreCase);
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to deserialize SNS message")]
