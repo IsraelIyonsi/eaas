@@ -56,14 +56,15 @@ export function EmailDetailSheet({
         side="right"
         className="w-full border-white/10 bg-[#1E1E2E] sm:max-w-lg overflow-y-auto"
       >
-        <SheetHeader className="pb-4">
+        <div className="px-6 py-6">
+        <SheetHeader className="pb-6">
           <SheetTitle className="text-left text-lg font-bold text-white">
             Email Detail
           </SheetTitle>
         </SheetHeader>
 
         {/* Metadata */}
-        <div className="space-y-3 pb-4">
+        <div className="space-y-4 pb-6">
           <MetaRow label="Status">
             <EmailStatusBadge status={email.status} />
           </MetaRow>
@@ -112,11 +113,11 @@ export function EmailDetailSheet({
         <Separator className="bg-white/10" />
 
         {/* Event Timeline */}
-        <div className="py-4">
+        <div className="py-6">
           <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
             Event Timeline
           </h3>
-          <div className="relative space-y-0">
+          <div className="relative ml-3 border-l-2 border-white/10 pl-6 space-y-6">
             {events.map((evt, i) => {
               const config = eventIconMap[evt.event_type] ?? {
                 icon: CircleDot,
@@ -124,29 +125,25 @@ export function EmailDetailSheet({
               };
               const Icon = config.icon;
               return (
-                <div key={evt.id} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={cn(
-                        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/5",
-                        config.color,
-                      )}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                    </div>
-                    {i < events.length - 1 && (
-                      <div className="h-8 w-px bg-white/10" />
+                <div key={evt.id} className="relative">
+                  {/* Timeline dot */}
+                  <div
+                    className={cn(
+                      "absolute -left-[calc(1.5rem+0.5625rem)] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1E1E2E] ring-2 ring-white/10",
+                      config.color,
                     )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
                   </div>
-                  <div className="pb-6">
+                  <div>
                     <p className="text-sm font-medium capitalize text-white/80">
                       {evt.event_type.replace("_", " ")}
                     </p>
-                    <p className="text-xs text-white/40">
+                    <p className="mt-0.5 text-xs text-white/40">
                       {format(parseISO(evt.timestamp), "MMM d, yyyy HH:mm:ss")}
                     </p>
                     {evt.details && (
-                      <p className="mt-0.5 text-xs text-white/30">
+                      <p className="mt-1 text-xs text-white/30">
                         {evt.details}
                       </p>
                     )}
@@ -161,8 +158,8 @@ export function EmailDetailSheet({
         {email.html_body && (
           <>
             <Separator className="bg-white/10" />
-            <div className="py-4">
-              <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/40">
+            <div className="py-6">
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
                 Body Preview
               </h3>
               <div className="rounded-lg border border-white/10 bg-white overflow-hidden">
@@ -176,6 +173,7 @@ export function EmailDetailSheet({
             </div>
           </>
         )}
+        </div>
       </SheetContent>
     </Sheet>
   );

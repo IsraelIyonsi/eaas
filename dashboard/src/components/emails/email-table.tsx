@@ -74,7 +74,7 @@ export function EmailTable({
               emails.map((email) => (
                 <TableRow
                   key={email.id}
-                  className="cursor-pointer border-white/5 hover:bg-white/[0.03]"
+                  className="cursor-pointer border-white/5 transition-colors hover:bg-white/[0.06] even:bg-white/[0.02]"
                   onClick={() => onRowClick(email)}
                 >
                   <TableCell>

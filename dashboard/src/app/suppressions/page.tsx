@@ -204,7 +204,7 @@ export default function SuppressionsPage() {
               {data.items.map((sup) => (
                 <TableRow
                   key={sup.id}
-                  className="border-white/5 hover:bg-white/[0.03]"
+                  className="border-white/5 transition-colors hover:bg-white/[0.06] even:bg-white/[0.02]"
                 >
                   <TableCell className="font-mono text-sm text-white/80">
                     {sup.email}

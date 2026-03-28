@@ -49,6 +49,13 @@ TestResults/
 *.coverage
 *.coveragexml
 
+## Node / Next.js
+node_modules/
+.next/
+.turbo/
+dashboard/node_modules/
+dashboard/.next/
+
 ## Misc
 *.log
 *.tmp

@@ -187,7 +187,7 @@ export default function TemplatesPage() {
               {data?.items.map((tpl) => (
                 <TableRow
                   key={tpl.id}
-                  className="border-white/5 hover:bg-white/[0.03]"
+                  className="border-white/5 transition-colors hover:bg-white/[0.06] even:bg-white/[0.02]"
                 >
                   <TableCell className="font-medium text-white">
                     {tpl.name}
@@ -252,12 +252,12 @@ export default function TemplatesPage() {
                 : "Create Template"}
             </DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="edit" className="mt-2">
+          <Tabs defaultValue="edit" className="mt-4">
             <TabsList className="bg-white/5">
               <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
-            <TabsContent value="edit" className="mt-4 space-y-4">
+            <TabsContent value="edit" className="mt-6 space-y-5">
               <div className="space-y-2">
                 <Label className="text-white/70">Template Name</Label>
                 <Input
@@ -275,7 +275,7 @@ export default function TemplatesPage() {
                     setForm({ ...form, subject: e.target.value })
                   }
                   placeholder="e.g., Invoice #{{invoice_number}}"
-                  className="border-white/10 bg-[#27293D] text-white font-mono text-sm"
+                  className="border-white/10 bg-[#27293D] text-white font-[var(--font-jetbrains-mono)] text-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -286,7 +286,7 @@ export default function TemplatesPage() {
                     setForm({ ...form, html_body: e.target.value })
                   }
                   placeholder="<html><body>Your email here...</body></html>"
-                  className="min-h-[200px] border-white/10 bg-[#27293D] font-mono text-sm text-white"
+                  className="min-h-[220px] border-white/10 bg-[#0F0F1A] font-[var(--font-jetbrains-mono)] text-sm text-[#00E5FF] leading-relaxed tracking-wide"
                 />
               </div>
               <div className="space-y-2">
@@ -297,16 +297,16 @@ export default function TemplatesPage() {
                     setForm({ ...form, text_body: e.target.value })
                   }
                   placeholder="Plain text version..."
-                  className="min-h-[100px] border-white/10 bg-[#27293D] font-mono text-sm text-white"
+                  className="min-h-[120px] border-white/10 bg-[#0F0F1A] font-[var(--font-jetbrains-mono)] text-sm text-white/80 leading-relaxed"
                 />
               </div>
             </TabsContent>
-            <TabsContent value="preview" className="mt-4">
+            <TabsContent value="preview" className="mt-6">
               <div className="rounded-lg border border-white/10 bg-white overflow-hidden">
                 <iframe
-                  srcDoc={form.html_body || "<p style='padding:20px;color:#888'>Enter HTML to see preview</p>"}
+                  srcDoc={form.html_body || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}
                   title="Template preview"
-                  className="h-[300px] w-full"
+                  className="h-[340px] w-full"
                   sandbox=""
                 />
               </div>

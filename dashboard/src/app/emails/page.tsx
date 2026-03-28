@@ -68,14 +68,14 @@ export default function EmailsPage() {
       {/* Page Header */}
       <div>
         <h1 className="text-xl font-bold text-white">Email Logs</h1>
-        <p className="text-sm text-white/50">
+        <p className="mt-1 text-sm text-white/50">
           Search and filter all sent emails. Click any row to view full delivery
           details.
         </p>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 pb-2">
         <Select
           value={status}
           onValueChange={(v) => {
