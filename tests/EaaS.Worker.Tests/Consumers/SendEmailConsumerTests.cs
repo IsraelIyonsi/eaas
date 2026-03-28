@@ -50,6 +50,7 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(), Arg.Any<IReadOnlyList<string>?>(),
             Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
             Arg.Any<CancellationToken>())
             .Returns(new SendEmailResult(true, "ses-msg-123", null));
@@ -59,13 +60,15 @@ public sealed class SendEmailConsumerTests : IDisposable
         await _emailDeliveryService.Received(1).SendEmailAsync(
             email.FromEmail,
             Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(),
+            Arg.Any<IReadOnlyList<string>?>(),
             email.Subject,
             email.HtmlBody,
             email.TextBody,
             Arg.Any<CancellationToken>());
 
         var updated = await _dbContext.Emails.FindAsync(email.Id);
-        updated!.Status.Should().Be(EmailStatus.Delivered);
+        updated!.Status.Should().Be(EmailStatus.Sending);
         updated.SesMessageId.Should().Be("ses-msg-123");
     }
 
@@ -98,6 +101,7 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(), Arg.Any<IReadOnlyList<string>?>(),
             Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
             Arg.Any<CancellationToken>())
             .Returns(new SendEmailResult(true, "ses-rendered-123", null));
@@ -115,6 +119,8 @@ public sealed class SendEmailConsumerTests : IDisposable
         await _emailDeliveryService.Received(1).SendEmailAsync(
             Arg.Any<string>(),
             Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(),
+            Arg.Any<IReadOnlyList<string>?>(),
             "Hello World",
             "<h1>World</h1>",
             "Hi World",
@@ -122,7 +128,7 @@ public sealed class SendEmailConsumerTests : IDisposable
     }
 
     [Fact]
-    public async Task Should_UpdateStatusToDelivered_When_SesSucceeds()
+    public async Task Should_UpdateStatusToSending_When_SesSucceeds()
     {
         var email = SeedEmail();
         var message = CreateMessage(email);
@@ -130,6 +136,7 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(), Arg.Any<IReadOnlyList<string>?>(),
             Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
             Arg.Any<CancellationToken>())
             .Returns(new SendEmailResult(true, "ses-delivered-123", null));
@@ -137,8 +144,7 @@ public sealed class SendEmailConsumerTests : IDisposable
         await _sut.Consume(context);
 
         var updated = await _dbContext.Emails.FindAsync(email.Id);
-        updated!.Status.Should().Be(EmailStatus.Delivered);
-        updated.DeliveredAt.Should().NotBeNull();
+        updated!.Status.Should().Be(EmailStatus.Sending);
         updated.SentAt.Should().NotBeNull();
     }
 
@@ -151,6 +157,7 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(), Arg.Any<IReadOnlyList<string>?>(),
             Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
             Arg.Any<CancellationToken>())
             .Returns(new SendEmailResult(false, null, "SES rate limit exceeded"));
@@ -173,6 +180,7 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService.SendEmailAsync(
             Arg.Any<string>(), Arg.Any<IReadOnlyList<string>>(),
+            Arg.Any<IReadOnlyList<string>?>(), Arg.Any<IReadOnlyList<string>?>(),
             Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>(),
             Arg.Any<CancellationToken>())
             .Throws(new Exception("Connection timeout"));

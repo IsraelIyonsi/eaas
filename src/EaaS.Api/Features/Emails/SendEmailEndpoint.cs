@@ -8,6 +8,8 @@ public static class SendEmailEndpoint
     public sealed record SendEmailRequest(
         string From,
         List<string> To,
+        List<string>? Cc,
+        List<string>? Bcc,
         string? Subject,
         string? HtmlBody,
         string? TextBody,
@@ -29,6 +31,8 @@ public static class SendEmailEndpoint
                 apiKeyId,
                 request.From,
                 request.To,
+                request.Cc,
+                request.Bcc,
                 request.Subject,
                 request.HtmlBody,
                 request.TextBody,

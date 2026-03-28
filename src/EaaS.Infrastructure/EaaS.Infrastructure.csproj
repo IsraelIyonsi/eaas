@@ -9,6 +9,8 @@
     <PackageReference Include="AWSSDK.SimpleEmailV2" />
     <PackageReference Include="Fluid.Core" />
     <PackageReference Include="DnsClient" />
+    <PackageReference Include="AngleSharp" />
+    <PackageReference Include="MimeKit" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
   </ItemGroup>
 

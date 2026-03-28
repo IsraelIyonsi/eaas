@@ -126,6 +126,10 @@ public sealed class EmailConfiguration : IEntityTypeConfiguration<Email>
         builder.Property(e => e.OpenedAt)
             .HasColumnName("opened_at");
 
+        builder.Property(e => e.TrackingId)
+            .HasColumnName("tracking_id")
+            .HasMaxLength(64);
+
         builder.Property(e => e.ClickedAt)
             .HasColumnName("clicked_at");
 

@@ -19,6 +19,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<EmailEvent> EmailEvents => Set<EmailEvent>();
     public DbSet<SuppressionEntry> SuppressionEntries => Set<SuppressionEntry>();
     public DbSet<Webhook> Webhooks => Set<Webhook>();
+    public DbSet<TrackingLink> TrackingLinks => Set<TrackingLink>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -7,6 +7,8 @@ public sealed record SendEmailCommand(
     Guid ApiKeyId,
     string From,
     List<string> To,
+    List<string>? Cc,
+    List<string>? Bcc,
     string? Subject,
     string? HtmlBody,
     string? TextBody,

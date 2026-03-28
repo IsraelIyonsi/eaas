@@ -54,13 +54,18 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             .AsNoTracking()
             .AnyAsync(d => d.TenantId == request.TenantId
                            && d.DomainName == fromDomain
-                           && d.Status == DomainStatus.Verified, cancellationToken);
+                           && d.Status == DomainStatus.Verified
+                           && d.DeletedAt == null, cancellationToken);
 
         if (!domainVerified)
             throw new InvalidOperationException($"Domain '{fromDomain}' is not verified for this tenant.");
 
-        // 3. Check all recipients against suppression list
-        foreach (var recipient in request.To)
+        // 3. Check all recipients against suppression list (To + CC + BCC)
+        var allRecipients = new List<string>(request.To);
+        if (request.Cc is not null) allRecipients.AddRange(request.Cc);
+        if (request.Bcc is not null) allRecipients.AddRange(request.Bcc);
+
+        foreach (var recipient in allRecipients)
         {
             var isSuppressed = await _cacheService.IsEmailSuppressedAsync(
                 request.TenantId, recipient, cancellationToken);
@@ -88,6 +93,8 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             MessageId = $"eaas_{Guid.NewGuid():N}",
             FromEmail = request.From,
             ToEmails = JsonSerializer.Serialize(request.To),
+            CcEmails = request.Cc is not null ? JsonSerializer.Serialize(request.Cc) : "[]",
+            BccEmails = request.Bcc is not null ? JsonSerializer.Serialize(request.Bcc) : "[]",
             Subject = request.Subject ?? string.Empty,
             HtmlBody = request.HtmlBody,
             TextBody = request.TextBody,
@@ -120,6 +127,8 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             TenantId = email.TenantId,
             From = email.FromEmail,
             To = JsonSerializer.Serialize(request.To),
+            CcEmails = email.CcEmails,
+            BccEmails = email.BccEmails,
             Subject = email.Subject,
             HtmlBody = email.HtmlBody,
             TextBody = email.TextBody,

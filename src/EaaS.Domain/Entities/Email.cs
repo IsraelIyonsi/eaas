@@ -31,6 +31,7 @@ public class Email
     public DateTime? SentAt { get; set; }
     public DateTime? DeliveredAt { get; set; }
     public DateTime? OpenedAt { get; set; }
+    public string? TrackingId { get; set; }
     public DateTime? ClickedAt { get; set; }
 
     // Navigation properties

@@ -16,6 +16,7 @@ public class SendingDomain
     public DateTime CreatedAt { get; set; }
     public DateTime? VerifiedAt { get; set; }
     public DateTime? LastCheckedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 
     // Navigation properties
     public Tenant Tenant { get; set; } = null!;

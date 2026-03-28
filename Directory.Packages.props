@@ -46,6 +46,12 @@
     <!-- DNS Lookup -->
     <PackageVersion Include="DnsClient" Version="1.7.0" />
 
+    <!-- HTML Parsing -->
+    <PackageVersion Include="AngleSharp" Version="1.1.2" />
+
+    <!-- MIME Email Construction -->
+    <PackageVersion Include="MimeKit" Version="4.15.1" />
+
     <!-- Health Checks -->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.3" />
 

@@ -1,0 +1,53 @@
+using EaaS.Domain.Entities;
+using EaaS.Domain.Enums;
+using EaaS.Domain.Interfaces;
+using EaaS.Infrastructure.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace EaaS.Api.Features.Suppressions;
+
+public sealed class AddSuppressionHandler : IRequestHandler<AddSuppressionCommand, AddSuppressionResult>
+{
+    private readonly AppDbContext _dbContext;
+    private readonly ICacheService _cacheService;
+
+    public AddSuppressionHandler(AppDbContext dbContext, ICacheService cacheService)
+    {
+        _dbContext = dbContext;
+        _cacheService = cacheService;
+    }
+
+    public async Task<AddSuppressionResult> Handle(AddSuppressionCommand request, CancellationToken cancellationToken)
+    {
+        var emailLower = request.EmailAddress.ToLowerInvariant();
+
+        var exists = await _dbContext.SuppressionEntries
+            .AsNoTracking()
+            .AnyAsync(s => s.TenantId == request.TenantId && s.EmailAddress == emailLower, cancellationToken);
+
+        if (exists)
+            throw new InvalidOperationException($"Email address '{request.EmailAddress}' is already suppressed.");
+
+        var entry = new SuppressionEntry
+        {
+            Id = Guid.NewGuid(),
+            TenantId = request.TenantId,
+            EmailAddress = emailLower,
+            Reason = SuppressionReason.Manual,
+            SuppressedAt = DateTime.UtcNow
+        };
+
+        _dbContext.SuppressionEntries.Add(entry);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Update Redis cache
+        await _cacheService.AddToSuppressionCacheAsync(request.TenantId, emailLower, cancellationToken);
+
+        return new AddSuppressionResult(
+            entry.Id,
+            entry.EmailAddress,
+            entry.Reason.ToString().ToLowerInvariant(),
+            entry.SuppressedAt);
+    }
+}

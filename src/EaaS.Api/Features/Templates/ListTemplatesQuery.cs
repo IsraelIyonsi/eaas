@@ -5,7 +5,8 @@ namespace EaaS.Api.Features.Templates;
 public sealed record ListTemplatesQuery(
     Guid TenantId,
     int Page,
-    int PageSize) : IRequest<ListTemplatesResult>;
+    int PageSize,
+    string? Search = null) : IRequest<ListTemplatesResult>;
 
 public sealed record ListTemplatesResult(
     IReadOnlyList<TemplateSummaryDto> Items,

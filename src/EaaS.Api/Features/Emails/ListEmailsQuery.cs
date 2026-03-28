@@ -9,7 +9,14 @@ public sealed record ListEmailsQuery(
     string? Status,
     DateTime? From,
     DateTime? To,
-    string? Tag) : IRequest<ListEmailsResult>;
+    string? Tag,
+    string? FromEmail,
+    string? ToEmail,
+    string? Tags,
+    Guid? TemplateId,
+    string? BatchId,
+    string? SortBy,
+    string? SortDir) : IRequest<ListEmailsResult>;
 
 public sealed record ListEmailsResult(
     IReadOnlyList<EmailSummaryDto> Items,

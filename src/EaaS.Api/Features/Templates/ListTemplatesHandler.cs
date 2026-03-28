@@ -19,6 +19,12 @@ public sealed class ListTemplatesHandler : IRequestHandler<ListTemplatesQuery, L
             .AsNoTracking()
             .Where(t => t.TenantId == request.TenantId && t.DeletedAt == null);
 
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var pattern = $"%{request.Search}%";
+            query = query.Where(t => EF.Functions.ILike(t.Name, pattern));
+        }
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query

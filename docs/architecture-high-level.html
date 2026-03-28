@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS - High-Level System Architecture</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--bg2:#161822;--bg3:#1e2030;
+    --text:#e2e4f0;--text2:#a0a4b8;--text3:#6b6f85;
+    --green:#3dd68c;--green2:#1a3d2e;--green3:rgba(61,214,140,.12);
+    --blue:#5b9cf5;--blue2:#1a2d4e;--blue3:rgba(91,156,245,.12);
+    --orange:#f5a623;--orange2:#3d2e1a;--orange3:rgba(245,166,35,.12);
+    --yellow:#f5d623;--yellow2:#3d351a;--yellow3:rgba(245,214,35,.10);
+    --purple:#b07cf5;--purple2:#2d1a4e;--purple3:rgba(176,124,245,.12);
+    --red:#f56b6b;--red2:#3d1a1a;
+    --border:rgba(255,255,255,.06);
+    --glow:0 0 20px rgba(91,156,245,.15);
+    --radius:12px;--radius-sm:8px;
+  }
+  html{font-size:14px}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    min-height:100vh;overflow-x:hidden;
+  }
+  /* HEADER */
+  .header{
+    text-align:center;padding:40px 20px 20px;
+    background:linear-gradient(180deg,rgba(91,156,245,.08) 0%,transparent 100%);
+  }
+  .header h1{font-size:2rem;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
+  .header h1 span{color:var(--blue)}
+  .header p{color:var(--text2);font-size:.95rem}
+  .header .badge{
+    display:inline-block;margin-top:10px;padding:4px 14px;
+    background:var(--blue3);border:1px solid rgba(91,156,245,.2);
+    border-radius:20px;font-size:.75rem;color:var(--blue);font-weight:600;
+  }
+  /* LEGEND */
+  .legend{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:16px;
+    padding:16px 20px;margin:0 auto;max-width:900px;
+  }
+  .legend-item{
+    display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);
+  }
+  .legend-dot{width:10px;height:10px;border-radius:50%}
+  .legend-dot.infra{background:var(--blue)}
+  .legend-dot.app{background:var(--green)}
+  .legend-dot.ext{background:var(--orange)}
+  .legend-dot.aws{background:var(--yellow)}
+  .legend-dot.flow{background:var(--purple)}
+  /* CANVAS */
+  .canvas-wrap{
+    position:relative;width:100%;max-width:1200px;margin:10px auto 40px;
+    padding:20px;
+  }
+  svg.diagram{width:100%;height:auto;display:block}
+  /* TOOLTIP */
+  .tooltip{
+    position:fixed;pointer-events:none;z-index:999;
+    background:var(--bg2);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:10px 14px;
+    box-shadow:var(--glow);max-width:280px;
+    font-size:.82rem;color:var(--text);opacity:0;
+    transition:opacity .15s;
+  }
+  .tooltip.show{opacity:1}
+  .tooltip h4{font-size:.85rem;margin-bottom:4px;font-weight:600}
+  .tooltip p{color:var(--text2);line-height:1.45}
+  /* FLOW LABELS */
+  .flow-legend{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:20px;
+    padding:10px 20px 30px;max-width:900px;margin:0 auto;
+  }
+  .flow-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text2)}
+  .flow-line{width:32px;height:3px;border-radius:2px}
+  .flow-line.send{background:var(--green)}
+  .flow-line.bounce{background:var(--red)}
+  .flow-line.track{background:var(--purple)}
+  .flow-line.dash{background:var(--blue)}
+  .flow-line.cache{background:var(--orange)}
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .header h1{font-size:1.4rem}
+    svg.diagram{min-height:500px}
+  }
+  /* ANIMATIONS */
+  @keyframes flowRight{0%{stroke-dashoffset:20}100%{stroke-dashoffset:0}}
+  @keyframes flowLeft{0%{stroke-dashoffset:-20}100%{stroke-dashoffset:0}}
+  @keyframes pulse{0%,100%{opacity:.7}50%{opacity:1}}
+  .flow-arrow{stroke-dasharray:8 4;animation:flowRight 1s linear infinite}
+  .flow-arrow-rev{stroke-dasharray:8 4;animation:flowLeft 1s linear infinite}
+  .flow-arrow-slow{stroke-dasharray:10 5;animation:flowRight 2s linear infinite}
+  .node-glow{filter:drop-shadow(0 0 6px rgba(91,156,245,.2))}
+  .node:hover .node-bg{filter:brightness(1.15)}
+  .node{cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>EaaS</span> - High-Level System Architecture</h1>
+  <p>Email as a Service - Transactional Email Platform</p>
+  <div class="badge">Hetzner CX22 &middot; Single VPS Deployment &middot; .NET 8</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot infra"></div>Infrastructure</div>
+  <div class="legend-item"><div class="legend-dot app"></div>Application Services</div>
+  <div class="legend-item"><div class="legend-dot ext"></div>External Clients</div>
+  <div class="legend-item"><div class="legend-dot aws"></div>AWS Services</div>
+  <div class="legend-item"><div class="legend-dot flow"></div>Tracking / Webhooks</div>
+</div>
+
+<div class="flow-legend">
+  <div class="flow-item"><div class="flow-line send"></div>Send Flow</div>
+  <div class="flow-item"><div class="flow-line bounce"></div>Bounce / Complaint Flow</div>
+  <div class="flow-item"><div class="flow-line track"></div>Tracking Flow</div>
+  <div class="flow-item"><div class="flow-line dash"></div>Dashboard Flow</div>
+  <div class="flow-item"><div class="flow-line cache"></div>Cache Flow</div>
+</div>
+
+<div class="canvas-wrap">
+<svg class="diagram" viewBox="0 0 1100 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Arrowheads -->
+    <marker id="ah-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6Z" fill="#3dd68c"/>
+    </marker>
+    <marker id="ah-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6Z" fill="#f56b6b"/>
+    </marker>
+    <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6Z" fill="#b07cf5"/>
+    </marker>
+    <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6Z" fill="#5b9cf5"/>
+    </marker>
+    <marker id="ah-orange" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6Z" fill="#f5a623"/>
+    </marker>
+    <!-- Glass effect -->
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,.06)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,.01)"/>
+    </linearGradient>
+    <!-- Zone backgrounds -->
+    <linearGradient id="zone-ext" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(245,166,35,.04)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="zone-app" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(61,214,140,.03)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="zone-infra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(91,156,245,.03)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ======== ZONE BACKGROUNDS ======== -->
+  <!-- External zone (left) -->
+  <rect x="10" y="20" width="170" height="680" rx="16" fill="url(#zone-ext)" stroke="rgba(245,166,35,.08)" stroke-width="1"/>
+  <text x="95" y="50" text-anchor="middle" fill="#f5a623" font-size="10" font-weight="600" opacity=".6">EXTERNAL</text>
+
+  <!-- Application zone (center) -->
+  <rect x="195" y="20" width="560" height="680" rx="16" fill="url(#zone-app)" stroke="rgba(61,214,140,.06)" stroke-width="1"/>
+  <text x="475" y="50" text-anchor="middle" fill="#3dd68c" font-size="10" font-weight="600" opacity=".6">APPLICATION LAYER</text>
+
+  <!-- Infrastructure zone (right) -->
+  <rect x="770" y="20" width="320" height="680" rx="16" fill="url(#zone-infra)" stroke="rgba(91,156,245,.06)" stroke-width="1"/>
+  <text x="930" y="50" text-anchor="middle" fill="#5b9cf5" font-size="10" font-weight="600" opacity=".6">INFRASTRUCTURE</text>
+
+  <!-- ======== FLOW ARROWS (behind nodes) ======== -->
+
+  <!-- SEND FLOW: Client Apps -> Nginx -> API -> RabbitMQ -> Worker -> SES -> Recipient -->
+  <path d="M155,155 L240,155" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <path d="M370,155 L430,155" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <path d="M560,185 L560,270 L810,270" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <path d="M930,300 L930,350" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <path d="M860,390 L560,390" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <!-- Worker -> SES -->
+  <path d="M490,420 L490,490 L100,490" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+  <!-- SES -> Recipient Inbox -->
+  <path d="M95,520 L95,600" class="flow-arrow" stroke="#3dd68c" stroke-width="2" fill="none" marker-end="url(#ah-green)"/>
+
+  <!-- BOUNCE FLOW: SES -> SNS -> Webhook Processor -> DB + Redis -->
+  <path d="M100,520 L100,560 L280,560" class="flow-arrow" stroke="#f56b6b" stroke-width="2" fill="none" marker-end="url(#ah-red)"/>
+  <!-- SNS -> Webhook Processor -->
+  <path d="M380,560 L430,560" class="flow-arrow" stroke="#f56b6b" stroke-width="2" fill="none" marker-end="url(#ah-red)"/>
+  <!-- Webhook -> PostgreSQL -->
+  <path d="M560,540 L810,480" class="flow-arrow" stroke="#f56b6b" stroke-width="2" fill="none" marker-end="url(#ah-red)"/>
+  <!-- Webhook -> Redis (suppress) -->
+  <path d="M560,580 L810,590" class="flow-arrow" stroke="#f56b6b" stroke-width="2" fill="none" marker-end="url(#ah-red)"/>
+
+  <!-- TRACKING FLOW: Recipient -> Webhook Processor -> DB -->
+  <path d="M155,640 L280,640 L280,580 L430,580" class="flow-arrow-slow" stroke="#b07cf5" stroke-width="2" fill="none" marker-end="url(#ah-purple)"/>
+
+  <!-- DASHBOARD FLOW: Admin -> Nginx -> Dashboard -> API -> DB -->
+  <path d="M155,300 L240,300" class="flow-arrow" stroke="#5b9cf5" stroke-width="2" fill="none" marker-end="url(#ah-blue)"/>
+  <path d="M370,300 L430,300" class="flow-arrow" stroke="#5b9cf5" stroke-width="2" fill="none" marker-end="url(#ah-blue)"/>
+  <path d="M560,300 L680,300 L680,180 L560,180" class="flow-arrow" stroke="#5b9cf5" stroke-width="2" fill="none" marker-end="url(#ah-blue)"/>
+  <!-- API -> PostgreSQL (read) -->
+  <path d="M560,165 L810,440" class="flow-arrow" stroke="#5b9cf5" stroke-width="1.5" fill="none" marker-end="url(#ah-blue)" opacity=".5"/>
+
+  <!-- CACHE FLOW: API <-> Redis -->
+  <path d="M560,150 L740,150 L740,590 L810,590" class="flow-arrow" stroke="#f5a623" stroke-width="1.5" fill="none" marker-end="url(#ah-orange)" opacity=".6"/>
+
+  <!-- ======== NODES ======== -->
+
+  <!-- CLIENT APPS -->
+  <g class="node" data-tip="Client Applications|CashTrack and other applications that consume the EaaS API. Send transactional emails via REST API with Bearer token auth.">
+    <rect class="node-bg" x="30" y="120" width="120" height="70" rx="10" fill="var(--orange2)" stroke="var(--orange)" stroke-width="1.5" opacity=".9"/>
+    <rect x="30" y="120" width="120" height="70" rx="10" fill="url(#glass)"/>
+    <text x="90" y="148" text-anchor="middle" fill="var(--orange)" font-size="11" font-weight="700">Client Apps</text>
+    <text x="90" y="165" text-anchor="middle" fill="var(--text2)" font-size="9">CashTrack, etc.</text>
+    <text x="90" y="178" text-anchor="middle" fill="var(--text3)" font-size="8">REST / Bearer</text>
+  </g>
+
+  <!-- ADMIN -->
+  <g class="node" data-tip="Admin Users|System administrators who manage tenants, domains, templates, and view email analytics through the Blazor Dashboard.">
+    <rect class="node-bg" x="30" y="268" width="120" height="64" rx="10" fill="var(--orange2)" stroke="var(--orange)" stroke-width="1.5" opacity=".9"/>
+    <rect x="30" y="268" width="120" height="64" rx="10" fill="url(#glass)"/>
+    <text x="90" y="296" text-anchor="middle" fill="var(--orange)" font-size="11" font-weight="700">Admin</text>
+    <text x="90" y="312" text-anchor="middle" fill="var(--text2)" font-size="9">Dashboard User</text>
+  </g>
+
+  <!-- NGINX -->
+  <g class="node" data-tip="Nginx Reverse Proxy|TLS termination with Let's Encrypt. Rate limiting at the edge. Routes traffic to API (:8080), Dashboard (:8082), and Webhook Processor (:8081). Memory limit: 64MB.">
+    <rect class="node-bg" x="245" y="105" width="120" height="250" rx="10" fill="var(--green2)" stroke="var(--green)" stroke-width="1.5" opacity=".9"/>
+    <rect x="245" y="105" width="120" height="250" rx="10" fill="url(#glass)"/>
+    <text x="305" y="140" text-anchor="middle" fill="var(--green)" font-size="12" font-weight="700">Nginx</text>
+    <text x="305" y="158" text-anchor="middle" fill="var(--text2)" font-size="9">Reverse Proxy</text>
+    <line x1="265" y1="172" x2="345" y2="172" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+    <text x="305" y="192" text-anchor="middle" fill="var(--text3)" font-size="8">TLS Termination</text>
+    <text x="305" y="206" text-anchor="middle" fill="var(--text3)" font-size="8">Rate Limiting</text>
+    <text x="305" y="220" text-anchor="middle" fill="var(--text3)" font-size="8">:80 / :443</text>
+    <line x1="265" y1="235" x2="345" y2="235" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+    <text x="305" y="255" text-anchor="middle" fill="var(--text3)" font-size="8">-> API :8080</text>
+    <text x="305" y="269" text-anchor="middle" fill="var(--text3)" font-size="8">-> Webhook :8081</text>
+    <text x="305" y="283" text-anchor="middle" fill="var(--text3)" font-size="8">-> Dashboard :8082</text>
+    <text x="305" y="340" text-anchor="middle" fill="var(--text3)" font-size="7.5">Let's Encrypt</text>
+  </g>
+
+  <!-- EAAS API -->
+  <g class="node" data-tip="EaaS API|.NET 8 Minimal API. The central brain of the system. Handles email sending, template management, domain verification, API key management, and suppression lists. Vertical slice architecture with MediatR + FluentValidation. Memory limit: 256MB.">
+    <rect class="node-bg" x="435" y="105" width="120" height="100" rx="10" fill="var(--green2)" stroke="var(--green)" stroke-width="2" opacity=".9"/>
+    <rect x="435" y="105" width="120" height="100" rx="10" fill="url(#glass)"/>
+    <text x="495" y="138" text-anchor="middle" fill="var(--green)" font-size="13" font-weight="800">EaaS API</text>
+    <text x="495" y="155" text-anchor="middle" fill="var(--text2)" font-size="9">.NET 8 Minimal API</text>
+    <line x1="450" y1="165" x2="540" y2="165" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+    <text x="495" y="180" text-anchor="middle" fill="var(--text3)" font-size="8">MediatR + FluentVal</text>
+    <text x="495" y="193" text-anchor="middle" fill="var(--text3)" font-size="8">:8080 / 256MB</text>
+  </g>
+
+  <!-- BLAZOR DASHBOARD -->
+  <g class="node" data-tip="Blazor Dashboard|Server-side Blazor management UI. Displays email analytics, delivery rates, bounce reports. Login via hashed password. Connects to API + DB. Memory limit: 192MB.">
+    <rect class="node-bg" x="435" y="255" width="120" height="80" rx="10" fill="var(--green2)" stroke="var(--green)" stroke-width="1.5" opacity=".9"/>
+    <rect x="435" y="255" width="120" height="80" rx="10" fill="url(#glass)"/>
+    <text x="495" y="285" text-anchor="middle" fill="var(--green)" font-size="11" font-weight="700">Dashboard</text>
+    <text x="495" y="300" text-anchor="middle" fill="var(--text2)" font-size="9">Blazor Server</text>
+    <text x="495" y="315" text-anchor="middle" fill="var(--text3)" font-size="8">:8082 / 192MB</text>
+  </g>
+
+  <!-- WORKER SERVICE -->
+  <g class="node" data-tip="Worker Service|Background service that consumes email messages from RabbitMQ. Renders Liquid templates, injects tracking pixels, rewrites links for click tracking, builds MIME messages for attachments, and sends via AWS SES. Retry: 1s -> 5s -> 30s -> DLQ. Memory limit: 256MB.">
+    <rect class="node-bg" x="435" y="360" width="120" height="80" rx="10" fill="var(--green2)" stroke="var(--green)" stroke-width="1.5" opacity=".9"/>
+    <rect x="435" y="360" width="120" height="80" rx="10" fill="url(#glass)"/>
+    <text x="495" y="390" text-anchor="middle" fill="var(--green)" font-size="11" font-weight="700">Worker</text>
+    <text x="495" y="405" text-anchor="middle" fill="var(--text2)" font-size="9">Email Processor</text>
+    <text x="495" y="420" text-anchor="middle" fill="var(--text3)" font-size="8">MassTransit Consumer</text>
+    <text x="495" y="432" text-anchor="middle" fill="var(--text3)" font-size="8">256MB</text>
+  </g>
+
+  <!-- WEBHOOK PROCESSOR -->
+  <g class="node" data-tip="Webhook Processor|Receives inbound SNS notifications for bounces, complaints, and deliveries. Validates SNS message signatures. Also serves open tracking pixel and click tracking redirect endpoints. Auto-suppresses hard bounces and complaints. Memory limit: 128MB.">
+    <rect class="node-bg" x="435" y="510" width="120" height="100" rx="10" fill="var(--purple2)" stroke="var(--purple)" stroke-width="1.5" opacity=".9"/>
+    <rect x="435" y="510" width="120" height="100" rx="10" fill="url(#glass)"/>
+    <text x="495" y="542" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="700">Webhook</text>
+    <text x="495" y="557" text-anchor="middle" fill="var(--purple)" font-size="11" font-weight="700">Processor</text>
+    <text x="495" y="574" text-anchor="middle" fill="var(--text2)" font-size="8">SNS + Tracking</text>
+    <text x="495" y="587" text-anchor="middle" fill="var(--text3)" font-size="8">:8081 / 128MB</text>
+    <text x="495" y="600" text-anchor="middle" fill="var(--text3)" font-size="7.5">/webhooks/sns</text>
+  </g>
+
+  <!-- AWS SES -->
+  <g class="node" data-tip="Amazon SES v2|Simple Email Service for SMTP delivery. Handles actual email delivery to recipient mail servers. Supports simple and raw (MIME) message formats. Publishes delivery events to SNS topics.">
+    <rect class="node-bg" x="30" y="460" width="120" height="65" rx="10" fill="var(--yellow2)" stroke="var(--yellow)" stroke-width="1.5" opacity=".9"/>
+    <rect x="30" y="460" width="120" height="65" rx="10" fill="url(#glass)"/>
+    <text x="90" y="488" text-anchor="middle" fill="var(--yellow)" font-size="11" font-weight="700">AWS SES</text>
+    <text x="90" y="503" text-anchor="middle" fill="var(--text2)" font-size="9">Email Delivery</text>
+    <text x="90" y="516" text-anchor="middle" fill="var(--text3)" font-size="8">SES v2 API</text>
+  </g>
+
+  <!-- AWS SNS -->
+  <g class="node" data-tip="Amazon SNS|Simple Notification Service. Receives bounce, complaint, and delivery events from SES and forwards them as HTTP POST to the Webhook Processor endpoint.">
+    <rect class="node-bg" x="265" y="535" width="110" height="55" rx="10" fill="var(--yellow2)" stroke="var(--yellow)" stroke-width="1.5" opacity=".9"/>
+    <rect x="265" y="535" width="110" height="55" rx="10" fill="url(#glass)"/>
+    <text x="320" y="558" text-anchor="middle" fill="var(--yellow)" font-size="11" font-weight="700">AWS SNS</text>
+    <text x="320" y="575" text-anchor="middle" fill="var(--text2)" font-size="8">Event Notifications</text>
+  </g>
+
+  <!-- RECIPIENT INBOX -->
+  <g class="node" data-tip="Recipient Inbox|End-user email clients (Gmail, Outlook, Yahoo, etc.). Receives delivered emails. Opens and clicks are tracked via embedded pixels and rewritten links.">
+    <rect class="node-bg" x="30" y="605" width="120" height="65" rx="10" fill="var(--orange2)" stroke="var(--orange)" stroke-width="1.5" opacity=".9"/>
+    <rect x="30" y="605" width="120" height="65" rx="10" fill="url(#glass)"/>
+    <text x="90" y="632" text-anchor="middle" fill="var(--orange)" font-size="11" font-weight="700">Recipient</text>
+    <text x="90" y="648" text-anchor="middle" fill="var(--text2)" font-size="9">Gmail, Outlook...</text>
+    <text x="90" y="661" text-anchor="middle" fill="var(--text3)" font-size="8">Opens / Clicks</text>
+  </g>
+
+  <!-- RABBITMQ -->
+  <g class="node" data-tip="RabbitMQ 3.13|Message broker with management UI. Durable classic queues. Queue: eaas-emails-send (prefetch configured). Retry policy: 1s, 5s, 30s then Dead Letter Queue. MassTransit managed. Memory limit: 512MB.">
+    <rect class="node-bg" x="820" y="240" width="200" height="80" rx="10" fill="var(--blue2)" stroke="var(--blue)" stroke-width="1.5" opacity=".9"/>
+    <rect x="820" y="240" width="200" height="80" rx="10" fill="url(#glass)"/>
+    <text x="920" y="268" text-anchor="middle" fill="var(--blue)" font-size="12" font-weight="700">RabbitMQ</text>
+    <text x="920" y="284" text-anchor="middle" fill="var(--text2)" font-size="9">Message Broker (3.13)</text>
+    <text x="920" y="298" text-anchor="middle" fill="var(--text3)" font-size="8">eaas-emails-send | DLQ</text>
+    <text x="920" y="310" text-anchor="middle" fill="var(--text3)" font-size="8">:5672 / 512MB</text>
+  </g>
+
+  <!-- Worker <- RabbitMQ -->
+  <text x="710" y="363" text-anchor="middle" fill="var(--text3)" font-size="7.5" transform="rotate(-25,710,363)">consume</text>
+
+  <!-- POSTGRESQL -->
+  <g class="node" data-tip="PostgreSQL 16|Primary data store. 9 tables: tenants, api_keys, domains, dns_records, templates, emails, email_events, suppression_list, webhooks. Alpine image. Memory limit: 512MB. Persistent volume.">
+    <rect class="node-bg" x="820" y="430" width="200" height="80" rx="10" fill="var(--blue2)" stroke="var(--blue)" stroke-width="1.5" opacity=".9"/>
+    <rect x="820" y="430" width="200" height="80" rx="10" fill="url(#glass)"/>
+    <!-- DB icon -->
+    <ellipse cx="855" cy="458" rx="12" ry="6" fill="none" stroke="var(--blue)" stroke-width="1.2"/>
+    <line x1="843" y1="458" x2="843" y2="472" stroke="var(--blue)" stroke-width="1.2"/>
+    <line x1="867" y1="458" x2="867" y2="472" stroke="var(--blue)" stroke-width="1.2"/>
+    <ellipse cx="855" cy="472" rx="12" ry="6" fill="none" stroke="var(--blue)" stroke-width="1.2"/>
+    <text x="940" y="460" text-anchor="middle" fill="var(--blue)" font-size="12" font-weight="700">PostgreSQL</text>
+    <text x="920" y="478" text-anchor="middle" fill="var(--text2)" font-size="9">Primary Database (16)</text>
+    <text x="920" y="492" text-anchor="middle" fill="var(--text3)" font-size="8">9 tables | EF Core 8</text>
+    <text x="920" y="504" text-anchor="middle" fill="var(--text3)" font-size="8">:5432 / 512MB</text>
+  </g>
+
+  <!-- REDIS -->
+  <g class="node" data-tip="Redis 7.2|In-memory cache. Stores: API key hashes (auth), suppression list (fast lookup), rate limit counters (sorted sets + Lua), idempotency keys, template cache. LRU eviction at 128MB. AOF persistence.">
+    <rect class="node-bg" x="820" y="560" width="200" height="80" rx="10" fill="var(--blue2)" stroke="var(--blue)" stroke-width="1.5" opacity=".9"/>
+    <rect x="820" y="560" width="200" height="80" rx="10" fill="url(#glass)"/>
+    <text x="920" y="590" text-anchor="middle" fill="var(--blue)" font-size="12" font-weight="700">Redis</text>
+    <text x="920" y="606" text-anchor="middle" fill="var(--text2)" font-size="9">Cache Layer (7.2)</text>
+    <text x="920" y="620" text-anchor="middle" fill="var(--text3)" font-size="8">API Keys | Suppression | Rate Limits</text>
+    <text x="920" y="632" text-anchor="middle" fill="var(--text3)" font-size="8">:6379 / 128MB LRU</text>
+  </g>
+
+  <!-- ======== FLOW LABELS ON ARROWS ======== -->
+  <text x="195" y="147" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">REST</text>
+  <text x="400" y="147" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">proxy</text>
+  <text x="680" y="255" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">publish</text>
+  <text x="930" y="343" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">consume</text>
+  <text x="290" y="485" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">SES v2</text>
+  <text x="95" y="592" text-anchor="middle" fill="var(--green)" font-size="7.5" font-weight="600">SMTP</text>
+
+  <text x="185" y="553" text-anchor="middle" fill="var(--red)" font-size="7.5" font-weight="600">events</text>
+  <text x="410" y="553" text-anchor="middle" fill="var(--red)" font-size="7.5" font-weight="600">POST</text>
+  <text x="705" y="502" text-anchor="middle" fill="var(--red)" font-size="7.5" font-weight="600">update</text>
+  <text x="710" y="592" text-anchor="middle" fill="var(--red)" font-size="7.5" font-weight="600">suppress</text>
+
+  <text x="220" y="625" text-anchor="middle" fill="var(--purple)" font-size="7.5" font-weight="600">pixel/click</text>
+
+  <text x="195" y="292" text-anchor="middle" fill="var(--blue)" font-size="7.5" font-weight="600">browser</text>
+  <text x="400" y="292" text-anchor="middle" fill="var(--blue)" font-size="7.5" font-weight="600">proxy</text>
+  <text x="630" y="228" text-anchor="middle" fill="var(--blue)" font-size="7.5" font-weight="600">API call</text>
+
+  <text x="765" y="142" text-anchor="middle" fill="var(--orange)" font-size="7.5" font-weight="600">cache</text>
+
+  <!-- Version tag -->
+  <text x="1085" y="710" text-anchor="end" fill="var(--text3)" font-size="8">EaaS Architecture v1.1 | Sprint 2 | 2026-03-27</text>
+</svg>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <h4 id="tip-title"></h4>
+  <p id="tip-desc"></p>
+</div>
+
+<script>
+(function(){
+  const tip = document.getElementById('tooltip');
+  const tipTitle = document.getElementById('tip-title');
+  const tipDesc = document.getElementById('tip-desc');
+
+  document.querySelectorAll('.node').forEach(node => {
+    const data = node.getAttribute('data-tip');
+    if(!data) return;
+    const [title, ...rest] = data.split('|');
+    const desc = rest.join('|');
+
+    node.addEventListener('mouseenter', e => {
+      tipTitle.textContent = title;
+      tipDesc.textContent = desc;
+      tip.classList.add('show');
+    });
+    node.addEventListener('mousemove', e => {
+      let x = e.clientX + 16;
+      let y = e.clientY + 12;
+      if(x + 280 > window.innerWidth) x = e.clientX - 290;
+      if(y + 120 > window.innerHeight) y = e.clientY - 130;
+      tip.style.left = x + 'px';
+      tip.style.top = y + 'px';
+    });
+    node.addEventListener('mouseleave', () => {
+      tip.classList.remove('show');
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -92,18 +92,27 @@ public sealed partial class SesEmailService : IEmailDeliveryService
     public async Task<SendEmailResult> SendEmailAsync(
         string from,
         IReadOnlyList<string> recipients,
+        IReadOnlyList<string>? ccRecipients,
+        IReadOnlyList<string>? bccRecipients,
         string subject,
         string? htmlBody,
         string? textBody,
         CancellationToken cancellationToken = default)
     {
-        // Stub for Phase 4 — will be fully implemented in Phase 5
         try
         {
+            var destination = new Destination { ToAddresses = recipients.ToList() };
+
+            if (ccRecipients is { Count: > 0 })
+                destination.CcAddresses = ccRecipients.ToList();
+
+            if (bccRecipients is { Count: > 0 })
+                destination.BccAddresses = bccRecipients.ToList();
+
             var request = new SendEmailRequest
             {
                 FromEmailAddress = from,
-                Destination = new Destination { ToAddresses = recipients.ToList() },
+                Destination = destination,
                 Content = new EmailContent
                 {
                     Simple = new Message
@@ -131,6 +140,52 @@ public sealed partial class SesEmailService : IEmailDeliveryService
         }
     }
 
+    public async Task<SendEmailResult> SendRawEmailAsync(Stream mimeMessage, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var memoryStream = new MemoryStream();
+            await mimeMessage.CopyToAsync(memoryStream, cancellationToken);
+
+            var request = new SendEmailRequest
+            {
+                Content = new EmailContent
+                {
+                    Raw = new RawMessage
+                    {
+                        Data = memoryStream
+                    }
+                }
+            };
+
+            var response = await _sesClient.SendEmailAsync(request, cancellationToken);
+
+            LogRawEmailSent(_logger, response.MessageId);
+
+            return new SendEmailResult(true, response.MessageId, null);
+        }
+        catch (Exception ex)
+        {
+            LogRawEmailSendFailed(_logger, ex);
+            return new SendEmailResult(false, null, ex.Message);
+        }
+    }
+
+    public async Task DeleteDomainIdentityAsync(string domain, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _sesClient.DeleteEmailIdentityAsync(
+                new DeleteEmailIdentityRequest { EmailIdentity = domain },
+                cancellationToken);
+            LogDomainIdentityDeleted(_logger, domain);
+        }
+        catch (Exception ex)
+        {
+            LogDomainIdentityDeleteFailed(_logger, ex, domain);
+        }
+    }
+
     [LoggerMessage(Level = LogLevel.Information, Message = "SES domain identity created for {Domain} with {TokenCount} DKIM tokens")]
     private static partial void LogDomainIdentityCreated(ILogger logger, string domain, int tokenCount);
 
@@ -151,4 +206,16 @@ public sealed partial class SesEmailService : IEmailDeliveryService
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send email via SES")]
     private static partial void LogEmailSendFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Raw email sent via SES, MessageId: {MessageId}")]
+    private static partial void LogRawEmailSent(ILogger logger, string messageId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send raw email via SES")]
+    private static partial void LogRawEmailSendFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "SES domain identity deleted for {Domain}")]
+    private static partial void LogDomainIdentityDeleted(ILogger logger, string domain);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete SES domain identity for {Domain}")]
+    private static partial void LogDomainIdentityDeleteFailed(ILogger logger, Exception ex, string domain);
 }

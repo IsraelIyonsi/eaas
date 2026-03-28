@@ -60,10 +60,12 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
             }
         }
 
-        // Look up in DB
+        // Look up in DB - Active or Rotating (within grace period)
         var dbKey = await _dbContext.ApiKeys
             .AsNoTracking()
-            .Where(k => k.KeyHash == keyHash && k.Status == ApiKeyStatus.Active)
+            .Where(k => k.KeyHash == keyHash
+                        && (k.Status == ApiKeyStatus.Active
+                            || (k.Status == ApiKeyStatus.Rotating && k.RotatingExpiresAt > DateTime.UtcNow)))
             .Select(k => new { k.Id, k.TenantId, k.Name })
             .FirstOrDefaultAsync();
 

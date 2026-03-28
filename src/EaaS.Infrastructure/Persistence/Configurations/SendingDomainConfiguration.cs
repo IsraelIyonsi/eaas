@@ -44,6 +44,9 @@ public sealed class SendingDomainConfiguration : IEntityTypeConfiguration<Sendin
         builder.Property(d => d.LastCheckedAt)
             .HasColumnName("last_checked_at");
 
+        builder.Property(d => d.DeletedAt)
+            .HasColumnName("deleted_at");
+
         // Unique constraint on (tenant_id, domain_name)
         builder.HasIndex(d => new { d.TenantId, d.DomainName })
             .IsUnique()

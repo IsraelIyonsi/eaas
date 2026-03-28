@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS - Low-Level Architecture & Data Flow</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161822;--bg3:#1e2030;--bg4:#252840;
+  --text:#e2e4f0;--text2:#a0a4b8;--text3:#6b6f85;
+  --green:#3dd68c;--green2:#1a3d2e;--green3:rgba(61,214,140,.10);
+  --blue:#5b9cf5;--blue2:#1a2d4e;--blue3:rgba(91,156,245,.10);
+  --orange:#f5a623;--orange2:#3d2e1a;--orange3:rgba(245,166,35,.10);
+  --purple:#b07cf5;--purple2:#2d1a4e;--purple3:rgba(176,124,245,.10);
+  --gray:#8b8fa8;--gray2:#252840;--gray3:rgba(139,143,168,.10);
+  --teal:#5bcfcf;--teal2:#1a3d3d;--teal3:rgba(91,207,207,.10);
+  --red:#f56b6b;--yellow:#f5d623;
+  --border:rgba(255,255,255,.06);
+  --glow:0 0 20px rgba(91,156,245,.1);
+  --radius:12px;--radius-sm:8px;
+}
+html{font-size:13px}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  min-height:100vh;line-height:1.5;
+}
+/* HEADER */
+.header{
+  text-align:center;padding:36px 20px 16px;
+  background:linear-gradient(180deg,rgba(91,156,245,.06) 0%,transparent 100%);
+}
+.header h1{font-size:1.8rem;font-weight:700;letter-spacing:-.5px}
+.header h1 span{color:var(--blue)}
+.header p{color:var(--text2);font-size:.9rem;margin-top:4px}
+.header .badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
+.header .badge{
+  display:inline-block;padding:3px 12px;
+  border-radius:20px;font-size:.72rem;font-weight:600;
+}
+.badge-green{background:var(--green3);border:1px solid rgba(61,214,140,.2);color:var(--green)}
+.badge-blue{background:var(--blue3);border:1px solid rgba(91,156,245,.2);color:var(--blue)}
+.badge-purple{background:var(--purple3);border:1px solid rgba(176,124,245,.2);color:var(--purple)}
+.badge-orange{background:var(--orange3);border:1px solid rgba(245,166,35,.2);color:var(--orange)}
+.badge-gray{background:var(--gray3);border:1px solid rgba(139,143,168,.2);color:var(--gray)}
+.badge-teal{background:var(--teal3);border:1px solid rgba(91,207,207,.2);color:var(--teal)}
+
+/* NAV TABS */
+.tabs{
+  display:flex;justify-content:center;gap:4px;padding:16px 20px 0;
+  flex-wrap:wrap;
+}
+.tab{
+  padding:8px 20px;border-radius:8px 8px 0 0;
+  background:var(--bg2);border:1px solid var(--border);border-bottom:none;
+  color:var(--text2);font-size:.85rem;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.tab:hover{color:var(--text);background:var(--bg3)}
+.tab.active{color:var(--blue);background:var(--bg3);border-color:rgba(91,156,245,.2)}
+
+/* PANELS */
+.panels{
+  max-width:1200px;margin:0 auto;padding:0 20px 40px;
+}
+.panel{
+  display:none;background:var(--bg2);border:1px solid var(--border);
+  border-radius:0 var(--radius) var(--radius) var(--radius);
+  padding:24px;
+}
+.panel.active{display:block}
+
+/* PROJECT CARDS */
+.project{
+  margin-bottom:20px;border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;
+  background:var(--bg);
+}
+.project-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;cursor:pointer;
+  transition:background .15s;
+}
+.project-header:hover{background:var(--bg3)}
+.project-header h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.project-header .dot{width:10px;height:10px;border-radius:50%}
+.project-header .arrow{
+  color:var(--text3);font-size:.8rem;transition:transform .2s;
+}
+.project-header .arrow.open{transform:rotate(90deg)}
+.project-body{
+  display:none;padding:0 18px 18px;border-top:1px solid var(--border);
+}
+.project-body.open{display:block}
+
+/* SUB SECTIONS */
+.sub-section{margin-top:14px}
+.sub-section h4{
+  font-size:.85rem;color:var(--text2);font-weight:600;
+  margin-bottom:8px;padding-bottom:4px;
+  border-bottom:1px solid var(--border);
+}
+.item-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;
+}
+.item{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 12px;
+  font-size:.82rem;transition:all .15s;
+}
+.item:hover{border-color:rgba(255,255,255,.12);background:var(--bg3)}
+.item .name{font-weight:600;color:var(--text)}
+.item .desc{color:var(--text3);font-size:.75rem;margin-top:2px}
+
+/* FILE LIST */
+.file-list{display:flex;flex-direction:column;gap:4px}
+.file{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:6px;font-size:.8rem;
+  color:var(--text2);transition:background .1s;
+}
+.file:hover{background:var(--bg3)}
+.file .icon{color:var(--text3);font-size:.7rem;width:14px;text-align:center}
+.file .fname{font-weight:500;color:var(--text)}
+.file .fdesc{color:var(--text3);margin-left:auto;font-size:.72rem}
+
+/* FLOW DIAGRAM */
+.flow{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  overflow-x:auto;
+}
+.flow-step{
+  display:flex;align-items:stretch;gap:0;margin:6px 0;
+}
+.step-box{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;min-width:160px;
+  font-size:.82rem;position:relative;
+}
+.step-box .step-label{
+  font-weight:700;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:4px;
+}
+.step-box .step-content{color:var(--text2);font-size:.78rem;line-height:1.5}
+.step-box .step-num{
+  position:absolute;top:-8px;left:-8px;
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.65rem;font-weight:700;
+}
+.step-arrow{
+  display:flex;align-items:center;color:var(--text3);
+  font-size:1.2rem;padding:0 6px;
+}
+.step-green .step-label{color:var(--green)}
+.step-green .step-num{background:var(--green2);color:var(--green);border:1px solid var(--green)}
+.step-blue .step-label{color:var(--blue)}
+.step-blue .step-num{background:var(--blue2);color:var(--blue);border:1px solid var(--blue)}
+.step-purple .step-label{color:var(--purple)}
+.step-purple .step-num{background:var(--purple2);color:var(--purple);border:1px solid var(--purple)}
+.step-orange .step-label{color:var(--orange)}
+.step-orange .step-num{background:var(--orange2);color:var(--orange);border:1px solid var(--orange)}
+
+/* VERTICAL FLOW */
+.vflow{display:flex;flex-direction:column;gap:2px;align-items:flex-start}
+.vflow .step-arrow{transform:rotate(90deg);padding:2px 0}
+.vflow .step-box{width:100%;max-width:600px}
+
+/* ERD */
+.erd-wrap{overflow-x:auto;padding:10px 0}
+.erd{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.table-card{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);min-width:200px;max-width:240px;
+  overflow:hidden;flex:0 0 auto;
+}
+.table-card .t-header{
+  padding:10px 14px;font-weight:700;font-size:.85rem;
+  border-bottom:1px solid var(--border);
+}
+.table-card .t-cols{padding:8px 14px;font-size:.75rem;color:var(--text2)}
+.table-card .t-col{
+  padding:2px 0;display:flex;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.table-card .t-col:last-child{border-bottom:none}
+.t-col .col-name{font-weight:500;color:var(--text)}
+.t-col .col-type{color:var(--text3);font-size:.7rem}
+.t-col .pk{color:var(--yellow);font-weight:700}
+.t-col .fk{color:var(--blue);font-weight:600}
+
+/* RELATIONSHIPS */
+.rels{
+  margin-top:16px;padding:14px;background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+}
+.rel{
+  display:flex;align-items:center;gap:8px;padding:4px 0;
+  font-size:.8rem;color:var(--text2);
+}
+.rel .r-from{font-weight:600;color:var(--text);min-width:120px}
+.rel .r-arrow{color:var(--blue);font-size:.7rem}
+.rel .r-to{font-weight:600;color:var(--text);min-width:120px}
+.rel .r-card{color:var(--text3);font-size:.72rem}
+
+/* DEP ARROWS */
+.deps{
+  margin-top:16px;padding:14px;background:var(--bg);
+  border:1px solid var(--border);border-radius:var(--radius);
+}
+.dep-row{
+  display:flex;align-items:center;gap:10px;padding:3px 0;
+  font-size:.82rem;
+}
+.dep-from{font-weight:600;min-width:140px}
+.dep-arrow{color:var(--text3)}
+.dep-to{color:var(--text2)}
+
+/* LEGEND INLINE */
+.legend-bar{
+  display:flex;flex-wrap:wrap;gap:12px;padding:10px 0;margin-bottom:12px;
+}
+.legend-bar .li{display:flex;align-items:center;gap:5px;font-size:.75rem;color:var(--text2)}
+.legend-bar .ldot{width:8px;height:8px;border-radius:50%}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .header h1{font-size:1.3rem}
+  .item-grid{grid-template-columns:1fr}
+  .erd{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>EaaS</span> - Low-Level Architecture & Data Flow</h1>
+  <p>Internal .NET Solution Structure, Request Pipeline, and Database Schema</p>
+  <div class="badges">
+    <span class="badge badge-green">EaaS.Api</span>
+    <span class="badge badge-blue">EaaS.Worker</span>
+    <span class="badge badge-purple">EaaS.WebhookProcessor</span>
+    <span class="badge badge-orange">EaaS.Infrastructure</span>
+    <span class="badge badge-gray">EaaS.Domain</span>
+    <span class="badge badge-teal">EaaS.Shared</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('projects')">Solution Structure</div>
+  <div class="tab" onclick="switchTab('flow')">Email Send Flow</div>
+  <div class="tab" onclick="switchTab('erd')">Database Schema</div>
+  <div class="tab" onclick="switchTab('deps')">Project Dependencies</div>
+</div>
+
+<div class="panels">
+
+<!-- ==================== TAB 1: SOLUTION STRUCTURE ==================== -->
+<div class="panel active" id="panel-projects">
+
+  <div class="legend-bar">
+    <div class="li"><div class="ldot" style="background:var(--green)"></div>API (Presentation)</div>
+    <div class="li"><div class="ldot" style="background:var(--blue)"></div>Worker (Background)</div>
+    <div class="li"><div class="ldot" style="background:var(--purple)"></div>Webhook (Inbound)</div>
+    <div class="li"><div class="ldot" style="background:var(--orange)"></div>Infrastructure (Impl)</div>
+    <div class="li"><div class="ldot" style="background:var(--gray)"></div>Domain (Core)</div>
+    <div class="li"><div class="ldot" style="background:var(--teal)"></div>Shared (DTOs)</div>
+  </div>
+
+  <!-- EaaS.Api -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--green)">
+      <h3><span class="dot" style="background:var(--green)"></span>EaaS.Api <span style="color:var(--text3);font-size:.75rem;font-weight:400">.NET 8 Minimal API</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>Features/ (Vertical Slices)</h4>
+        <div class="item-grid">
+          <div class="item"><div class="name">Emails/</div><div class="desc">SendEmail, GetEmail, ListEmails, SendBatch</div></div>
+          <div class="item"><div class="name">Templates/</div><div class="desc">Create, Get, List, Update, Delete, Preview</div></div>
+          <div class="item"><div class="name">Domains/</div><div class="desc">Add, List, Verify, Remove</div></div>
+          <div class="item"><div class="name">ApiKeys/</div><div class="desc">Create, List, Revoke, Rotate</div></div>
+          <div class="item"><div class="name">Suppressions/</div><div class="desc">List, Add, Remove</div></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Each Feature Slice Pattern</h4>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="step-box step-green"><div class="step-num">1</div><div class="step-label">Endpoint</div><div class="step-content">HTTP adapter (MapPost/Get/Delete). Parses request, sends MediatR command/query.</div></div>
+            <div class="step-arrow">&#8594;</div>
+            <div class="step-box step-green"><div class="step-num">2</div><div class="step-label">Validator</div><div class="step-content">FluentValidation rules. Runs in ValidationBehavior pipeline.</div></div>
+            <div class="step-arrow">&#8594;</div>
+            <div class="step-box step-green"><div class="step-num">3</div><div class="step-label">Command/Query</div><div class="step-content">MediatR IRequest&lt;T&gt;. Immutable record with request data.</div></div>
+            <div class="step-arrow">&#8594;</div>
+            <div class="step-box step-green"><div class="step-num">4</div><div class="step-label">Handler</div><div class="step-content">Business logic. Calls domain services, repos, cache, publishes messages.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Middleware & Behaviors</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#9881;</span><span class="fname">GlobalExceptionHandler</span><span class="fdesc">Catches all unhandled exceptions, returns structured ProblemDetails</span></div>
+          <div class="file"><span class="icon">&#128274;</span><span class="fname">ApiKeyAuthHandler</span><span class="fdesc">Validates Bearer token: SHA-256 hash lookup in Redis, fallback to DB</span></div>
+          <div class="file"><span class="icon">&#9889;</span><span class="fname">ValidationBehavior&lt;T,R&gt;</span><span class="fdesc">MediatR pipeline behavior. Runs FluentValidation before handler executes</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EaaS.Worker -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--blue)">
+      <h3><span class="dot" style="background:var(--blue)"></span>EaaS.Worker <span style="color:var(--text3);font-size:.75rem;font-weight:400">Background Service</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>MassTransit Consumer</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128229;</span><span class="fname">SendEmailConsumer</span><span class="fdesc">Consumes from eaas-emails-send queue</span></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Processing Pipeline</h4>
+        <div class="flow">
+          <div class="vflow">
+            <div class="step-box step-blue"><div class="step-num">1</div><div class="step-label">Load Email</div><div class="step-content">Fetch Email entity from PostgreSQL by ID</div></div>
+            <div class="step-arrow">&#8595;</div>
+            <div class="step-box step-blue"><div class="step-num">2</div><div class="step-label">Render Template</div><div class="step-content">If template_id set, render Liquid template via Fluid engine with variables</div></div>
+            <div class="step-arrow">&#8595;</div>
+            <div class="step-box step-blue"><div class="step-num">3</div><div class="step-label">Inject Tracking</div><div class="step-content">If track_opens: inject 1x1 pixel. If track_clicks: rewrite &lt;a&gt; hrefs via AngleSharp</div></div>
+            <div class="step-arrow">&#8595;</div>
+            <div class="step-box step-blue"><div class="step-num">4</div><div class="step-label">Build Message</div><div class="step-content">Simple format (no attachments) or MimeKit MIME message (with attachments/CC/BCC)</div></div>
+            <div class="step-arrow">&#8595;</div>
+            <div class="step-box step-blue"><div class="step-num">5</div><div class="step-label">SES Delivery</div><div class="step-content">Call SendEmailAsync (simple) or SendRawEmailAsync (MIME). Update status to Sending</div></div>
+            <div class="step-arrow">&#8595;</div>
+            <div class="step-box step-blue"><div class="step-num">6</div><div class="step-label">Log Event</div><div class="step-content">Create EmailEvent (Sent). Store SES Message-ID for bounce correlation</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Retry / DLQ</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128260;</span><span class="fname">Retry Policy</span><span class="fdesc">1s -> 5s -> 30s intervals (MassTransit UseMessageRetry)</span></div>
+          <div class="file"><span class="icon">&#9760;</span><span class="fname">Dead Letter Queue</span><span class="fdesc">eaas-emails-send_error after all retries exhausted</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EaaS.WebhookProcessor -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--purple)">
+      <h3><span class="dot" style="background:var(--purple)"></span>EaaS.WebhookProcessor <span style="color:var(--text3);font-size:.75rem;font-weight:400">Inbound Webhooks</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>SNS Webhook Handler</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128232;</span><span class="fname">POST /webhooks/sns</span><span class="fdesc">Receives SNS notifications (SubscriptionConfirmation + Notification)</span></div>
+          <div class="file"><span class="icon">&#128274;</span><span class="fname">SNS Signature Validator</span><span class="fdesc">Verifies SHA1WithRSA signature using AWS certificate</span></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Event Handlers</h4>
+        <div class="item-grid">
+          <div class="item" style="border-left:3px solid var(--red)">
+            <div class="name">Bounce Handler</div>
+            <div class="desc">Hard bounce: auto-suppress recipient, update email status to Bounced, log EmailEvent. Soft bounce: log only.</div>
+          </div>
+          <div class="item" style="border-left:3px solid var(--orange)">
+            <div class="name">Complaint Handler</div>
+            <div class="desc">Auto-suppress all complained recipients. Update email status to Complained. Log EmailEvent.</div>
+          </div>
+          <div class="item" style="border-left:3px solid var(--green)">
+            <div class="name">Delivery Handler</div>
+            <div class="desc">Update email status to Delivered, set DeliveredAt timestamp. Log EmailEvent.</div>
+          </div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Tracking Endpoints</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128065;</span><span class="fname">GET /track/open/{token}</span><span class="fdesc">Validates HMAC token, logs Open event, returns 1x1 transparent GIF</span></div>
+          <div class="file"><span class="icon">&#128279;</span><span class="fname">GET /track/click/{token}</span><span class="fdesc">Validates token, logs Click event, 302 redirects to original URL</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EaaS.Infrastructure -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--orange)">
+      <h3><span class="dot" style="background:var(--orange)"></span>EaaS.Infrastructure <span style="color:var(--text3);font-size:.75rem;font-weight:400">Implementation Layer</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>Persistence/</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128451;</span><span class="fname">AppDbContext</span><span class="fdesc">EF Core 8 DbContext with 9 DbSets, enum mapping via NpgsqlDataSourceBuilder</span></div>
+          <div class="file"><span class="icon">&#128196;</span><span class="fname">Configurations/ (9 files)</span><span class="fdesc">TenantConfig, ApiKeyConfig, DomainConfig, DnsRecordConfig, TemplateConfig, EmailConfig, EmailEventConfig, SuppressionEntryConfig, WebhookConfig</span></div>
+          <div class="file"><span class="icon">&#128194;</span><span class="fname">Repositories/ (6 files)</span><span class="fdesc">EmailRepo, TemplateRepo, DomainRepo, ApiKeyRepo, SuppressionRepo, WebhookRepo</span></div>
+          <div class="file"><span class="icon">&#128260;</span><span class="fname">Migrations/</span><span class="fdesc">EF Core auto-generated migration files</span></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Services/</h4>
+        <div class="item-grid">
+          <div class="item"><div class="name">SesEmailService</div><div class="desc">IEmailDeliveryService impl. SES v2: SendEmail (simple) + SendRawEmail (MIME)</div></div>
+          <div class="item"><div class="name">RedisCacheService</div><div class="desc">ICacheService impl. API key cache, suppression cache, rate limits (sorted set + Lua)</div></div>
+          <div class="item"><div class="name">TemplateRenderingService</div><div class="desc">ITemplateRenderingService impl. Fluid/Liquid template engine</div></div>
+          <div class="item"><div class="name">TrackingTokenService</div><div class="desc">ITrackingTokenService impl. HMAC-SHA256 token generation and validation</div></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Messaging/</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#128233;</span><span class="fname">MassTransitConfiguration</span><span class="fdesc">RabbitMQ bus setup, consumer registration, retry policy, queue config</span></div>
+          <div class="file"><span class="icon">&#128233;</span><span class="fname">SendEmailConsumer</span><span class="fdesc">IConsumer&lt;SendEmailMessage&gt; -- processes queued emails</span></div>
+          <div class="file"><span class="icon">&#128196;</span><span class="fname">SendEmailMessage</span><span class="fdesc">Message contract: EmailId, From, To, Cc, Bcc, Subject, Html, Text, Attachments, TrackOpens, TrackClicks</span></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Configuration/</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#9881;</span><span class="fname">RabbitMqSettings</span><span class="fdesc">Host, Port, Username, Password, VirtualHost, PrefetchCount</span></div>
+          <div class="file"><span class="icon">&#9881;</span><span class="fname">SesSettings</span><span class="fdesc">Region, AccessKeyId, SecretAccessKey</span></div>
+          <div class="file"><span class="icon">&#9881;</span><span class="fname">RateLimitingSettings</span><span class="fdesc">Max requests per minute per API key</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EaaS.Domain -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--gray)">
+      <h3><span class="dot" style="background:var(--gray)"></span>EaaS.Domain <span style="color:var(--text3);font-size:.75rem;font-weight:400">Core Domain (Zero Dependencies)</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>Entities (9)</h4>
+        <div class="item-grid">
+          <div class="item"><div class="name">Tenant</div><div class="desc">Id, Name, CreatedAt</div></div>
+          <div class="item"><div class="name">ApiKey</div><div class="desc">Id, TenantId, Name, KeyHash, Prefix, Status, RotatingExpiresAt</div></div>
+          <div class="item"><div class="name">SendingDomain</div><div class="desc">Id, TenantId, DomainName, Status, VerifiedAt, DeletedAt</div></div>
+          <div class="item"><div class="name">DnsRecord</div><div class="desc">DomainId, Type, Name, Value, Purpose, IsVerified</div></div>
+          <div class="item"><div class="name">Template</div><div class="desc">Id, TenantId, Name, SubjectTemplate, HtmlBody, TextBody, Version</div></div>
+          <div class="item"><div class="name">Email</div><div class="desc">Id, TenantId, ApiKeyId, MessageId, From, To, Cc, Bcc, Subject, Status</div></div>
+          <div class="item"><div class="name">EmailEvent</div><div class="desc">Id, EmailId, EventType, Timestamp, Data (JSONB)</div></div>
+          <div class="item"><div class="name">SuppressionEntry</div><div class="desc">Id, TenantId, EmailAddress, Reason, SourceMessageId</div></div>
+          <div class="item"><div class="name">Webhook</div><div class="desc">Id, TenantId, Url, Events, Secret, Status</div></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Enums (7)</h4>
+        <div class="item-grid">
+          <div class="item"><div class="name">EmailStatus</div><div class="desc">Queued, Sending, Sent, Delivered, Bounced, Complained, Failed</div></div>
+          <div class="item"><div class="name">EventType</div><div class="desc">Queued, Sent, Delivered, Bounced, Complained, Opened, Clicked, Failed</div></div>
+          <div class="item"><div class="name">DomainStatus</div><div class="desc">PendingVerification, Verified, Failed, Suspended</div></div>
+          <div class="item"><div class="name">ApiKeyStatus</div><div class="desc">Active, Revoked, Rotating</div></div>
+          <div class="item"><div class="name">SuppressionReason</div><div class="desc">HardBounce, SoftBounceLimit, Complaint, Manual</div></div>
+          <div class="item"><div class="name">DnsRecordType</div><div class="desc">TXT, CNAME, MX</div></div>
+          <div class="item"><div class="name">DnsRecordPurpose</div><div class="desc">SPF, DKIM, DMARC</div></div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <h4>Interfaces</h4>
+        <div class="file-list">
+          <div class="file"><span class="icon">&#9673;</span><span class="fname">IEmailDeliveryService</span><span class="fdesc">SendEmailAsync + SendRawEmailAsync</span></div>
+          <div class="file"><span class="icon">&#9673;</span><span class="fname">ICacheService</span><span class="fdesc">Get/Set/Remove, CheckRateLimit, CheckSuppression</span></div>
+          <div class="file"><span class="icon">&#9673;</span><span class="fname">ITemplateRenderingService</span><span class="fdesc">RenderAsync(template, variables)</span></div>
+          <div class="file"><span class="icon">&#9673;</span><span class="fname">ITrackingTokenService</span><span class="fdesc">GenerateToken / ValidateToken</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EaaS.Shared -->
+  <div class="project">
+    <div class="project-header" onclick="toggleProject(this)" style="border-left:3px solid var(--teal)">
+      <h3><span class="dot" style="background:var(--teal)"></span>EaaS.Shared <span style="color:var(--text3);font-size:.75rem;font-weight:400">Cross-Cutting DTOs</span></h3>
+      <span class="arrow">&#9654;</span>
+    </div>
+    <div class="project-body">
+      <div class="sub-section">
+        <h4>Shared Types</h4>
+        <div class="item-grid">
+          <div class="item"><div class="name">ApiResponse&lt;T&gt;</div><div class="desc">Standard success wrapper: { success: true, data: T }</div></div>
+          <div class="item"><div class="name">ApiErrorResponse</div><div class="desc">Standard error wrapper: { success: false, error: { code, message, details } }</div></div>
+          <div class="item"><div class="name">PagedRequest</div><div class="desc">Base pagination: Page, PageSize, SortBy, SortDir</div></div>
+          <div class="item"><div class="name">PagedResponse&lt;T&gt;</div><div class="desc">Paged result: Items, Total, Page, PageSize, TotalPages</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== TAB 2: EMAIL SEND FLOW ==================== -->
+<div class="panel" id="panel-flow">
+
+  <h3 style="margin-bottom:16px;font-size:1.1rem">POST /api/v1/emails/send - Complete Request Lifecycle</h3>
+
+  <div class="flow">
+    <div class="vflow">
+
+      <div class="step-box step-green" style="border:1px solid var(--green)">
+        <div class="step-num">1</div>
+        <div class="step-label">API Gateway</div>
+        <div class="step-content">
+          <strong>POST /api/v1/emails/send</strong> arrives at Nginx.<br>
+          TLS terminated. Rate limit check at edge. Proxied to API :8080.
+        </div>
+      </div>
+      <div class="step-arrow">&#8595;</div>
+
+      <div class="step-box step-green">
+        <div class="step-num">2</div>
+        <div class="step-label">ApiKeyAuthHandler</div>
+        <div class="step-content">
+          Extract Bearer token from Authorization header.<br>
+          SHA-256 hash the token.<br>
+          Lookup hash in <strong>Redis cache</strong> (fast path).<br>
+          On miss: query <strong>PostgreSQL</strong> api_keys table, cache result.<br>
+          Validate key is Active (or Rotating with valid expiry).<br>
+          Set ClaimsPrincipal with TenantId + ApiKeyId.
+        </div>
+      </div>
+      <div class="step-arrow">&#8595;</div>
+
+      <div class="step-box step-green">
+        <div class="step-num">3</div>
+        <div class="step-label">SendEmailEndpoint</div>
+        <div class="step-content">
+          Parse JSON request body into SendEmailCommand.<br>
+          Extract TenantId and ApiKeyId from authenticated claims.<br>
+          Dispatch via MediatR: <code>mediator.Send(command)</code>
+        </div>
+      </div>
+      <div class="step-arrow">&#8595;</div>
+
+      <div class="step-box step-green">
+        <div class="step-num">4</div>
+        <div class="step-label">ValidationBehavior (MediatR Pipeline)</div>
+        <div class="step-content">
+          FluentValidation runs <strong>SendEmailValidator</strong>:<br>
+          - Valid email format (from, to, cc, bcc)<br>
+          - Total recipients (to + cc + bcc) &le; 50<br>
+          - Subject required, max 998 chars<br>
+          - HTML or Text body required<br>
+          - Attachments: max 10 files, max 7MB total<br>
+          On failure: throws ValidationException -> 422 response.
+        </div>
+      </div>
+      <div class="step-arrow">&#8595;</div>
+
+      <div class="step-box step-green" style="border:2px solid var(--green)">
+        <div class="step-num">5</div>
+        <div class="step-label">SendEmailHandler (Business Logic)</div>
+        <div class="step-content" style="line-height:1.8">
+          <strong>5a.</strong> <span style="color:var(--orange)">Check rate limit</span> - Redis sorted set + Lua script. 100 emails/min per key.<br>
+          <strong>5b.</strong> <span style="color:var(--orange)">Check idempotency key</span> - Redis SET NX with TTL. Reject duplicate.<br>
+          <strong>5c.</strong> <span style="color:var(--blue)">Verify sending domain</span> - PostgreSQL lookup: domain must be Verified status.<br>
+          <strong>5d.</strong> <span style="color:var(--orange)">Check suppression list</span> - Redis cache first, PostgreSQL fallback. Check ALL recipients.<br>
+          <strong>5e.</strong> <span style="color:var(--blue)">Create Email entity</span> - PostgreSQL INSERT with status = Queued.<br>
+          <strong>5f.</strong> <span style="color:var(--purple)">Publish SendEmailMessage</span> - MassTransit -> RabbitMQ queue: eaas-emails-send.<br>
+          <strong>5g.</strong> Return <strong>202 Accepted</strong> with message_id.
+        </div>
+      </div>
+      <div class="step-arrow" style="font-size:1.5rem;color:var(--purple);font-weight:700">&#8595; Queue: eaas-emails-send</div>
+
+      <div class="step-box step-blue" style="border:2px solid var(--blue)">
+        <div class="step-num">6</div>
+        <div class="step-label">SendEmailConsumer (Worker Service)</div>
+        <div class="step-content" style="line-height:1.8">
+          <strong>6a.</strong> Load Email entity from PostgreSQL by EmailId.<br>
+          <strong>6b.</strong> If TemplateId set: render Liquid template via <strong>Fluid</strong> engine.<br>
+          <strong>6c.</strong> If TrackOpens: inject tracking pixel before &lt;/body&gt;.<br>
+          <strong>6d.</strong> If TrackClicks: rewrite &lt;a href&gt; tags via <strong>AngleSharp</strong>.<br>
+          <strong>6e.</strong> If attachments: build MIME message via <strong>MimeKit</strong>.<br>
+          <strong>6f.</strong> Call AWS SES: <strong>SendEmailAsync</strong> (simple) or <strong>SendRawEmailAsync</strong> (MIME).<br>
+          <strong>6g.</strong> Update Email: status = Sending, store SES Message-ID.<br>
+          <strong>6h.</strong> Insert EmailEvent (EventType.Sent).<br>
+          <strong>6i.</strong> On failure: MassTransit retries 1s -> 5s -> 30s -> DLQ.
+        </div>
+      </div>
+      <div class="step-arrow" style="font-size:1.5rem;color:var(--yellow);font-weight:700">&#8595; AWS SES Delivery</div>
+
+      <div class="step-box step-purple">
+        <div class="step-num">7</div>
+        <div class="step-label">Post-Delivery Events (Async)</div>
+        <div class="step-content">
+          SES delivers to recipient mail server.<br>
+          SES publishes event to <strong>SNS topic</strong>.<br>
+          SNS POSTs to <strong>WebhookProcessor</strong> /webhooks/sns.<br>
+          <br>
+          <strong>Delivery:</strong> Update status -> Delivered, set DeliveredAt.<br>
+          <strong>Bounce (hard):</strong> Update status -> Bounced, auto-suppress recipient in DB + Redis.<br>
+          <strong>Complaint:</strong> Update status -> Complained, auto-suppress in DB + Redis.<br>
+          <strong>Open:</strong> Pixel loaded -> log EmailEvent (Opened), set OpenedAt.<br>
+          <strong>Click:</strong> Link clicked -> log EmailEvent (Clicked), set ClickedAt, 302 redirect.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== TAB 3: DATABASE SCHEMA ==================== -->
+<div class="panel" id="panel-erd">
+
+  <h3 style="margin-bottom:16px;font-size:1.1rem">Database Schema - 9 Tables (PostgreSQL 16)</h3>
+
+  <div class="erd-wrap">
+    <div class="erd">
+
+      <div class="table-card" style="border-color:rgba(245,214,35,.3)">
+        <div class="t-header" style="background:rgba(245,214,35,.08);color:var(--yellow)">tenants</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">name</span><span class="col-type">VARCHAR(200)</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(91,156,245,.3)">
+        <div class="t-header" style="background:rgba(91,156,245,.08);color:var(--blue)">api_keys</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">name</span><span class="col-type">VARCHAR(100)</span></div>
+          <div class="t-col"><span class="col-name">key_hash</span><span class="col-type">VARCHAR(64)</span></div>
+          <div class="t-col"><span class="col-name">prefix</span><span class="col-type">VARCHAR(12)</span></div>
+          <div class="t-col"><span class="col-name">allowed_domains</span><span class="col-type">TEXT[]</span></div>
+          <div class="t-col"><span class="col-name">status</span><span class="col-type">api_key_status</span></div>
+          <div class="t-col"><span class="col-name">rotating_expires_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">replaced_by_key_id</span><span class="col-type">UUID?</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="t-col"><span class="col-name">last_used_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">revoked_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(61,214,140,.3)">
+        <div class="t-header" style="background:rgba(61,214,140,.08);color:var(--green)">domains</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">domain_name</span><span class="col-type">VARCHAR(253)</span></div>
+          <div class="t-col"><span class="col-name">status</span><span class="col-type">domain_status</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="t-col"><span class="col-name">verified_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">deleted_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(61,214,140,.2)">
+        <div class="t-header" style="background:rgba(61,214,140,.05);color:var(--green)">dns_records</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> domain_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">type</span><span class="col-type">dns_record_type</span></div>
+          <div class="t-col"><span class="col-name">name</span><span class="col-type">VARCHAR(253)</span></div>
+          <div class="t-col"><span class="col-name">value</span><span class="col-type">TEXT</span></div>
+          <div class="t-col"><span class="col-name">purpose</span><span class="col-type">dns_record_purpose</span></div>
+          <div class="t-col"><span class="col-name">is_verified</span><span class="col-type">BOOLEAN</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(176,124,245,.3)">
+        <div class="t-header" style="background:rgba(176,124,245,.08);color:var(--purple)">templates</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">name</span><span class="col-type">VARCHAR(200)</span></div>
+          <div class="t-col"><span class="col-name">subject_template</span><span class="col-type">TEXT</span></div>
+          <div class="t-col"><span class="col-name">html_body</span><span class="col-type">TEXT</span></div>
+          <div class="t-col"><span class="col-name">text_body</span><span class="col-type">TEXT</span></div>
+          <div class="t-col"><span class="col-name">variables_schema</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">version</span><span class="col-type">INT</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="t-col"><span class="col-name">deleted_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(245,107,107,.3)">
+        <div class="t-header" style="background:rgba(245,107,107,.08);color:var(--red)">emails</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> api_key_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">message_id</span><span class="col-type">VARCHAR(20)</span></div>
+          <div class="t-col"><span class="col-name">ses_message_id</span><span class="col-type">VARCHAR(100)?</span></div>
+          <div class="t-col"><span class="col-name">batch_id</span><span class="col-type">VARCHAR(20)?</span></div>
+          <div class="t-col"><span class="col-name">tracking_id</span><span class="col-type">VARCHAR(64)?</span></div>
+          <div class="t-col"><span class="col-name">from_email</span><span class="col-type">VARCHAR(254)</span></div>
+          <div class="t-col"><span class="col-name">to_emails</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">cc_emails</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">bcc_emails</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">subject</span><span class="col-type">VARCHAR(998)</span></div>
+          <div class="t-col"><span class="col-name">html_body</span><span class="col-type">TEXT</span></div>
+          <div class="t-col"><span class="col-name">text_body</span><span class="col-type">TEXT?</span></div>
+          <div class="t-col"><span class="col-name">template_id</span><span class="col-type">UUID?</span></div>
+          <div class="t-col"><span class="col-name">attachments</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">tags</span><span class="col-type">TEXT[]</span></div>
+          <div class="t-col"><span class="col-name">metadata</span><span class="col-type">JSONB</span></div>
+          <div class="t-col"><span class="col-name">track_opens</span><span class="col-type">BOOLEAN</span></div>
+          <div class="t-col"><span class="col-name">track_clicks</span><span class="col-type">BOOLEAN</span></div>
+          <div class="t-col"><span class="col-name">status</span><span class="col-type">email_status</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="t-col"><span class="col-name">sent_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">delivered_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">opened_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+          <div class="t-col"><span class="col-name">clicked_at</span><span class="col-type">TIMESTAMPTZ?</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(245,107,107,.2)">
+        <div class="t-header" style="background:rgba(245,107,107,.05);color:var(--red)">email_events</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> email_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">event_type</span><span class="col-type">event_type</span></div>
+          <div class="t-col"><span class="col-name">timestamp</span><span class="col-type">TIMESTAMPTZ</span></div>
+          <div class="t-col"><span class="col-name">data</span><span class="col-type">JSONB</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(245,166,35,.3)">
+        <div class="t-header" style="background:rgba(245,166,35,.08);color:var(--orange)">suppression_list</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">email_address</span><span class="col-type">VARCHAR(254)</span></div>
+          <div class="t-col"><span class="col-name">reason</span><span class="col-type">suppression_reason</span></div>
+          <div class="t-col"><span class="col-name">source_message_id</span><span class="col-type">VARCHAR(20)?</span></div>
+          <div class="t-col"><span class="col-name">suppressed_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+        </div>
+      </div>
+
+      <div class="table-card" style="border-color:rgba(91,207,207,.3)">
+        <div class="t-header" style="background:rgba(91,207,207,.08);color:var(--teal)">webhooks</div>
+        <div class="t-cols">
+          <div class="t-col"><span class="col-name"><span class="pk">PK</span> id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name"><span class="fk">FK</span> tenant_id</span><span class="col-type">UUID</span></div>
+          <div class="t-col"><span class="col-name">url</span><span class="col-type">VARCHAR(2048)</span></div>
+          <div class="t-col"><span class="col-name">events</span><span class="col-type">TEXT[]</span></div>
+          <div class="t-col"><span class="col-name">secret</span><span class="col-type">VARCHAR(64)</span></div>
+          <div class="t-col"><span class="col-name">status</span><span class="col-type">VARCHAR(20)</span></div>
+          <div class="t-col"><span class="col-name">created_at</span><span class="col-type">TIMESTAMPTZ</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Relationships -->
+  <div class="rels">
+    <h4 style="margin-bottom:10px;font-size:.9rem;color:var(--text)">Table Relationships</h4>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--blue)">api_keys</span><span class="r-card">One tenant has many API keys</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--green)">domains</span><span class="r-card">One tenant has many sending domains</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--green)">domains</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--green)">dns_records</span><span class="r-card">One domain has many DNS records (SPF, DKIM, DMARC)</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--purple)">templates</span><span class="r-card">One tenant has many email templates</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--red)">emails</span><span class="r-card">One tenant has many emails</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--blue)">api_keys</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--red)">emails</span><span class="r-card">One API key sends many emails</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--red)">emails</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--red)">email_events</span><span class="r-card">One email has many lifecycle events</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--orange)">suppression_list</span><span class="r-card">One tenant has many suppressed addresses</span></div>
+    <div class="rel"><span class="r-from" style="color:var(--yellow)">tenants</span><span class="r-arrow">1 ----&gt; N</span><span class="r-to" style="color:var(--teal)">webhooks</span><span class="r-card">One tenant has many webhook endpoints</span></div>
+  </div>
+
+  <!-- Indexes -->
+  <div class="rels" style="margin-top:12px">
+    <h4 style="margin-bottom:10px;font-size:.9rem;color:var(--text)">Key Indexes</h4>
+    <div class="file-list" style="font-size:.78rem">
+      <div class="file"><span class="fname">idx_emails_tenant_status</span><span class="fdesc">emails(tenant_id, status) - Email listing by status</span></div>
+      <div class="file"><span class="fname">idx_emails_message_id</span><span class="fdesc">emails(message_id) UNIQUE - Public ID lookup</span></div>
+      <div class="file"><span class="fname">idx_emails_ses_message_id</span><span class="fdesc">emails(ses_message_id) WHERE NOT NULL - Bounce correlation</span></div>
+      <div class="file"><span class="fname">idx_emails_tracking_id</span><span class="fdesc">emails(tracking_id) UNIQUE WHERE NOT NULL - Open/click lookup</span></div>
+      <div class="file"><span class="fname">idx_emails_tags</span><span class="fdesc">emails USING GIN(tags) - Tag-based filtering</span></div>
+      <div class="file"><span class="fname">idx_emails_tenant_date_range</span><span class="fdesc">emails(tenant_id, created_at DESC, status) - Date range queries</span></div>
+      <div class="file"><span class="fname">idx_api_keys_hash</span><span class="fdesc">api_keys(key_hash) UNIQUE - Auth lookup</span></div>
+      <div class="file"><span class="fname">idx_suppression_tenant_email</span><span class="fdesc">suppression_list(tenant_id, email_address) UNIQUE - Dedup</span></div>
+      <div class="file"><span class="fname">idx_domains_deleted</span><span class="fdesc">domains(tenant_id, deleted_at) WHERE deleted_at IS NULL</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== TAB 4: PROJECT DEPENDENCIES ==================== -->
+<div class="panel" id="panel-deps">
+
+  <h3 style="margin-bottom:16px;font-size:1.1rem">Project Dependency Graph</h3>
+
+  <svg viewBox="0 0 800 420" style="width:100%;max-width:800px;display:block;margin:0 auto">
+    <defs>
+      <marker id="dep-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#5b9cf5"/>
+      </marker>
+      <marker id="dep-arrow-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L8,3 L0,6Z" fill="#3dd68c"/>
+      </marker>
+    </defs>
+
+    <!-- Domain (bottom center - no deps) -->
+    <rect x="310" y="340" width="180" height="50" rx="10" fill="#252840" stroke="#8b8fa8" stroke-width="1.5"/>
+    <text x="400" y="370" text-anchor="middle" fill="#8b8fa8" font-size="13" font-weight="700">EaaS.Domain</text>
+    <text x="400" y="384" text-anchor="middle" fill="#6b6f85" font-size="9">Zero dependencies</text>
+
+    <!-- Shared (bottom right) -->
+    <rect x="580" y="340" width="160" height="50" rx="10" fill="#1a3d3d" stroke="#5bcfcf" stroke-width="1.5"/>
+    <text x="660" y="370" text-anchor="middle" fill="#5bcfcf" font-size="13" font-weight="700">EaaS.Shared</text>
+    <text x="660" y="384" text-anchor="middle" fill="#6b6f85" font-size="9">DTOs only</text>
+
+    <!-- Infrastructure (middle) -->
+    <rect x="290" y="220" width="220" height="50" rx="10" fill="#3d2e1a" stroke="#f5a623" stroke-width="1.5"/>
+    <text x="400" y="250" text-anchor="middle" fill="#f5a623" font-size="13" font-weight="700">EaaS.Infrastructure</text>
+    <text x="400" y="264" text-anchor="middle" fill="#6b6f85" font-size="9">EF Core, Redis, MassTransit, SES</text>
+
+    <!-- Infra -> Domain -->
+    <line x1="400" y1="270" x2="400" y2="338" stroke="#5b9cf5" stroke-width="1.5" marker-end="url(#dep-arrow)"/>
+
+    <!-- Api (top left) -->
+    <rect x="40" y="80" width="200" height="50" rx="10" fill="#1a3d2e" stroke="#3dd68c" stroke-width="1.5"/>
+    <text x="140" y="110" text-anchor="middle" fill="#3dd68c" font-size="13" font-weight="700">EaaS.Api</text>
+    <text x="140" y="124" text-anchor="middle" fill="#6b6f85" font-size="9">Minimal API + MediatR</text>
+
+    <!-- Api -> Infrastructure -->
+    <line x1="200" y1="130" x2="340" y2="220" stroke="#5b9cf5" stroke-width="1.5" marker-end="url(#dep-arrow)"/>
+    <!-- Api -> Domain -->
+    <line x1="140" y1="130" x2="360" y2="338" stroke="#5b9cf5" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#dep-arrow)" opacity=".5"/>
+    <!-- Api -> Shared -->
+    <line x1="240" y1="105" x2="580" y2="360" stroke="#5b9cf5" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#dep-arrow)" opacity=".5"/>
+
+    <!-- Worker (top center) -->
+    <rect x="300" y="80" width="200" height="50" rx="10" fill="#1a2d4e" stroke="#5b9cf5" stroke-width="1.5"/>
+    <text x="400" y="110" text-anchor="middle" fill="#5b9cf5" font-size="13" font-weight="700">EaaS.Worker</text>
+    <text x="400" y="124" text-anchor="middle" fill="#6b6f85" font-size="9">Background Service</text>
+
+    <!-- Worker -> Infrastructure -->
+    <line x1="400" y1="130" x2="400" y2="218" stroke="#5b9cf5" stroke-width="1.5" marker-end="url(#dep-arrow)"/>
+
+    <!-- WebhookProcessor (top right) -->
+    <rect x="560" y="80" width="200" height="50" rx="10" fill="#2d1a4e" stroke="#b07cf5" stroke-width="1.5"/>
+    <text x="660" y="110" text-anchor="middle" fill="#b07cf5" font-size="13" font-weight="700">EaaS.WebhookProcessor</text>
+    <text x="660" y="124" text-anchor="middle" fill="#6b6f85" font-size="9">SNS + Tracking</text>
+
+    <!-- Webhook -> Infrastructure -->
+    <line x1="600" y1="130" x2="460" y2="220" stroke="#5b9cf5" stroke-width="1.5" marker-end="url(#dep-arrow)"/>
+
+    <!-- Dashboard (far left) -->
+    <rect x="40" y="180" width="180" height="50" rx="10" fill="#1a3d2e" stroke="#3dd68c" stroke-width="1"/>
+    <text x="130" y="207" text-anchor="middle" fill="#3dd68c" font-size="12" font-weight="600">EaaS.Dashboard</text>
+    <text x="130" y="222" text-anchor="middle" fill="#6b6f85" font-size="9">Blazor Server</text>
+
+    <!-- Dashboard -> Infrastructure -->
+    <line x1="220" y1="210" x2="290" y2="240" stroke="#5b9cf5" stroke-width="1" marker-end="url(#dep-arrow)" opacity=".7"/>
+
+    <!-- Labels on arrows -->
+    <text x="255" y="175" fill="#6b6f85" font-size="8" transform="rotate(-30,255,175)">depends on</text>
+    <text x="408" y="180" fill="#6b6f85" font-size="8">depends on</text>
+    <text x="540" y="175" fill="#6b6f85" font-size="8" transform="rotate(30,540,175)">depends on</text>
+    <text x="408" y="312" fill="#6b6f85" font-size="8">implements</text>
+
+    <!-- Dependency Rule -->
+    <text x="60" y="370" fill="#6b6f85" font-size="10" font-weight="600">Dependency Rule:</text>
+    <text x="60" y="386" fill="#6b6f85" font-size="9">Outer layers depend on inner layers.</text>
+    <text x="60" y="400" fill="#6b6f85" font-size="9">Domain has ZERO external dependencies.</text>
+
+    <!-- Layer labels -->
+    <rect x="10" y="60" width="780" height="3" rx="1" fill="rgba(61,214,140,.15)"/>
+    <text x="10" y="55" fill="#3dd68c" font-size="9" font-weight="600">PRESENTATION + HOST LAYER</text>
+    <rect x="10" y="205" width="780" height="2" rx="1" fill="rgba(245,166,35,.12)"/>
+    <text x="260" y="200" fill="#f5a623" font-size="9" font-weight="600">INFRASTRUCTURE LAYER</text>
+    <rect x="10" y="325" width="780" height="2" rx="1" fill="rgba(139,143,168,.12)"/>
+    <text x="310" y="320" fill="#8b8fa8" font-size="9" font-weight="600">DOMAIN + SHARED LAYER</text>
+  </svg>
+
+  <div class="deps" style="margin-top:20px">
+    <h4 style="margin-bottom:10px;font-size:.9rem;color:var(--text)">NuGet Dependencies by Project</h4>
+    <div class="item-grid">
+      <div class="item" style="border-left:3px solid var(--green)">
+        <div class="name" style="color:var(--green)">EaaS.Api</div>
+        <div class="desc">MediatR, FluentValidation, Serilog, Swashbuckle</div>
+      </div>
+      <div class="item" style="border-left:3px solid var(--blue)">
+        <div class="name" style="color:var(--blue)">EaaS.Worker</div>
+        <div class="desc">MassTransit (host), Serilog</div>
+      </div>
+      <div class="item" style="border-left:3px solid var(--purple)">
+        <div class="name" style="color:var(--purple)">EaaS.WebhookProcessor</div>
+        <div class="desc">Serilog (Minimal API host)</div>
+      </div>
+      <div class="item" style="border-left:3px solid var(--orange)">
+        <div class="name" style="color:var(--orange)">EaaS.Infrastructure</div>
+        <div class="desc">EF Core + Npgsql, StackExchange.Redis, MassTransit.RabbitMQ, AWSSDK.SimpleEmailV2, Fluid.Core, MimeKit, AngleSharp</div>
+      </div>
+      <div class="item" style="border-left:3px solid var(--gray)">
+        <div class="name" style="color:var(--gray)">EaaS.Domain</div>
+        <div class="desc">None (pure domain)</div>
+      </div>
+      <div class="item" style="border-left:3px solid var(--teal)">
+        <div class="name" style="color:var(--teal)">EaaS.Shared</div>
+        <div class="desc">None (DTOs only)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /panels -->
+
+<div style="text-align:center;padding:10px 20px 30px;color:var(--text3);font-size:.75rem">
+  EaaS Architecture v1.1 &middot; Sprint 2 &middot; 2026-03-27 &middot; .NET 8 / PostgreSQL 16 / Redis 7.2 / RabbitMQ 3.13
+</div>
+
+<script>
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggleProject(header){
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.arrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// Auto-expand first project on load
+document.addEventListener('DOMContentLoaded',()=>{
+  const first = document.querySelector('.project-body');
+  const firstArrow = document.querySelector('.project-header .arrow');
+  if(first){first.classList.add('open');firstArrow.classList.add('open')}
+});
+</script>
+</body>
+</html>

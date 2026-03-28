@@ -35,16 +35,60 @@ public sealed class ListEmailsHandler : IRequestHandler<ListEmailsQuery, ListEma
         if (request.To.HasValue)
             query = query.Where(e => e.CreatedAt <= request.To.Value);
 
-        // Filter by tag
+        // Filter by single tag (backward compatible)
         if (!string.IsNullOrWhiteSpace(request.Tag))
             query = query.Where(e => e.Tags.Contains(request.Tag));
 
+        // Filter by comma-separated tags (any match)
+        if (!string.IsNullOrWhiteSpace(request.Tags))
+        {
+            var tagList = request.Tags.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            foreach (var tag in tagList)
+            {
+                var t = tag;
+                query = query.Where(e => e.Tags.Contains(t));
+            }
+        }
+
+        // Filter by from email (partial match)
+        if (!string.IsNullOrWhiteSpace(request.FromEmail))
+        {
+            var fromPattern = $"%{request.FromEmail}%";
+            query = query.Where(e => EF.Functions.ILike(e.FromEmail, fromPattern));
+        }
+
+        // Filter by to email (partial match in JSON)
+        if (!string.IsNullOrWhiteSpace(request.ToEmail))
+        {
+            var toPattern = $"%{request.ToEmail}%";
+            query = query.Where(e => EF.Functions.ILike(e.ToEmails, toPattern));
+        }
+
+        // Filter by template ID
+        if (request.TemplateId.HasValue)
+            query = query.Where(e => e.TemplateId == request.TemplateId.Value);
+
+        // Filter by batch ID
+        if (!string.IsNullOrWhiteSpace(request.BatchId))
+            query = query.Where(e => e.BatchId == request.BatchId);
+
         var totalCount = await query.CountAsync(cancellationToken);
 
+        // Sorting
+        var sortBy = request.SortBy?.ToLowerInvariant() ?? "created_at";
+        var sortDesc = string.Equals(request.SortDir, "asc", StringComparison.OrdinalIgnoreCase) ? false : true;
+
+        query = sortBy switch
+        {
+            "sent_at" => sortDesc ? query.OrderByDescending(e => e.SentAt) : query.OrderBy(e => e.SentAt),
+            "status" => sortDesc ? query.OrderByDescending(e => e.Status) : query.OrderBy(e => e.Status),
+            _ => sortDesc ? query.OrderByDescending(e => e.CreatedAt) : query.OrderBy(e => e.CreatedAt)
+        };
+
+        var pageSize = Math.Min(request.PageSize, 100);
         var items = await query
-            .OrderByDescending(e => e.CreatedAt)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip((request.Page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
 
         var dtos = items.Select(e => new EmailSummaryDto(
@@ -59,6 +103,6 @@ public sealed class ListEmailsHandler : IRequestHandler<ListEmailsQuery, ListEma
             e.SentAt,
             e.DeliveredAt)).ToList();
 
-        return new ListEmailsResult(dtos, request.Page, request.PageSize, totalCount);
+        return new ListEmailsResult(dtos, request.Page, pageSize, totalCount);
     }
 }

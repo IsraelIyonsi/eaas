@@ -15,9 +15,27 @@ public interface IEmailDeliveryService
     Task<DomainVerificationResult> GetDomainVerificationStatusAsync(string domain, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sends an email via SES. (Stub for Phase 4, fully implemented in Phase 5.)
+    /// Sends an email via SES with optional CC/BCC recipients.
     /// </summary>
-    Task<SendEmailResult> SendEmailAsync(string from, IReadOnlyList<string> recipients, string subject, string? htmlBody, string? textBody, CancellationToken cancellationToken = default);
+    Task<SendEmailResult> SendEmailAsync(
+        string from,
+        IReadOnlyList<string> recipients,
+        IReadOnlyList<string>? ccRecipients,
+        IReadOnlyList<string>? bccRecipients,
+        string subject,
+        string? htmlBody,
+        string? textBody,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a raw MIME email via SES (used when attachments are present).
+    /// </summary>
+    Task<SendEmailResult> SendRawEmailAsync(Stream mimeMessage, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes an email identity (domain) from SES.
+    /// </summary>
+    Task DeleteDomainIdentityAsync(string domain, CancellationToken cancellationToken = default);
 }
 
 public record DomainIdentityResult(bool Success, string? IdentityArn, IReadOnlyList<DkimToken> DkimTokens, string? ErrorMessage);

@@ -11,10 +11,11 @@ public static class ListTemplatesEndpoint
             HttpContext httpContext,
             IMediator mediator,
             int page = 1,
-            int pageSize = 20) =>
+            int pageSize = 20,
+            string? search = null) =>
         {
             var tenantId = GetTenantId(httpContext);
-            var query = new ListTemplatesQuery(tenantId, page, pageSize);
+            var query = new ListTemplatesQuery(tenantId, page, pageSize, search);
             var result = await mediator.Send(query);
 
             return Results.Ok(ApiResponse.Ok(new

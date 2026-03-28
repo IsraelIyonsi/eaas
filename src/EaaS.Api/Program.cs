@@ -1,3 +1,4 @@
+using System.Reflection;
 using Amazon;
 using Amazon.SimpleEmailV2;
 using EaaS.Api.Authentication;
@@ -6,6 +7,7 @@ using EaaS.Api.Commands;
 using EaaS.Api.Features.ApiKeys;
 using EaaS.Api.Features.Domains;
 using EaaS.Api.Features.Emails;
+using EaaS.Api.Features.Suppressions;
 using EaaS.Api.Features.Templates;
 using EaaS.Api.Middleware;
 using EaaS.Domain.Interfaces;
@@ -16,6 +18,7 @@ using FluentValidation;
 using MediatR;
 using EaaS.Infrastructure.Persistence;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -83,7 +86,43 @@ try
     builder.Services.AddProblemDetails();
 
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "EaaS API",
+            Version = "v1",
+            Description = "Email as a Service - Transactional Email API"
+        });
+
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "API Key",
+            Description = "Enter your API key"
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+            options.IncludeXmlComments(xmlPath);
+    });
 
     // Health checks
     var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
@@ -92,11 +131,11 @@ try
 
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "EaaS API v1");
+    });
 
     app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
@@ -117,6 +156,7 @@ try
     CreateApiKeyEndpoint.Map(keysGroup);
     RevokeApiKeyEndpoint.Map(keysGroup);
     ListApiKeysEndpoint.Map(keysGroup);
+    RotateApiKeyEndpoint.Map(keysGroup);
 
     // Domain endpoints
     var domainsGroup = app.MapGroup("/api/v1/domains")
@@ -126,6 +166,7 @@ try
     AddDomainEndpoint.Map(domainsGroup);
     ListDomainsEndpoint.Map(domainsGroup);
     VerifyDomainEndpoint.Map(domainsGroup);
+    RemoveDomainEndpoint.Map(domainsGroup);
 
     // Email endpoints
     var emailsGroup = app.MapGroup("/api/v1/emails")
@@ -133,6 +174,7 @@ try
         .WithTags("Emails");
 
     SendEmailEndpoint.Map(emailsGroup);
+    SendBatchEndpoint.Map(emailsGroup);
     GetEmailEndpoint.Map(emailsGroup);
     ListEmailsEndpoint.Map(emailsGroup);
 
@@ -146,6 +188,16 @@ try
     ListTemplatesEndpoint.Map(templatesGroup);
     UpdateTemplateEndpoint.Map(templatesGroup);
     DeleteTemplateEndpoint.Map(templatesGroup);
+    PreviewTemplateEndpoint.Map(templatesGroup);
+
+    // Suppression endpoints
+    var suppressionsGroup = app.MapGroup("/api/v1/suppressions")
+        .RequireAuthorization()
+        .WithTags("Suppressions");
+
+    ListSuppressionsEndpoint.Map(suppressionsGroup);
+    AddSuppressionEndpoint.Map(suppressionsGroup);
+    RemoveSuppressionEndpoint.Map(suppressionsGroup);
 
     app.Run();
 }

@@ -7,6 +7,8 @@ public sealed record SendEmailMessage
     public string From { get; init; } = string.Empty;
     public string? FromName { get; init; }
     public string To { get; init; } = string.Empty;
+    public string CcEmails { get; init; } = "[]";
+    public string BccEmails { get; init; } = "[]";
     public string Subject { get; init; } = string.Empty;
     public string? HtmlBody { get; init; }
     public string? TextBody { get; init; }
@@ -14,4 +16,7 @@ public sealed record SendEmailMessage
     public string? Variables { get; init; }
     public string[] Tags { get; init; } = Array.Empty<string>();
     public string? Metadata { get; init; }
+    public bool TrackOpens { get; init; } = true;
+    public bool TrackClicks { get; init; } = true;
+    public string Attachments { get; init; } = "[]";
 }

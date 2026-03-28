@@ -26,6 +26,8 @@ public static class TestDataBuilders
         private Guid _apiKeyId = DefaultApiKeyId;
         private string _from = "sender@verified.com";
         private List<string> _to = new() { "recipient@example.com" };
+        private List<string>? _cc;
+        private List<string>? _bcc;
         private string? _subject = "Test Subject";
         private string? _htmlBody = "<p>Hello</p>";
         private string? _textBody = "Hello";
@@ -39,6 +41,8 @@ public static class TestDataBuilders
         public SendEmailCommandBuilder WithApiKeyId(Guid apiKeyId) { _apiKeyId = apiKeyId; return this; }
         public SendEmailCommandBuilder WithFrom(string from) { _from = from; return this; }
         public SendEmailCommandBuilder WithTo(List<string> to) { _to = to; return this; }
+        public SendEmailCommandBuilder WithCc(List<string>? cc) { _cc = cc; return this; }
+        public SendEmailCommandBuilder WithBcc(List<string>? bcc) { _bcc = bcc; return this; }
         public SendEmailCommandBuilder WithSubject(string? subject) { _subject = subject; return this; }
         public SendEmailCommandBuilder WithHtmlBody(string? htmlBody) { _htmlBody = htmlBody; return this; }
         public SendEmailCommandBuilder WithTextBody(string? textBody) { _textBody = textBody; return this; }
@@ -49,7 +53,7 @@ public static class TestDataBuilders
         public SendEmailCommandBuilder WithIdempotencyKey(string? key) { _idempotencyKey = key; return this; }
 
         public SendEmailCommand Build() => new(
-            _tenantId, _apiKeyId, _from, _to, _subject,
+            _tenantId, _apiKeyId, _from, _to, _cc, _bcc, _subject,
             _htmlBody, _textBody, _templateId, _variables,
             _tags, _metadata, _idempotencyKey);
     }

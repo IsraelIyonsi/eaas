@@ -14,6 +14,8 @@ public class ApiKey
     public DateTime CreatedAt { get; set; }
     public DateTime? LastUsedAt { get; set; }
     public DateTime? RevokedAt { get; set; }
+    public DateTime? RotatingExpiresAt { get; set; }
+    public Guid? ReplacedByKeyId { get; set; }
 
     // Navigation properties
     public Tenant Tenant { get; set; } = null!;

@@ -54,6 +54,12 @@ public static class DependencyInjection
 
         services.AddSingleton<ICacheService, RedisCacheService>();
 
+        // Tracking services
+        services.Configure<TrackingSettings>(configuration.GetSection(TrackingSettings.SectionName));
+        services.AddSingleton<ITrackingTokenService, TrackingTokenService>();
+        services.AddScoped<TrackingPixelInjector>();
+        services.AddScoped<ClickTrackingLinkRewriter>();
+
         // MassTransit with RabbitMQ
         services.AddMassTransitWithRabbitMq();
 
