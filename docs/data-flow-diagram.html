@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS — Complete Data Flow Diagram</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0f1117;--bg2:#161822;--bg3:#1e2030;--bg4:#252738;
+    --text:#e2e4f0;--text2:#a0a4b8;--text3:#6b6f85;
+    --green:#3dd68c;--green2:#1a3d2e;--green3:rgba(61,214,140,.12);
+    --blue:#5b9cf5;--blue2:#1a2d4e;--blue3:rgba(91,156,245,.12);
+    --orange:#f5a623;--orange2:#3d2e1a;--orange3:rgba(245,166,35,.12);
+    --yellow:#f5d623;--yellow2:#3d351a;--yellow3:rgba(245,214,35,.10);
+    --purple:#b07cf5;--purple2:#2d1a4e;--purple3:rgba(176,124,245,.12);
+    --red:#f56b6b;--red2:#3d1a1a;--red3:rgba(245,107,107,.12);
+    --gray:#8a8ea0;--gray2:#252738;--gray3:rgba(138,142,160,.12);
+    --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+    --glow:0 0 20px rgba(91,156,245,.15);
+    --radius:12px;--radius-sm:8px;
+  }
+  html{font-size:14px;scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    min-height:100vh;overflow-x:hidden;
+  }
+  /* HEADER */
+  .header{
+    text-align:center;padding:40px 20px 16px;
+    background:linear-gradient(180deg,rgba(91,156,245,.08) 0%,transparent 100%);
+    position:relative;
+  }
+  .header h1{font-size:2rem;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}
+  .header h1 span{color:var(--blue)}
+  .header p{color:var(--text2);font-size:.95rem}
+  .header .badge{
+    display:inline-block;margin-top:10px;padding:4px 14px;
+    background:var(--blue3);border:1px solid rgba(91,156,245,.2);
+    border-radius:20px;font-size:.75rem;color:var(--blue);font-weight:600;
+  }
+  /* LEGEND */
+  .legend{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:16px;
+    padding:14px 20px 8px;margin:0 auto;max-width:900px;
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2)}
+  .legend-dot{width:10px;height:10px;border-radius:50%}
+  .legend-dot.api{background:var(--green)}
+  .legend-dot.queue{background:var(--orange)}
+  .legend-dot.worker{background:var(--blue)}
+  .legend-dot.webhook{background:var(--purple)}
+  .legend-dot.aws{background:var(--yellow)}
+  .legend-dot.storage{background:var(--gray)}
+  /* NAV TABS */
+  .tab-nav{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:6px;
+    padding:16px 20px;margin:0 auto;max-width:1200px;
+    position:sticky;top:0;z-index:100;
+    background:linear-gradient(180deg,var(--bg) 60%,transparent);
+    backdrop-filter:blur(12px);
+  }
+  .tab-btn{
+    padding:8px 18px;border:1px solid var(--border2);border-radius:24px;
+    background:var(--bg2);color:var(--text2);font-size:.82rem;font-weight:500;
+    cursor:pointer;transition:all .25s;white-space:nowrap;
+  }
+  .tab-btn:hover{border-color:var(--blue);color:var(--text)}
+  .tab-btn.active{
+    background:var(--blue3);border-color:var(--blue);color:var(--blue);font-weight:600;
+  }
+  .tab-btn .dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;
+    vertical-align:middle;
+  }
+  /* FLOW SECTIONS */
+  .flow-section{
+    max-width:1100px;margin:0 auto 32px;padding:0 20px;
+    display:none;opacity:0;transform:translateY(12px);
+    transition:opacity .35s,transform .35s;
+  }
+  .flow-section.visible{display:block;opacity:1;transform:translateY(0)}
+  .flow-title{
+    font-size:1.35rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:10px;
+  }
+  .flow-title .icon{font-size:1.1rem}
+  .flow-subtitle{color:var(--text2);font-size:.88rem;margin-bottom:20px}
+  .flow-endpoint{
+    display:inline-block;padding:3px 10px;background:var(--bg3);border:1px solid var(--border2);
+    border-radius:6px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.78rem;
+    color:var(--green);margin-bottom:16px;
+  }
+  /* FLOW CONTAINER (vertical steps) */
+  .flow-container{position:relative;padding-left:40px}
+  .flow-line-v{
+    position:absolute;left:18px;top:0;bottom:0;width:2px;
+    background:repeating-linear-gradient(180deg,var(--border2) 0,var(--border2) 6px,transparent 6px,transparent 12px);
+  }
+  /* STEP */
+  .step{
+    position:relative;margin-bottom:12px;
+    background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 18px;transition:border-color .2s,box-shadow .2s;
+  }
+  .step:hover{border-color:rgba(255,255,255,.12);box-shadow:0 2px 16px rgba(0,0,0,.3)}
+  .step::before{
+    content:'';position:absolute;left:-28px;top:20px;
+    width:14px;height:14px;border-radius:50%;
+    border:2px solid var(--blue);background:var(--bg);z-index:2;
+  }
+  .step::after{
+    content:'';position:absolute;left:-21px;top:27px;
+    width:15px;height:2px;background:var(--border2);
+  }
+  /* Step variants */
+  .step.api::before{border-color:var(--green)}
+  .step.queue::before{border-color:var(--orange)}
+  .step.worker::before{border-color:var(--blue)}
+  .step.webhook::before{border-color:var(--purple)}
+  .step.aws::before{border-color:var(--yellow)}
+  .step.storage::before{border-color:var(--gray)}
+  .step.external::before{border-color:var(--orange)}
+  .step.error::before{border-color:var(--red)}
+  .step.success::before{border-color:var(--green);background:var(--green2)}
+  /* Filled dots for data stores */
+  .step.storage::before{background:var(--gray2)}
+  .step.queue::before{background:var(--orange2)}
+  .step-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:22px;height:22px;border-radius:6px;font-size:.72rem;font-weight:700;
+    padding:0 5px;
+  }
+  .step-num.api{background:var(--green3);color:var(--green)}
+  .step-num.queue{background:var(--orange3);color:var(--orange)}
+  .step-num.worker{background:var(--blue3);color:var(--blue)}
+  .step-num.webhook{background:var(--purple3);color:var(--purple)}
+  .step-num.aws{background:var(--yellow3);color:var(--yellow)}
+  .step-num.storage{background:var(--gray3);color:var(--gray)}
+  .step-num.external{background:var(--orange3);color:var(--orange)}
+  .step-num.error{background:var(--red3);color:var(--red)}
+  .step-label{font-weight:600;font-size:.92rem}
+  .step-component{
+    display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600;
+    margin-left:auto;
+  }
+  .step-component.api{background:var(--green3);color:var(--green)}
+  .step-component.queue{background:var(--orange3);color:var(--orange)}
+  .step-component.worker{background:var(--blue3);color:var(--blue)}
+  .step-component.webhook{background:var(--purple3);color:var(--purple)}
+  .step-component.aws{background:var(--yellow3);color:var(--yellow)}
+  .step-component.storage{background:var(--gray3);color:var(--gray)}
+  .step-component.external{background:var(--orange3);color:var(--orange)}
+  .step-component.error{background:var(--red3);color:var(--red)}
+  .step-desc{color:var(--text2);font-size:.84rem;line-height:1.55}
+  .step-data{
+    margin-top:8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);
+    border-radius:var(--radius-sm);font-family:'Cascadia Code','Fira Code',monospace;
+    font-size:.76rem;color:var(--text2);line-height:1.6;overflow-x:auto;
+  }
+  .step-data .key{color:var(--blue)}
+  .step-data .val{color:var(--green)}
+  .step-data .comment{color:var(--text3);font-style:italic}
+  /* ARROW between steps */
+  .arrow-down{
+    position:relative;height:28px;display:flex;align-items:center;justify-content:center;
+  }
+  .arrow-down svg{width:20px;height:28px}
+  .arrow-down .arrow-label{
+    position:absolute;left:50px;font-size:.74rem;color:var(--text3);white-space:nowrap;
+  }
+  /* BRANCH */
+  .branch{
+    display:flex;gap:12px;margin-bottom:12px;position:relative;
+  }
+  .branch-path{
+    flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+    padding:12px 16px;
+  }
+  .branch-path.success{border-color:rgba(61,214,140,.15)}
+  .branch-path.error{border-color:rgba(245,107,107,.15)}
+  .branch-label{
+    font-size:.78rem;font-weight:700;margin-bottom:6px;
+  }
+  .branch-label.success{color:var(--green)}
+  .branch-label.error{color:var(--red)}
+  .branch-label.neutral{color:var(--blue)}
+  .branch-desc{color:var(--text2);font-size:.82rem;line-height:1.5}
+  /* ANIMATED FLOW INDICATOR */
+  @keyframes flowPulse{
+    0%{opacity:.3;transform:translateY(-4px)}
+    50%{opacity:1;transform:translateY(4px)}
+    100%{opacity:.3;transform:translateY(-4px)}
+  }
+  .flow-indicator{
+    display:inline-block;animation:flowPulse 1.5s ease-in-out infinite;
+    color:var(--blue);font-size:.9rem;
+  }
+  /* Separator */
+  .flow-sep{
+    height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);
+    margin:28px 0;
+  }
+  /* FOOTER */
+  .footer{
+    text-align:center;padding:24px 20px 40px;
+    color:var(--text3);font-size:.78rem;
+  }
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    .header h1{font-size:1.4rem}
+    .tab-btn{padding:6px 12px;font-size:.76rem}
+    .flow-container{padding-left:32px}
+    .flow-line-v{left:14px}
+    .step::before{left:-24px;width:12px;height:12px}
+    .step::after{left:-18px}
+    .branch{flex-direction:column}
+  }
+  /* Animated SVG arrows */
+  @keyframes dashFlow{0%{stroke-dashoffset:16}100%{stroke-dashoffset:0}}
+  .svg-arrow{stroke-dasharray:8 4;animation:dashFlow .8s linear infinite}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>EaaS</span> — Complete Data Flow Diagram</h1>
+  <p>Every data path in the Email as a Service platform, step by step</p>
+  <div class="badge">.NET 8 &middot; MassTransit &middot; AWS SES &middot; PostgreSQL &middot; Redis &middot; RabbitMQ</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot api"></div>API (Green)</div>
+  <div class="legend-item"><div class="legend-dot queue"></div>Queue (Orange)</div>
+  <div class="legend-item"><div class="legend-dot worker"></div>Worker (Blue)</div>
+  <div class="legend-item"><div class="legend-dot webhook"></div>Webhook (Purple)</div>
+  <div class="legend-item"><div class="legend-dot aws"></div>AWS (Yellow)</div>
+  <div class="legend-item"><div class="legend-dot storage"></div>Storage (Gray)</div>
+</div>
+
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" data-flow="flow1"><span class="dot" style="background:var(--green)"></span>Send Email</button>
+  <button class="tab-btn" data-flow="flow2"><span class="dot" style="background:var(--green)"></span>Batch Send</button>
+  <button class="tab-btn" data-flow="flow3"><span class="dot" style="background:var(--red)"></span>Bounce / Complaint</button>
+  <button class="tab-btn" data-flow="flow4"><span class="dot" style="background:var(--purple)"></span>Open Tracking</button>
+  <button class="tab-btn" data-flow="flow5"><span class="dot" style="background:var(--purple)"></span>Click Tracking</button>
+  <button class="tab-btn" data-flow="flow6"><span class="dot" style="background:var(--blue)"></span>API Key Rotation</button>
+  <button class="tab-btn" data-flow="flow7"><span class="dot" style="background:var(--orange)"></span>Template Rendering</button>
+  <button class="tab-btn" data-flow="flow8"><span class="dot" style="background:var(--red)"></span>Retry / Dead Letter</button>
+</div>
+
+<!-- ============================== FLOW 1: SEND SINGLE EMAIL ============================== -->
+<div class="flow-section visible" id="flow1">
+  <div class="flow-title"><span class="icon">&#9993;</span> Flow 1: Send Single Email</div>
+  <div class="flow-subtitle">The primary flow — from REST request to recipient inbox</div>
+  <div class="flow-endpoint">POST /api/v1/emails/send</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Client Application</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">CashTrack or any tenant app sends an HTTP POST with the email payload and API key in the Authorization header.</div>
+      <div class="step-data">
+        POST /api/v1/emails/send<br>
+        Authorization: Bearer eaas_live_abc123...<br>
+        Content-Type: application/json<br><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"from"</span>: <span class="val">"billing@cashtrack.ng"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"to"</span>: [<span class="val">"customer@gmail.com"</span>],<br>
+        &nbsp;&nbsp;<span class="key">"cc"</span>: [],<br>
+        &nbsp;&nbsp;<span class="key">"bcc"</span>: [],<br>
+        &nbsp;&nbsp;<span class="key">"subject"</span>: <span class="val">"Invoice #1042"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"html_body"</span>: <span class="val">"&lt;h1&gt;Hello...&lt;/h1&gt;"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"template_id"</span>: <span class="val">null</span>,<br>
+        &nbsp;&nbsp;<span class="key">"attachments"</span>: [],<br>
+        &nbsp;&nbsp;<span class="key">"track_opens"</span>: <span class="val">true</span>,<br>
+        &nbsp;&nbsp;<span class="key">"track_clicks"</span>: <span class="val">true</span>,<br>
+        &nbsp;&nbsp;<span class="key">"idempotency_key"</span>: <span class="val">"inv-1042-send"</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">2</span>
+        <span class="step-label">Nginx — TLS Termination + Rate Limiting</span>
+        <span class="step-component api">GATEWAY</span>
+      </div>
+      <div class="step-desc">Terminates TLS (Let's Encrypt). Applies edge rate limiting. Routes to API server on port 8080.</div>
+      <div class="step-data">
+        <span class="comment">// Nginx routes to upstream</span><br>
+        proxy_pass http://eaas-api:8080;
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">3</span>
+        <span class="step-label">ApiKeyAuthHandler — Authentication</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Extracts Bearer token, computes SHA-256 hash, and looks up the API key.</div>
+      <div class="step-data">
+        <span class="comment">// Step 3a: Redis — check cached API key hash</span><br>
+        GET cache:apikey:{sha256_hash}<br><br>
+        <span class="comment">// Step 3b: Cache miss → PostgreSQL fallback</span><br>
+        SELECT * FROM api_keys WHERE key_hash = @hash AND status IN ('Active','Rotating')<br><br>
+        <span class="comment">// Step 3c: Set ClaimsPrincipal</span><br>
+        Claims: { <span class="key">TenantId</span>: <span class="val">guid</span>, <span class="key">ApiKeyId</span>: <span class="val">guid</span> }
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">4</span>
+        <span class="step-label">ValidationBehavior — FluentValidation</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">MediatR pipeline behavior runs FluentValidation rules before the handler executes.</div>
+      <div class="step-data">
+        <span class="comment">// Validates:</span><br>
+        - from: required, valid email format<br>
+        - to: required, 1..50 valid email addresses<br>
+        - cc, bcc: optional, valid emails<br>
+        - combined recipients (to + cc + bcc) &le; 50<br>
+        - subject: required (unless template_id)<br>
+        - html_body or template_id: at least one required
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">5a</span>
+        <span class="step-label">SendEmailHandler &mdash; Rate Limit Check</span>
+        <span class="step-component storage">REDIS</span>
+      </div>
+      <div class="step-desc">Sliding window rate limiter using a Lua script. Max 100 sends/min per API key.</div>
+      <div class="step-data">
+        <span class="comment">// Redis sorted set + Lua atomic check</span><br>
+        Key: <span class="key">ratelimit:send:{apiKeyId}</span><br>
+        Window: 60 seconds, Max: 100 requests<br>
+        <span class="comment">// If exceeded → 429 Too Many Requests</span>
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">5b</span>
+        <span class="step-label">SendEmailHandler &mdash; Idempotency Check</span>
+        <span class="step-component storage">REDIS</span>
+      </div>
+      <div class="step-desc">If an idempotency key is provided, check Redis for a cached result. Returns the previous response if found.</div>
+      <div class="step-data">
+        Key: <span class="key">idempotency:{tenantId}:{key}</span><br>
+        Value: <span class="val">{ "id": "guid", "messageId": "eaas_xxx" }</span><br>
+        TTL: 24 hours
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">5c</span>
+        <span class="step-label">SendEmailHandler &mdash; Verify Sender Domain</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Extracts domain from the "from" address and verifies it is a verified domain for this tenant.</div>
+      <div class="step-data">
+        SELECT COUNT(*) FROM <span class="key">domains</span><br>
+        WHERE tenant_id = @tenantId<br>
+        &nbsp;&nbsp;AND domain_name = <span class="val">'cashtrack.ng'</span><br>
+        &nbsp;&nbsp;AND status = <span class="val">'Verified'</span><br>
+        &nbsp;&nbsp;AND deleted_at IS NULL
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">5d</span>
+        <span class="step-label">SendEmailHandler &mdash; Suppression Check</span>
+        <span class="step-component storage">REDIS + PG</span>
+      </div>
+      <div class="step-desc">For EVERY recipient (to + cc + bcc), check the suppression list. Redis first, then PostgreSQL fallback.</div>
+      <div class="step-data">
+        <span class="comment">// For each recipient:</span><br>
+        1. Redis: GET <span class="key">suppression:{tenantId}:{email}</span><br>
+        2. [Cache miss] PostgreSQL:<br>
+        &nbsp;&nbsp;SELECT 1 FROM <span class="key">suppression_list</span><br>
+        &nbsp;&nbsp;WHERE tenant_id = @tid AND email_address = @email<br><br>
+        <span class="comment">// If any recipient suppressed → 400 error</span>
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">5e</span>
+        <span class="step-label">SendEmailHandler &mdash; Persist Email + Event</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">INSERT the email record with status=Queued and the initial Queued event. Single SaveChanges transaction.</div>
+      <div class="step-data">
+        INSERT INTO <span class="key">emails</span> (<br>
+        &nbsp;&nbsp;id, tenant_id, api_key_id, message_id,<br>
+        &nbsp;&nbsp;from_email, to_emails, cc_emails, bcc_emails,<br>
+        &nbsp;&nbsp;subject, html_body, text_body,<br>
+        &nbsp;&nbsp;template_id, variables, tags, metadata,<br>
+        &nbsp;&nbsp;status=<span class="val">'Queued'</span>, created_at<br>
+        )<br><br>
+        INSERT INTO <span class="key">email_events</span> (<br>
+        &nbsp;&nbsp;id, email_id, event_type=<span class="val">'Queued'</span>, data='{}', created_at<br>
+        )
+      </div>
+    </div>
+
+    <div class="step queue">
+      <div class="step-header">
+        <span class="step-num queue">5f</span>
+        <span class="step-label">SendEmailHandler &mdash; Publish to Queue</span>
+        <span class="step-component queue">RABBITMQ</span>
+      </div>
+      <div class="step-desc">Publishes a SendEmailMessage via MassTransit to the RabbitMQ exchange. The message lands in the <code>eaas-emails-send</code> queue.</div>
+      <div class="step-data">
+        Queue: <span class="key">eaas-emails-send</span><br>
+        Message: SendEmailMessage {<br>
+        &nbsp;&nbsp;<span class="key">EmailId</span>: <span class="val">guid</span>,<br>
+        &nbsp;&nbsp;<span class="key">TenantId</span>: <span class="val">guid</span>,<br>
+        &nbsp;&nbsp;<span class="key">From</span>: <span class="val">"billing@cashtrack.ng"</span>,<br>
+        &nbsp;&nbsp;<span class="key">To</span>: <span class="val">'["customer@gmail.com"]'</span>,<br>
+        &nbsp;&nbsp;<span class="key">Subject, HtmlBody, TextBody, TemplateId,</span><br>
+        &nbsp;&nbsp;<span class="key">Variables, Tags, Metadata, TrackOpens, TrackClicks</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">5g</span>
+        <span class="step-label">SendEmailHandler &mdash; Store Idempotency Key</span>
+        <span class="step-component storage">REDIS</span>
+      </div>
+      <div class="step-desc">Stores the idempotency key with a 24-hour TTL so duplicate requests return the same response.</div>
+      <div class="step-data">
+        SET <span class="key">idempotency:{tenantId}:{key}</span><br>
+        Value: <span class="val">{ "id": "guid", "messageId": "eaas_xxx" }</span><br>
+        TTL: 86400 seconds (24h)
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num api">5h</span>
+        <span class="step-label">Return 202 Accepted</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">The API immediately returns. Email delivery happens asynchronously via the worker.</div>
+      <div class="step-data">
+        HTTP/1.1 <span class="val">202 Accepted</span><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"id"</span>: <span class="val">"a1b2c3d4-..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">"messageId"</span>: <span class="val">"eaas_a1b2c3d4..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">"status"</span>: <span class="val">"queued"</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="flow-sep"></div>
+
+    <div class="step queue">
+      <div class="step-header">
+        <span class="step-num queue">6</span>
+        <span class="step-label">RabbitMQ — Message Waiting</span>
+        <span class="step-component queue">RABBITMQ</span>
+      </div>
+      <div class="step-desc">Message sits in <code>eaas-emails-send</code> queue until a worker consumer picks it up. Durable classic queue with prefetch configured.</div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">7a</span>
+        <span class="step-label">SendEmailConsumer &mdash; Load Email</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Worker loads the full Email entity from PostgreSQL by EmailId.</div>
+      <div class="step-data">
+        SELECT * FROM <span class="key">emails</span> WHERE id = <span class="val">@emailId</span>
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">7b</span>
+        <span class="step-label">SendEmailConsumer &mdash; Load + Render Template</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">If <code>template_id</code> is set, load the template and render via Fluid (Liquid engine) with provided variables.</div>
+      <div class="step-data">
+        <span class="comment">// Load template</span><br>
+        SELECT * FROM <span class="key">templates</span> WHERE id = @templateId AND deleted_at IS NULL<br><br>
+        <span class="comment">// Fluid renders with variables</span><br>
+        Input: subject_template + html_body + text_body + { <span class="key">name</span>: <span class="val">"Tunde"</span>, <span class="key">invoice_url</span>: <span class="val">"..."</span> }<br>
+        Output: rendered subject, html, text
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">7c</span>
+        <span class="step-label">TrackingPixelInjector &mdash; Open Tracking</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">If <code>trackOpens=true</code>, injects a 1x1 transparent pixel <code>&lt;img&gt;</code> tag before <code>&lt;/body&gt;</code>.</div>
+      <div class="step-data">
+        <span class="comment">// Injected HTML</span><br>
+        &lt;img src="<span class="val">https://BASE_URL/track/open/{hmac_token}</span>"<br>
+        &nbsp;&nbsp;width="1" height="1" style="display:none" /&gt;
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">7d</span>
+        <span class="step-label">ClickTrackingLinkRewriter &mdash; Click Tracking</span>
+        <span class="step-component storage">PG + WORKER</span>
+      </div>
+      <div class="step-desc">If <code>trackClicks=true</code>, rewrites every <code>&lt;a href&gt;</code> to a tracking redirect URL. Stores original URLs in PostgreSQL.</div>
+      <div class="step-data">
+        <span class="comment">// For each link in HTML:</span><br>
+        Original: &lt;a href="<span class="val">https://pay.cashtrack.ng/inv/1042</span>"&gt;<br>
+        Rewritten: &lt;a href="<span class="val">https://BASE_URL/track/click/{token}</span>"&gt;<br><br>
+        INSERT INTO <span class="key">tracking_links</span> (id, email_id, token, original_url, created_at)
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num worker">7e</span>
+        <span class="step-label">Update Email Status &rarr; Sending</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Updates the email record status to Sending and inserts a Sent event.</div>
+      <div class="step-data">
+        UPDATE <span class="key">emails</span> SET status = <span class="val">'Sending'</span> WHERE id = @id<br>
+        INSERT INTO <span class="key">email_events</span> (event_type=<span class="val">'Sent'</span>)
+      </div>
+    </div>
+
+    <div class="step aws">
+      <div class="step-header">
+        <span class="step-num aws">7f</span>
+        <span class="step-label">AWS SES — Send Email</span>
+        <span class="step-component aws">AWS SES</span>
+      </div>
+      <div class="step-desc">Depending on attachments, sends via SES v2 Simple or Raw (MimeKit-built MIME message).</div>
+      <div class="step-data">
+        <span class="comment">// No attachments:</span><br>
+        SES v2 SendEmail (Simple: from, to, cc, bcc, subject, html, text)<br><br>
+        <span class="comment">// With attachments:</span><br>
+        MimeKit builds multipart/mixed MIME → SES v2 SendRawEmail(stream)<br><br>
+        <span class="comment">// Returns:</span><br>
+        { <span class="key">Success</span>: <span class="val">true</span>, <span class="key">MessageId</span>: <span class="val">"ses-msg-id"</span> }
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num worker">7g</span>
+        <span class="step-label">Persist SES Result</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Stores the SES Message ID and SentAt timestamp on the email record.</div>
+      <div class="step-data">
+        UPDATE <span class="key">emails</span> SET<br>
+        &nbsp;&nbsp;ses_message_id = <span class="val">'ses-msg-id'</span>,<br>
+        &nbsp;&nbsp;sent_at = <span class="val">NOW()</span><br>
+        WHERE id = @id
+      </div>
+    </div>
+
+    <div class="step aws">
+      <div class="step-header">
+        <span class="step-num aws">8</span>
+        <span class="step-label">SMTP Delivery to Recipient</span>
+        <span class="step-component aws">AWS SES</span>
+      </div>
+      <div class="step-desc">AWS SES delivers the email via SMTP to the recipient's mail server (Gmail, Outlook, Yahoo, etc.).</div>
+      <div class="step-data">
+        SES SMTP &rarr; <span class="val">mx.google.com</span> &rarr; customer@gmail.com<br>
+        <span class="comment">// Delivery events published to SNS (see Flow 3)</span>
+      </div>
+    </div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">9</span>
+        <span class="step-label">Recipient Inbox</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">Email appears in the recipient's inbox. Opens and clicks are tracked via embedded pixel and rewritten links (see Flows 4 and 5).</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 2: BATCH SEND ============================== -->
+<div class="flow-section" id="flow2">
+  <div class="flow-title"><span class="icon">&#128230;</span> Flow 2: Batch Send</div>
+  <div class="flow-subtitle">Send up to 100 emails in a single API call</div>
+  <div class="flow-endpoint">POST /api/v1/emails/batch</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Client Application</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">Sends an array of up to 100 email payloads in a single request.</div>
+      <div class="step-data">
+        POST /api/v1/emails/batch<br>
+        Authorization: Bearer eaas_live_abc123...<br><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"emails"</span>: [<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="key">"from"</span>: <span class="val">"..."</span>, <span class="key">"to"</span>: [...], <span class="key">"subject"</span>: <span class="val">"..."</span>, ... },<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// ... up to 100 items</span><br>
+        &nbsp;&nbsp;]<br>
+        }
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">2</span>
+        <span class="step-label">Nginx + Auth + Validation</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Same TLS, authentication, and validation pipeline as single send. Validates the batch array length &le; 100.</div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">3</span>
+        <span class="step-label">SendBatchHandler &mdash; Generate Batch ID</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Generates a unique batch_id to group all emails in this batch.</div>
+      <div class="step-data">
+        batch_id = <span class="val">Guid.NewGuid()</span>
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">4</span>
+        <span class="step-label">SendBatchHandler &mdash; For Each Email</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Iterates through each email in the batch. For each one: validates, checks suppression, creates DB record, publishes to queue.</div>
+      <div class="step-data">
+        <span class="comment">// For each of N emails (max 100):</span><br>
+        1. Validate from, to, subject, body<br>
+        2. Check suppression list (Redis &rarr; PG)<br>
+        3. INSERT INTO <span class="key">emails</span> (status=<span class="val">'Queued'</span>, batch_id)<br>
+        4. INSERT INTO <span class="key">email_events</span> (event_type=<span class="val">'Queued'</span>)<br>
+        5. Publish SendEmailMessage to RabbitMQ
+      </div>
+    </div>
+
+    <div class="step queue">
+      <div class="step-header">
+        <span class="step-num queue">5</span>
+        <span class="step-label">RabbitMQ &mdash; N Individual Messages</span>
+        <span class="step-component queue">RABBITMQ</span>
+      </div>
+      <div class="step-desc">Each email becomes its own independent message on the <code>eaas-emails-send</code> queue. Workers process them in parallel.</div>
+      <div class="step-data">
+        Queue: <span class="key">eaas-emails-send</span><br>
+        Messages: <span class="val">N individual SendEmailMessage</span> (1 per email in batch)<br>
+        <span class="comment">// Each processed independently by SendEmailConsumer</span>
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num api">6</span>
+        <span class="step-label">Return 202 Accepted</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Returns the batch ID and per-email results immediately.</div>
+      <div class="step-data">
+        HTTP/1.1 <span class="val">202 Accepted</span><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"batchId"</span>: <span class="val">"batch-guid"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"results"</span>: [<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="key">"messageId"</span>: <span class="val">"eaas_xxx"</span>, <span class="key">"status"</span>: <span class="val">"queued"</span> },<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="key">"messageId"</span>: <span class="val">"eaas_yyy"</span>, <span class="key">"status"</span>: <span class="val">"queued"</span> },<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">// ...</span><br>
+        &nbsp;&nbsp;]<br>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 3: BOUNCE / COMPLAINT / DELIVERY ============================== -->
+<div class="flow-section" id="flow3">
+  <div class="flow-title"><span class="icon">&#9888;</span> Flow 3: Bounce, Complaint &amp; Delivery Handling</div>
+  <div class="flow-subtitle">SNS webhook processing for SES delivery events</div>
+  <div class="flow-endpoint">POST /webhooks/sns</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Recipient Mail Server Rejects / Complains</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">The recipient's mail server rejects the email (bounce) or the user marks it as spam (complaint). Successful delivery also triggers a delivery event.</div>
+    </div>
+
+    <div class="step aws">
+      <div class="step-header">
+        <span class="step-num aws">2</span>
+        <span class="step-label">AWS SES Detects Event</span>
+        <span class="step-component aws">AWS SES</span>
+      </div>
+      <div class="step-desc">SES detects the bounce, complaint, or delivery event and publishes it to the configured SNS topic.</div>
+    </div>
+
+    <div class="step aws">
+      <div class="step-header">
+        <span class="step-num aws">3</span>
+        <span class="step-label">AWS SNS Notification</span>
+        <span class="step-component aws">AWS SNS</span>
+      </div>
+      <div class="step-desc">SNS sends an HTTP POST to the webhook endpoint with the event wrapped in an SNS envelope.</div>
+      <div class="step-data">
+        POST /webhooks/sns<br>
+        Content-Type: text/plain<br><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"Type"</span>: <span class="val">"Notification"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"MessageId"</span>: <span class="val">"sns-msg-id"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"TopicArn"</span>: <span class="val">"arn:aws:sns:..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">"Message"</span>: <span class="val">"{ SES notification JSON }"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"SigningCertURL"</span>: <span class="val">"https://sns.*.amazonaws.com/..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">"Signature"</span>: <span class="val">"base64..."</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">4</span>
+        <span class="step-label">SnsMessageHandler &mdash; Validate + Route</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">Validates the SNS message signature by checking the cert URL is <code>*.amazonaws.com</code>. Routes by message type.</div>
+      <div class="step-data">
+        <span class="comment">// Validate cert URL domain</span><br>
+        Assert: SigningCertURL host ends with <span class="val">.amazonaws.com</span><br><br>
+        <span class="comment">// Route by Type:</span><br>
+        <span class="key">"SubscriptionConfirmation"</span> &rarr; GET SubscribeURL (auto-confirm)<br>
+        <span class="key">"Notification"</span> &rarr; Parse SES notification &rarr; route to handler
+      </div>
+    </div>
+
+    <div class="flow-sep"></div>
+
+    <div style="font-size:.88rem;font-weight:600;color:var(--red);margin-bottom:12px;padding-left:40px">BOUNCE PATH (bounceType detected)</div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">5a</span>
+        <span class="step-label">BounceHandler &mdash; Lookup Email</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Finds the email record by the SES Message ID from the notification.</div>
+      <div class="step-data">
+        SELECT * FROM <span class="key">emails</span><br>
+        WHERE ses_message_id = <span class="val">@notification.Mail.MessageId</span>
+      </div>
+    </div>
+
+    <div class="branch">
+      <div class="branch-path error">
+        <div class="branch-label error">Permanent (Hard) Bounce</div>
+        <div class="branch-desc">
+          1. INSERT into <strong>suppression_list</strong> (reason: HardBounce)<br>
+          2. Redis: add to suppression cache<br>
+          3. UPDATE emails SET status = <strong>Bounced</strong><br>
+          4. INSERT email_event (Bounced) with diagnostic data
+        </div>
+      </div>
+      <div class="branch-path" style="border-color:rgba(245,166,35,.15)">
+        <div class="branch-label" style="color:var(--orange)">Transient (Soft) Bounce</div>
+        <div class="branch-desc">
+          1. INSERT email_event (Bounced, transient=true)<br>
+          2. No suppression &mdash; may retry later<br>
+          3. Email status unchanged
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-sep"></div>
+
+    <div style="font-size:.88rem;font-weight:600;color:var(--orange);margin-bottom:12px;padding-left:40px">COMPLAINT PATH (complaint detected)</div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">5b</span>
+        <span class="step-label">ComplaintHandler</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">User marked the email as spam. Auto-suppresses the recipient immediately.</div>
+      <div class="step-data">
+        1. INSERT INTO <span class="key">suppression_list</span> (reason: <span class="val">Complaint</span>)<br>
+        2. Redis: <span class="key">suppression:{tenantId}:{email}</span> = true<br>
+        3. UPDATE <span class="key">emails</span> SET status = <span class="val">'Complained'</span><br>
+        4. INSERT INTO <span class="key">email_events</span> (event_type=<span class="val">'Complained'</span>)
+      </div>
+    </div>
+
+    <div class="flow-sep"></div>
+
+    <div style="font-size:.88rem;font-weight:600;color:var(--green);margin-bottom:12px;padding-left:40px">DELIVERY PATH (delivery confirmed)</div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">5c</span>
+        <span class="step-label">DeliveryHandler</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">SES confirms the email was accepted by the recipient's mail server.</div>
+      <div class="step-data">
+        1. UPDATE <span class="key">emails</span> SET status = <span class="val">'Delivered'</span>, delivered_at = <span class="val">NOW()</span><br>
+        2. INSERT INTO <span class="key">email_events</span> (event_type=<span class="val">'Delivered'</span>)
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 4: OPEN TRACKING ============================== -->
+<div class="flow-section" id="flow4">
+  <div class="flow-title"><span class="icon">&#128065;</span> Flow 4: Open Tracking</div>
+  <div class="flow-subtitle">Tracking pixel loaded when a recipient opens the email</div>
+  <div class="flow-endpoint">GET /track/open/{token}</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Recipient Opens Email</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">The recipient opens the email in their mail client (Gmail, Outlook, Apple Mail, etc.). The client loads remote images.</div>
+    </div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">2</span>
+        <span class="step-label">Browser Loads Tracking Pixel</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">The mail client sends a GET request for the embedded 1x1 pixel image.</div>
+      <div class="step-data">
+        GET <span class="val">https://BASE_URL/track/open/{hmac_token}</span><br>
+        User-Agent: Mozilla/5.0 (iPhone; ...)<br>
+        X-Forwarded-For: 102.89.xx.xx
+      </div>
+    </div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">3</span>
+        <span class="step-label">ITrackingTokenService &mdash; Validate HMAC Token</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">Validates the HMAC token signature and extracts the emailId from it.</div>
+      <div class="step-data">
+        Token: <span class="val">{hmac_token}</span><br>
+        &rarr; HMAC-SHA256 validate with secret key<br>
+        &rarr; Extract: <span class="key">emailId</span> = <span class="val">guid</span>
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">4</span>
+        <span class="step-label">Record Open Event</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Inserts an Opened event and sets <code>opened_at</code> on first open only.</div>
+      <div class="step-data">
+        INSERT INTO <span class="key">email_events</span> (<br>
+        &nbsp;&nbsp;email_id, event_type=<span class="val">'Opened'</span>,<br>
+        &nbsp;&nbsp;data: { <span class="key">user_agent</span>: <span class="val">"..."</span>, <span class="key">ip</span>: <span class="val">"102.89.xx.xx"</span> }<br>
+        )<br><br>
+        <span class="comment">// First open only:</span><br>
+        UPDATE <span class="key">emails</span> SET opened_at = <span class="val">NOW()</span><br>
+        WHERE id = @id AND opened_at IS NULL
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num webhook">5</span>
+        <span class="step-label">Return 1x1 Transparent GIF</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">Returns a minimal transparent GIF with no-cache headers so each open is tracked.</div>
+      <div class="step-data">
+        HTTP/1.1 <span class="val">200 OK</span><br>
+        Content-Type: image/gif<br>
+        Content-Length: 43<br>
+        Cache-Control: no-store, no-cache, must-revalidate<br>
+        Pragma: no-cache<br><br>
+        <span class="comment">// 43-byte transparent 1x1 GIF binary</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 5: CLICK TRACKING ============================== -->
+<div class="flow-section" id="flow5">
+  <div class="flow-title"><span class="icon">&#128279;</span> Flow 5: Click Tracking</div>
+  <div class="flow-subtitle">Tracking redirect when a recipient clicks a link in the email</div>
+  <div class="flow-endpoint">GET /track/click/{token}</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Recipient Clicks a Link</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">The recipient clicks a rewritten link in the email body.</div>
+      <div class="step-data">
+        <span class="comment">// What the recipient sees in the email:</span><br>
+        &lt;a href="<span class="val">https://BASE_URL/track/click/{token}</span>"&gt;Pay Invoice&lt;/a&gt;
+      </div>
+    </div>
+
+    <div class="step webhook">
+      <div class="step-header">
+        <span class="step-num webhook">2</span>
+        <span class="step-label">Lookup Original URL</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Looks up the tracking_links table by token to find the original destination URL.</div>
+      <div class="step-data">
+        SELECT <span class="key">original_url</span>, <span class="key">email_id</span> FROM <span class="key">tracking_links</span><br>
+        WHERE token = <span class="val">@token</span><br><br>
+        Result: <span class="val">https://pay.cashtrack.ng/inv/1042</span>
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">3</span>
+        <span class="step-label">Record Click Event</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Inserts a Clicked event and updates the tracking_links record with the click timestamp.</div>
+      <div class="step-data">
+        INSERT INTO <span class="key">email_events</span> (<br>
+        &nbsp;&nbsp;email_id, event_type=<span class="val">'Clicked'</span>,<br>
+        &nbsp;&nbsp;data: { <span class="key">original_url</span>: <span class="val">"https://pay.cashtrack.ng/inv/1042"</span> }<br>
+        )<br><br>
+        UPDATE <span class="key">tracking_links</span> SET clicked_at = <span class="val">NOW()</span><br>
+        WHERE token = @token
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num webhook">4</span>
+        <span class="step-label">302 Redirect to Original URL</span>
+        <span class="step-component webhook">WEBHOOK</span>
+      </div>
+      <div class="step-desc">Sends a 302 redirect to the original destination URL. The recipient is seamlessly forwarded.</div>
+      <div class="step-data">
+        HTTP/1.1 <span class="val">302 Found</span><br>
+        Location: <span class="val">https://pay.cashtrack.ng/inv/1042</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 6: API KEY ROTATION ============================== -->
+<div class="flow-section" id="flow6">
+  <div class="flow-title"><span class="icon">&#128273;</span> Flow 6: API Key Rotation</div>
+  <div class="flow-subtitle">Zero-downtime key rotation with a 24-hour grace period</div>
+  <div class="flow-endpoint">POST /api/v1/keys/{id}/rotate</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">1</span>
+        <span class="step-label">Admin Requests Rotation</span>
+        <span class="step-component external">EXTERNAL</span>
+      </div>
+      <div class="step-desc">Admin sends a POST to rotate an existing API key.</div>
+      <div class="step-data">
+        POST /api/v1/keys/<span class="val">{keyId}</span>/rotate<br>
+        Authorization: Bearer eaas_live_current_key...
+      </div>
+    </div>
+
+    <div class="step api">
+      <div class="step-header">
+        <span class="step-num api">2</span>
+        <span class="step-label">RotateApiKeyHandler &mdash; Generate New Key</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Generates a new cryptographically random API key with the <code>eaas_live_</code> prefix.</div>
+      <div class="step-data">
+        new_key = <span class="val">"eaas_live_"</span> + RandomBytes(32).ToBase64Url()
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">3</span>
+        <span class="step-label">PostgreSQL &mdash; Update Old + Insert New</span>
+        <span class="step-component storage">POSTGRESQL</span>
+      </div>
+      <div class="step-desc">Marks the old key as Rotating with a 24-hour expiry. Inserts the new key as Active.</div>
+      <div class="step-data">
+        <span class="comment">// Old key:</span><br>
+        UPDATE <span class="key">api_keys</span> SET<br>
+        &nbsp;&nbsp;status = <span class="val">'Rotating'</span>,<br>
+        &nbsp;&nbsp;rotating_expires_at = <span class="val">NOW() + INTERVAL '24 hours'</span>,<br>
+        &nbsp;&nbsp;replaced_by_id = <span class="val">@newKeyId</span><br>
+        WHERE id = @oldKeyId<br><br>
+        <span class="comment">// New key:</span><br>
+        INSERT INTO <span class="key">api_keys</span> (<br>
+        &nbsp;&nbsp;id, tenant_id, key_hash, status=<span class="val">'Active'</span>, created_at<br>
+        )
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">4</span>
+        <span class="step-label">Redis &mdash; Invalidate Old Key Cache</span>
+        <span class="step-component storage">REDIS</span>
+      </div>
+      <div class="step-desc">Removes the old key from the Redis cache so the auth handler fetches the updated status from PostgreSQL.</div>
+      <div class="step-data">
+        DEL <span class="key">cache:apikey:{old_key_hash}</span>
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num api">5</span>
+        <span class="step-label">Return New Plaintext Key</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">Returns the new key in plaintext (shown only once, never stored in plaintext).</div>
+      <div class="step-data">
+        HTTP/1.1 <span class="val">200 OK</span><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"newKey"</span>: <span class="val">"eaas_live_abc123newkey..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">"oldKeyExpiresAt"</span>: <span class="val">"2026-03-28T12:00:00Z"</span>,<br>
+        &nbsp;&nbsp;<span class="key">"message"</span>: <span class="val">"Old key valid for 24 more hours"</span><br>
+        }
+      </div>
+    </div>
+
+    <div class="flow-sep"></div>
+
+    <div class="step api" style="border-color:rgba(91,156,245,.2)">
+      <div class="step-header">
+        <span class="step-num api">6</span>
+        <span class="step-label">Grace Period Behavior (24 hours)</span>
+        <span class="step-component api">API</span>
+      </div>
+      <div class="step-desc">During the grace period, the ApiKeyAuthHandler accepts both the old key (status=Rotating, not yet expired) and the new key (status=Active). After 24 hours, the old key's <code>rotating_expires_at</code> is in the past, so auth rejects it.</div>
+      <div class="step-data">
+        <span class="comment">// Auth handler logic:</span><br>
+        if (key.Status == <span class="val">"Rotating"</span>)<br>
+        &nbsp;&nbsp;if (key.RotatingExpiresAt > <span class="val">DateTime.UtcNow</span>)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&rarr; <span class="val">ALLOW</span> (grace period active)<br>
+        &nbsp;&nbsp;else<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&rarr; <span class="val">DENY</span> (expired)
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 7: TEMPLATE RENDERING ============================== -->
+<div class="flow-section" id="flow7">
+  <div class="flow-title"><span class="icon">&#128196;</span> Flow 7: Template Rendering</div>
+  <div class="flow-subtitle">Fluid (Liquid) template engine rendering with Redis caching</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">1</span>
+        <span class="step-label">SendEmailConsumer Receives Message with template_id</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">The consumer receives a message from RabbitMQ that specifies a <code>template_id</code> instead of inline HTML.</div>
+      <div class="step-data">
+        message.TemplateId = <span class="val">guid</span><br>
+        message.Variables = <span class="val">'{ "name": "Tunde", "invoice_url": "https://..." }'</span>
+      </div>
+    </div>
+
+    <div class="step storage">
+      <div class="step-header">
+        <span class="step-num storage">2</span>
+        <span class="step-label">Redis &mdash; Check Template Cache</span>
+        <span class="step-component storage">REDIS</span>
+      </div>
+      <div class="step-desc">Attempts to load a cached version of the compiled template from Redis.</div>
+      <div class="step-data">
+        GET <span class="key">template:{templateId}</span>
+      </div>
+    </div>
+
+    <div class="branch">
+      <div class="branch-path success">
+        <div class="branch-label success">Cache Hit</div>
+        <div class="branch-desc">Use the cached template directly. Skip database query.</div>
+      </div>
+      <div class="branch-path" style="border-color:rgba(138,142,160,.2)">
+        <div class="branch-label neutral">Cache Miss</div>
+        <div class="branch-desc">
+          Load from PostgreSQL:<br>
+          <code style="color:var(--text2);font-size:.8rem">SELECT * FROM templates WHERE id = @id AND deleted_at IS NULL</code><br>
+          Then cache the result in Redis for future use.
+        </div>
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">3</span>
+        <span class="step-label">Fluid (Liquid Engine) &mdash; Parse + Render</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">Fluid parses the subject template, HTML body, and text body. Injects the provided variables using Liquid syntax.</div>
+      <div class="step-data">
+        <span class="comment">// Input templates:</span><br>
+        subject_template: <span class="val">"Invoice for {{name}}"</span><br>
+        html_body: <span class="val">"&lt;h1&gt;Hi {{name}}&lt;/h1&gt;&lt;a href='{{invoice_url}}'&gt;Pay&lt;/a&gt;"</span><br>
+        text_body: <span class="val">"Hi {{name}}, pay at {{invoice_url}}"</span><br><br>
+        <span class="comment">// Variables:</span><br>
+        { <span class="key">name</span>: <span class="val">"Tunde Adebayo"</span>, <span class="key">invoice_url</span>: <span class="val">"https://pay.cashtrack.ng/inv/1042"</span> }<br><br>
+        <span class="comment">// Output:</span><br>
+        subject: <span class="val">"Invoice for Tunde Adebayo"</span><br>
+        html: <span class="val">"&lt;h1&gt;Hi Tunde Adebayo&lt;/h1&gt;&lt;a href='https://pay...'&gt;Pay&lt;/a&gt;"</span><br>
+        text: <span class="val">"Hi Tunde Adebayo, pay at https://pay..."</span>
+      </div>
+    </div>
+
+    <div class="step success">
+      <div class="step-header">
+        <span class="step-num worker">4</span>
+        <span class="step-label">Return Rendered Content</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">Rendered subject, HTML body, and text body are passed to the next steps in the send flow (tracking injection, SES delivery).</div>
+      <div class="step-data">
+        RenderedTemplate {<br>
+        &nbsp;&nbsp;<span class="key">Subject</span>: <span class="val">"Invoice for Tunde Adebayo"</span>,<br>
+        &nbsp;&nbsp;<span class="key">HtmlBody</span>: <span class="val">"&lt;h1&gt;Hi Tunde Adebayo..."</span>,<br>
+        &nbsp;&nbsp;<span class="key">TextBody</span>: <span class="val">"Hi Tunde Adebayo, pay at..."</span><br>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================== FLOW 8: RETRY & DEAD LETTER ============================== -->
+<div class="flow-section" id="flow8">
+  <div class="flow-title"><span class="icon">&#128260;</span> Flow 8: Retry &amp; Dead Letter Queue</div>
+  <div class="flow-subtitle">MassTransit retry policy and error handling</div>
+
+  <div class="flow-container">
+    <div class="flow-line-v"></div>
+
+    <div class="step error">
+      <div class="step-header">
+        <span class="step-num error">1</span>
+        <span class="step-label">SendEmailConsumer Throws Exception</span>
+        <span class="step-component worker">WORKER</span>
+      </div>
+      <div class="step-desc">The consumer fails to process the message (SES error, database timeout, template not found, etc.). The exception is caught by MassTransit.</div>
+      <div class="step-data">
+        <span class="comment">// Example failures:</span><br>
+        - SES delivery failed (throttled, invalid address)<br>
+        - PostgreSQL connection timeout<br>
+        - Template not found (status → Failed, no retry)<br>
+        - Unexpected exception
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">2</span>
+        <span class="step-label">Retry 1 &mdash; After 1 Second</span>
+        <span class="step-component queue">MASSTRANSIT</span>
+      </div>
+      <div class="step-desc">MassTransit retries the message after a 1-second delay.</div>
+      <div class="step-data">
+        Delay: <span class="val">1 second</span><br>
+        <span class="comment">// Success? → Done. Failure? → Retry 2</span>
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">3</span>
+        <span class="step-label">Retry 2 &mdash; After 5 Seconds</span>
+        <span class="step-component queue">MASSTRANSIT</span>
+      </div>
+      <div class="step-desc">Second retry attempt after a 5-second delay.</div>
+      <div class="step-data">
+        Delay: <span class="val">5 seconds</span><br>
+        <span class="comment">// Success? → Done. Failure? → Retry 3</span>
+      </div>
+    </div>
+
+    <div class="step worker">
+      <div class="step-header">
+        <span class="step-num worker">4</span>
+        <span class="step-label">Retry 3 &mdash; After 30 Seconds</span>
+        <span class="step-component queue">MASSTRANSIT</span>
+      </div>
+      <div class="step-desc">Final retry attempt after a 30-second delay.</div>
+      <div class="step-data">
+        Delay: <span class="val">30 seconds</span><br>
+        <span class="comment">// Success? → Done. Failure? → Dead Letter Queue</span>
+      </div>
+    </div>
+
+    <div class="step error">
+      <div class="step-header">
+        <span class="step-num error">5</span>
+        <span class="step-label">Dead Letter Queue</span>
+        <span class="step-component queue">RABBITMQ</span>
+      </div>
+      <div class="step-desc">After all 3 retries fail, MassTransit moves the message to the error queue. The email status is set to Failed.</div>
+      <div class="step-data">
+        Queue: <span class="key">eaas-emails-send_error</span> (Dead Letter Queue)<br><br>
+        <span class="comment">// PostgreSQL update:</span><br>
+        UPDATE <span class="key">emails</span> SET status = <span class="val">'Failed'</span>,<br>
+        &nbsp;&nbsp;error_message = <span class="val">'SES delivery failed after 3 retries'</span><br>
+        WHERE id = @id<br><br>
+        INSERT INTO <span class="key">email_events</span> (event_type=<span class="val">'Failed'</span>, data=<span class="val">'{ "error": "..." }'</span>)
+      </div>
+    </div>
+
+    <div class="step external">
+      <div class="step-header">
+        <span class="step-num external">6</span>
+        <span class="step-label">Manual Inspection Required</span>
+        <span class="step-component external">ADMIN</span>
+      </div>
+      <div class="step-desc">Messages in the DLQ require manual inspection via the RabbitMQ management UI or Dashboard. Admins can investigate the failure, fix the root cause, and optionally republish the message.</div>
+      <div class="step-data">
+        <span class="comment">// RabbitMQ Management UI:</span><br>
+        http://localhost:15672 &rarr; Queues &rarr; <span class="key">eaas-emails-send_error</span><br>
+        &rarr; Get Message(s) &rarr; Inspect payload &rarr; Fix &amp; Republish
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  EaaS Data Flow Diagram v1.0 &middot; Sprint 2 &middot; 2026-03-27 &middot; .NET 8 &middot; MassTransit &middot; AWS SES &middot; PostgreSQL &middot; Redis &middot; RabbitMQ
+</div>
+
+<script>
+(function(){
+  // Tab navigation
+  const tabs = document.querySelectorAll('.tab-btn');
+  const sections = document.querySelectorAll('.flow-section');
+
+  function showFlow(flowId) {
+    sections.forEach(s => s.classList.remove('visible'));
+    tabs.forEach(t => t.classList.remove('active'));
+
+    const target = document.getElementById(flowId);
+    if (target) {
+      target.classList.add('visible');
+      // Smooth scroll into view
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    tabs.forEach(t => {
+      if (t.getAttribute('data-flow') === flowId) t.classList.add('active');
+    });
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      showFlow(tab.getAttribute('data-flow'));
+    });
+  });
+
+  // Keyboard navigation (left/right arrows)
+  const flowIds = Array.from(tabs).map(t => t.getAttribute('data-flow'));
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const current = flowIds.findIndex(id => document.getElementById(id)?.classList.contains('visible'));
+    if (e.key === 'ArrowRight' && current < flowIds.length - 1) {
+      showFlow(flowIds[current + 1]);
+    } else if (e.key === 'ArrowLeft' && current > 0) {
+      showFlow(flowIds[current - 1]);
+    }
+  });
+
+  // Animate steps on scroll (intersection observer)
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateX(0)';
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.step, .branch').forEach(step => {
+    step.style.opacity = '0';
+    step.style.transform = 'translateX(-16px)';
+    step.style.transition = 'opacity .4s ease, transform .4s ease';
+    observer.observe(step);
+  });
+
+  // Animated flow line dots
+  document.querySelectorAll('.flow-line-v').forEach(line => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position:absolute;left:-3px;width:8px;height:8px;border-radius:50%;
+      background:var(--blue);opacity:.6;
+      animation:flowDot 3s ease-in-out infinite;
+    `;
+    line.appendChild(dot);
+  });
+
+  // Add flow dot animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes flowDot {
+      0% { top: 0%; opacity: .2; }
+      50% { opacity: .8; }
+      100% { top: 95%; opacity: .2; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>
