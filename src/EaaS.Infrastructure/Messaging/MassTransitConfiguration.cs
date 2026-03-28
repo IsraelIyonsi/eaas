@@ -54,4 +54,28 @@ public static class MassTransitConfiguration
 
         return services;
     }
+
+    /// <summary>
+    /// Registers MassTransit in publish-only mode (no consumers).
+    /// Used by services that only need to publish messages (e.g., WebhookProcessor).
+    /// </summary>
+    public static IServiceCollection AddMassTransitPublishOnly(
+        this IServiceCollection services)
+    {
+        services.AddMassTransit(bus =>
+        {
+            bus.UsingRabbitMq((context, cfg) =>
+            {
+                var settings = context.GetRequiredService<IOptions<RabbitMqSettings>>().Value;
+
+                cfg.Host(settings.Host, (ushort)settings.Port, settings.VirtualHost, h =>
+                {
+                    h.Username(settings.Username);
+                    h.Password(settings.Password);
+                });
+            });
+        });
+
+        return services;
+    }
 }

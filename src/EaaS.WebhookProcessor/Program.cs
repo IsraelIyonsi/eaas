@@ -26,8 +26,8 @@ try
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
 
-    // Infrastructure services (DbContext, Redis, MassTransit for publishing webhook dispatch messages)
-    builder.Services.AddInfrastructure(builder.Configuration);
+    // Infrastructure services (DbContext, Redis, MassTransit publish-only for webhook dispatch)
+    builder.Services.AddInfrastructure(builder.Configuration, publishOnly: true);
 
     // Tracking settings and services
     builder.Services.Configure<TrackingSettings>(builder.Configuration.GetSection(TrackingSettings.SectionName));
