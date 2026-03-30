@@ -35,7 +35,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         var webhooks = await _dbContext.Webhooks
             .AsNoTracking()
             .Where(w => w.TenantId == message.TenantId
-                        && w.Status == "active"
+                        && w.Status == EaaS.Domain.Enums.WebhookStatus.Active
                         && w.Events.Contains(message.EventType))
             .ToListAsync(context.CancellationToken);
 

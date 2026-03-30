@@ -22,7 +22,7 @@ public sealed class GetWebhookHandler : IRequestHandler<GetWebhookQuery, Webhook
                 w.Id,
                 w.Url,
                 w.Events,
-                w.Status,
+                w.Status.ToString(),
                 w.CreatedAt,
                 w.UpdatedAt))
             .FirstOrDefaultAsync(cancellationToken)

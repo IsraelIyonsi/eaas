@@ -36,7 +36,7 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
             Url = request.Url,
             Events = request.Events.Select(e => e.ToLowerInvariant()).ToArray(),
             Secret = secret,
-            Status = "active",
+            Status = EaaS.Domain.Enums.WebhookStatus.Active,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -49,7 +49,7 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
             webhook.Url,
             webhook.Events,
             secret,
-            webhook.Status,
+            webhook.Status.ToString().ToLowerInvariant(),
             webhook.CreatedAt);
     }
 
