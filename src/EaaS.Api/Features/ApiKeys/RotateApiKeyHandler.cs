@@ -1,10 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -80,19 +79,7 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
             newApiKey.CreatedAt);
     }
 
-    private static string GenerateApiKey()
-    {
-        var random = new char[ApiKeyConstants.RandomPartLength];
+    private static string GenerateApiKey() => ApiKeyGenerator.GenerateKey();
 
-        for (var i = 0; i < ApiKeyConstants.RandomPartLength; i++)
-            random[i] = ApiKeyConstants.AllowedCharacters[RandomNumberGenerator.GetInt32(ApiKeyConstants.AllowedCharacters.Length)];
-
-        return ApiKeyConstants.LiveKeyPrefix + new string(random);
-    }
-
-    private static string ComputeSha256Hash(string rawKey)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
-    }
+    private static string ComputeSha256Hash(string rawKey) => ApiKeyGenerator.ComputeSha256Hash(rawKey);
 }
