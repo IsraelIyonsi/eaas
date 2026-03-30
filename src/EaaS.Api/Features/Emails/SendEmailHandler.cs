@@ -4,6 +4,7 @@ using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -30,9 +31,9 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
     {
         // 0. Check rate limit per API key
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException("Rate limit exceeded. Maximum 100 sends per minute per API key.");
+            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         // 1. Check idempotency key
         if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
@@ -90,7 +91,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             Id = Guid.NewGuid(),
             TenantId = request.TenantId,
             ApiKeyId = request.ApiKeyId,
-            MessageId = $"eaas_{Guid.NewGuid():N}",
+            MessageId = $"{EmailConstants.MessageIdPrefix}{Guid.NewGuid():N}",
             FromEmail = request.From,
             ToEmails = JsonSerializer.Serialize(request.To),
             CcEmails = request.Cc is not null ? JsonSerializer.Serialize(request.Cc) : "[]",

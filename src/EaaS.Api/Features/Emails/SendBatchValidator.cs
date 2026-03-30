@@ -1,3 +1,4 @@
+using EaaS.Shared.Constants;
 using FluentValidation;
 
 namespace EaaS.Api.Features.Emails;
@@ -9,7 +10,7 @@ public sealed class SendBatchValidator : AbstractValidator<SendBatchCommand>
         RuleFor(x => x.Emails)
             .NotNull().WithMessage("Emails array is required.")
             .NotEmpty().WithMessage("At least one email is required.")
-            .Must(e => e is null || e.Count <= 100).WithMessage("Maximum 100 emails per batch.");
+            .Must(e => e is null || e.Count <= EmailConstants.MaxBatchSize).WithMessage($"Maximum {EmailConstants.MaxBatchSize} emails per batch.");
 
         RuleForEach(x => x.Emails).ChildRules(email =>
         {

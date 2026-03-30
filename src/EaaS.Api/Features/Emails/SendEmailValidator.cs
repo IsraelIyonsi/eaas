@@ -1,3 +1,4 @@
+using EaaS.Shared.Constants;
 using FluentValidation;
 
 namespace EaaS.Api.Features.Emails;
@@ -15,8 +16,8 @@ public sealed class SendEmailValidator : AbstractValidator<SendEmailCommand>
             .NotEmpty().WithMessage("At least one recipient is required.");
 
         RuleFor(x => x)
-            .Must(x => (x.To?.Count ?? 0) + (x.Cc?.Count ?? 0) + (x.Bcc?.Count ?? 0) <= 50)
-            .WithMessage("Combined To + CC + BCC recipients must not exceed 50.")
+            .Must(x => (x.To?.Count ?? 0) + (x.Cc?.Count ?? 0) + (x.Bcc?.Count ?? 0) <= EmailConstants.MaxRecipientsPerEmail)
+            .WithMessage($"Combined To + CC + BCC recipients must not exceed {EmailConstants.MaxRecipientsPerEmail}.")
             .WithName("Recipients");
 
         RuleForEach(x => x.To)
@@ -43,13 +44,13 @@ public sealed class SendEmailValidator : AbstractValidator<SendEmailCommand>
             .WithName("Body");
 
         RuleFor(x => x.Tags)
-            .Must(tags => tags is null || tags.Count <= 10)
-            .WithMessage("Maximum 10 tags allowed.");
+            .Must(tags => tags is null || tags.Count <= EmailConstants.MaxTags)
+            .WithMessage($"Maximum {EmailConstants.MaxTags} tags allowed.");
 
         RuleForEach(x => x.Tags)
-            .MaximumLength(50).WithMessage("Each tag must not exceed 50 characters.");
+            .MaximumLength(EmailConstants.MaxTagLength).WithMessage($"Each tag must not exceed {EmailConstants.MaxTagLength} characters.");
 
         RuleFor(x => x.IdempotencyKey)
-            .MaximumLength(255).WithMessage("Idempotency key must not exceed 255 characters.");
+            .MaximumLength(EmailConstants.MaxIdempotencyKeyLength).WithMessage($"Idempotency key must not exceed {EmailConstants.MaxIdempotencyKeyLength} characters.");
     }
 }
