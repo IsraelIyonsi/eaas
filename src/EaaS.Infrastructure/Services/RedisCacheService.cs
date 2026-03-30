@@ -1,5 +1,6 @@
 using EaaS.Domain.Interfaces;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -46,7 +47,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             return await db.KeyExistsAsync(key);
         }
         catch (Exception ex)
@@ -61,7 +62,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             await db.StringSetAsync(key, "1");
         }
         catch (Exception ex)
@@ -75,7 +76,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             await db.KeyDeleteAsync(key);
         }
         catch (Exception ex)
@@ -89,7 +90,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var rateLimitKey = $"ratelimit:{key}";
+            var rateLimitKey = CacheKeys.RateLimit(key);
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var result = await db.ScriptEvaluateAsync(
@@ -111,7 +112,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -127,7 +128,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             await db.StringSetAsync(cacheKey, serializedApiKey, ttl ?? ApiKeyCacheTtl);
         }
         catch (Exception ex)
@@ -141,7 +142,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             await db.KeyDeleteAsync(cacheKey);
         }
         catch (Exception ex)
@@ -157,7 +158,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"idempotency:{tenantId}:{key}";
+            var cacheKey = CacheKeys.Idempotency(tenantId, key);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -173,7 +174,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"idempotency:{tenantId}:{key}";
+            var cacheKey = CacheKeys.Idempotency(tenantId, key);
             await db.StringSetAsync(cacheKey, value, IdempotencyTtl);
         }
         catch (Exception ex)
@@ -189,7 +190,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -205,7 +206,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             await db.StringSetAsync(cacheKey, serializedTemplate, TemplateCacheTtl);
         }
         catch (Exception ex)
@@ -219,7 +220,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             await db.KeyDeleteAsync(cacheKey);
         }
         catch (Exception ex)
