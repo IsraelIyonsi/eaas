@@ -4,6 +4,7 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         var webhooks = await _dbContext.Webhooks
             .AsNoTracking()
             .Where(w => w.TenantId == message.TenantId
-                        && w.Status == "active"
+                        && w.Status == EaaS.Domain.Enums.WebhookStatus.Active
                         && w.Events.Contains(message.EventType))
             .ToListAsync(context.CancellationToken);
 
@@ -90,7 +91,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         try
         {
             var client = _httpClientFactory.CreateClient("WebhookDispatch");
-            client.Timeout = TimeSpan.FromSeconds(10);
+            client.Timeout = TimeSpan.FromSeconds(WebhookConstants.DispatchTimeoutSeconds);
 
             var response = await client.PostAsync(webhook.Url, content, cancellationToken);
             statusCode = (int)response.StatusCode;

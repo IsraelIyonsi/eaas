@@ -1,4 +1,5 @@
 using EaaS.Infrastructure.Configuration;
+using EaaS.Shared.Constants;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -31,13 +32,13 @@ public static class MassTransitConfiguration
                         TimeSpan.FromSeconds(5),
                         TimeSpan.FromSeconds(30)));
 
-                cfg.ReceiveEndpoint("eaas-emails-send", e =>
+                cfg.ReceiveEndpoint(MessagingConstants.EmailSendQueue, e =>
                 {
                     e.PrefetchCount = settings.PrefetchCount;
                     e.ConfigureConsumer<SendEmailConsumer>(context);
                 });
 
-                cfg.ReceiveEndpoint("eaas-webhook-dispatch", e =>
+                cfg.ReceiveEndpoint(MessagingConstants.WebhookDispatchQueue, e =>
                 {
                     e.PrefetchCount = settings.PrefetchCount;
                     e.UseMessageRetry(r =>

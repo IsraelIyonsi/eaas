@@ -1,4 +1,6 @@
 using EaaS.Domain.Interfaces;
+using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -9,7 +11,7 @@ public sealed partial class RedisCacheService : ICacheService
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<RedisCacheService> _logger;
 
-    private static readonly TimeSpan ApiKeyCacheTtl = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan ApiKeyCacheTtl = CacheConstants.ApiKeyCacheTtl;
 
     // Lua script for sliding window rate limiting
     private const string RateLimitLuaScript = @"
@@ -45,7 +47,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             return await db.KeyExistsAsync(key);
         }
         catch (Exception ex)
@@ -60,7 +62,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             await db.StringSetAsync(key, "1");
         }
         catch (Exception ex)
@@ -74,7 +76,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var key = $"suppression:{tenantId}:{emailAddress.ToLowerInvariant()}";
+            var key = CacheKeys.Suppression(tenantId, emailAddress);
             await db.KeyDeleteAsync(key);
         }
         catch (Exception ex)
@@ -88,7 +90,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var rateLimitKey = $"ratelimit:{key}";
+            var rateLimitKey = CacheKeys.RateLimit(key);
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var result = await db.ScriptEvaluateAsync(
@@ -110,7 +112,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -126,7 +128,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             await db.StringSetAsync(cacheKey, serializedApiKey, ttl ?? ApiKeyCacheTtl);
         }
         catch (Exception ex)
@@ -140,7 +142,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"apikey:{keyHash}";
+            var cacheKey = CacheKeys.ApiKey(keyHash);
             await db.KeyDeleteAsync(cacheKey);
         }
         catch (Exception ex)
@@ -149,15 +151,14 @@ public sealed partial class RedisCacheService : ICacheService
         }
     }
 
-    // Idempotency key methods
-    private static readonly TimeSpan IdempotencyTtl = TimeSpan.FromHours(24);
+    private static readonly TimeSpan IdempotencyTtl = CacheConstants.IdempotencyTtl;
 
     public async Task<string?> GetIdempotencyKeyAsync(Guid tenantId, string key, CancellationToken cancellationToken = default)
     {
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"idempotency:{tenantId}:{key}";
+            var cacheKey = CacheKeys.Idempotency(tenantId, key);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -173,7 +174,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"idempotency:{tenantId}:{key}";
+            var cacheKey = CacheKeys.Idempotency(tenantId, key);
             await db.StringSetAsync(cacheKey, value, IdempotencyTtl);
         }
         catch (Exception ex)
@@ -182,15 +183,14 @@ public sealed partial class RedisCacheService : ICacheService
         }
     }
 
-    // Template cache methods
-    private static readonly TimeSpan TemplateCacheTtl = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan TemplateCacheTtl = CacheConstants.TemplateCacheTtl;
 
     public async Task<string?> GetTemplateCacheAsync(Guid templateId, CancellationToken cancellationToken = default)
     {
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             var value = await db.StringGetAsync(cacheKey);
             return value.HasValue ? value.ToString() : null;
         }
@@ -206,7 +206,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             await db.StringSetAsync(cacheKey, serializedTemplate, TemplateCacheTtl);
         }
         catch (Exception ex)
@@ -220,7 +220,7 @@ public sealed partial class RedisCacheService : ICacheService
         try
         {
             var db = _redis.GetDatabase();
-            var cacheKey = $"template:{templateId}";
+            var cacheKey = CacheKeys.Template(templateId);
             await db.KeyDeleteAsync(cacheKey);
         }
         catch (Exception ex)

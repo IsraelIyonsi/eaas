@@ -1,8 +1,7 @@
-using System.Security.Cryptography;
-using System.Text;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Utilities;
 using MediatR;
 
 namespace EaaS.Api.Features.ApiKeys;
@@ -44,21 +43,7 @@ public sealed class CreateApiKeyHandler : IRequestHandler<CreateApiKeyCommand, C
             apiKey.CreatedAt);
     }
 
-    private static string GenerateApiKey()
-    {
-        const string prefix = "eaas_live_";
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var random = new char[40];
+    private static string GenerateApiKey() => ApiKeyGenerator.GenerateKey();
 
-        for (var i = 0; i < 40; i++)
-            random[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
-
-        return prefix + new string(random);
-    }
-
-    private static string ComputeSha256Hash(string rawKey)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
-    }
+    private static string ComputeSha256Hash(string rawKey) => ApiKeyGenerator.ComputeSha256Hash(rawKey);
 }

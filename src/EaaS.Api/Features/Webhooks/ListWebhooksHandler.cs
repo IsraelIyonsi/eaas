@@ -1,4 +1,5 @@
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ public sealed class ListWebhooksHandler : IRequestHandler<ListWebhooksQuery, Lis
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var pageSize = Math.Min(request.PageSize, 100);
+        var pageSize = Math.Min(request.PageSize, PaginationConstants.MaxPageSize);
         var items = await query
             .OrderByDescending(w => w.CreatedAt)
             .Skip((request.Page - 1) * pageSize)
@@ -30,7 +31,7 @@ public sealed class ListWebhooksHandler : IRequestHandler<ListWebhooksQuery, Lis
                 w.Id,
                 w.Url,
                 w.Events,
-                w.Status,
+                w.Status.ToString(),
                 w.CreatedAt,
                 w.UpdatedAt))
             .ToListAsync(cancellationToken);

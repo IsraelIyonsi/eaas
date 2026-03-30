@@ -1,5 +1,6 @@
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,7 @@ public sealed class ListSuppressionsHandler : IRequestHandler<ListSuppressionsQu
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var pageSize = Math.Min(request.PageSize, 100);
+        var pageSize = Math.Min(request.PageSize, PaginationConstants.MaxPageSize);
         var items = await query
             .OrderByDescending(s => s.SuppressedAt)
             .Skip((request.Page - 1) * pageSize)

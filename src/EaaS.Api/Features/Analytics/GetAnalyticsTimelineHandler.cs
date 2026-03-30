@@ -1,4 +1,5 @@
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,12 @@ namespace EaaS.Api.Features.Analytics;
 
 public sealed class GetAnalyticsTimelineHandler : IRequestHandler<GetAnalyticsTimelineQuery, AnalyticsTimelineResult>
 {
+    private static readonly Dictionary<string, string> TruncExpressions = new()
+    {
+        ["hour"] = "DATE_TRUNC('hour', e.created_at)",
+        ["day"] = "DATE_TRUNC('day', e.created_at)"
+    };
+
     private readonly AppDbContext _dbContext;
 
     public GetAnalyticsTimelineHandler(AppDbContext dbContext)
@@ -19,20 +26,20 @@ public sealed class GetAnalyticsTimelineHandler : IRequestHandler<GetAnalyticsTi
             ? "hour"
             : "day";
 
-        // Enforce max range: 7 days for hourly, 90 days for daily
-        var maxRange = granularity == "hour" ? TimeSpan.FromDays(7) : TimeSpan.FromDays(90);
+        var maxRange = granularity == "hour" ? AnalyticsConstants.HourlyMaxRange : AnalyticsConstants.DailyMaxRange;
         var dateFrom = request.DateFrom;
         var dateTo = request.DateTo;
 
         if (dateTo - dateFrom > maxRange)
             dateFrom = dateTo - maxRange;
 
-        // Build raw SQL for DATE_TRUNC - use parameterized query for safety
+        var truncExpr = TruncExpressions[granularity];
+
         var parameters = new List<object> { request.TenantId, dateFrom, dateTo };
         var paramIndex = 3;
 
-        var sql = "SELECT " +
-            "DATE_TRUNC('" + granularity + "', e.created_at) AS \"Timestamp\", " +
+        var sql = $"SELECT " +
+            $"{truncExpr} AS \"Timestamp\", " +
             "COUNT(*)::int AS \"Sent\", " +
             "COUNT(*) FILTER (WHERE e.status = 'delivered')::int AS \"Delivered\", " +
             "COUNT(*) FILTER (WHERE e.status = 'bounced')::int AS \"Bounced\", " +
@@ -65,7 +72,7 @@ public sealed class GetAnalyticsTimelineHandler : IRequestHandler<GetAnalyticsTi
             paramIndex++;
         }
 
-        sql += " GROUP BY DATE_TRUNC('" + granularity + "', e.created_at)" +
+        sql += $" GROUP BY {truncExpr}" +
                " ORDER BY \"Timestamp\" ASC";
 
         var points = await _dbContext.Database

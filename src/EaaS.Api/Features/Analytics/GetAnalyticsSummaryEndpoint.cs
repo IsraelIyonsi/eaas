@@ -1,3 +1,4 @@
+using EaaS.Shared.Constants;
 using EaaS.Shared.Contracts;
 using MediatR;
 
@@ -17,7 +18,7 @@ public static class GetAnalyticsSummaryEndpoint
             Guid? template_id) =>
         {
             var tenantId = GetTenantId(httpContext);
-            var from = date_from ?? DateTime.UtcNow.AddDays(-30);
+            var from = date_from ?? DateTime.UtcNow.AddDays(-AnalyticsConstants.DefaultDateRangeDays);
             var to = date_to ?? DateTime.UtcNow;
 
             var query = new GetAnalyticsSummaryQuery(tenantId, from, to, domain, api_key_id, template_id);

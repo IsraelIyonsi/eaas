@@ -1,9 +1,12 @@
 using System.Text.Json;
+using EaaS.Api.Services;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -15,24 +18,27 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SuppressionChecker _suppressionChecker;
 
     public SendEmailHandler(
         AppDbContext dbContext,
         ICacheService cacheService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
         _publishEndpoint = publishEndpoint;
+        _suppressionChecker = suppressionChecker;
     }
 
     public async Task<SendEmailResult> Handle(SendEmailCommand request, CancellationToken cancellationToken)
     {
         // 0. Check rate limit per API key
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException("Rate limit exceeded. Maximum 100 sends per minute per API key.");
+            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         // 1. Check idempotency key
         if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
@@ -65,24 +71,8 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
         if (request.Cc is not null) allRecipients.AddRange(request.Cc);
         if (request.Bcc is not null) allRecipients.AddRange(request.Bcc);
 
-        foreach (var recipient in allRecipients)
-        {
-            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(
-                request.TenantId, recipient, cancellationToken);
-
-            if (!isSuppressed)
-            {
-                // Also check DB suppression
-                var recipientLower = recipient.ToLowerInvariant();
-                isSuppressed = await _dbContext.SuppressionEntries
-                    .AsNoTracking()
-                    .AnyAsync(s => s.TenantId == request.TenantId
-                                   && s.EmailAddress == recipientLower, cancellationToken);
-            }
-
-            if (isSuppressed)
-                throw new InvalidOperationException($"Recipient '{recipient}' is on the suppression list.");
-        }
+        await _suppressionChecker.EnsureNoneSuppressedOrThrowAsync(
+            request.TenantId, allRecipients, cancellationToken);
 
         // 4. Create Email entity
         var email = new Email
@@ -90,7 +80,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             Id = Guid.NewGuid(),
             TenantId = request.TenantId,
             ApiKeyId = request.ApiKeyId,
-            MessageId = $"eaas_{Guid.NewGuid():N}",
+            MessageId = IdGenerator.GenerateMessageId(),
             FromEmail = request.From,
             ToEmails = JsonSerializer.Serialize(request.To),
             CcEmails = request.Cc is not null ? JsonSerializer.Serialize(request.Cc) : "[]",

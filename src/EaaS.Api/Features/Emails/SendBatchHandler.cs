@@ -1,10 +1,12 @@
-using System.Security.Cryptography;
 using System.Text.Json;
+using EaaS.Api.Services;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,26 +18,29 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SuppressionChecker _suppressionChecker;
 
     public SendBatchHandler(
         AppDbContext dbContext,
         ICacheService cacheService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
         _publishEndpoint = publishEndpoint;
+        _suppressionChecker = suppressionChecker;
     }
 
     public async Task<SendBatchResult> Handle(SendBatchCommand request, CancellationToken cancellationToken)
     {
         // Rate limit: single atomic check for the entire batch
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException($"Rate limit exceeded. Maximum 100 sends per minute per API key.");
+            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
-        var batchId = $"batch_{GenerateShortId()}";
+        var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();
         var accepted = 0;
         var rejected = 0;
@@ -67,7 +72,8 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                 if (item.Cc is not null) allRecipients.AddRange(item.Cc);
                 if (item.Bcc is not null) allRecipients.AddRange(item.Bcc);
 
-                var suppressedRecipient = await CheckSuppression(request.TenantId, allRecipients, cancellationToken);
+                var suppressedRecipient = await _suppressionChecker.FindSuppressedRecipientAsync(
+                    request.TenantId, allRecipients, cancellationToken);
                 if (suppressedRecipient is not null)
                 {
                     results.Add(new BatchEmailResultItem(i, null, "rejected", $"Recipient '{suppressedRecipient}' is on the suppression list."));
@@ -81,7 +87,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     Id = Guid.NewGuid(),
                     TenantId = request.TenantId,
                     ApiKeyId = request.ApiKeyId,
-                    MessageId = $"eaas_{Guid.NewGuid():N}",
+                    MessageId = IdGenerator.GenerateMessageId(),
                     BatchId = batchId,
                     FromEmail = item.From,
                     ToEmails = JsonSerializer.Serialize(item.To),
@@ -144,33 +150,4 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         return new SendBatchResult(batchId, request.Emails.Count, accepted, rejected, results);
     }
 
-    private async Task<string?> CheckSuppression(Guid tenantId, List<string> recipients, CancellationToken cancellationToken)
-    {
-        foreach (var recipient in recipients)
-        {
-            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(tenantId, recipient, cancellationToken);
-
-            if (!isSuppressed)
-            {
-                var recipientLower = recipient.ToLowerInvariant();
-                isSuppressed = await _dbContext.SuppressionEntries
-                    .AsNoTracking()
-                    .AnyAsync(s => s.TenantId == tenantId && s.EmailAddress == recipientLower, cancellationToken);
-            }
-
-            if (isSuppressed)
-                return recipient;
-        }
-
-        return null;
-    }
-
-    private static string GenerateShortId()
-    {
-        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var result = new char[8];
-        for (var i = 0; i < 8; i++)
-            result[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
-        return new string(result);
-    }
 }

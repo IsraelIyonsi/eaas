@@ -1,3 +1,5 @@
+using EaaS.Domain.Enums;
+
 namespace EaaS.Domain.Entities;
 
 public class Webhook
@@ -7,7 +9,7 @@ public class Webhook
     public string Url { get; set; } = string.Empty;
     public string[] Events { get; set; } = Array.Empty<string>();
     public string? Secret { get; set; }
-    public string Status { get; set; } = "active";
+    public WebhookStatus Status { get; set; } = WebhookStatus.Active;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

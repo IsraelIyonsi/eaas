@@ -1,8 +1,8 @@
-using System.Security.Cryptography;
-using System.Text;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EaaS.Api.Commands;
@@ -76,7 +76,7 @@ public static class SeedCommand
         }
 
         var password = args[passwordIndex];
-        var hash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
+        var hash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: SecurityConstants.BCryptWorkFactor);
 
         Console.WriteLine("Dashboard password hash generated.");
         Console.WriteLine($"DASHBOARD_PASSWORD_HASH={hash}");
@@ -85,21 +85,7 @@ public static class SeedCommand
         return 0;
     }
 
-    private static string GenerateApiKey()
-    {
-        const string prefix = "eaas_live_";
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var random = new char[40];
+    private static string GenerateApiKey() => ApiKeyGenerator.GenerateKey();
 
-        for (var i = 0; i < 40; i++)
-            random[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
-
-        return prefix + new string(random);
-    }
-
-    private static string ComputeSha256Hash(string rawKey)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawKey));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
-    }
+    private static string ComputeSha256Hash(string rawKey) => ApiKeyGenerator.ComputeSha256Hash(rawKey);
 }

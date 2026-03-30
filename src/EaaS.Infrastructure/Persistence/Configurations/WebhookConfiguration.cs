@@ -1,4 +1,5 @@
 using EaaS.Domain.Entities;
+using EaaS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -37,7 +38,10 @@ public sealed class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
         builder.Property(w => w.Status)
             .HasColumnName("status")
             .HasMaxLength(20)
-            .HasDefaultValue("active");
+            .HasConversion(
+                v => v.ToString().ToLowerInvariant(),
+                v => Enum.Parse<WebhookStatus>(v, true))
+            .HasDefaultValue(WebhookStatus.Active);
 
         builder.Property(w => w.CreatedAt)
             .HasColumnName("created_at")
