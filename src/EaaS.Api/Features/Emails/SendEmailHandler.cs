@@ -6,6 +6,7 @@ using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -79,7 +80,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
             Id = Guid.NewGuid(),
             TenantId = request.TenantId,
             ApiKeyId = request.ApiKeyId,
-            MessageId = $"{EmailConstants.MessageIdPrefix}{Guid.NewGuid():N}",
+            MessageId = IdGenerator.GenerateMessageId(),
             FromEmail = request.From,
             ToEmails = JsonSerializer.Serialize(request.To),
             CcEmails = request.Cc is not null ? JsonSerializer.Serialize(request.Cc) : "[]",

@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text.Json;
 using EaaS.Api.Services;
 using EaaS.Domain.Entities;
@@ -7,6 +6,7 @@ using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +40,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         if (!isAllowed)
             throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
-        var batchId = $"{EmailConstants.BatchIdPrefix}{GenerateShortId()}";
+        var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();
         var accepted = 0;
         var rejected = 0;
@@ -87,7 +87,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     Id = Guid.NewGuid(),
                     TenantId = request.TenantId,
                     ApiKeyId = request.ApiKeyId,
-                    MessageId = $"{EmailConstants.MessageIdPrefix}{Guid.NewGuid():N}",
+                    MessageId = IdGenerator.GenerateMessageId(),
                     BatchId = batchId,
                     FromEmail = item.From,
                     ToEmails = JsonSerializer.Serialize(item.To),
@@ -150,12 +150,4 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         return new SendBatchResult(batchId, request.Emails.Count, accepted, rejected, results);
     }
 
-    private static string GenerateShortId()
-    {
-        const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var result = new char[EmailConstants.BatchShortIdLength];
-        for (var i = 0; i < EmailConstants.BatchShortIdLength; i++)
-            result[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
-        return new string(result);
-    }
 }
