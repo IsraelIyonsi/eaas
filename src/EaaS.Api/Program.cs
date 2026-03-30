@@ -80,6 +80,7 @@ try
         builder.Services.AddSingleton<IEmailDeliveryService, SesEmailService>();
     }
     builder.Services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
+    builder.Services.AddScoped<EaaS.Api.Services.SuppressionChecker>();
 
     // MediatR
     builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
