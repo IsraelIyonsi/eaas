@@ -18,7 +18,7 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
 
     public async Task<WebhookCreatedDto> Handle(CreateWebhookCommand request, CancellationToken cancellationToken)
     {
-        // Check max 10 webhooks per tenant
+        // Check max webhooks per tenant
         var count = await _dbContext.Webhooks
             .AsNoTracking()
             .CountAsync(w => w.TenantId == request.TenantId, cancellationToken);

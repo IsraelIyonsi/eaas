@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EaaS.Api.Features.Emails;
+using EaaS.Api.Services;
 using EaaS.Api.Tests.Helpers;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
@@ -25,7 +26,8 @@ public sealed class SendEmailHandlerTests : IDisposable
         _dbContext = DbContextFactory.Create();
         _cacheService = Substitute.For<ICacheService>();
         _publishEndpoint = Substitute.For<IPublishEndpoint>();
-        _sut = new SendEmailHandler(_dbContext, _cacheService, _publishEndpoint);
+        var suppressionChecker = new SuppressionChecker(_cacheService, _dbContext);
+        _sut = new SendEmailHandler(_dbContext, _cacheService, _publishEndpoint, suppressionChecker);
 
         // Seed a verified domain
         _dbContext.Domains.Add(new SendingDomain
