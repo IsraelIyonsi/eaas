@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EaaS.Api.Services;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
@@ -16,15 +17,18 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SuppressionChecker _suppressionChecker;
 
     public SendEmailHandler(
         AppDbContext dbContext,
         ICacheService cacheService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
         _publishEndpoint = publishEndpoint;
+        _suppressionChecker = suppressionChecker;
     }
 
     public async Task<SendEmailResult> Handle(SendEmailCommand request, CancellationToken cancellationToken)
@@ -66,24 +70,8 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
         if (request.Cc is not null) allRecipients.AddRange(request.Cc);
         if (request.Bcc is not null) allRecipients.AddRange(request.Bcc);
 
-        foreach (var recipient in allRecipients)
-        {
-            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(
-                request.TenantId, recipient, cancellationToken);
-
-            if (!isSuppressed)
-            {
-                // Also check DB suppression
-                var recipientLower = recipient.ToLowerInvariant();
-                isSuppressed = await _dbContext.SuppressionEntries
-                    .AsNoTracking()
-                    .AnyAsync(s => s.TenantId == request.TenantId
-                                   && s.EmailAddress == recipientLower, cancellationToken);
-            }
-
-            if (isSuppressed)
-                throw new InvalidOperationException($"Recipient '{recipient}' is on the suppression list.");
-        }
+        await _suppressionChecker.EnsureNoneSuppressedOrThrowAsync(
+            request.TenantId, allRecipients, cancellationToken);
 
         // 4. Create Email entity
         var email = new Email
