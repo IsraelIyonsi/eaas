@@ -2,9 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+    <IsTestProject>true</IsTestProject>  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="xunit" />
