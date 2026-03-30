@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,7 +55,7 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
         try
         {
             var client = _httpClientFactory.CreateClient("WebhookTest");
-            client.Timeout = TimeSpan.FromSeconds(5);
+            client.Timeout = TimeSpan.FromSeconds(WebhookConstants.TestTimeoutSeconds);
 
             var response = await client.PostAsync(webhook.Url, content, cancellationToken);
             return new TestWebhookResult(response.IsSuccessStatusCode, (int)response.StatusCode, null);

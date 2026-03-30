@@ -1,6 +1,7 @@
 using System.Text.Json;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -85,7 +86,7 @@ public sealed class ListEmailsHandler : IRequestHandler<ListEmailsQuery, ListEma
             _ => sortDesc ? query.OrderByDescending(e => e.CreatedAt) : query.OrderBy(e => e.CreatedAt)
         };
 
-        var pageSize = Math.Min(request.PageSize, 100);
+        var pageSize = Math.Min(request.PageSize, PaginationConstants.MaxPageSize);
         var items = await query
             .Skip((request.Page - 1) * pageSize)
             .Take(pageSize)
