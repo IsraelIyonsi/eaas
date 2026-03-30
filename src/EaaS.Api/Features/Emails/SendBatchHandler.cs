@@ -5,6 +5,7 @@ using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -31,11 +32,11 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
     {
         // Rate limit: single atomic check for the entire batch
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, maxRequests: 100, TimeSpan.FromMinutes(1), cancellationToken);
+        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException($"Rate limit exceeded. Maximum 100 sends per minute per API key.");
+            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
-        var batchId = $"batch_{GenerateShortId()}";
+        var batchId = $"{EmailConstants.BatchIdPrefix}{GenerateShortId()}";
         var results = new List<BatchEmailResultItem>();
         var accepted = 0;
         var rejected = 0;
@@ -81,7 +82,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     Id = Guid.NewGuid(),
                     TenantId = request.TenantId,
                     ApiKeyId = request.ApiKeyId,
-                    MessageId = $"eaas_{Guid.NewGuid():N}",
+                    MessageId = $"{EmailConstants.MessageIdPrefix}{Guid.NewGuid():N}",
                     BatchId = batchId,
                     FromEmail = item.From,
                     ToEmails = JsonSerializer.Serialize(item.To),
@@ -168,8 +169,8 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
     private static string GenerateShortId()
     {
         const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        var result = new char[8];
-        for (var i = 0; i < 8; i++)
+        var result = new char[EmailConstants.BatchShortIdLength];
+        for (var i = 0; i < EmailConstants.BatchShortIdLength; i++)
             result[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
         return new string(result);
     }

@@ -4,6 +4,7 @@ using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,7 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
         var plaintextKey = GenerateApiKey();
         var keyHash = ComputeSha256Hash(plaintextKey);
         var prefix = plaintextKey[..8];
-        var gracePeriodExpiry = DateTime.UtcNow.AddHours(24);
+        var gracePeriodExpiry = DateTime.UtcNow.AddHours(ApiKeyConstants.GracePeriodHours);
 
         // Update old key to Rotating status
         existingKey.Status = ApiKeyStatus.Rotating;
@@ -68,7 +69,7 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
         var oldCacheData = await _cacheService.GetApiKeyCacheAsync(existingKey.KeyHash, cancellationToken);
         if (oldCacheData is not null)
         {
-            await _cacheService.SetApiKeyCacheAsync(existingKey.KeyHash, oldCacheData, TimeSpan.FromHours(24), cancellationToken);
+            await _cacheService.SetApiKeyCacheAsync(existingKey.KeyHash, oldCacheData, TimeSpan.FromHours(ApiKeyConstants.GracePeriodHours), cancellationToken);
         }
 
         return new RotateApiKeyResult(
@@ -81,14 +82,12 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
 
     private static string GenerateApiKey()
     {
-        const string prefix = "eaas_live_";
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        var random = new char[40];
+        var random = new char[ApiKeyConstants.RandomPartLength];
 
-        for (var i = 0; i < 40; i++)
-            random[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
+        for (var i = 0; i < ApiKeyConstants.RandomPartLength; i++)
+            random[i] = ApiKeyConstants.AllowedCharacters[RandomNumberGenerator.GetInt32(ApiKeyConstants.AllowedCharacters.Length)];
 
-        return prefix + new string(random);
+        return ApiKeyConstants.LiveKeyPrefix + new string(random);
     }
 
     private static string ComputeSha256Hash(string rawKey)

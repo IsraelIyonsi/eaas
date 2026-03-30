@@ -1,3 +1,4 @@
+using EaaS.Shared.Constants;
 using FluentValidation;
 
 namespace EaaS.Api.Features.Templates;
@@ -10,7 +11,7 @@ public sealed class UpdateTemplateValidator : AbstractValidator<UpdateTemplateCo
             .NotEmpty().WithMessage("Template ID is required.");
 
         RuleFor(x => x.Name)
-            .MaximumLength(100).WithMessage("Template name must not exceed 100 characters.")
+            .MaximumLength(EmailConstants.MaxTemplateNameLength).WithMessage($"Template name must not exceed {EmailConstants.MaxTemplateNameLength} characters.")
             .When(x => x.Name is not null);
 
         RuleFor(x => x.HtmlBody)

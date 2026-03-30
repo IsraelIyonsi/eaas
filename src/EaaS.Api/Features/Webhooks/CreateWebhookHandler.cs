@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using EaaS.Domain.Entities;
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,8 +23,8 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
             .AsNoTracking()
             .CountAsync(w => w.TenantId == request.TenantId, cancellationToken);
 
-        if (count >= 10)
-            throw new InvalidOperationException("Maximum of 10 webhooks per tenant reached.");
+        if (count >= WebhookConstants.MaxWebhooksPerTenant)
+            throw new InvalidOperationException($"Maximum of {WebhookConstants.MaxWebhooksPerTenant} webhooks per tenant reached.");
 
         var secret = request.Secret ?? GenerateSecret();
         var now = DateTime.UtcNow;
@@ -55,6 +56,6 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
     private static string GenerateSecret()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
-        return $"whsec_{Convert.ToBase64String(bytes)}";
+        return $"{WebhookConstants.SecretPrefix}{Convert.ToBase64String(bytes)}";
     }
 }
