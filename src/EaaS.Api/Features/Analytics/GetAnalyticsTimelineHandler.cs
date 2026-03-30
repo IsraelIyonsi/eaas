@@ -1,4 +1,5 @@
 using EaaS.Infrastructure.Persistence;
+using EaaS.Shared.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,8 +20,7 @@ public sealed class GetAnalyticsTimelineHandler : IRequestHandler<GetAnalyticsTi
             ? "hour"
             : "day";
 
-        // Enforce max range: 7 days for hourly, 90 days for daily
-        var maxRange = granularity == "hour" ? TimeSpan.FromDays(7) : TimeSpan.FromDays(90);
+        var maxRange = granularity == "hour" ? AnalyticsConstants.HourlyMaxRange : AnalyticsConstants.DailyMaxRange;
         var dateFrom = request.DateFrom;
         var dateTo = request.DateTo;
 
