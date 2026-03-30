@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using EaaS.Api.Services;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
@@ -17,15 +18,18 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
     private readonly AppDbContext _dbContext;
     private readonly ICacheService _cacheService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly SuppressionChecker _suppressionChecker;
 
     public SendBatchHandler(
         AppDbContext dbContext,
         ICacheService cacheService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
         _cacheService = cacheService;
         _publishEndpoint = publishEndpoint;
+        _suppressionChecker = suppressionChecker;
     }
 
     public async Task<SendBatchResult> Handle(SendBatchCommand request, CancellationToken cancellationToken)
@@ -68,7 +72,8 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                 if (item.Cc is not null) allRecipients.AddRange(item.Cc);
                 if (item.Bcc is not null) allRecipients.AddRange(item.Bcc);
 
-                var suppressedRecipient = await CheckSuppression(request.TenantId, allRecipients, cancellationToken);
+                var suppressedRecipient = await _suppressionChecker.FindSuppressedRecipientAsync(
+                    request.TenantId, allRecipients, cancellationToken);
                 if (suppressedRecipient is not null)
                 {
                     results.Add(new BatchEmailResultItem(i, null, "rejected", $"Recipient '{suppressedRecipient}' is on the suppression list."));
@@ -143,27 +148,6 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
             await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new SendBatchResult(batchId, request.Emails.Count, accepted, rejected, results);
-    }
-
-    private async Task<string?> CheckSuppression(Guid tenantId, List<string> recipients, CancellationToken cancellationToken)
-    {
-        foreach (var recipient in recipients)
-        {
-            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(tenantId, recipient, cancellationToken);
-
-            if (!isSuppressed)
-            {
-                var recipientLower = recipient.ToLowerInvariant();
-                isSuppressed = await _dbContext.SuppressionEntries
-                    .AsNoTracking()
-                    .AnyAsync(s => s.TenantId == tenantId && s.EmailAddress == recipientLower, cancellationToken);
-            }
-
-            if (isSuppressed)
-                return recipient;
-        }
-
-        return null;
     }
 
     private static string GenerateShortId()
