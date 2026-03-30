@@ -31,7 +31,7 @@ public sealed class ListWebhooksHandler : IRequestHandler<ListWebhooksQuery, Lis
                 w.Id,
                 w.Url,
                 w.Events,
-                w.Status,
+                w.Status.ToString(),
                 w.CreatedAt,
                 w.UpdatedAt))
             .ToListAsync(cancellationToken);

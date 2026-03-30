@@ -1,3 +1,4 @@
+using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -26,8 +27,8 @@ public sealed class UpdateWebhookHandler : IRequestHandler<UpdateWebhookCommand,
         if (request.Events is not null)
             webhook.Events = request.Events.Select(e => e.ToLowerInvariant()).ToArray();
 
-        if (request.Status is not null)
-            webhook.Status = request.Status;
+        if (request.Status is not null && Enum.TryParse<WebhookStatus>(request.Status, ignoreCase: true, out var status))
+            webhook.Status = status;
 
         webhook.UpdatedAt = DateTime.UtcNow;
 
@@ -37,7 +38,7 @@ public sealed class UpdateWebhookHandler : IRequestHandler<UpdateWebhookCommand,
             webhook.Id,
             webhook.Url,
             webhook.Events,
-            webhook.Status,
+            webhook.Status.ToString().ToLowerInvariant(),
             webhook.CreatedAt,
             webhook.UpdatedAt);
     }
