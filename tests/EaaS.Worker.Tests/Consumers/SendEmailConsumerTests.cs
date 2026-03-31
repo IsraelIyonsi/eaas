@@ -18,7 +18,7 @@ namespace EaaS.Worker.Tests.Consumers;
 public sealed class SendEmailConsumerTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IEmailSender _emailDeliveryService;
     private readonly ITemplateRenderingService _templateRenderingService;
     private readonly ILogger<SendEmailConsumer> _logger;
     private readonly SendEmailConsumer _sut;
@@ -31,7 +31,7 @@ public sealed class SendEmailConsumerTests : IDisposable
         _dbContext = new AppDbContext(options);
         _dbContext.Database.EnsureCreated();
 
-        _emailDeliveryService = Substitute.For<IEmailDeliveryService>();
+        _emailDeliveryService = Substitute.For<IEmailSender>();
         _templateRenderingService = Substitute.For<ITemplateRenderingService>();
         _logger = Substitute.For<ILogger<SendEmailConsumer>>();
 

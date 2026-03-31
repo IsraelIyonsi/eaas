@@ -76,4 +76,31 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddEmailProvider(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var emailProvider = configuration["EMAIL_PROVIDER"] ?? "ses";
+        if (string.Equals(emailProvider, "smtp", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSingleton<SmtpEmailService>();
+            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SmtpEmailService>());
+            services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SmtpEmailService>());
+        }
+        else
+        {
+            var sesSettings = configuration.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
+            services.AddSingleton<Amazon.SimpleEmailV2.IAmazonSimpleEmailServiceV2>(_ =>
+                new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(
+                    sesSettings.AccessKeyId,
+                    sesSettings.SecretAccessKey,
+                    Amazon.RegionEndpoint.GetBySystemName(sesSettings.Region)));
+            services.AddSingleton<SesEmailService>();
+            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SesEmailService>());
+            services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SesEmailService>());
+        }
+
+        return services;
+    }
 }

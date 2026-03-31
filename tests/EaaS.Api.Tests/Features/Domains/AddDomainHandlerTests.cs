@@ -12,13 +12,13 @@ namespace EaaS.Api.Tests.Features.Domains;
 public sealed class AddDomainHandlerTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IDomainIdentityService _emailDeliveryService;
     private readonly AddDomainHandler _sut;
 
     public AddDomainHandlerTests()
     {
         _dbContext = DbContextFactory.Create();
-        _emailDeliveryService = Substitute.For<IEmailDeliveryService>();
+        _emailDeliveryService = Substitute.For<IDomainIdentityService>();
         _sut = new AddDomainHandler(_dbContext, _emailDeliveryService);
     }
 
