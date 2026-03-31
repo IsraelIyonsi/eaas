@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using System.Text.Json;
 using EaaS.Api.Features.Emails;
 using EaaS.Api.Services;
@@ -81,7 +82,7 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.RecipientSuppressedException>()
+        await act.Should().ThrowAsync<RecipientSuppressedException>()
             .WithMessage("*suppression list*");
     }
 
@@ -95,7 +96,7 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.DomainNotVerifiedException>()
+        await act.Should().ThrowAsync<DomainNotVerifiedException>()
             .WithMessage("*not verified*");
     }
 

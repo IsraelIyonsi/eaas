@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Api.Features.Templates;
 using EaaS.Api.Tests.Helpers;
 using EaaS.Domain.Entities;
@@ -61,7 +62,7 @@ public sealed class CreateTemplateHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.ConflictException>()
+        await act.Should().ThrowAsync<ConflictException>()
             .WithMessage("*already exists*");
     }
 

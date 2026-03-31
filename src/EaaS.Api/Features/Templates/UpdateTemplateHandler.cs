@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -25,7 +26,7 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
             .FirstOrDefaultAsync(cancellationToken);
 
         if (template is null)
-            throw new EaaS.Domain.Exceptions.NotFoundException($"Template with ID '{request.TemplateId}' not found.");
+            throw new NotFoundException($"Template with ID '{request.TemplateId}' not found.");
 
         // Check name uniqueness if changing
         if (request.Name is not null && request.Name != template.Name)
@@ -38,7 +39,7 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
                                && t.DeletedAt == null, cancellationToken);
 
             if (nameExists)
-                throw new EaaS.Domain.Exceptions.ConflictException($"Template with name '{request.Name}' already exists.");
+                throw new ConflictException($"Template with name '{request.Name}' already exists.");
 
             template.Name = request.Name;
         }

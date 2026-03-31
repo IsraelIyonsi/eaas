@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -25,7 +26,7 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
             .AsNoTracking()
             .Where(w => w.Id == request.Id && w.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Webhook with id '{request.Id}' not found.");
+            ?? throw new NotFoundException($"Webhook with id '{request.Id}' not found.");
 
         var testPayload = new
         {

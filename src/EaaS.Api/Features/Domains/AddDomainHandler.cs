@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
@@ -25,7 +26,7 @@ public sealed class AddDomainHandler : IRequestHandler<AddDomainCommand, AddDoma
             .AnyAsync(d => d.TenantId == request.TenantId && d.DomainName == request.DomainName, cancellationToken);
 
         if (exists)
-            throw new EaaS.Domain.Exceptions.ConflictException($"Domain '{request.DomainName}' already exists for this tenant.");
+            throw new ConflictException($"Domain '{request.DomainName}' already exists for this tenant.");
 
         // Call SES to create the domain identity
         var sesResult = await _emailDeliveryService.CreateDomainIdentityAsync(request.DomainName, cancellationToken);

@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using System.Security.Cryptography;
 using EaaS.Domain.Entities;
 using EaaS.Infrastructure.Persistence;
@@ -24,7 +25,7 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
             .CountAsync(w => w.TenantId == request.TenantId, cancellationToken);
 
         if (count >= WebhookConstants.MaxWebhooksPerTenant)
-            throw new EaaS.Domain.Exceptions.ConflictException($"Maximum of {WebhookConstants.MaxWebhooksPerTenant} webhooks per tenant reached.");
+            throw new ConflictException($"Maximum of {WebhookConstants.MaxWebhooksPerTenant} webhooks per tenant reached.");
 
         var secret = request.Secret ?? GenerateSecret();
         var now = DateTime.UtcNow;

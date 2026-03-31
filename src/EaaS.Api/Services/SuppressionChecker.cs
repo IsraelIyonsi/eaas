@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,6 @@ public sealed class SuppressionChecker
     {
         var suppressed = await FindSuppressedRecipientAsync(tenantId, recipients, cancellationToken);
         if (suppressed is not null)
-            throw new EaaS.Domain.Exceptions.RecipientSuppressedException($"Recipient '{suppressed}' is on the suppression list.");
+            throw new RecipientSuppressedException($"Recipient '{suppressed}' is on the suppression list.");
     }
 }

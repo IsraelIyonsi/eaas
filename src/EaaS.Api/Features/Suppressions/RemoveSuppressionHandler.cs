@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -21,7 +22,7 @@ public sealed class RemoveSuppressionHandler : IRequestHandler<RemoveSuppression
         var entry = await _dbContext.SuppressionEntries
             .Where(s => s.Id == request.Id && s.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Suppression entry with id '{request.Id}' not found.");
+            ?? throw new NotFoundException($"Suppression entry with id '{request.Id}' not found.");
 
         _dbContext.SuppressionEntries.Remove(entry);
         await _dbContext.SaveChangesAsync(cancellationToken);

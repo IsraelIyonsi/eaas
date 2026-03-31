@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
@@ -22,7 +23,7 @@ public sealed class RevokeApiKeyHandler : IRequestHandler<RevokeApiKeyCommand>
         var apiKey = await _dbContext.ApiKeys
             .Where(k => k.Id == request.Id && k.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"API key with id '{request.Id}' not found.");
+            ?? throw new NotFoundException($"API key with id '{request.Id}' not found.");
 
         apiKey.Status = ApiKeyStatus.Revoked;
         apiKey.RevokedAt = DateTime.UtcNow;

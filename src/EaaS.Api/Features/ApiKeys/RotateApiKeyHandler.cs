@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
@@ -25,10 +26,10 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
         var existingKey = await _dbContext.ApiKeys
             .Where(k => k.Id == request.Id && k.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"API key with id '{request.Id}' not found.");
+            ?? throw new NotFoundException($"API key with id '{request.Id}' not found.");
 
         if (existingKey.Status != ApiKeyStatus.Active)
-            throw new EaaS.Domain.Exceptions.ConflictException("Only active API keys can be rotated.");
+            throw new ConflictException("Only active API keys can be rotated.");
 
         // Generate new key
         var plaintextKey = GenerateApiKey();

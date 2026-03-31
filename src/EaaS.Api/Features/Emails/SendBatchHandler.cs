@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using System.Text.Json;
 using EaaS.Api.Services;
 using EaaS.Domain.Entities;
@@ -38,7 +39,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
         var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new EaaS.Domain.Exceptions.RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
+            throw new RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();

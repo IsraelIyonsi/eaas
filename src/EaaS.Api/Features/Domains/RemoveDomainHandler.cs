@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
@@ -22,7 +23,7 @@ public sealed class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
         var domain = await _dbContext.Domains
             .Where(d => d.Id == request.Id && d.TenantId == request.TenantId && d.DeletedAt == null)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Domain with id '{request.Id}' not found.");
+            ?? throw new NotFoundException($"Domain with id '{request.Id}' not found.");
 
         // Check for pending emails using this domain
         var domainName = domain.DomainName;
@@ -34,7 +35,7 @@ public sealed class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
                 cancellationToken);
 
         if (hasPendingEmails)
-            throw new InvalidOperationException($"Cannot remove domain '{domainName}' while emails are in Queued or Sending status.");
+            throw new ConflictException($"Cannot remove domain '{domainName}' while emails are in Queued or Sending status.");
 
         // Soft delete
         domain.DeletedAt = DateTime.UtcNow;
