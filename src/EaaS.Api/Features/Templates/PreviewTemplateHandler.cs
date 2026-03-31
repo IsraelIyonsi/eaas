@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -22,7 +23,7 @@ public sealed class PreviewTemplateHandler : IRequestHandler<PreviewTemplateComm
             .AsNoTracking()
             .Where(t => t.Id == request.TemplateId && t.TenantId == request.TenantId && t.DeletedAt == null)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Template with id '{request.TemplateId}' not found.");
+            ?? throw new NotFoundException($"Template with id '{request.TemplateId}' not found.");
 
         var variables = request.Variables ?? new Dictionary<string, object>();
 

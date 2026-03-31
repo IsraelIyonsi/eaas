@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ public sealed class GetTemplateHandler : IRequestHandler<GetTemplateQuery, Templ
             .FirstOrDefaultAsync(cancellationToken);
 
         if (template is null)
-            throw new EaaS.Domain.Exceptions.NotFoundException($"Template with ID '{request.TemplateId}' not found.");
+            throw new NotFoundException($"Template with ID '{request.TemplateId}' not found.");
 
         return new TemplateResult(
             template.Id,

@@ -75,6 +75,30 @@ public sealed class GlobalExceptionHandlerTests
     }
 
     [Fact]
+    public async Task Should_Return422_When_DomainNotVerifiedException()
+    {
+        var httpContext = CreateHttpContext();
+        var exception = new DomainNotVerifiedException("Domain 'example.com' is not verified.");
+
+        var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        handled.Should().BeTrue();
+        httpContext.Response.StatusCode.Should().Be(StatusCodes.Status422UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task Should_Return422_When_RecipientSuppressedException()
+    {
+        var httpContext = CreateHttpContext();
+        var exception = new RecipientSuppressedException("Recipient is on the suppression list.");
+
+        var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        handled.Should().BeTrue();
+        httpContext.Response.StatusCode.Should().Be(StatusCodes.Status422UnprocessableEntity);
+    }
+
+    [Fact]
     public async Task Should_Return500_When_UnhandledException()
     {
         var httpContext = CreateHttpContext();

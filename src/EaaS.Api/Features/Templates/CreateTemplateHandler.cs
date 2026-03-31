@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Entities;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -24,7 +25,7 @@ public sealed class CreateTemplateHandler : IRequestHandler<CreateTemplateComman
                            && t.DeletedAt == null, cancellationToken);
 
         if (nameExists)
-            throw new EaaS.Domain.Exceptions.ConflictException($"Template with name '{request.Name}' already exists.");
+            throw new ConflictException($"Template with name '{request.Name}' already exists.");
 
         var now = DateTime.UtcNow;
         var template = new Template

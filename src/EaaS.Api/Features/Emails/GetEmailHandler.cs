@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using System.Text.Json;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -23,7 +24,7 @@ public sealed class GetEmailHandler : IRequestHandler<GetEmailQuery, EmailDetail
             .FirstOrDefaultAsync(cancellationToken);
 
         if (email is null)
-            throw new EaaS.Domain.Exceptions.NotFoundException($"Email with messageId '{request.MessageId}' not found.");
+            throw new NotFoundException($"Email with messageId '{request.MessageId}' not found.");
 
         var toList = JsonSerializer.Deserialize<List<string>>(email.ToEmails) ?? new List<string>();
 

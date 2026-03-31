@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
@@ -25,7 +26,7 @@ public sealed class DeleteTemplateHandler : IRequestHandler<DeleteTemplateComman
             .FirstOrDefaultAsync(cancellationToken);
 
         if (template is null)
-            throw new EaaS.Domain.Exceptions.NotFoundException($"Template with ID '{request.TemplateId}' not found.");
+            throw new NotFoundException($"Template with ID '{request.TemplateId}' not found.");
 
         // Soft delete
         template.DeletedAt = DateTime.UtcNow;
