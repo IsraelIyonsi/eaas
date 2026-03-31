@@ -164,11 +164,18 @@ services:
       - ASPNETCORE_URLS=http://+:8081
       - ConnectionStrings__PostgreSQL=Host=postgres;Port=5432;Database=eaas;Username=eaas_app;Password=${POSTGRES_PASSWORD}
       - ConnectionStrings__Redis=redis:6379,password=${REDIS_PASSWORD}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Port=5672
+      - RabbitMq__Username=eaas_app
+      - RabbitMq__Password=${RABBITMQ_PASSWORD}
+      - RabbitMq__VirtualHost=eaas
       - Tracking__BaseUrl=https://email.israeliyonsi.dev
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/health"]
@@ -194,7 +201,7 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>{process.exit(r.ok?0:1)}).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 5
