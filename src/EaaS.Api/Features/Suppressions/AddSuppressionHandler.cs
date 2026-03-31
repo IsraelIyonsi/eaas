@@ -11,12 +11,12 @@ namespace EaaS.Api.Features.Suppressions;
 public sealed class AddSuppressionHandler : IRequestHandler<AddSuppressionCommand, AddSuppressionResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ISuppressionCache _suppressionCache;
 
-    public AddSuppressionHandler(AppDbContext dbContext, ICacheService cacheService)
+    public AddSuppressionHandler(AppDbContext dbContext, ISuppressionCache suppressionCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _suppressionCache = suppressionCache;
     }
 
     public async Task<AddSuppressionResult> Handle(AddSuppressionCommand request, CancellationToken cancellationToken)
@@ -43,7 +43,7 @@ public sealed class AddSuppressionHandler : IRequestHandler<AddSuppressionComman
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Update Redis cache
-        await _cacheService.AddToSuppressionCacheAsync(request.TenantId, emailLower, cancellationToken);
+        await _suppressionCache.AddToSuppressionCacheAsync(request.TenantId, emailLower, cancellationToken);
 
         return new AddSuppressionResult(
             entry.Id,

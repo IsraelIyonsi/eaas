@@ -13,12 +13,12 @@ namespace EaaS.Api.Features.ApiKeys;
 public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, RotateApiKeyResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IApiKeyCache _apiKeyCache;
 
-    public RotateApiKeyHandler(AppDbContext dbContext, ICacheService cacheService)
+    public RotateApiKeyHandler(AppDbContext dbContext, IApiKeyCache apiKeyCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _apiKeyCache = apiKeyCache;
     }
 
     public async Task<RotateApiKeyResult> Handle(RotateApiKeyCommand request, CancellationToken cancellationToken)
@@ -63,13 +63,13 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
         // Cache the new key
         var newCacheData = System.Text.Json.JsonSerializer.Serialize(
             new { TenantId = newApiKey.TenantId, ApiKeyId = newApiKey.Id, Name = newApiKey.Name });
-        await _cacheService.SetApiKeyCacheAsync(keyHash, newCacheData, cancellationToken: cancellationToken);
+        await _apiKeyCache.SetApiKeyCacheAsync(keyHash, newCacheData, cancellationToken: cancellationToken);
 
         // Keep old key cached with 24h TTL
-        var oldCacheData = await _cacheService.GetApiKeyCacheAsync(existingKey.KeyHash, cancellationToken);
+        var oldCacheData = await _apiKeyCache.GetApiKeyCacheAsync(existingKey.KeyHash, cancellationToken);
         if (oldCacheData is not null)
         {
-            await _cacheService.SetApiKeyCacheAsync(existingKey.KeyHash, oldCacheData, TimeSpan.FromHours(ApiKeyConstants.GracePeriodHours), cancellationToken);
+            await _apiKeyCache.SetApiKeyCacheAsync(existingKey.KeyHash, oldCacheData, TimeSpan.FromHours(ApiKeyConstants.GracePeriodHours), cancellationToken);
         }
 
         return new RotateApiKeyResult(

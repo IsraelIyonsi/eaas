@@ -17,18 +17,18 @@ namespace EaaS.Api.Features.Emails;
 public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBatchResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IRateLimiter _rateLimiter;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
 
     public SendBatchHandler(
         AppDbContext dbContext,
-        ICacheService cacheService,
+        IRateLimiter rateLimiter,
         IPublishEndpoint publishEndpoint,
         SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _rateLimiter = rateLimiter;
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
     }
@@ -37,7 +37,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
     {
         // Rate limit: single atomic check for the entire batch
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
+        var isAllowed = await _rateLimiter.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
             throw new RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 

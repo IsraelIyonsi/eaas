@@ -10,12 +10,12 @@ namespace EaaS.Api.Features.ApiKeys;
 public sealed class RevokeApiKeyHandler : IRequestHandler<RevokeApiKeyCommand>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IApiKeyCache _apiKeyCache;
 
-    public RevokeApiKeyHandler(AppDbContext dbContext, ICacheService cacheService)
+    public RevokeApiKeyHandler(AppDbContext dbContext, IApiKeyCache apiKeyCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _apiKeyCache = apiKeyCache;
     }
 
     public async Task Handle(RevokeApiKeyCommand request, CancellationToken cancellationToken)
@@ -31,6 +31,6 @@ public sealed class RevokeApiKeyHandler : IRequestHandler<RevokeApiKeyCommand>
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Invalidate cache for this key
-        await _cacheService.InvalidateApiKeyCacheAsync(apiKey.KeyHash, cancellationToken);
+        await _apiKeyCache.InvalidateApiKeyCacheAsync(apiKey.KeyHash, cancellationToken);
     }
 }

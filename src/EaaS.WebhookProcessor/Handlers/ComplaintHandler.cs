@@ -14,14 +14,14 @@ namespace EaaS.WebhookProcessor.Handlers;
 public sealed partial class ComplaintHandler
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ISuppressionCache _suppressionCache;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<ComplaintHandler> _logger;
 
-    public ComplaintHandler(AppDbContext dbContext, ICacheService cacheService, IPublishEndpoint publishEndpoint, ILogger<ComplaintHandler> logger)
+    public ComplaintHandler(AppDbContext dbContext, ISuppressionCache suppressionCache, IPublishEndpoint publishEndpoint, ILogger<ComplaintHandler> logger)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _suppressionCache = suppressionCache;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
@@ -90,7 +90,7 @@ public sealed partial class ComplaintHandler
                 LogRecipientSuppressed(_logger, normalizedEmail);
             }
 
-            await _cacheService.AddToSuppressionCacheAsync(email.TenantId, normalizedEmail, cancellationToken);
+            await _suppressionCache.AddToSuppressionCacheAsync(email.TenantId, normalizedEmail, cancellationToken);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);

@@ -17,18 +17,21 @@ namespace EaaS.Api.Features.Emails;
 public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEmailResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IRateLimiter _rateLimiter;
+    private readonly IIdempotencyStore _idempotencyStore;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
 
     public SendEmailHandler(
         AppDbContext dbContext,
-        ICacheService cacheService,
+        IRateLimiter rateLimiter,
+        IIdempotencyStore idempotencyStore,
         IPublishEndpoint publishEndpoint,
         SuppressionChecker suppressionChecker)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _rateLimiter = rateLimiter;
+        _idempotencyStore = idempotencyStore;
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
     }
@@ -37,14 +40,14 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
     {
         // 0. Check rate limit per API key
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
+        var isAllowed = await _rateLimiter.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
             throw new RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         // 1. Check idempotency key
         if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
         {
-            var idempotencyValue = await _cacheService.GetIdempotencyKeyAsync(
+            var idempotencyValue = await _idempotencyStore.GetIdempotencyKeyAsync(
                 request.TenantId, request.IdempotencyKey, cancellationToken);
 
             if (idempotencyValue is not null)
@@ -133,7 +136,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
         if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
         {
             var data = JsonSerializer.Serialize(new IdempotencyData(email.Id, email.MessageId));
-            await _cacheService.SetIdempotencyKeyAsync(
+            await _idempotencyStore.SetIdempotencyKeyAsync(
                 request.TenantId, request.IdempotencyKey, data, cancellationToken);
         }
 

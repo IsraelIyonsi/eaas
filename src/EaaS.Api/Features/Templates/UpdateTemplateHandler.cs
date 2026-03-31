@@ -9,12 +9,12 @@ namespace EaaS.Api.Features.Templates;
 public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateCommand, TemplateResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ITemplateCache _templateCache;
 
-    public UpdateTemplateHandler(AppDbContext dbContext, ICacheService cacheService)
+    public UpdateTemplateHandler(AppDbContext dbContext, ITemplateCache templateCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _templateCache = templateCache;
     }
 
     public async Task<TemplateResult> Handle(UpdateTemplateCommand request, CancellationToken cancellationToken)
@@ -59,7 +59,7 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Invalidate template cache
-        await _cacheService.InvalidateTemplateCacheAsync(template.Id, cancellationToken);
+        await _templateCache.InvalidateTemplateCacheAsync(template.Id, cancellationToken);
 
         return new TemplateResult(
             template.Id,
