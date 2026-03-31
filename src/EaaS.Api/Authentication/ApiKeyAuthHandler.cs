@@ -17,18 +17,18 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
     public const string SchemeName = "ApiKey";
 
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IApiKeyCache _apiKeyCache;
 
     public ApiKeyAuthHandler(
         IOptionsMonitor<ApiKeyAuthSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
         AppDbContext dbContext,
-        ICacheService cacheService)
+        IApiKeyCache apiKeyCache)
         : base(options, logger, encoder)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _apiKeyCache = apiKeyCache;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -49,7 +49,7 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
         var keyHash = ComputeSha256Hash(apiKey);
 
         // Check Redis cache first
-        var cached = await _cacheService.GetApiKeyCacheAsync(keyHash);
+        var cached = await _apiKeyCache.GetApiKeyCacheAsync(keyHash);
         if (cached is not null)
         {
             var cachedData = JsonSerializer.Deserialize<CachedApiKeyData>(cached);
@@ -74,7 +74,7 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
 
         // Cache the result
         var dataToCache = new CachedApiKeyData(dbKey.TenantId, dbKey.Id, dbKey.Name);
-        await _cacheService.SetApiKeyCacheAsync(keyHash, JsonSerializer.Serialize(dataToCache));
+        await _apiKeyCache.SetApiKeyCacheAsync(keyHash, JsonSerializer.Serialize(dataToCache));
 
         var principal = BuildClaimsPrincipal(dbKey.TenantId, dbKey.Id, dbKey.Name);
         return AuthenticateResult.Success(new AuthenticationTicket(principal, SchemeName));

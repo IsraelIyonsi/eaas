@@ -9,12 +9,12 @@ namespace EaaS.Api.Features.Suppressions;
 public sealed class RemoveSuppressionHandler : IRequestHandler<RemoveSuppressionCommand>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ISuppressionCache _suppressionCache;
 
-    public RemoveSuppressionHandler(AppDbContext dbContext, ICacheService cacheService)
+    public RemoveSuppressionHandler(AppDbContext dbContext, ISuppressionCache suppressionCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _suppressionCache = suppressionCache;
     }
 
     public async Task Handle(RemoveSuppressionCommand request, CancellationToken cancellationToken)
@@ -28,6 +28,6 @@ public sealed class RemoveSuppressionHandler : IRequestHandler<RemoveSuppression
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Remove from Redis cache
-        await _cacheService.RemoveFromSuppressionCacheAsync(request.TenantId, entry.EmailAddress, cancellationToken);
+        await _suppressionCache.RemoveFromSuppressionCacheAsync(request.TenantId, entry.EmailAddress, cancellationToken);
     }
 }

@@ -17,7 +17,9 @@ namespace EaaS.Api.Tests.Features.Emails;
 public sealed class SendEmailHandlerTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly IRateLimiter _rateLimiter;
+    private readonly IIdempotencyStore _idempotencyStore;
+    private readonly ISuppressionCache _suppressionCache;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SendEmailHandler _sut;
     private readonly Guid _tenantId = Guid.NewGuid();
@@ -25,10 +27,12 @@ public sealed class SendEmailHandlerTests : IDisposable
     public SendEmailHandlerTests()
     {
         _dbContext = DbContextFactory.Create();
-        _cacheService = Substitute.For<ICacheService>();
+        _rateLimiter = Substitute.For<IRateLimiter>();
+        _idempotencyStore = Substitute.For<IIdempotencyStore>();
+        _suppressionCache = Substitute.For<ISuppressionCache>();
         _publishEndpoint = Substitute.For<IPublishEndpoint>();
-        var suppressionChecker = new SuppressionChecker(_cacheService, _dbContext);
-        _sut = new SendEmailHandler(_dbContext, _cacheService, _publishEndpoint, suppressionChecker);
+        var suppressionChecker = new SuppressionChecker(_suppressionCache, _dbContext);
+        _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker);
 
         // Seed a verified domain
         _dbContext.Domains.Add(new SendingDomain
@@ -50,7 +54,7 @@ public sealed class SendEmailHandlerTests : IDisposable
             .WithFrom("sender@verified.com")
             .Build();
 
-        _cacheService.IsEmailSuppressedAsync(_tenantId, Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _suppressionCache.IsEmailSuppressedAsync(_tenantId, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(false);
 
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -77,7 +81,7 @@ public sealed class SendEmailHandlerTests : IDisposable
             .WithTo(new List<string> { "suppressed@example.com" })
             .Build();
 
-        _cacheService.IsEmailSuppressedAsync(_tenantId, "suppressed@example.com", Arg.Any<CancellationToken>())
+        _suppressionCache.IsEmailSuppressedAsync(_tenantId, "suppressed@example.com", Arg.Any<CancellationToken>())
             .Returns(true);
 
         var act = () => _sut.Handle(command, CancellationToken.None);
@@ -113,7 +117,7 @@ public sealed class SendEmailHandlerTests : IDisposable
             .WithIdempotencyKey("unique-key-123")
             .Build();
 
-        _cacheService.GetIdempotencyKeyAsync(_tenantId, "unique-key-123", Arg.Any<CancellationToken>())
+        _idempotencyStore.GetIdempotencyKeyAsync(_tenantId, "unique-key-123", Arg.Any<CancellationToken>())
             .Returns(cachedData);
 
         var result = await _sut.Handle(command, CancellationToken.None);
@@ -136,14 +140,14 @@ public sealed class SendEmailHandlerTests : IDisposable
             .WithIdempotencyKey("new-key-456")
             .Build();
 
-        _cacheService.IsEmailSuppressedAsync(_tenantId, Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _suppressionCache.IsEmailSuppressedAsync(_tenantId, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(false);
-        _cacheService.GetIdempotencyKeyAsync(_tenantId, "new-key-456", Arg.Any<CancellationToken>())
+        _idempotencyStore.GetIdempotencyKeyAsync(_tenantId, "new-key-456", Arg.Any<CancellationToken>())
             .Returns((string?)null);
 
         await _sut.Handle(command, CancellationToken.None);
 
-        await _cacheService.Received(1).SetIdempotencyKeyAsync(
+        await _idempotencyStore.Received(1).SetIdempotencyKeyAsync(
             _tenantId,
             "new-key-456",
             Arg.Any<string>(),

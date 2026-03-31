@@ -40,18 +40,7 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
         var json = JsonSerializer.Serialize(testPayload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // Compute HMAC signature
-        if (!string.IsNullOrWhiteSpace(webhook.Secret))
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(webhook.Secret);
-            var payloadBytes = Encoding.UTF8.GetBytes(json);
-            var hash = HMACSHA256.HashData(keyBytes, payloadBytes);
-            var signature = $"sha256={Convert.ToHexString(hash).ToLowerInvariant()}";
-            content.Headers.Add("X-EaaS-Signature", signature);
-        }
-
-        content.Headers.Add("X-EaaS-Event", "test");
-        content.Headers.Add("X-EaaS-Delivery-Id", Guid.NewGuid().ToString());
+        EaaS.Shared.Utilities.WebhookSigner.ApplyHeaders(content, webhook.Secret, json, "test", Guid.NewGuid().ToString());
 
         try
         {

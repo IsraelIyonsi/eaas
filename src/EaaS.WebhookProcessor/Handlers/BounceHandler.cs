@@ -14,14 +14,14 @@ namespace EaaS.WebhookProcessor.Handlers;
 public sealed partial class BounceHandler
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ISuppressionCache _suppressionCache;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<BounceHandler> _logger;
 
-    public BounceHandler(AppDbContext dbContext, ICacheService cacheService, IPublishEndpoint publishEndpoint, ILogger<BounceHandler> logger)
+    public BounceHandler(AppDbContext dbContext, ISuppressionCache suppressionCache, IPublishEndpoint publishEndpoint, ILogger<BounceHandler> logger)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _suppressionCache = suppressionCache;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
@@ -161,7 +161,7 @@ public sealed partial class BounceHandler
         }
 
         // Update Redis cache regardless
-        await _cacheService.AddToSuppressionCacheAsync(tenantId, normalizedEmail, cancellationToken);
+        await _suppressionCache.AddToSuppressionCacheAsync(tenantId, normalizedEmail, cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Bounce notification has no bounce data for SES message {MessageId}")]

@@ -17,7 +17,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
     private readonly AppDbContext _dbContext;
     private readonly IEmailDeliveryService _emailDeliveryService;
     private readonly ITemplateRenderingService _templateRenderingService;
-    private readonly ICacheService _cacheService;
     private readonly TrackingPixelInjector? _pixelInjector;
     private readonly ClickTrackingLinkRewriter? _linkRewriter;
     private readonly ILogger<SendEmailConsumer> _logger;
@@ -26,7 +25,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         AppDbContext dbContext,
         IEmailDeliveryService emailDeliveryService,
         ITemplateRenderingService templateRenderingService,
-        ICacheService cacheService,
         ILogger<SendEmailConsumer> logger,
         TrackingPixelInjector? pixelInjector = null,
         ClickTrackingLinkRewriter? linkRewriter = null)
@@ -34,7 +32,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;
         _templateRenderingService = templateRenderingService;
-        _cacheService = cacheService;
         _logger = logger;
         _pixelInjector = pixelInjector;
         _linkRewriter = linkRewriter;

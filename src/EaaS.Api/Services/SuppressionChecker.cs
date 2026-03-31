@@ -7,12 +7,12 @@ namespace EaaS.Api.Services;
 
 public sealed class SuppressionChecker
 {
-    private readonly ICacheService _cacheService;
+    private readonly ISuppressionCache _suppressionCache;
     private readonly AppDbContext _dbContext;
 
-    public SuppressionChecker(ICacheService cacheService, AppDbContext dbContext)
+    public SuppressionChecker(ISuppressionCache suppressionCache, AppDbContext dbContext)
     {
-        _cacheService = cacheService;
+        _suppressionCache = suppressionCache;
         _dbContext = dbContext;
     }
 
@@ -21,7 +21,7 @@ public sealed class SuppressionChecker
     {
         foreach (var recipient in recipients)
         {
-            var isSuppressed = await _cacheService.IsEmailSuppressedAsync(
+            var isSuppressed = await _suppressionCache.IsEmailSuppressedAsync(
                 tenantId, recipient, cancellationToken);
 
             if (!isSuppressed)

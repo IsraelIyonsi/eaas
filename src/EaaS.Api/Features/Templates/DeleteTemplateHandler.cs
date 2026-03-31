@@ -9,12 +9,12 @@ namespace EaaS.Api.Features.Templates;
 public sealed class DeleteTemplateHandler : IRequestHandler<DeleteTemplateCommand>
 {
     private readonly AppDbContext _dbContext;
-    private readonly ICacheService _cacheService;
+    private readonly ITemplateCache _templateCache;
 
-    public DeleteTemplateHandler(AppDbContext dbContext, ICacheService cacheService)
+    public DeleteTemplateHandler(AppDbContext dbContext, ITemplateCache templateCache)
     {
         _dbContext = dbContext;
-        _cacheService = cacheService;
+        _templateCache = templateCache;
     }
 
     public async Task Handle(DeleteTemplateCommand request, CancellationToken cancellationToken)
@@ -33,6 +33,6 @@ public sealed class DeleteTemplateHandler : IRequestHandler<DeleteTemplateComman
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Invalidate cache
-        await _cacheService.InvalidateTemplateCacheAsync(template.Id, cancellationToken);
+        await _templateCache.InvalidateTemplateCacheAsync(template.Id, cancellationToken);
     }
 }

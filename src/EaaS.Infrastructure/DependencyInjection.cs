@@ -55,7 +55,12 @@ public static class DependencyInjection
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(redisConnectionString));
 
-        services.AddSingleton<ICacheService, RedisCacheService>();
+        services.AddSingleton<RedisCacheService>();
+        services.AddSingleton<ISuppressionCache>(sp => sp.GetRequiredService<RedisCacheService>());
+        services.AddSingleton<IRateLimiter>(sp => sp.GetRequiredService<RedisCacheService>());
+        services.AddSingleton<IApiKeyCache>(sp => sp.GetRequiredService<RedisCacheService>());
+        services.AddSingleton<IIdempotencyStore>(sp => sp.GetRequiredService<RedisCacheService>());
+        services.AddSingleton<ITemplateCache>(sp => sp.GetRequiredService<RedisCacheService>());
 
         // Tracking services
         services.Configure<TrackingSettings>(configuration.GetSection(TrackingSettings.SectionName));

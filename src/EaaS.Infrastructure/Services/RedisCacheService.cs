@@ -6,7 +6,7 @@ using StackExchange.Redis;
 
 namespace EaaS.Infrastructure.Services;
 
-public sealed partial class RedisCacheService : ICacheService
+public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter, IApiKeyCache, IIdempotencyStore, ITemplateCache
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly ILogger<RedisCacheService> _logger;

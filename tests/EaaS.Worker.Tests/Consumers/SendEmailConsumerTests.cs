@@ -20,7 +20,6 @@ public sealed class SendEmailConsumerTests : IDisposable
     private readonly AppDbContext _dbContext;
     private readonly IEmailDeliveryService _emailDeliveryService;
     private readonly ITemplateRenderingService _templateRenderingService;
-    private readonly ICacheService _cacheService;
     private readonly ILogger<SendEmailConsumer> _logger;
     private readonly SendEmailConsumer _sut;
 
@@ -34,11 +33,10 @@ public sealed class SendEmailConsumerTests : IDisposable
 
         _emailDeliveryService = Substitute.For<IEmailDeliveryService>();
         _templateRenderingService = Substitute.For<ITemplateRenderingService>();
-        _cacheService = Substitute.For<ICacheService>();
         _logger = Substitute.For<ILogger<SendEmailConsumer>>();
 
         _sut = new SendEmailConsumer(
-            _dbContext, _emailDeliveryService, _templateRenderingService, _cacheService, _logger);
+            _dbContext, _emailDeliveryService, _templateRenderingService, _logger);
     }
 
     [Fact]
