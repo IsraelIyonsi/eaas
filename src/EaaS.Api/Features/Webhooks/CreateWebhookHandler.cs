@@ -24,7 +24,7 @@ public sealed class CreateWebhookHandler : IRequestHandler<CreateWebhookCommand,
             .CountAsync(w => w.TenantId == request.TenantId, cancellationToken);
 
         if (count >= WebhookConstants.MaxWebhooksPerTenant)
-            throw new InvalidOperationException($"Maximum of {WebhookConstants.MaxWebhooksPerTenant} webhooks per tenant reached.");
+            throw new EaaS.Domain.Exceptions.ConflictException($"Maximum of {WebhookConstants.MaxWebhooksPerTenant} webhooks per tenant reached.");
 
         var secret = request.Secret ?? GenerateSecret();
         var now = DateTime.UtcNow;

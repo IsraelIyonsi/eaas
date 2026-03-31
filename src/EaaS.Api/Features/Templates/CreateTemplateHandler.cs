@@ -24,7 +24,7 @@ public sealed class CreateTemplateHandler : IRequestHandler<CreateTemplateComman
                            && t.DeletedAt == null, cancellationToken);
 
         if (nameExists)
-            throw new InvalidOperationException($"Template with name '{request.Name}' already exists.");
+            throw new EaaS.Domain.Exceptions.ConflictException($"Template with name '{request.Name}' already exists.");
 
         var now = DateTime.UtcNow;
         var template = new Template

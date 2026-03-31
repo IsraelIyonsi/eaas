@@ -25,7 +25,7 @@ COPY --from=build /app/publish .
 EXPOSE 8081
 ENV ASPNETCORE_URLS=http://+:8081
 
-HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=30s \
     CMD wget -q --spider http://localhost:8081/health || exit 1
 
 ENTRYPOINT ["dotnet", "EaaS.WebhookProcessor.dll"]

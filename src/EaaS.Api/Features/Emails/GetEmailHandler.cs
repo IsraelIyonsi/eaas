@@ -23,7 +23,7 @@ public sealed class GetEmailHandler : IRequestHandler<GetEmailQuery, EmailDetail
             .FirstOrDefaultAsync(cancellationToken);
 
         if (email is null)
-            throw new KeyNotFoundException($"Email with messageId '{request.MessageId}' not found.");
+            throw new EaaS.Domain.Exceptions.NotFoundException($"Email with messageId '{request.MessageId}' not found.");
 
         var toList = JsonSerializer.Deserialize<List<string>>(email.ToEmails) ?? new List<string>();
 

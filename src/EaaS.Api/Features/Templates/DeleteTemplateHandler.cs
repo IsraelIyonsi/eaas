@@ -25,7 +25,7 @@ public sealed class DeleteTemplateHandler : IRequestHandler<DeleteTemplateComman
             .FirstOrDefaultAsync(cancellationToken);
 
         if (template is null)
-            throw new KeyNotFoundException($"Template with ID '{request.TemplateId}' not found.");
+            throw new EaaS.Domain.Exceptions.NotFoundException($"Template with ID '{request.TemplateId}' not found.");
 
         // Soft delete
         template.DeletedAt = DateTime.UtcNow;

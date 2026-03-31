@@ -1,3 +1,4 @@
+using EaaS.Domain.Exceptions;
 using EaaS.Shared.Contracts;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
@@ -29,29 +30,13 @@ public sealed partial class GlobalExceptionHandler : IExceptionHandler
                         .Select(e => new ErrorDetail(e.PropertyName, e.ErrorMessage))
                         .ToList())),
 
-            KeyNotFoundException => (
-                StatusCodes.Status404NotFound,
-                ApiErrorResponse.Create("NOT_FOUND", exception.Message)),
+            DomainException domainEx => (
+                domainEx.StatusCode,
+                ApiErrorResponse.Create(domainEx.ErrorCode, domainEx.Message)),
 
             UnauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,
                 ApiErrorResponse.Create("UNAUTHORIZED", exception.Message)),
-
-            InvalidOperationException when exception.Message.Contains("already exists", StringComparison.Ordinal) => (
-                StatusCodes.Status409Conflict,
-                ApiErrorResponse.Create("CONFLICT", exception.Message)),
-
-            InvalidOperationException when exception.Message.Contains("not verified", StringComparison.OrdinalIgnoreCase) => (
-                StatusCodes.Status422UnprocessableEntity,
-                ApiErrorResponse.Create("DOMAIN_NOT_VERIFIED", exception.Message)),
-
-            InvalidOperationException when exception.Message.Contains("suppression list", StringComparison.OrdinalIgnoreCase) => (
-                StatusCodes.Status422UnprocessableEntity,
-                ApiErrorResponse.Create("RECIPIENT_SUPPRESSED", exception.Message)),
-
-            InvalidOperationException when exception.Message.Contains("Rate limit", StringComparison.OrdinalIgnoreCase) => (
-                StatusCodes.Status429TooManyRequests,
-                ApiErrorResponse.Create("RATE_LIMIT_EXCEEDED", exception.Message)),
 
             _ => (
                 StatusCodes.Status500InternalServerError,

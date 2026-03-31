@@ -38,7 +38,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
         var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
+            throw new EaaS.Domain.Exceptions.RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         // 1. Check idempotency key
         if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
@@ -64,7 +64,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
                            && d.DeletedAt == null, cancellationToken);
 
         if (!domainVerified)
-            throw new InvalidOperationException($"Domain '{fromDomain}' is not verified for this tenant.");
+            throw new EaaS.Domain.Exceptions.DomainNotVerifiedException($"Domain '{fromDomain}' is not verified for this tenant.");
 
         // 3. Check all recipients against suppression list (To + CC + BCC)
         var allRecipients = new List<string>(request.To);

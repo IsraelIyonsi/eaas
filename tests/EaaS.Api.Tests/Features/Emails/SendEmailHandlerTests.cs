@@ -81,7 +81,7 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.RecipientSuppressedException>()
             .WithMessage("*suppression list*");
     }
 
@@ -95,7 +95,7 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.DomainNotVerifiedException>()
             .WithMessage("*not verified*");
     }
 

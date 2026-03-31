@@ -23,7 +23,7 @@ public sealed class GetTemplateHandler : IRequestHandler<GetTemplateQuery, Templ
             .FirstOrDefaultAsync(cancellationToken);
 
         if (template is null)
-            throw new KeyNotFoundException($"Template with ID '{request.TemplateId}' not found.");
+            throw new EaaS.Domain.Exceptions.NotFoundException($"Template with ID '{request.TemplateId}' not found.");
 
         return new TemplateResult(
             template.Id,

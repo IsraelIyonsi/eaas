@@ -25,10 +25,10 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
         var existingKey = await _dbContext.ApiKeys
             .Where(k => k.Id == request.Id && k.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new KeyNotFoundException($"API key with id '{request.Id}' not found.");
+            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"API key with id '{request.Id}' not found.");
 
         if (existingKey.Status != ApiKeyStatus.Active)
-            throw new InvalidOperationException("Only active API keys can be rotated.");
+            throw new EaaS.Domain.Exceptions.ConflictException("Only active API keys can be rotated.");
 
         // Generate new key
         var plaintextKey = GenerateApiKey();

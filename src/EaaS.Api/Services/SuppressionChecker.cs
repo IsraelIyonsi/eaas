@@ -44,6 +44,6 @@ public sealed class SuppressionChecker
     {
         var suppressed = await FindSuppressedRecipientAsync(tenantId, recipients, cancellationToken);
         if (suppressed is not null)
-            throw new InvalidOperationException($"Recipient '{suppressed}' is on the suppression list.");
+            throw new EaaS.Domain.Exceptions.RecipientSuppressedException($"Recipient '{suppressed}' is on the suppression list.");
     }
 }
