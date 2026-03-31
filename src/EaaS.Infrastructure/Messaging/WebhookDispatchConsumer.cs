@@ -71,18 +71,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
     {
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-        // Compute HMAC-SHA256 signature
-        if (!string.IsNullOrWhiteSpace(webhook.Secret))
-        {
-            var keyBytes = Encoding.UTF8.GetBytes(webhook.Secret);
-            var payloadBytes = Encoding.UTF8.GetBytes(payload);
-            var hash = HMACSHA256.HashData(keyBytes, payloadBytes);
-            var signature = $"sha256={Convert.ToHexString(hash).ToLowerInvariant()}";
-            content.Headers.Add("X-EaaS-Signature", signature);
-        }
-
-        content.Headers.Add("X-EaaS-Event", message.EventType);
-        content.Headers.Add("X-EaaS-Delivery-Id", deliveryId);
+        EaaS.Shared.Utilities.WebhookSigner.ApplyHeaders(content, webhook.Secret, payload, message.EventType, deliveryId);
 
         int statusCode = 0;
         bool success = false;
