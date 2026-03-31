@@ -27,7 +27,7 @@ public sealed class AddSuppressionHandler : IRequestHandler<AddSuppressionComman
             .AnyAsync(s => s.TenantId == request.TenantId && s.EmailAddress == emailLower, cancellationToken);
 
         if (exists)
-            throw new InvalidOperationException($"Email address '{request.EmailAddress}' is already suppressed.");
+            throw new EaaS.Domain.Exceptions.ConflictException($"Email address '{request.EmailAddress}' is already suppressed.");
 
         var entry = new SuppressionEntry
         {

@@ -61,7 +61,7 @@ public sealed class CreateTemplateHandlerTests : IDisposable
 
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<EaaS.Domain.Exceptions.ConflictException>()
             .WithMessage("*already exists*");
     }
 

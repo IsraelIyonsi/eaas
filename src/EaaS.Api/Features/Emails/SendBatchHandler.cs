@@ -38,7 +38,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
         var isAllowed = await _cacheService.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
-            throw new InvalidOperationException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
+            throw new EaaS.Domain.Exceptions.RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
 
         var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();

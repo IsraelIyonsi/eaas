@@ -26,7 +26,7 @@ public sealed class GetWebhookHandler : IRequestHandler<GetWebhookQuery, Webhook
                 w.CreatedAt,
                 w.UpdatedAt))
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new KeyNotFoundException($"Webhook with id '{request.Id}' not found.");
+            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Webhook with id '{request.Id}' not found.");
 
         return webhook;
     }

@@ -18,7 +18,7 @@ public sealed class DeleteWebhookHandler : IRequestHandler<DeleteWebhookCommand>
         var webhook = await _dbContext.Webhooks
             .Where(w => w.Id == request.Id && w.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new KeyNotFoundException($"Webhook with id '{request.Id}' not found.");
+            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Webhook with id '{request.Id}' not found.");
 
         _dbContext.Webhooks.Remove(webhook);
         await _dbContext.SaveChangesAsync(cancellationToken);

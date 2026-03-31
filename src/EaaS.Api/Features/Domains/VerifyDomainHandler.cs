@@ -23,7 +23,7 @@ public sealed class VerifyDomainHandler : IRequestHandler<VerifyDomainCommand, V
             .Include(d => d.DnsRecords)
             .Where(d => d.Id == request.Id && d.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new KeyNotFoundException($"Domain with id '{request.Id}' not found.");
+            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Domain with id '{request.Id}' not found.");
 
         // Check SES verification status
         var sesResult = await _emailDeliveryService.GetDomainVerificationStatusAsync(domain.DomainName, cancellationToken);

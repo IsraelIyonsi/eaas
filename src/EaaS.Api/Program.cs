@@ -160,8 +160,11 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    // Health check (no auth)
-    app.MapHealthChecks("/health");
+    // Liveness probe: always returns 200 if Kestrel is accepting requests (Docker HEALTHCHECK target)
+    app.MapGet("/health", () => Results.Ok("Healthy"));
+
+    // Readiness probe: includes DB, MassTransit bus, and any registered IHealthCheck
+    app.MapHealthChecks("/health/ready");
 
     app.MapGet("/", () => Results.Ok(new { Service = "EaaS API", Status = "Running" }));
 

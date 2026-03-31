@@ -48,7 +48,13 @@ try
 
     app.UseSerilogRequestLogging();
 
-    app.MapHealthChecks("/health");
+    // Liveness probe: always returns 200 if the process is running and Kestrel is accepting requests.
+    // Used by Docker HEALTHCHECK to determine if the container is alive.
+    app.MapGet("/health", () => Results.Ok("Healthy"));
+
+    // Readiness probe: includes MassTransit bus health + any registered IHealthCheck.
+    // Use this to check if the service is ready to handle traffic (e.g., RabbitMQ connected).
+    app.MapHealthChecks("/health/ready");
 
     app.MapGet("/", () => Results.Ok(new { Service = "EaaS Webhook Processor", Status = "Running" }));
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EaaS.Api.Middleware;
+using EaaS.Domain.Exceptions;
 using EaaS.Shared.Contracts;
 using FluentAssertions;
 using FluentValidation;
@@ -38,15 +39,39 @@ public sealed class GlobalExceptionHandlerTests
     }
 
     [Fact]
-    public async Task Should_Return404_When_KeyNotFoundException()
+    public async Task Should_Return404_When_NotFoundException()
     {
         var httpContext = CreateHttpContext();
-        var exception = new KeyNotFoundException("Email not found.");
+        var exception = new NotFoundException("Email not found.");
 
         var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
 
         handled.Should().BeTrue();
         httpContext.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    [Fact]
+    public async Task Should_Return429_When_RateLimitExceededException()
+    {
+        var httpContext = CreateHttpContext();
+        var exception = new RateLimitExceededException("Rate limit exceeded.");
+
+        var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        handled.Should().BeTrue();
+        httpContext.Response.StatusCode.Should().Be(StatusCodes.Status429TooManyRequests);
+    }
+
+    [Fact]
+    public async Task Should_Return409_When_ConflictException()
+    {
+        var httpContext = CreateHttpContext();
+        var exception = new ConflictException("Resource already exists.");
+
+        var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
+
+        handled.Should().BeTrue();
+        httpContext.Response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
     }
 
     [Fact]

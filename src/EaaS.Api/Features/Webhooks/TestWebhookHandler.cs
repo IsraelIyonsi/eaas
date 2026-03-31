@@ -25,7 +25,7 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
             .AsNoTracking()
             .Where(w => w.Id == request.Id && w.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken)
-            ?? throw new KeyNotFoundException($"Webhook with id '{request.Id}' not found.");
+            ?? throw new EaaS.Domain.Exceptions.NotFoundException($"Webhook with id '{request.Id}' not found.");
 
         var testPayload = new
         {
