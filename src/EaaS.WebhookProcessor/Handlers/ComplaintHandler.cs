@@ -1,10 +1,10 @@
 using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
-using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
+using EaaS.WebhookProcessor.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,14 +14,14 @@ namespace EaaS.WebhookProcessor.Handlers;
 public sealed partial class ComplaintHandler
 {
     private readonly AppDbContext _dbContext;
-    private readonly ISuppressionCache _suppressionCache;
+    private readonly RecipientSuppressor _suppressor;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<ComplaintHandler> _logger;
 
-    public ComplaintHandler(AppDbContext dbContext, ISuppressionCache suppressionCache, IPublishEndpoint publishEndpoint, ILogger<ComplaintHandler> logger)
+    public ComplaintHandler(AppDbContext dbContext, RecipientSuppressor suppressor, IPublishEndpoint publishEndpoint, ILogger<ComplaintHandler> logger)
     {
         _dbContext = dbContext;
-        _suppressionCache = suppressionCache;
+        _suppressor = suppressor;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
@@ -68,29 +68,12 @@ public sealed partial class ComplaintHandler
         // Auto-suppress all complained recipients
         foreach (var recipient in complaint.ComplainedRecipients)
         {
-            var normalizedEmail = recipient.EmailAddress.ToLowerInvariant();
-
-            var existing = await _dbContext.SuppressionEntries
-                .FirstOrDefaultAsync(
-                    s => s.TenantId == email.TenantId && s.EmailAddress == normalizedEmail,
-                    cancellationToken);
-
-            if (existing is null)
-            {
-                _dbContext.SuppressionEntries.Add(new SuppressionEntry
-                {
-                    Id = Guid.NewGuid(),
-                    TenantId = email.TenantId,
-                    EmailAddress = normalizedEmail,
-                    Reason = SuppressionReason.Complaint,
-                    SourceMessageId = email.MessageId,
-                    SuppressedAt = DateTime.UtcNow
-                });
-
-                LogRecipientSuppressed(_logger, normalizedEmail);
-            }
-
-            await _suppressionCache.AddToSuppressionCacheAsync(email.TenantId, normalizedEmail, cancellationToken);
+            await _suppressor.SuppressAsync(
+                email.TenantId,
+                recipient.EmailAddress,
+                SuppressionReason.Complaint,
+                email.MessageId,
+                cancellationToken);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
@@ -120,6 +103,4 @@ public sealed partial class ComplaintHandler
     [LoggerMessage(Level = LogLevel.Information, Message = "Complaint received: FeedbackType={FeedbackType}, EmailId={EmailId}")]
     private static partial void LogComplaintReceived(ILogger logger, string feedbackType, Guid emailId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Recipient {Email} suppressed due to complaint")]
-    private static partial void LogRecipientSuppressed(ILogger logger, string email);
 }

@@ -1,10 +1,10 @@
 using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
-using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
+using EaaS.WebhookProcessor.Services;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,14 +14,14 @@ namespace EaaS.WebhookProcessor.Handlers;
 public sealed partial class BounceHandler
 {
     private readonly AppDbContext _dbContext;
-    private readonly ISuppressionCache _suppressionCache;
+    private readonly RecipientSuppressor _suppressor;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger<BounceHandler> _logger;
 
-    public BounceHandler(AppDbContext dbContext, ISuppressionCache suppressionCache, IPublishEndpoint publishEndpoint, ILogger<BounceHandler> logger)
+    public BounceHandler(AppDbContext dbContext, RecipientSuppressor suppressor, IPublishEndpoint publishEndpoint, ILogger<BounceHandler> logger)
     {
         _dbContext = dbContext;
-        _suppressionCache = suppressionCache;
+        _suppressor = suppressor;
         _publishEndpoint = publishEndpoint;
         _logger = logger;
     }
@@ -77,7 +77,7 @@ public sealed partial class BounceHandler
             // Auto-suppress all bounced recipients
             foreach (var recipient in bounce.BouncedRecipients)
             {
-                await SuppressRecipient(
+                await _suppressor.SuppressAsync(
                     email.TenantId,
                     recipient.EmailAddress,
                     SuppressionReason.HardBounce,
@@ -130,40 +130,6 @@ public sealed partial class BounceHandler
         }, cancellationToken);
     }
 
-    private async Task SuppressRecipient(
-        Guid tenantId,
-        string emailAddress,
-        SuppressionReason reason,
-        string sourceMessageId,
-        CancellationToken cancellationToken)
-    {
-        var normalizedEmail = emailAddress.ToLowerInvariant();
-
-        // Check if already suppressed
-        var existing = await _dbContext.SuppressionEntries
-            .FirstOrDefaultAsync(
-                s => s.TenantId == tenantId && s.EmailAddress == normalizedEmail,
-                cancellationToken);
-
-        if (existing is null)
-        {
-            _dbContext.SuppressionEntries.Add(new SuppressionEntry
-            {
-                Id = Guid.NewGuid(),
-                TenantId = tenantId,
-                EmailAddress = normalizedEmail,
-                Reason = reason,
-                SourceMessageId = sourceMessageId,
-                SuppressedAt = DateTime.UtcNow
-            });
-
-            LogRecipientSuppressed(_logger, normalizedEmail, reason.ToString());
-        }
-
-        // Update Redis cache regardless
-        await _suppressionCache.AddToSuppressionCacheAsync(tenantId, normalizedEmail, cancellationToken);
-    }
-
     [LoggerMessage(Level = LogLevel.Warning, Message = "Bounce notification has no bounce data for SES message {MessageId}")]
     private static partial void LogNoBounceData(ILogger logger, string messageId);
 
@@ -172,7 +138,4 @@ public sealed partial class BounceHandler
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Bounce received: Type={BounceType}, SubType={BounceSubType}, EmailId={EmailId}")]
     private static partial void LogBounceReceived(ILogger logger, string bounceType, string bounceSubType, Guid emailId);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Recipient {Email} suppressed due to {Reason}")]
-    private static partial void LogRecipientSuppressed(ILogger logger, string email, string reason);
 }
