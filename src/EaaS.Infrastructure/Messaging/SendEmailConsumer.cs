@@ -15,7 +15,7 @@ namespace EaaS.Infrastructure.Messaging;
 public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IEmailSender _emailDeliveryService;
     private readonly ITemplateRenderingService _templateRenderingService;
     private readonly TrackingPixelInjector? _pixelInjector;
     private readonly ClickTrackingLinkRewriter? _linkRewriter;
@@ -23,7 +23,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
     public SendEmailConsumer(
         AppDbContext dbContext,
-        IEmailDeliveryService emailDeliveryService,
+        IEmailSender emailDeliveryService,
         ITemplateRenderingService templateRenderingService,
         ILogger<SendEmailConsumer> logger,
         TrackingPixelInjector? pixelInjector = null,

@@ -10,9 +10,9 @@ namespace EaaS.Api.Features.Domains;
 public sealed class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IDomainIdentityService _emailDeliveryService;
 
-    public RemoveDomainHandler(AppDbContext dbContext, IEmailDeliveryService emailDeliveryService)
+    public RemoveDomainHandler(AppDbContext dbContext, IDomainIdentityService emailDeliveryService)
     {
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace EaaS.Infrastructure.Services;
 
-public sealed partial class SesEmailService : IEmailDeliveryService
+public sealed partial class SesEmailService : IDomainIdentityService, IEmailSender
 {
     private readonly IAmazonSimpleEmailServiceV2 _sesClient;
     private readonly ILogger<SesEmailService> _logger;

@@ -10,9 +10,9 @@ namespace EaaS.Api.Features.Domains;
 public sealed class VerifyDomainHandler : IRequestHandler<VerifyDomainCommand, VerifyDomainResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IDomainIdentityService _emailDeliveryService;
 
-    public VerifyDomainHandler(AppDbContext dbContext, IEmailDeliveryService emailDeliveryService)
+    public VerifyDomainHandler(AppDbContext dbContext, IDomainIdentityService emailDeliveryService)
     {
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;

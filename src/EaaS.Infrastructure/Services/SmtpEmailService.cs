@@ -7,7 +7,7 @@ using MimeKit;
 
 namespace EaaS.Infrastructure.Services;
 
-public sealed partial class SmtpEmailService : IEmailDeliveryService
+public sealed partial class SmtpEmailService : IDomainIdentityService, IEmailSender
 {
     private readonly SmtpSettings _settings;
     private readonly ILogger<SmtpEmailService> _logger;

@@ -11,9 +11,9 @@ namespace EaaS.Api.Features.Domains;
 public sealed class AddDomainHandler : IRequestHandler<AddDomainCommand, AddDomainResult>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailDeliveryService _emailDeliveryService;
+    private readonly IDomainIdentityService _emailDeliveryService;
 
-    public AddDomainHandler(AppDbContext dbContext, IEmailDeliveryService emailDeliveryService)
+    public AddDomainHandler(AppDbContext dbContext, IDomainIdentityService emailDeliveryService)
     {
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;

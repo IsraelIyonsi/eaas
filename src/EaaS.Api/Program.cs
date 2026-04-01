@@ -62,23 +62,7 @@ try
     builder.Services.AddInfrastructure(builder.Configuration);
 
     // Email delivery: SMTP (Mailpit) for local dev, SES for production
-    var emailProvider = builder.Configuration["EMAIL_PROVIDER"] ?? "ses";
-    if (string.Equals(emailProvider, "smtp", StringComparison.OrdinalIgnoreCase))
-    {
-        Log.Information("Using SMTP email provider (Mailpit)");
-        builder.Services.AddSingleton<IEmailDeliveryService, SmtpEmailService>();
-    }
-    else
-    {
-        Log.Information("Using AWS SES email provider");
-        var sesSettings = builder.Configuration.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
-        builder.Services.AddSingleton<IAmazonSimpleEmailServiceV2>(_ =>
-            new AmazonSimpleEmailServiceV2Client(
-                sesSettings.AccessKeyId,
-                sesSettings.SecretAccessKey,
-                RegionEndpoint.GetBySystemName(sesSettings.Region)));
-        builder.Services.AddSingleton<IEmailDeliveryService, SesEmailService>();
-    }
+    builder.Services.AddEmailProvider(builder.Configuration);
     builder.Services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
     builder.Services.AddScoped<EaaS.Api.Services.SuppressionChecker>();
 
