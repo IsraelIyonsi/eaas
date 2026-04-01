@@ -44,7 +44,7 @@ try
             .Enrich.WithMachineName()
             .Enrich.WithEnvironmentName());
 
-        builder.Services.AddInfrastructure(builder.Configuration);
+        builder.Services.AddInfrastructure(builder.Configuration, includeMassTransit: false);
 
         var seedApp = builder.Build();
         var exitCode = await SeedCommand.ExecuteAsync(args, seedApp.Services);
