@@ -1,7 +1,4 @@
-using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure;
-using EaaS.Infrastructure.Configuration;
-using EaaS.Infrastructure.Services;
 using EaaS.WebhookProcessor.Handlers;
 using EaaS.WebhookProcessor.Services;
 using Serilog;
@@ -24,10 +21,6 @@ try
 
     // Infrastructure services (DbContext, Redis, MassTransit publish-only for webhook dispatch)
     builder.Services.AddInfrastructure(builder.Configuration, publishOnly: true);
-
-    // Tracking settings and services
-    builder.Services.Configure<TrackingSettings>(builder.Configuration.GetSection(TrackingSettings.SectionName));
-    builder.Services.AddSingleton<ITrackingTokenService, TrackingTokenService>();
 
     // SNS webhook handlers
     builder.Services.AddScoped<SnsMessageHandler>();
