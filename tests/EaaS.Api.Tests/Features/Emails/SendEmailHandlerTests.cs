@@ -31,6 +31,11 @@ public sealed class SendEmailHandlerTests : IDisposable
         _idempotencyStore = Substitute.For<IIdempotencyStore>();
         _suppressionCache = Substitute.For<ISuppressionCache>();
         _publishEndpoint = Substitute.For<IPublishEndpoint>();
+
+        // Default: allow all rate limit checks
+        _rateLimiter.CheckRateLimitAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
         var suppressionChecker = new SuppressionChecker(_suppressionCache, _dbContext);
         _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker);
 
