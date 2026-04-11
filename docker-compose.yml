@@ -199,7 +199,9 @@ services:
       - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://api:8080
       - EAAS_API_INTERNAL_URL=http://api:8080
-      - EAAS_API_KEY=eaas_dashboard_key_for_local_dev
+      - EAAS_API_KEY=${EAAS_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - SECURE_COOKIES=${SECURE_COOKIES:-false}
     depends_on:
       api:
         condition: service_healthy
