@@ -1,3 +1,4 @@
+using EaaS.Domain.Entities;
 using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
@@ -40,9 +41,25 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
 
             if (nameExists)
                 throw new ConflictException($"Template with name '{request.Name}' already exists.");
-
-            template.Name = request.Name;
         }
+
+        // Snapshot current state before applying update
+        var snapshot = new TemplateVersion
+        {
+            Id = Guid.NewGuid(),
+            TemplateId = template.Id,
+            Version = template.Version,
+            Name = template.Name,
+            Subject = template.SubjectTemplate,
+            HtmlBody = template.HtmlBody,
+            TextBody = template.TextBody,
+            CreatedAt = DateTime.UtcNow
+        };
+        _dbContext.TemplateVersions.Add(snapshot);
+
+        // Apply updates
+        if (request.Name is not null)
+            template.Name = request.Name;
 
         if (request.SubjectTemplate is not null)
             template.SubjectTemplate = request.SubjectTemplate;

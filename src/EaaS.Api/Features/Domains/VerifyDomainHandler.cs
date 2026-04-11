@@ -74,7 +74,7 @@ public sealed class VerifyDomainHandler : IRequestHandler<VerifyDomainCommand, V
             domain.DomainName,
             domain.Status.ToString(),
             domain.DnsRecords.Select(r => new DnsRecordDto(
-                r.Id, r.RecordType, r.RecordName, r.RecordValue,
+                r.Id, r.RecordType.ToString().ToUpperInvariant(), r.RecordName, r.RecordValue,
                 r.Purpose.ToString().ToLowerInvariant(), r.IsVerified)).ToList(),
             domain.VerifiedAt);
     }

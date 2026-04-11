@@ -23,7 +23,6 @@ public static class CreateWebhookEndpoint
         .WithName("CreateWebhook")
         .WithSummary("Create a webhook endpoint")
         .WithDescription("Registers a new webhook URL to receive email event notifications.")
-        .WithOpenApi()
         .Produces<ApiResponse<WebhookCreatedDto>>(StatusCodes.Status201Created)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest);
     }

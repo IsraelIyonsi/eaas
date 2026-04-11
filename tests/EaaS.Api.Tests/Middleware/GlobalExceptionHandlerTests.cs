@@ -30,7 +30,7 @@ public sealed class GlobalExceptionHandlerTests
         {
             new("From", "From address is required.")
         };
-        var exception = new ValidationException(failures);
+        var exception = new FluentValidation.ValidationException(failures);
 
         var handled = await _sut.TryHandleAsync(httpContext, exception, CancellationToken.None);
 

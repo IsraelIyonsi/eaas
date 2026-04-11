@@ -25,7 +25,6 @@ public static class RotateApiKeyEndpoint
         .WithName("RotateApiKey")
         .WithSummary("Rotate an API key")
         .WithDescription("Creates a new API key and puts the old one in a 24-hour grace period.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest);

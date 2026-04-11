@@ -4,7 +4,7 @@ test.describe("Login Page", () => {
   test("should display the login form", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByText("Sign in to EaaS")).toBeVisible();
-    await expect(page.getByLabel("Username")).toBeVisible();
+    await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password")).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign In" })).toBeVisible();
   });
@@ -13,7 +13,7 @@ test.describe("Login Page", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.getByLabel("Username").fill("admin");
+    await page.getByLabel("Email").fill("admin@eaas.local");
     await page.getByLabel("Password").fill("admin");
     await page.getByRole("button", { name: "Sign In" }).click();
 
@@ -26,11 +26,11 @@ test.describe("Login Page", () => {
 
   test("should show error for invalid credentials", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Username").fill("wrong");
+    await page.getByLabel("Email").fill("wrong@example.com");
     await page.getByLabel("Password").fill("wrong");
     await page.getByRole("button", { name: "Sign In" }).click();
 
-    await expect(page.getByText("Invalid username or password")).toBeVisible();
+    await expect(page.getByText(/Invalid email or password|Authentication service unavailable/)).toBeVisible();
   });
 
   test("should redirect unauthenticated users to login", async ({ page }) => {

@@ -1,0 +1,155 @@
+# Staging overlay: mirrors production topology at reduced scale
+# 2 replicas per service, medium resources, HPA enabled but with lower ceilings
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eaas
+
+resources:
+  - ../../
+
+commonLabels:
+  environment: staging
+
+patches:
+  # API: 2 replicas
+  - target:
+      kind: Deployment
+      name: eaas-api
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "192Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "200m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "384Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "750m"
+
+  # Worker: 2 replicas
+  - target:
+      kind: Deployment
+      name: eaas-worker
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "192Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "200m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "384Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "750m"
+
+  # WebhookProcessor: 2 replicas
+  - target:
+      kind: Deployment
+      name: eaas-webhook-processor
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  # PostgreSQL: medium storage
+  - target:
+      kind: StatefulSet
+      name: eaas-postgres
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "500m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "2Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "1"
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "20Gi"
+
+  # RabbitMQ: 2 replicas for staging (still tests clustering)
+  - target:
+      kind: StatefulSet
+      name: eaas-rabbitmq
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "10Gi"
+
+  # Redis: 2 replicas
+  - target:
+      kind: StatefulSet
+      name: eaas-redis
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "5Gi"
+
+  # HPA: lower ceilings for staging
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: eaas-api
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 2
+      - op: replace
+        path: /spec/maxReplicas
+        value: 5
+
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: eaas-worker
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 2
+      - op: replace
+        path: /spec/maxReplicas
+        value: 4
+
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: eaas-webhook-processor
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 2
+      - op: replace
+        path: /spec/maxReplicas
+        value: 3
+
+  # Staging config overrides
+  - target:
+      kind: ConfigMap
+      name: eaas-config
+    patch: |
+      - op: replace
+        path: /data/Logging__LogLevel__Default
+        value: "Information"
+      - op: replace
+        path: /data/RateLimit__DefaultPerDay
+        value: "100000"

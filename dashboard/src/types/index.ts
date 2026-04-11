@@ -1,154 +1,79 @@
 // ============================================================
-// EaaS Dashboard - TypeScript Interfaces
+// EaaS Dashboard - Types Barrel Export
 // ============================================================
 
-// --- API Envelope ---
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  error?: string;
-}
+// Common
+export type { ApiResponse, PaginatedResponse, PaginationParams, SortParams, DateRangeParams } from './common';
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
-}
+// Email
+export type { Email, EmailEvent, EmailListParams } from './email';
+export type { EmailStatus } from './email';
 
-// --- Email ---
-export type EmailStatus =
-  | "queued"
-  | "sending"
-  | "delivered"
-  | "bounced"
-  | "complained"
-  | "failed"
-  | "opened"
-  | "clicked";
+// Inbound
+export type {
+  InboundEmail,
+  InboundAttachment,
+  InboundRule,
+  CreateInboundRuleRequest,
+  UpdateInboundRuleRequest,
+  InboundEmailListParams,
+  WebhookDeliveryLog,
+} from './inbound';
+export type { InboundEmailStatus, InboundRuleAction, VerdictStatus } from './inbound';
 
-export interface Email {
-  id: string;
-  message_id: string;
-  from: string;
-  to: string;
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  status: EmailStatus;
-  template_id?: string;
-  template_name?: string;
-  tags?: string[];
-  html_body?: string;
-  text_body?: string;
-  created_at: string;
-  sent_at?: string;
-  delivered_at?: string;
-  opened_at?: string;
-  clicked_at?: string;
-}
+// Template
+export type { Template, CreateTemplateRequest, UpdateTemplateRequest } from './template';
 
-export interface EmailEvent {
-  id: string;
-  email_id: string;
-  event_type: EmailStatus;
-  timestamp: string;
-  details?: string;
-}
+// Domain
+export type { Domain, DnsRecord, DomainDetail } from './domain';
+export type { DomainStatus } from './domain';
 
-// --- Template ---
-export interface Template {
-  id: string;
-  name: string;
-  subject: string;
-  html_body: string;
-  text_body: string;
-  variables_schema?: string;
-  version: number;
-  created_at: string;
-  updated_at: string;
-  deleted_at?: string;
-}
+// API Key
+export type { ApiKey, CreateApiKeyRequest, CreateApiKeyResponse } from './api-key';
 
-// --- Domain ---
-export type DomainStatus =
-  | "pending_verification"
-  | "verified"
-  | "failed"
-  | "suspended";
+// Webhook
+export type {
+  Webhook,
+  WebhookDelivery,
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  TestWebhookResult,
+} from './webhook';
+export type { WebhookStatus } from './webhook';
+export { WEBHOOK_EVENT_TYPES } from './webhook';
 
-export interface DnsRecord {
-  type: string;
-  name: string;
-  value: string;
-  status: "verified" | "missing" | "mismatch";
-}
+// Suppression
+export type { Suppression, CreateSuppressionRequest } from './suppression';
+export type { SuppressionReason } from './suppression';
 
-export interface Domain {
-  id: string;
-  domain: string;
-  status: DomainStatus;
-  dns_records: DnsRecord[];
-  verified_at?: string;
-  created_at: string;
-}
+// Analytics
+export type {
+  AnalyticsSummary,
+  TimelinePoint,
+  AnalyticsTimeline,
+  InboundAnalyticsSummary,
+  TopSender,
+} from './analytics';
 
-// --- Analytics ---
-export interface AnalyticsSummary {
-  total_sent: number;
-  delivered: number;
-  bounced: number;
-  complained: number;
-  opened: number;
-  clicked: number;
-  failed: number;
-  delivery_rate: number;
-  open_rate: number;
-  click_rate: number;
-  bounce_rate: number;
-  complaint_rate: number;
-}
+// Health
+export type { ServiceHealth, SystemHealth } from './health';
+export type { HealthStatus } from './health';
 
-export interface TimelinePoint {
-  timestamp: string;
-  sent: number;
-  delivered: number;
-  bounced: number;
-  complained: number;
-  opened: number;
-  clicked: number;
-}
-
-export interface AnalyticsTimeline {
-  granularity: "hour" | "day";
-  points: TimelinePoint[];
-}
-
-// --- Suppression ---
-export type SuppressionReason =
-  | "hard_bounce"
-  | "soft_bounce_limit"
-  | "complaint"
-  | "manual";
-
-export interface Suppression {
-  id: string;
-  email: string;
-  reason: SuppressionReason;
-  created_at: string;
-}
-
-// --- System Health ---
-export type HealthStatus = "healthy" | "degraded" | "down";
-
-export interface ServiceHealth {
-  name: string;
-  status: HealthStatus;
-  latency_ms?: number;
-}
-
-export interface SystemHealth {
-  status: HealthStatus;
-  services: ServiceHealth[];
-}
+// Admin
+export type {
+  AdminTenant,
+  AdminUser,
+  AuditLog,
+  PlatformSummary,
+  TenantRanking,
+  GrowthMetrics,
+  AdminSystemHealth,
+  AdminServiceHealth,
+  AdminHealthMetrics,
+  AdminTenantListParams,
+  AdminUserListParams,
+  AuditLogListParams,
+  CreateAdminUserRequest,
+  UpdateTenantRequest,
+} from './admin';
+export type { TenantStatus, AdminRole } from './admin';

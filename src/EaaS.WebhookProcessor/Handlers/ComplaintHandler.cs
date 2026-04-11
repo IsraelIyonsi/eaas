@@ -2,6 +2,7 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Messaging.Contracts;
+using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
 using EaaS.WebhookProcessor.Services;
@@ -45,6 +46,7 @@ public sealed partial class ComplaintHandler
         }
 
         LogComplaintReceived(_logger, complaint.ComplaintFeedbackType ?? "unknown", email.Id);
+        EmailMetrics.ComplaintsTotal.WithLabels(email.TenantId.ToString()).Inc();
 
         // Update email status
         email.Status = EmailStatus.Complained;

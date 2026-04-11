@@ -1,0 +1,72 @@
+# PodDisruptionBudgets for production
+# Ensure minimum availability during voluntary disruptions (node drains, upgrades)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eaas-api-pdb
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-api
+    app.kubernetes.io/part-of: eaas
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-api
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eaas-worker-pdb
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-worker
+    app.kubernetes.io/part-of: eaas
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-worker
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eaas-webhook-processor-pdb
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-webhook-processor
+    app.kubernetes.io/part-of: eaas
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-webhook-processor
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eaas-rabbitmq-pdb
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-rabbitmq
+    app.kubernetes.io/part-of: eaas
+spec:
+  # Quorum queues need majority (2 of 3) to maintain consensus
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-rabbitmq
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: eaas-redis-pdb
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis
+    app.kubernetes.io/part-of: eaas
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-redis

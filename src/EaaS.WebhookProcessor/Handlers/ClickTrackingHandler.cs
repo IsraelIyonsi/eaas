@@ -4,18 +4,21 @@ using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.WebhookProcessor.Handlers;
 
-public sealed class ClickTrackingHandler
+public sealed partial class ClickTrackingHandler
 {
     private readonly ITrackingTokenService _tokenService;
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<ClickTrackingHandler> _logger;
 
-    public ClickTrackingHandler(ITrackingTokenService tokenService, AppDbContext dbContext)
+    public ClickTrackingHandler(ITrackingTokenService tokenService, AppDbContext dbContext, ILogger<ClickTrackingHandler> logger)
     {
         _tokenService = tokenService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<IResult> HandleAsync(string token, HttpContext httpContext, CancellationToken cancellationToken)
@@ -60,11 +63,15 @@ public sealed class ClickTrackingHandler
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
             // Tracking failures should not break the redirect
+            LogClickTrackingFailed(_logger, trackingLink.EmailId, ex);
         }
 
         return Results.Redirect(trackingLink.OriginalUrl);
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Click tracking event failed to persist for EmailId={EmailId}")]
+    private static partial void LogClickTrackingFailed(ILogger logger, Guid emailId, Exception ex);
 }

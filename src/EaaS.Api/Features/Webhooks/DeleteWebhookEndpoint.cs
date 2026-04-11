@@ -21,7 +21,6 @@ public static class DeleteWebhookEndpoint
         .WithName("DeleteWebhook")
         .WithSummary("Delete a webhook endpoint")
         .WithDescription("Removes a webhook configuration permanently.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

@@ -46,7 +46,7 @@ public sealed partial class SnsMessageHandler
             return Results.BadRequest(new { error = "Empty message" });
 
         // Validate that the signing cert URL is from AWS
-        if (!IsValidSigningCertUrl(snsMessage.SigningCertUrl))
+        if (!SnsValidation.IsValidSigningCertUrl(snsMessage.SigningCertUrl))
         {
             LogInvalidCertUrl(_logger, snsMessage.SigningCertUrl ?? "null");
             return Results.StatusCode(403);
@@ -128,21 +128,6 @@ public sealed partial class SnsMessageHandler
     {
         // Acknowledge but do nothing — we want to remain subscribed
         return Results.Ok();
-    }
-
-    private static bool IsValidSigningCertUrl(string? url)
-    {
-        if (string.IsNullOrWhiteSpace(url))
-            return false;
-
-        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
-            return false;
-
-        // Must be HTTPS from SNS cert endpoint with .pem extension
-        return uri.Scheme == "https"
-               && uri.Host.EndsWith(".amazonaws.com", StringComparison.OrdinalIgnoreCase)
-               && uri.Host.StartsWith("sns.", StringComparison.OrdinalIgnoreCase)
-               && uri.AbsolutePath.EndsWith(".pem", StringComparison.OrdinalIgnoreCase);
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to deserialize SNS message")]

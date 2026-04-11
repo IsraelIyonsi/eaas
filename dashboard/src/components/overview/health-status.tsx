@@ -10,25 +10,27 @@ interface HealthStatusProps {
 }
 
 export function HealthStatus({ health }: HealthStatusProps) {
+  const services = health?.services ?? [];
+
   return (
-    <Card className="border-white/10 bg-[#1E1E2E] shadow-none">
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Activity className="h-4 w-4 text-[#7C4DFF]" />
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Activity className="h-4 w-4 text-primary" />
           System Health
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
-        {health.services.map((service) => (
+        {services.map((service) => (
           <div
             key={service.name}
-            className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2"
+            className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
           >
-            <span className="text-sm text-white/70">{service.name}</span>
+            <span className="text-sm text-foreground/70">{service.name}</span>
             <div className="flex items-center gap-3">
-              {service.latency_ms !== undefined && (
-                <span className="text-xs text-white/30">
-                  {service.latency_ms}ms
+              {service.latencyMs !== undefined && (
+                <span className="text-xs text-muted-foreground">
+                  {service.latencyMs}ms
                 </span>
               )}
               <HealthDot status={service.status} />

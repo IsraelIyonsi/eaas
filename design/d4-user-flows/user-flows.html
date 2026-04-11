@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Flows & Flowcharts — Inbound Email Feature | EaaS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --surface-3: #22222f;
+    --border: #2a2a3a;
+    --border-light: #3a3a4f;
+    --text: #e8e8f0;
+    --text-muted: #8888a0;
+    --text-dim: #5a5a70;
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --accent-glow: rgba(99,102,241,0.15);
+    --green: #22c55e;
+    --green-soft: #16a34a;
+    --green-bg: rgba(34,197,94,0.08);
+    --green-border: rgba(34,197,94,0.25);
+    --red: #ef4444;
+    --red-soft: #dc2626;
+    --red-bg: rgba(239,68,68,0.08);
+    --red-border: rgba(239,68,68,0.25);
+    --yellow: #eab308;
+    --yellow-soft: #ca8a04;
+    --yellow-bg: rgba(234,179,8,0.08);
+    --yellow-border: rgba(234,179,8,0.25);
+    --blue: #3b82f6;
+    --blue-soft: #2563eb;
+    --blue-bg: rgba(59,130,246,0.08);
+    --blue-border: rgba(59,130,246,0.25);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.08);
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.08);
+    --cyan: #06b6d4;
+    --cyan-bg: rgba(6,182,212,0.08);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --radius-lg: 16px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== HEADER ===== */
+  .doc-header {
+    background: linear-gradient(135deg, #12121a 0%, #1a1028 50%, #12121a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+  .doc-header::before {
+    content: '';
+    position: absolute;
+    top: -150px; right: -150px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .doc-header::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(99,102,241,0.3);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 20px;
+  }
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent-light);
+    border-radius: 50%;
+  }
+  .doc-header h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.15;
+    background: linear-gradient(135deg, #fff 0%, #c7c7d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .doc-header p.subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .header-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px;
+  }
+
+  /* ===== TABLE OF CONTENTS ===== */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 48px;
+  }
+  .toc h2 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .toc-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .toc-item:hover {
+    background: var(--surface-3);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .toc-num {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-glow);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-light);
+    flex-shrink: 0;
+  }
+
+  /* ===== FLOW SECTION ===== */
+  .flow-section {
+    margin-bottom: 64px;
+  }
+  .flow-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .flow-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: 4px 0 0 4px;
+  }
+  .flow-header.blue::before { background: var(--blue); }
+  .flow-header.green::before { background: var(--green); }
+  .flow-header.purple::before { background: var(--purple); }
+  .flow-header.orange::before { background: var(--orange); }
+  .flow-header.red::before { background: var(--red); }
+  .flow-header.cyan::before { background: var(--cyan); }
+
+  .flow-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .flow-tag.blue { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
+  .flow-tag.green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .flow-tag.purple { background: var(--purple-bg); color: var(--purple); border: 1px solid rgba(168,85,247,0.25); }
+  .flow-tag.orange { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(249,115,22,0.25); }
+  .flow-tag.red { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .flow-tag.cyan { background: var(--cyan-bg); color: var(--cyan); border: 1px solid rgba(6,182,212,0.25); }
+
+  .flow-header h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .flow-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .flow-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+  }
+  .flow-meta-item strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ===== FLOWCHART CANVAS ===== */
+  .flowchart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    overflow-x: auto;
+    position: relative;
+  }
+  .flowchart-inner {
+    min-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ===== NODE STYLES ===== */
+  .node {
+    position: relative;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+    z-index: 2;
+  }
+
+  /* Start / End pill */
+  .node-start, .node-end, .node-complete {
+    padding: 12px 32px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+  .node-start {
+    background: linear-gradient(135deg, #166534, #15803d);
+    border: 1px solid rgba(34,197,94,0.4);
+    color: #dcfce7;
+    box-shadow: 0 0 20px rgba(34,197,94,0.15);
+  }
+  .node-end, .node-complete {
+    background: linear-gradient(135deg, #7f1d1d, #991b1b);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #fecaca;
+    box-shadow: 0 0 20px rgba(239,68,68,0.15);
+  }
+  .node-complete {
+    background: linear-gradient(135deg, #1e3a5f, #1e40af);
+    border: 1px solid rgba(59,130,246,0.4);
+    color: #bfdbfe;
+    box-shadow: 0 0 20px rgba(59,130,246,0.15);
+  }
+
+  /* Process box */
+  .node-process {
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 14px 24px;
+    min-width: 240px;
+    max-width: 440px;
+    transition: border-color 0.2s;
+  }
+  .node-process:hover {
+    border-color: var(--accent);
+  }
+  .node-process .node-label {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .node-process .node-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* Process with step number */
+  .node-step {
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 0;
+    min-width: 280px;
+    max-width: 480px;
+    overflow: hidden;
+  }
+  .node-step .step-header {
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .node-step .step-header.blue { background: var(--blue-bg); color: var(--blue); }
+  .node-step .step-header.green { background: var(--green-bg); color: var(--green); }
+  .node-step .step-header.purple { background: var(--purple-bg); color: var(--purple); }
+  .node-step .step-header.orange { background: var(--orange-bg); color: var(--orange); }
+  .node-step .step-header.yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .node-step .step-header.red { background: var(--red-bg); color: var(--red); }
+  .node-step .step-header.cyan { background: var(--cyan-bg); color: var(--cyan); }
+  .node-step .step-body {
+    padding: 14px 20px;
+    text-align: left;
+  }
+  .node-step .step-body .step-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .node-step .step-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .node-step .step-body ul li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .node-step .step-body ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 7px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+
+  /* Decision diamond */
+  .node-decision {
+    position: relative;
+    width: 180px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .diamond-shape {
+    position: absolute;
+    width: 140px;
+    height: 80px;
+    background: var(--yellow-bg);
+    border: 2px solid var(--yellow-border);
+    transform: rotate(0deg);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+  .diamond-text {
+    position: relative;
+    z-index: 2;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+    text-align: center;
+    padding: 0 10px;
+  }
+
+  /* Alternative diamond: hexagonal for better text fit */
+  .node-diamond {
+    background: var(--yellow-bg);
+    border: 2px solid var(--yellow-border);
+    padding: 12px 20px;
+    clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+  }
+
+  /* Success outcome */
+  .node-success {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    color: var(--green);
+    font-weight: 600;
+  }
+  /* Error outcome */
+  .node-error {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    color: var(--red);
+    font-weight: 600;
+  }
+  /* Info */
+  .node-info {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    color: var(--blue);
+    font-weight: 500;
+    font-size: 12px;
+  }
+
+  /* ===== ARROWS ===== */
+  .arrow-down {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 36px;
+    position: relative;
+    z-index: 1;
+  }
+  .arrow-down .arrow-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border-light);
+  }
+  .arrow-down .arrow-head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--border-light);
+  }
+  .arrow-down.green .arrow-line { background: var(--green); }
+  .arrow-down.green .arrow-head { border-top-color: var(--green); }
+  .arrow-down.red .arrow-line { background: var(--red); }
+  .arrow-down.red .arrow-head { border-top-color: var(--red); }
+  .arrow-down.blue .arrow-line { background: var(--blue); }
+  .arrow-down.blue .arrow-head { border-top-color: var(--blue); }
+  .arrow-down.yellow .arrow-line { background: var(--yellow); }
+  .arrow-down.yellow .arrow-head { border-top-color: var(--yellow); }
+
+  .arrow-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    position: absolute;
+    white-space: nowrap;
+  }
+  .arrow-label.yes {
+    color: var(--green);
+    background: var(--green-bg);
+    right: -40px;
+    top: 8px;
+  }
+  .arrow-label.no {
+    color: var(--red);
+    background: var(--red-bg);
+    left: -34px;
+    top: 8px;
+  }
+
+  /* ===== BRANCH LAYOUT ===== */
+  .branch-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 32px;
+    width: 100%;
+  }
+  .branch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    max-width: 400px;
+  }
+  .branch-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  .branch-label.yes { color: var(--green); background: var(--green-bg); }
+  .branch-label.no { color: var(--red); background: var(--red-bg); }
+  .branch-label.error { color: var(--red); background: var(--red-bg); }
+  .branch-label.success { color: var(--green); background: var(--green-bg); }
+  .branch-label.timeout { color: var(--orange); background: var(--orange-bg); }
+  .branch-label.info { color: var(--blue); background: var(--blue-bg); }
+
+  /* ===== SWIM LANES ===== */
+  .swim-lanes {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    min-width: 900px;
+  }
+  .swim-lane {
+    flex: 1;
+    padding: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    border-right: 1px dashed var(--border);
+  }
+  .swim-lane:last-child { border-right: none; }
+  .swim-lane-header {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    width: 100%;
+    text-align: center;
+  }
+  .swim-lane-header.blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
+  .swim-lane-header.green { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .swim-lane-header.purple { background: var(--purple-bg); color: var(--purple); border-color: rgba(168,85,247,0.25); }
+  .swim-lane-header.orange { background: var(--orange-bg); color: var(--orange); border-color: rgba(249,115,22,0.25); }
+
+  /* ===== RETRY TABLE ===== */
+  .retry-table {
+    width: 100%;
+    max-width: 500px;
+    margin: 12px auto;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .retry-table th {
+    background: var(--surface-3);
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 10px;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .retry-table td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .retry-table tr:last-child td {
+    border-bottom: none;
+    color: var(--red);
+    font-weight: 600;
+  }
+
+  /* ===== SUMMARY MATRIX ===== */
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .matrix-table thead th {
+    background: var(--surface-3);
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-size: 11px;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    position: sticky;
+    top: 0;
+  }
+  .matrix-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .matrix-table tbody tr:hover {
+    background: var(--surface-2);
+  }
+  .complexity-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .complexity-badge.high { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .complexity-badge.medium { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .complexity-badge.low { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+  .sprint-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--accent-glow);
+    color: var(--accent-light);
+    border: 1px solid rgba(99,102,241,0.3);
+  }
+
+  /* ===== SUBFLOW (indented section) ===== */
+  .subflow {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 8px 0;
+    width: 100%;
+    max-width: 600px;
+  }
+  .subflow-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    text-align: left;
+  }
+  .subflow .flowchart-inner {
+    min-width: unset;
+  }
+
+  /* ===== HORIZONTAL BRANCH ===== */
+  .h-branch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+  }
+  .h-arrow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .h-arrow .h-line {
+    width: 30px;
+    height: 2px;
+    background: var(--border-light);
+  }
+  .h-arrow .h-head {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid var(--border-light);
+  }
+  .h-arrow.red .h-line { background: var(--red); }
+  .h-arrow.red .h-head { border-left-color: var(--red); }
+  .h-arrow.green .h-line { background: var(--green); }
+  .h-arrow.green .h-head { border-left-color: var(--green); }
+
+  /* ===== 3-COL BRANCH ===== */
+  .branch-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  /* ===== CONNECTOR BAR ===== */
+  .connector-bar {
+    width: 60%;
+    max-width: 600px;
+    height: 2px;
+    background: var(--border-light);
+    margin: 0 auto;
+    position: relative;
+  }
+  .connector-bar::before, .connector-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 12px;
+    background: var(--border-light);
+  }
+  .connector-bar::before { left: 0; }
+  .connector-bar::after { right: 0; }
+
+  /* ===== SECTION DIVIDER ===== */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 24px;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .section-divider span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+  }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .legend-shape {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .legend-pill {
+    width: 24px; height: 14px;
+    border-radius: 100px;
+    border: 1.5px solid var(--green);
+    background: rgba(34,197,94,0.15);
+  }
+  .legend-box {
+    width: 22px; height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border-light);
+    background: var(--surface-3);
+  }
+  .legend-diamond {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--yellow);
+    background: var(--yellow-bg);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+  .legend-success-box {
+    width: 22px; height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid var(--green);
+    background: var(--green-bg);
+  }
+  .legend-error-box {
+    width: 22px; height: 16px;
+    border-radius: 3px;
+    border: 1.5px solid var(--red);
+    background: var(--red-bg);
+  }
+
+  /* ===== ERROR SUBFLOW ===== */
+  .error-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .error-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .error-section .error-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* ===== FOOTER ===== */
+  .doc-footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 900px) {
+    .doc-header { padding: 40px 20px 30px; }
+    .doc-header h1 { font-size: 28px; }
+    .main-content { padding: 20px; }
+    .flowchart { padding: 20px; }
+    .branch-row { flex-direction: column; align-items: center; }
+    .branch-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="doc-header">
+  <div class="header-inner">
+    <div class="header-badge">UX Design Deliverable</div>
+    <h1>User Flows & Flowcharts</h1>
+    <p class="subtitle">Inbound Email Feature &mdash; EaaS Platform</p>
+    <div class="header-meta">
+      <span><strong>Date:</strong>&nbsp; April 1, 2026</span>
+      <span><strong>Prepared by:</strong>&nbsp; UX Design Team</span>
+      <span><strong>Version:</strong>&nbsp; 1.0</span>
+      <span><strong>Status:</strong>&nbsp; Ready for Review</span>
+    </div>
+  </div>
+</header>
+
+<main class="main-content">
+
+  <!-- ===== LEGEND ===== -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-shape"><div class="legend-pill"></div></div> Start / End Node</div>
+    <div class="legend-item"><div class="legend-shape"><div class="legend-box"></div></div> Process Step</div>
+    <div class="legend-item"><div class="legend-shape"><div class="legend-diamond"></div></div> Decision Point</div>
+    <div class="legend-item"><div class="legend-shape"><div class="legend-success-box"></div></div> Success Outcome</div>
+    <div class="legend-item"><div class="legend-shape"><div class="legend-error-box"></div></div> Error / Failure</div>
+    <div class="legend-item" style="margin-left: auto; color: var(--text-dim); font-size: 11px;">Blue = happy path &middot; Red = error path &middot; Yellow = decision &middot; Green = success</div>
+  </div>
+
+  <!-- ===== TABLE OF CONTENTS ===== -->
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <div class="toc-grid">
+      <a href="#flow-1" class="toc-item"><span class="toc-num">1</span> First-Time Inbound Setup</a>
+      <a href="#flow-2" class="toc-item"><span class="toc-num">2</span> Daily Email Monitoring</a>
+      <a href="#flow-3" class="toc-item"><span class="toc-num">3</span> Rule Management</a>
+      <a href="#flow-4" class="toc-item"><span class="toc-num">4</span> Developer Webhook Integration</a>
+      <a href="#flow-5" class="toc-item"><span class="toc-num">5</span> Error Flows (4 sub-flows)</a>
+      <a href="#summary" class="toc-item"><span class="toc-num">6</span> Flow Summary Matrix</a>
+    </div>
+  </nav>
+
+  <!-- ================================================================== -->
+  <!--  FLOW 1: FIRST-TIME INBOUND SETUP                                  -->
+  <!-- ================================================================== -->
+  <section id="flow-1" class="flow-section">
+    <div class="flow-header blue">
+      <span class="flow-tag blue">Flow 1</span>
+      <h2>First-Time Inbound Setup</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Configure inbound email for a domain from zero to receiving first email</p>
+      <div class="flow-meta">
+        <div class="flow-meta-item"><strong>Persona:</strong> Alex (Developer)</div>
+        <div class="flow-meta-item"><strong>Complexity:</strong> <span style="color:var(--red)">High</span></div>
+        <div class="flow-meta-item"><strong>Screens:</strong> Domain Detail, Setup Wizard (5 steps)</div>
+        <div class="flow-meta-item"><strong>Sprint:</strong> 5</div>
+      </div>
+    </div>
+
+    <div class="flowchart">
+      <div class="flowchart-inner">
+
+        <!-- Start -->
+        <div class="node node-start">START: User clicks "Enable Inbound" on domain page</div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <!-- Decision: Has verified domain? -->
+        <div class="node node-diamond">Has verified domain?</div>
+        <div style="height:8px"></div>
+
+        <!-- Branch: Yes / No -->
+        <div class="branch-row">
+          <div class="branch">
+            <div class="branch-label no">No</div>
+            <div class="arrow-down red" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+            <div class="node node-error" style="font-size:12px">Redirect to Add Domain flow</div>
+            <div class="arrow-down red" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+            <div class="node node-info">Return after domain verification</div>
+          </div>
+          <div class="branch">
+            <div class="branch-label yes">Yes</div>
+            <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+            <div class="node node-step">
+              <div class="step-header blue">Step 1</div>
+              <div class="step-body">
+                <div class="step-title">Confirm Domain</div>
+                <ul>
+                  <li>Display domain name</li>
+                  <li>Show current DNS status</li>
+                  <li>Highlight any existing records</li>
+                </ul>
+              </div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Step 2 -->
+            <div class="node node-step">
+              <div class="step-header blue">Step 2</div>
+              <div class="step-body">
+                <div class="step-title">MX Record Configuration</div>
+                <ul>
+                  <li>Display MX record values with copy buttons</li>
+                  <li>Show provider-specific guides (Cloudflare, Route53, GoDaddy, Namecheap)</li>
+                  <li>User copies MX records to their DNS provider</li>
+                </ul>
+              </div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Step 3 -->
+            <div class="node node-step">
+              <div class="step-header yellow">Step 3</div>
+              <div class="step-body">
+                <div class="step-title">Verify MX Records</div>
+                <ul><li>Click "Verify" &rarr; API checks DNS</li></ul>
+              </div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Decision: Verified? -->
+            <div class="node node-diamond">MX Verified?</div>
+            <div style="height:8px"></div>
+
+            <div class="branch-row">
+              <div class="branch">
+                <div class="branch-label no">Not Yet</div>
+                <div class="arrow-down red" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-info" style="max-width:260px">
+                  "DNS propagation can take up to 48 hours" &mdash; auto-poll every 30s
+                </div>
+                <div style="height:12px"></div>
+                <div class="branch-row" style="gap:12px">
+                  <div class="branch" style="max-width:180px">
+                    <div class="node node-process" style="min-width:160px;font-size:11px">
+                      <div class="node-label">Save & Resume Later</div>
+                      <div class="node-desc">Store progress, email when verified</div>
+                    </div>
+                  </div>
+                  <div class="branch" style="max-width:140px">
+                    <div class="node node-process" style="min-width:120px;font-size:11px">
+                      <div class="node-label">Keep Waiting</div>
+                      <div class="node-desc">Continue polling</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="branch">
+                <div class="branch-label yes">Verified</div>
+                <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-success" style="font-size:12px">Green checkmark &mdash; proceed</div>
+              </div>
+            </div>
+
+            <div style="height:16px"></div>
+            <div class="arrow-down green"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Step 4 -->
+            <div class="node node-step">
+              <div class="step-header purple">Step 4</div>
+              <div class="step-body">
+                <div class="step-title">Configure Default Webhook</div>
+                <ul>
+                  <li>Enter webhook URL</li>
+                  <li>Test Webhook &rarr; Send test POST &rarr; Show response code</li>
+                </ul>
+              </div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Decision: Test result -->
+            <div class="node node-diamond">Webhook Test Result?</div>
+            <div style="height:8px"></div>
+            <div class="branch-row" style="gap:16px">
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label success">200 OK</div>
+                <div class="arrow-down green" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-success" style="font-size:11px">Green checkmark</div>
+              </div>
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label error">Error</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px">Show error, allow retry</div>
+              </div>
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label info">Skip</div>
+                <div class="arrow-down blue" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-info" style="font-size:11px">Configure later in Rules</div>
+              </div>
+            </div>
+
+            <div style="height:16px"></div>
+            <div class="arrow-down green"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Step 5 -->
+            <div class="node node-step">
+              <div class="step-header green">Step 5</div>
+              <div class="step-body">
+                <div class="step-title">Send Test Email</div>
+                <ul>
+                  <li>Display test email address: test@yourdomain.com</li>
+                  <li>Click "Send Test" &rarr; System sends test email to itself</li>
+                  <li>Wait for receipt (polling)</li>
+                </ul>
+              </div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Decision: Received? -->
+            <div class="node node-diamond">Email Received?</div>
+            <div style="height:8px"></div>
+            <div class="branch-row">
+              <div class="branch" style="max-width:220px">
+                <div class="branch-label yes">Received</div>
+                <div class="arrow-down green" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-success" style="font-size:12px">
+                  Show email in dashboard<br>"Inbound email is active!"
+                </div>
+              </div>
+              <div class="branch" style="max-width:220px">
+                <div class="branch-label timeout">Timeout</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:12px">Troubleshooting guide link</div>
+              </div>
+            </div>
+
+            <div style="height:16px"></div>
+            <div class="arrow-down green"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <!-- Complete -->
+            <div class="node node-complete">COMPLETE: Redirect to Received Emails page with confetti animation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================== -->
+  <!--  FLOW 2: DAILY EMAIL MONITORING                                     -->
+  <!-- ================================================================== -->
+  <section id="flow-2" class="flow-section">
+    <div class="flow-header green">
+      <span class="flow-tag green">Flow 2</span>
+      <h2>Daily Email Monitoring</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Review incoming emails, check for issues, handle failures</p>
+      <div class="flow-meta">
+        <div class="flow-meta-item"><strong>Persona:</strong> Sarah (Support Lead)</div>
+        <div class="flow-meta-item"><strong>Complexity:</strong> <span style="color:var(--yellow)">Medium</span></div>
+        <div class="flow-meta-item"><strong>Screens:</strong> Email List, Email Detail, Analytics</div>
+        <div class="flow-meta-item"><strong>Sprint:</strong> 5</div>
+      </div>
+    </div>
+
+    <div class="flowchart">
+      <div class="flowchart-inner">
+
+        <div class="node node-start">START: Sarah opens Dashboard</div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">Navigate to Emails &gt; Received</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">View email list</div>
+          <div class="node-desc">Scan status column for red (failed) items</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-diamond">Red items found?</div>
+        <div style="height:8px"></div>
+
+        <div class="branch-row">
+          <!-- Left: All green -->
+          <div class="branch">
+            <div class="branch-label no">All Green</div>
+            <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process" style="min-width:200px">
+              <div class="node-label">Check volume metrics</div>
+              <div class="node-desc">Compare to yesterday's volume</div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-diamond" style="min-width:150px">Normal volume?</div>
+            <div style="height:8px"></div>
+
+            <div class="branch-row" style="gap:12px">
+              <div class="branch" style="max-width:150px">
+                <div class="branch-label yes">Yes</div>
+                <div class="arrow-down green" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-success" style="font-size:11px">Done &mdash; all good</div>
+              </div>
+              <div class="branch" style="max-width:200px">
+                <div class="branch-label no">Volume Drop</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px">Check domain health &rarr; Check MX records</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Red items -->
+          <div class="branch">
+            <div class="branch-label yes" style="background:var(--red-bg);color:var(--red)">Red Items Found</div>
+            <div class="arrow-down red" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process" style="min-width:200px">
+              <div class="node-label">Click failed email</div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process">
+              <div class="node-label">View email detail</div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process">
+              <div class="node-label">Check webhook delivery log</div>
+            </div>
+            <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-diamond">Error type?</div>
+            <div style="height:8px"></div>
+
+            <!-- 3 error types -->
+            <div class="branch-3" style="max-width:700px">
+              <!-- 5xx -->
+              <div class="branch">
+                <div class="branch-label error">5xx Error</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px;max-width:200px">
+                  Customer's webhook server issue
+                </div>
+                <div style="height:8px"></div>
+                <div class="node node-process" style="min-width:160px;font-size:11px">
+                  <div class="node-label">Click "Retry Webhook"</div>
+                  <div class="node-desc">Resend webhook delivery</div>
+                </div>
+                <div class="arrow-down" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-diamond" style="min-width:140px;font-size:10px">Retry OK?</div>
+                <div style="height:6px"></div>
+                <div class="branch-row" style="gap:8px">
+                  <div class="branch" style="max-width:100px">
+                    <div class="branch-label yes" style="font-size:9px">Yes</div>
+                    <div class="arrow-down green" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                    <div class="node node-success" style="font-size:10px;padding:8px 12px">Resolved</div>
+                  </div>
+                  <div class="branch" style="max-width:120px">
+                    <div class="branch-label no" style="font-size:9px">Still Failing</div>
+                    <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                    <div class="node node-error" style="font-size:10px;padding:8px 12px">Contact customer</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Timeout -->
+              <div class="branch">
+                <div class="branch-label timeout">Timeout</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px;max-width:200px">
+                  Customer's server too slow
+                </div>
+                <div style="height:8px"></div>
+                <div class="node node-info" style="font-size:11px;max-width:200px">
+                  Advise: respond within 5 seconds, process async
+                </div>
+              </div>
+
+              <!-- 4xx -->
+              <div class="branch">
+                <div class="branch-label error">4xx Error</div>
+                <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px;max-width:200px">
+                  Permanent rejection
+                </div>
+                <div style="height:8px"></div>
+                <div class="node node-process" style="min-width:160px;font-size:11px">
+                  <div class="node-label">Check webhook URL validity</div>
+                  <div class="node-desc">Update rule if URL changed</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:24px"></div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-step">
+          <div class="step-header green">Analytics Review</div>
+          <div class="step-body">
+            <div class="step-title">Navigate to Analytics &gt; Inbound</div>
+            <ul>
+              <li>Check volume chart for anomalies</li>
+              <li>Check failed rate trend</li>
+              <li>Review top senders for spam patterns</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-complete">DONE: Monitoring complete</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================== -->
+  <!--  FLOW 3: RULE MANAGEMENT                                            -->
+  <!-- ================================================================== -->
+  <section id="flow-3" class="flow-section">
+    <div class="flow-header purple">
+      <span class="flow-tag purple">Flow 3</span>
+      <h2>Rule Management</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Create, test, and manage inbound routing rules</p>
+      <div class="flow-meta">
+        <div class="flow-meta-item"><strong>Persona:</strong> Sarah (Support Lead) + Alex (Developer)</div>
+        <div class="flow-meta-item"><strong>Complexity:</strong> <span style="color:var(--yellow)">Medium</span></div>
+        <div class="flow-meta-item"><strong>Screens:</strong> Rules List, Create/Edit Rule</div>
+        <div class="flow-meta-item"><strong>Sprint:</strong> 4 (API) + 5 (UI)</div>
+      </div>
+    </div>
+
+    <div class="flowchart">
+      <div class="flowchart-inner">
+
+        <div class="node node-start">START: Navigate to Inbound Rules</div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">View existing rules list</div>
+          <div class="node-desc">Ordered by priority</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <!-- 4 action branches -->
+        <div class="node node-diamond" style="min-width:200px">Choose Action</div>
+        <div style="height:12px"></div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; width:100%; max-width:900px;">
+
+          <!-- Create new rule -->
+          <div class="subflow">
+            <div class="subflow-title" style="color:var(--blue)">Create New Rule</div>
+            <div class="flowchart-inner" style="align-items:stretch">
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Click "+ Create Rule"</div>
+              </div>
+              <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header purple">Rule Form</div>
+                <div class="step-body">
+                  <ul>
+                    <li>Enter name: "Support Inbox"</li>
+                    <li>Select domain: "example.com"</li>
+                    <li>Enter match pattern: "support@"</li>
+                    <li>Select action: Webhook / Forward / Store</li>
+                    <li>Set priority: 0 (highest)</li>
+                    <li>Toggle active: ON</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-diamond" style="min-width:140px;font-size:11px">Validation?</div>
+              <div style="height:6px"></div>
+              <div class="branch-row" style="gap:8px">
+                <div class="branch" style="max-width:140px">
+                  <div class="branch-label yes" style="font-size:9px">Passed</div>
+                  <div class="arrow-down green" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-success" style="font-size:10px;padding:8px">Rule created, shown in list</div>
+                </div>
+                <div class="branch" style="max-width:140px">
+                  <div class="branch-label no" style="font-size:9px">Failed</div>
+                  <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-error" style="font-size:10px;padding:8px">Show inline errors, retry</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit existing rule -->
+          <div class="subflow">
+            <div class="subflow-title" style="color:var(--yellow)">Edit Existing Rule</div>
+            <div class="flowchart-inner" style="align-items:stretch">
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Click edit icon</div>
+              </div>
+              <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Modify fields</div>
+              </div>
+              <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Save Changes</div>
+                <div class="node-desc">Takes effect within 60 seconds</div>
+              </div>
+              <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-success" style="font-size:11px">Visual confirmation</div>
+            </div>
+          </div>
+
+          <!-- Toggle active -->
+          <div class="subflow">
+            <div class="subflow-title" style="color:var(--green)">Toggle Rule Active/Inactive</div>
+            <div class="flowchart-inner" style="align-items:stretch">
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Click toggle switch</div>
+              </div>
+              <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-success" style="font-size:11px">Immediate effect &mdash; visual confirmation</div>
+            </div>
+          </div>
+
+          <!-- Delete rule -->
+          <div class="subflow">
+            <div class="subflow-title" style="color:var(--red)">Delete Rule</div>
+            <div class="flowchart-inner" style="align-items:stretch">
+              <div class="node node-process" style="min-width:unset">
+                <div class="node-label">Click delete icon</div>
+              </div>
+              <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-diamond" style="min-width:140px;font-size:11px">Confirm?</div>
+              <div style="height:6px"></div>
+              <div class="branch-row" style="gap:8px">
+                <div class="branch" style="max-width:120px">
+                  <div class="branch-label yes" style="font-size:9px">Confirm</div>
+                  <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-error" style="font-size:10px;padding:8px">Rule deleted</div>
+                </div>
+                <div class="branch" style="max-width:120px">
+                  <div class="branch-label no" style="font-size:9px">Cancel</div>
+                  <div class="arrow-down green" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-success" style="font-size:10px;padding:8px">No action</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:20px"></div>
+        <div class="node node-process" style="background:var(--surface-3)">
+          <div class="node-label">Reorder Priority</div>
+          <div class="node-desc">Drag and drop (future) OR edit priority number &rarr; Rules re-evaluated in new order</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================== -->
+  <!--  FLOW 4: DEVELOPER WEBHOOK INTEGRATION                             -->
+  <!-- ================================================================== -->
+  <section id="flow-4" class="flow-section">
+    <div class="flow-header orange">
+      <span class="flow-tag orange">Flow 4</span>
+      <h2>Developer Webhook Integration</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Implement webhook handler for inbound emails in their application</p>
+      <div class="flow-meta">
+        <div class="flow-meta-item"><strong>Persona:</strong> Alex (Developer)</div>
+        <div class="flow-meta-item"><strong>Complexity:</strong> <span style="color:var(--red)">High</span></div>
+        <div class="flow-meta-item"><strong>Screens:</strong> API Docs, Webhook Guide, Dashboard (debugging)</div>
+        <div class="flow-meta-item"><strong>Sprint:</strong> 5</div>
+      </div>
+    </div>
+
+    <div class="flowchart">
+      <div class="flowchart-inner">
+
+        <div class="node node-start">START: Alex reads API Documentation</div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">Navigate to Webhook Integration Guide</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-step">
+          <div class="step-header orange">Read Payload Schema</div>
+          <div class="step-body">
+            <ul>
+              <li>Understand JSON structure</li>
+              <li>Note HMAC-SHA256 signature in X-EaaS-Signature header</li>
+              <li>Note timestamp for replay protection</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">Choose language: Node.js / Python / C# / Go</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-process">
+          <div class="node-label">Copy webhook handler code snippet</div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <!-- Implementation Steps -->
+        <div class="node node-step" style="max-width:560px">
+          <div class="step-header blue">Implement in Application</div>
+          <div class="step-body">
+            <div class="step-title">7 Implementation Steps</div>
+            <ul>
+              <li><strong style="color:var(--text)">Step 1:</strong> Create endpoint &rarr; POST /webhooks/email</li>
+              <li><strong style="color:var(--text)">Step 2:</strong> Verify HMAC signature (extract header, compute HMAC-SHA256, timing-safe compare)</li>
+              <li><strong style="color:var(--text)">Step 3:</strong> Check timestamp &rarr; Reject if &gt; 5 minutes old</li>
+              <li><strong style="color:var(--text)">Step 4:</strong> Check idempotency &rarr; Store message ID, skip duplicates</li>
+              <li><strong style="color:var(--text)">Step 5:</strong> Acknowledge fast &rarr; Return 200 within 500ms</li>
+              <li><strong style="color:var(--text)">Step 6:</strong> Enqueue for processing (Redis, RabbitMQ, SQS)</li>
+              <li><strong style="color:var(--text)">Step 7:</strong> Process async (parse email, thread matching, download attachments, business logic)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <!-- Testing with ngrok -->
+        <div class="node node-step" style="max-width:560px">
+          <div class="step-header yellow">Test with ngrok</div>
+          <div class="step-body">
+            <ul>
+              <li>Run ngrok http 3000</li>
+              <li>Update webhook URL in EaaS rule to ngrok URL</li>
+              <li>Send test email</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-diamond">Webhook received?</div>
+        <div style="height:8px"></div>
+
+        <div class="branch-row">
+          <div class="branch">
+            <div class="branch-label yes">Received</div>
+            <div class="arrow-down green" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process" style="min-width:200px">
+              <div class="node-label">Inspect payload in app logs</div>
+            </div>
+            <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-diamond" style="min-width:150px">Signature valid?</div>
+            <div style="height:6px"></div>
+            <div class="branch-row" style="gap:12px">
+              <div class="branch" style="max-width:200px">
+                <div class="branch-label yes">Yes</div>
+                <div class="arrow-down green" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-diamond" style="min-width:130px;font-size:10px">Parsed OK?</div>
+                <div style="height:6px"></div>
+                <div class="branch-row" style="gap:6px">
+                  <div class="branch" style="max-width:100px">
+                    <div class="branch-label yes" style="font-size:9px">Yes</div>
+                    <div class="arrow-down green" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                    <div class="node node-success" style="font-size:10px;padding:6px 10px">Working!</div>
+                  </div>
+                  <div class="branch" style="max-width:100px">
+                    <div class="branch-label no" style="font-size:9px">No</div>
+                    <div class="arrow-down red" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                    <div class="node node-error" style="font-size:10px;padding:6px 10px">Debug parsing</div>
+                  </div>
+                </div>
+              </div>
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label no">No</div>
+                <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-error" style="font-size:11px">Check webhook secret matches</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="branch">
+            <div class="branch-label no">Not Received</div>
+            <div class="arrow-down red" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-process" style="min-width:200px">
+              <div class="node-label">Check EaaS dashboard logs</div>
+            </div>
+            <div class="arrow-down" style="height:24px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+            <div class="node node-diamond" style="min-width:150px;font-size:11px">Delivery attempted?</div>
+            <div style="height:6px"></div>
+            <div class="branch-row" style="gap:8px">
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label yes" style="font-size:9px">Yes</div>
+                <div class="arrow-down" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-info" style="font-size:10px;padding:8px">Check ngrok logs, firewall</div>
+              </div>
+              <div class="branch" style="max-width:160px">
+                <div class="branch-label no" style="font-size:9px">No</div>
+                <div class="arrow-down" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                <div class="node node-info" style="font-size:10px;padding:8px">Check rule matches, email received</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:24px"></div>
+        <div class="arrow-down green"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <!-- Deploy to production -->
+        <div class="node node-step" style="max-width:480px">
+          <div class="step-header green">Deploy to Production</div>
+          <div class="step-body">
+            <ul>
+              <li>Update webhook URL to production endpoint</li>
+              <li>Configure HTTPS (required)</li>
+              <li>Set up monitoring for webhook failures</li>
+              <li>Test with real email</li>
+            </ul>
+          </div>
+        </div>
+        <div class="arrow-down green"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+        <div class="node node-complete">DONE: Inbound integration complete</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================== -->
+  <!--  FLOW 5: ERROR FLOWS                                                -->
+  <!-- ================================================================== -->
+  <section id="flow-5" class="flow-section">
+    <div class="flow-header red">
+      <span class="flow-tag red">Flow 5</span>
+      <h2>Error Flows</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Handle common error scenarios across the inbound email system</p>
+      <div class="flow-meta">
+        <div class="flow-meta-item"><strong>Personas:</strong> Various (Alex, Sarah, System)</div>
+        <div class="flow-meta-item"><strong>Sub-flows:</strong> 4</div>
+      </div>
+    </div>
+
+    <!-- 5a: DNS Verification Failure -->
+    <div class="error-section">
+      <h3 style="color:var(--red)">5a: DNS Verification Failure</h3>
+      <p class="error-desc">User adds MX records but verification fails</p>
+
+      <div class="flowchart" style="padding:24px">
+        <div class="flowchart-inner">
+          <div class="node node-process">
+            <div class="node-label">User adds MX records &rarr; Click Verify</div>
+          </div>
+          <div class="arrow-down red"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="node node-error">DNS check fails</div>
+          <div class="arrow-down" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="branch-3" style="max-width:900px">
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">MX Not Found</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red">Error: MX record not found</div>
+                <div class="step-body">
+                  <ul>
+                    <li>"MX record for example.com not detected"</li>
+                    <li>Check DNS provider, verify record values</li>
+                    <li>Wait for propagation</li>
+                    <li>Link: Provider-specific guides</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">Wrong MX Value</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red">Error: Value mismatch</div>
+                <div class="step-body">
+                  <ul>
+                    <li>"MX record found but value doesn't match"</li>
+                    <li>Show expected vs actual values</li>
+                    <li>"Copy correct value" button</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">Conflicting MX</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red">Error: Multiple MX records</div>
+                <div class="step-body">
+                  <ul>
+                    <li>"EaaS must be the only MX"</li>
+                    <li>Remove existing MX records</li>
+                    <li>Or use a subdomain instead</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5b: Webhook Delivery Failure -->
+    <div class="error-section">
+      <h3 style="color:var(--orange)">5b: Webhook Delivery Failure</h3>
+      <p class="error-desc">Inbound email received, rule matched, webhook dispatch fails</p>
+
+      <div class="flowchart" style="padding:24px">
+        <div class="flowchart-inner">
+          <div class="node node-process">
+            <div class="node-label">Inbound email received &rarr; Rule matched &rarr; Dispatch webhook</div>
+          </div>
+          <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="node node-process">
+            <div class="node-label">POST to customer webhook URL</div>
+          </div>
+          <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="node node-diamond" style="min-width:200px">Response Code?</div>
+          <div style="height:10px"></div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:16px; width:100%; max-width:1000px;">
+            <!-- 2xx -->
+            <div class="branch">
+              <div class="branch-label success" style="font-size:10px">2xx</div>
+              <div class="arrow-down green" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-success" style="font-size:11px;padding:10px">Success &rarr; Log delivery</div>
+            </div>
+
+            <!-- 4xx -->
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">4xx</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red" style="font-size:9px">Permanent Failure</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Log error with response body</li>
+                    <li>Email stored (not lost)</li>
+                    <li>Dashboard: "Webhook Failed (4xx)"</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5xx -->
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">5xx</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header orange" style="font-size:9px">Retry Loop</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <table class="retry-table">
+                    <thead><tr><th>Retry</th><th>Delay</th></tr></thead>
+                    <tbody>
+                      <tr><td>1</td><td>1 minute</td></tr>
+                      <tr><td>2</td><td>5 minutes</td></tr>
+                      <tr><td>3</td><td>30 minutes</td></tr>
+                      <tr><td>4</td><td>2 hours</td></tr>
+                      <tr><td>5</td><td>8 hours</td></tr>
+                      <tr><td>6</td><td>24 hours</td></tr>
+                      <tr><td>7</td><td>48 hours</td></tr>
+                      <tr><td>8</td><td>72 hours &rarr; EXHAUSTED</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-error" style="font-size:10px;padding:8px 12px">Dead letter queue + Alert</div>
+            </div>
+
+            <!-- Timeout -->
+            <div class="branch">
+              <div class="branch-label timeout" style="font-size:10px">Timeout (&gt;10s)</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-info" style="font-size:11px;padding:10px">Treat as 5xx &rarr; Enter retry loop</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5c: Inbound Email Processing Failure -->
+    <div class="error-section">
+      <h3 style="color:var(--yellow)">5c: Inbound Email Processing Failure</h3>
+      <p class="error-desc">Internal system failures during email processing pipeline</p>
+
+      <div class="flowchart" style="padding:24px">
+        <div class="flowchart-inner">
+          <div class="node node-process">
+            <div class="node-label">SNS notification received &rarr; Fetch MIME from S3</div>
+          </div>
+          <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="node node-diamond" style="min-width:180px">Failure Point?</div>
+          <div style="height:10px"></div>
+
+          <div class="branch-3" style="max-width:900px">
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">S3 Fetch Failed</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header orange" style="font-size:9px">MassTransit Retry</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Retry 1: 5 seconds</li>
+                    <li>Retry 2: 30 seconds</li>
+                    <li>Retry 3: 120 seconds</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-error" style="font-size:10px;padding:8px">All failed &rarr; Dead letter + Alert</div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">MIME Parse Failed</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red" style="font-size:9px">Malformed Email</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Store raw MIME (forensic access)</li>
+                    <li>Create InboundEmail status=Failed</li>
+                    <li>Log parse error details</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">DB Save Failed</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header orange" style="font-size:9px">MassTransit Retry</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Retry with exponential backoff</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="arrow-down red" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-error" style="font-size:10px;padding:8px">All failed &rarr; Dead letter + Alert</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5d: Spam/Virus Detection -->
+    <div class="error-section">
+      <h3 style="color:var(--purple)">5d: Spam / Virus Detection</h3>
+      <p class="error-desc">SES verdict processing for incoming emails</p>
+
+      <div class="flowchart" style="padding:24px">
+        <div class="flowchart-inner">
+          <div class="node node-process">
+            <div class="node-label">Inbound email received &rarr; Check SES verdicts</div>
+          </div>
+          <div class="arrow-down"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+          <div class="node node-diamond" style="min-width:180px">SES Verdict?</div>
+          <div style="height:10px"></div>
+
+          <div class="branch-3" style="max-width:900px">
+            <!-- Both pass -->
+            <div class="branch">
+              <div class="branch-label success" style="font-size:10px">Spam PASS + Virus PASS</div>
+              <div class="arrow-down green" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-success" style="font-size:11px">Normal processing</div>
+            </div>
+
+            <!-- Spam fail -->
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">Spam FAIL</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header yellow" style="font-size:9px">Spam Handling</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Store with spam_verdict = "fail"</li>
+                    <li>Show spam badge in dashboard</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="arrow-down" style="height:16px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-diamond" style="min-width:140px;font-size:10px">Threshold set?</div>
+              <div style="height:6px"></div>
+              <div class="branch-row" style="gap:8px">
+                <div class="branch" style="max-width:140px">
+                  <div class="branch-label yes" style="font-size:9px">Yes + Exceeds</div>
+                  <div class="arrow-down red" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-error" style="font-size:9px;padding:6px 10px">Skip webhook, mark spam</div>
+                </div>
+                <div class="branch" style="max-width:140px">
+                  <div class="branch-label no" style="font-size:9px">No / Under</div>
+                  <div class="arrow-down green" style="height:12px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+                  <div class="node node-info" style="font-size:9px;padding:6px 10px">Process normally, include verdict</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Virus fail -->
+            <div class="branch">
+              <div class="branch-label error" style="font-size:10px">Virus FAIL</div>
+              <div class="arrow-down red" style="height:20px"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+              <div class="node node-step" style="min-width:unset;max-width:unset">
+                <div class="step-header red" style="font-size:9px">Virus Quarantine</div>
+                <div class="step-body" style="padding:10px 14px">
+                  <ul>
+                    <li>Store metadata only (no attachments)</li>
+                    <li>Mark virus_verdict = "fail"</li>
+                    <li>Skip webhook dispatch</li>
+                    <li>Show virus alert in dashboard</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================================================================== -->
+  <!--  FLOW 6: SUMMARY MATRIX                                            -->
+  <!-- ================================================================== -->
+  <section id="summary" class="flow-section">
+    <div class="flow-header cyan">
+      <span class="flow-tag cyan">Summary</span>
+      <h2>Flow Summary Matrix</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Complete mapping of flows to personas, complexity, screens, and sprints</p>
+    </div>
+
+    <div class="flowchart" style="padding:0; overflow:hidden;">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Flow</th>
+            <th>Primary Persona</th>
+            <th>Screens Touched</th>
+            <th>Complexity</th>
+            <th>Sprint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>First-Time Setup</strong></td>
+            <td>Alex (Developer)</td>
+            <td>Domain Detail, Setup Wizard (5 steps)</td>
+            <td><span class="complexity-badge high">High</span></td>
+            <td><span class="sprint-badge">Sprint 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Daily Monitoring</strong></td>
+            <td>Sarah (Support Lead)</td>
+            <td>Email List, Email Detail, Analytics</td>
+            <td><span class="complexity-badge medium">Medium</span></td>
+            <td><span class="sprint-badge">Sprint 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Rule Management</strong></td>
+            <td>Sarah + Alex</td>
+            <td>Rules List, Create/Edit Rule</td>
+            <td><span class="complexity-badge medium">Medium</span></td>
+            <td><span class="sprint-badge">Sprint 4 + 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Webhook Integration</strong></td>
+            <td>Alex (Developer)</td>
+            <td>API Docs, Webhook Guide, Dashboard</td>
+            <td><span class="complexity-badge high">High</span></td>
+            <td><span class="sprint-badge">Sprint 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Error: DNS</strong></td>
+            <td>Alex (Developer)</td>
+            <td>Setup Wizard Step 3</td>
+            <td><span class="complexity-badge low">Low</span></td>
+            <td><span class="sprint-badge">Sprint 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Error: Webhook</strong></td>
+            <td>Sarah (Support Lead)</td>
+            <td>Email Detail, Webhook Logs</td>
+            <td><span class="complexity-badge medium">Medium</span></td>
+            <td><span class="sprint-badge">Sprint 5</span></td>
+          </tr>
+          <tr>
+            <td><strong>Error: Processing</strong></td>
+            <td>System</td>
+            <td>Dashboard (failed status)</td>
+            <td><span class="complexity-badge low">Low</span></td>
+            <td><span class="sprint-badge">Sprint 4</span></td>
+          </tr>
+          <tr>
+            <td><strong>Error: Spam/Virus</strong></td>
+            <td>System</td>
+            <td>Email Detail (verdict badges)</td>
+            <td><span class="complexity-badge low">Low</span></td>
+            <td><span class="sprint-badge">Sprint 6</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="doc-footer">
+  <p>EaaS Platform &mdash; User Flows & Flowcharts v1.0 &mdash; April 1, 2026 &mdash; UX Design Team</p>
+  <p style="margin-top:8px; color:var(--text-dim)">This document is confidential and intended for internal use only.</p>
+</footer>
+
+</body>
+</html>

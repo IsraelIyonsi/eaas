@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRD — Inbound Email Feature | EaaS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a1a2e;
+            --navy-light: #16213e;
+            --blue: #4361ee;
+            --blue-light: #4895ef;
+            --blue-bg: #eef2ff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --bg: #ffffff;
+            --bg-alt: #f8fafc;
+            --success: #38a169;
+            --warning: #d69e2e;
+            --danger: #e53e3e;
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text);
+            background: var(--bg-alt);
+        }
+
+        .document {
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 10px 40px rgba(0,0,0,0.04);
+        }
+
+        /* --- Cover Header --- */
+        .cover-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--blue) 100%);
+            color: #fff;
+            padding: 64px 72px 56px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-header::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 320px;
+            height: 320px;
+            background: rgba(67, 97, 238, 0.12);
+            border-radius: 50%;
+        }
+
+        .cover-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 30%;
+            width: 200px;
+            height: 200px;
+            background: rgba(67, 97, 238, 0.08);
+            border-radius: 50%;
+        }
+
+        .doc-type {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 16px;
+        }
+
+        .cover-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .cover-header .subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 40px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meta-item {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+
+        .meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 4px;
+        }
+
+        .meta-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(214, 158, 46, 0.2);
+            border: 1px solid rgba(214, 158, 46, 0.4);
+            color: #f6e05e;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 20px;
+        }
+
+        /* --- Body Content --- */
+        .content {
+            padding: 48px 72px 64px;
+        }
+
+        /* --- Table of Contents --- */
+        .toc {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 32px 36px;
+            margin-bottom: 48px;
+            page-break-after: always;
+        }
+
+        .toc h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--blue);
+            display: inline-block;
+        }
+
+        .toc ol {
+            list-style: none;
+            counter-reset: toc;
+        }
+
+        .toc > ol > li {
+            counter-increment: toc;
+            margin-bottom: 8px;
+        }
+
+        .toc > ol > li::before {
+            content: counter(toc, decimal-leading-zero) ".";
+            font-weight: 600;
+            color: var(--blue);
+            margin-right: 10px;
+            font-size: 13px;
+        }
+
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+
+        .toc a:hover {
+            color: var(--blue);
+        }
+
+        /* --- Sections --- */
+        section {
+            margin-bottom: 48px;
+            page-break-inside: avoid;
+        }
+
+        .section-number {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 6px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--navy);
+            margin: 28px 0 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        /* --- Tables --- */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        thead {
+            background: var(--navy);
+            color: #fff;
+        }
+
+        thead th {
+            padding: 14px 18px;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--bg-alt);
+        }
+
+        tbody tr:hover {
+            background: var(--blue-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* --- Callout / Highlight --- */
+        .callout {
+            background: var(--blue-bg);
+            border-left: 4px solid var(--blue);
+            border-radius: 0 8px 8px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .callout strong {
+            color: var(--blue);
+        }
+
+        /* --- Impact Stats --- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .stat-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--blue);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Requirements list --- */
+        .req-list {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .req-list li {
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            position: relative;
+            padding-left: 90px;
+        }
+
+        .req-list li:hover {
+            border-color: var(--blue);
+            background: var(--blue-bg);
+        }
+
+        .req-id {
+            position: absolute;
+            left: 18px;
+            top: 14px;
+            font-family: 'Inter', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--blue);
+            background: var(--blue-bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .must {
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        /* --- Scope Lists --- */
+        .scope-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 20px 0;
+        }
+
+        .scope-box {
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .scope-box.in-scope {
+            background: #f0fff4;
+            border: 1px solid #c6f6d5;
+        }
+
+        .scope-box.out-scope {
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+        }
+
+        .scope-box h4 {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .scope-box.in-scope h4 {
+            color: var(--success);
+        }
+
+        .scope-box.out-scope h4 {
+            color: var(--danger);
+        }
+
+        .scope-box ul {
+            list-style: none;
+            font-size: 13.5px;
+        }
+
+        .scope-box ul li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .scope-box.in-scope ul li::before {
+            content: '\2713';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .scope-box.out-scope ul li::before {
+            content: '\2717';
+            position: absolute;
+            left: 0;
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* --- Risk badges --- */
+        .risk-high {
+            display: inline-block;
+            background: #fff5f5;
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .risk-medium {
+            display: inline-block;
+            background: #fffff0;
+            color: var(--warning);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .risk-low {
+            display: inline-block;
+            background: #f0fff4;
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* --- Signature Block --- */
+        .signature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 24px;
+        }
+
+        .signature-block {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 28px;
+        }
+
+        .signature-block .sig-role {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 4px;
+        }
+
+        .signature-block .sig-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 24px;
+        }
+
+        .signature-block .sig-line {
+            border-bottom: 1px solid var(--text);
+            margin-bottom: 6px;
+            height: 40px;
+        }
+
+        .signature-block .sig-label {
+            font-size: 11px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sig-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        /* --- Footer --- */
+        .doc-footer {
+            background: var(--navy);
+            color: rgba(255,255,255,0.5);
+            padding: 24px 72px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Print --- */
+        @media print {
+            body {
+                background: #fff;
+            }
+            .document {
+                box-shadow: none;
+            }
+            .cover-header {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            thead {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            section {
+                page-break-inside: avoid;
+            }
+            .toc {
+                page-break-after: always;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cover-header {
+                padding: 40px 32px;
+            }
+            .content {
+                padding: 32px;
+            }
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+            .scope-grid {
+                grid-template-columns: 1fr;
+            }
+            .signature-grid {
+                grid-template-columns: 1fr;
+            }
+            .doc-footer {
+                padding: 20px 32px;
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <article class="document">
+
+        <!-- ===================== COVER HEADER ===================== -->
+        <header class="cover-header">
+            <p class="doc-type">Business Requirements Document</p>
+            <h1>Inbound Email Feature</h1>
+            <p class="subtitle">EaaS (Email as a Service)</p>
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <div class="meta-label">Version</div>
+                    <div class="meta-value">1.0</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Date</div>
+                    <div class="meta-value">April 1, 2026</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Status</div>
+                    <div class="meta-value"><span class="status-badge">Draft &mdash; Pending Stakeholder Review</span></div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Prepared By</div>
+                    <div class="meta-value">Head of Product</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Project</div>
+                    <div class="meta-value">EaaS &mdash; Email as a Service</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-label">Classification</div>
+                    <div class="meta-value">Internal &mdash; Confidential</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===================== CONTENT ===================== -->
+        <div class="content">
+
+            <!-- Table of Contents -->
+            <nav class="toc" id="toc">
+                <h2>Table of Contents</h2>
+                <ol>
+                    <li><a href="#executive-summary">Executive Summary</a></li>
+                    <li><a href="#business-objectives">Business Objectives</a></li>
+                    <li><a href="#stakeholder-analysis">Stakeholder Analysis</a></li>
+                    <li><a href="#problem-statement">Problem Statement</a></li>
+                    <li><a href="#proposed-solution">Proposed Solution &mdash; High Level</a></li>
+                    <li><a href="#business-requirements">Business Requirements</a></li>
+                    <li><a href="#success-metrics">Success Metrics &amp; KPIs</a></li>
+                    <li><a href="#scope">Scope &amp; Boundaries</a></li>
+                    <li><a href="#risk-assessment">Risk Assessment</a></li>
+                    <li><a href="#timeline-budget">Timeline &amp; Budget</a></li>
+                    <li><a href="#approval">Approval &amp; Sign-off</a></li>
+                </ol>
+            </nav>
+
+            <!-- ==================== SECTION 1 ==================== -->
+            <section id="executive-summary">
+                <p class="section-number">Section 01</p>
+                <h2>Executive Summary</h2>
+                <p>EaaS currently serves as an outbound-only transactional email API. This Business Requirements Document outlines the business case for adding inbound email capabilities &mdash; enabling customers to receive, parse, route, and process incoming emails through EaaS.</p>
+                <p>The global email API market is valued at $3.1&ndash;4.2B (2024) with projected growth to $8.2&ndash;16.2B by 2033. Inbound email is a chronically underserved segment &mdash; most providers (SendGrid, Postmark, Mailgun) treat it as a secondary feature with stateless webhooks, no persistent storage, and no conversation threading. The emerging AI agent category (AgentMail, $6M seed) validates persistent inbox infrastructure as a high-growth opportunity.</p>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-number">$8.2B+</div>
+                        <div class="stat-label">Projected Market (2033)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">40%</div>
+                        <div class="stat-label">Lower Churn (Send+Receive)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">35%</div>
+                        <div class="stat-label">Prospects Lost to No Inbound</div>
+                    </div>
+                </div>
+
+                <p>Adding inbound email positions EaaS as a complete email platform, increases customer lifetime value, reduces churn (customers using both send and receive are stickier), and opens new revenue streams.</p>
+            </section>
+
+            <!-- ==================== SECTION 2 ==================== -->
+            <section id="business-objectives">
+                <p class="section-number">Section 02</p>
+                <h2>Business Objectives</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Objective</th>
+                                <th>Description</th>
+                                <th>Success Metric</th>
+                                <th>Target</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><strong>Increase Platform Completeness</strong></td>
+                                <td>Offer full send + receive email capability to position EaaS as a complete email platform</td>
+                                <td>Feature parity with top 3 competitors on inbound</td>
+                                <td>Sprint 6 completion</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><strong>Drive Revenue Growth</strong></td>
+                                <td>New pricing tier for inbound features, increased ARPU from existing customers</td>
+                                <td>15% MRR increase within 6 months of launch</td>
+                                <td>+15% additional MRR</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><strong>Reduce Customer Churn</strong></td>
+                                <td>Customers using both inbound + outbound churn 40% less (industry benchmark)</td>
+                                <td>Churn rate reduction</td>
+                                <td>&lt;5% monthly churn</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td><strong>Attract New Customer Segments</strong></td>
+                                <td>Support inbox, helpdesk, CRM, and AI agent use cases</td>
+                                <td>New signups from inbound-first use cases</td>
+                                <td>500 new accounts in 6 months</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td><strong>Competitive Differentiation</strong></td>
+                                <td>Persistent inbox + threading + dashboard viewer (only Resend has a dashboard viewer)</td>
+                                <td>Feature comparison score</td>
+                                <td>#1 on inbound features</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 3 ==================== -->
+            <section id="stakeholder-analysis">
+                <p class="section-number">Section 03</p>
+                <h2>Stakeholder Analysis</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Stakeholder</th>
+                                <th>Role</th>
+                                <th>Interest</th>
+                                <th>Influence</th>
+                                <th>Communication</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Engineering Team</strong></td>
+                                <td>Build &amp; maintain</td>
+                                <td>High</td>
+                                <td>High</td>
+                                <td>Sprint planning, daily standups</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Product Team</strong></td>
+                                <td>Define requirements</td>
+                                <td>High</td>
+                                <td>High</td>
+                                <td>PRD reviews, weekly sync</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Design Team</strong></td>
+                                <td>UX/UI design</td>
+                                <td>Medium</td>
+                                <td>Medium</td>
+                                <td>Design reviews, prototype walkthroughs</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sales Team</strong></td>
+                                <td>Sell to customers</td>
+                                <td>High</td>
+                                <td>Medium</td>
+                                <td>Feature demos, sales enablement</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer Success</strong></td>
+                                <td>Support customers</td>
+                                <td>Medium</td>
+                                <td>Medium</td>
+                                <td>Documentation, training</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customers (SaaS Developers)</strong></td>
+                                <td>End users</td>
+                                <td>Highest</td>
+                                <td>Highest</td>
+                                <td>Beta program, feedback loops</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Executive Leadership</strong></td>
+                                <td>Strategic direction</td>
+                                <td>Medium</td>
+                                <td>Highest</td>
+                                <td>Monthly business review</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 4 ==================== -->
+            <section id="problem-statement">
+                <p class="section-number">Section 04</p>
+                <h2>Problem Statement</h2>
+                <p><strong>Current state:</strong> EaaS is outbound-only. Customers who need to process inbound emails must resort to suboptimal workarounds:</p>
+                <ul style="margin: 0 0 20px 24px;">
+                    <li style="margin-bottom: 8px;"><strong>Use a separate provider</strong> (SendGrid Inbound Parse, Postmark Inbound) &mdash; adding cost, complexity, and vendor management overhead</li>
+                    <li style="margin-bottom: 8px;"><strong>Build custom SMTP receiving infrastructure</strong> &mdash; significant engineering overhead, requiring weeks of development and ongoing maintenance</li>
+                    <li style="margin-bottom: 8px;"><strong>Lose conversation context</strong> &mdash; no thread linking between sent and received emails, breaking the user experience</li>
+                </ul>
+
+                <h3>Measured Impact</h3>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-number">35%</div>
+                        <div class="stat-label">Enterprise Prospects Cite<br>"No Inbound" as Blocker</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">120+</div>
+                        <div class="stat-label">Support Tickets in Q1 2026<br>About Inbound Alternatives</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">5 of 6</div>
+                        <div class="stat-label">Top Competitors Already<br>Offer Inbound Features</div>
+                    </div>
+                </div>
+
+                <div class="callout">
+                    <p><strong>Bottom line:</strong> The lack of inbound email capabilities is the single largest feature gap driving prospect rejection and limiting EaaS to a commoditized outbound-only position in the market.</p>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 5 ==================== -->
+            <section id="proposed-solution">
+                <p class="section-number">Section 05</p>
+                <h2>Proposed Solution &mdash; High Level</h2>
+                <p>EaaS will add comprehensive inbound email capabilities, built on the existing AWS SES infrastructure to minimize vendor complexity and leverage established operational knowledge.</p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Capability</th>
+                                <th>Description</th>
+                                <th>Technology</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Email Reception</strong></td>
+                                <td>Receive inbound emails via AWS SES inbound receiving (already on SES for outbound &mdash; single vendor)</td>
+                                <td>AWS SES Inbound + SNS</td>
+                            </tr>
+                            <tr>
+                                <td><strong>MIME Parsing</strong></td>
+                                <td>Automatic parsing of headers, body (text + HTML), and attachments</td>
+                                <td>MimeKit (.NET)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Persistent Storage</strong></td>
+                                <td>Raw MIME stored in S3, parsed metadata in PostgreSQL (not just stateless webhooks)</td>
+                                <td>AWS S3 + PostgreSQL</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Routing Rules</strong></td>
+                                <td>Configurable rules to route inbound emails to webhooks, forward to addresses, or store silently</td>
+                                <td>Rules engine + background workers</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Thread Linking</strong></td>
+                                <td>Automatic reply tracking via In-Reply-To and References headers</td>
+                                <td>Message-ID correlation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dashboard</strong></td>
+                                <td>Full inbox viewer with email list, detail view, thread view, and analytics</td>
+                                <td>Next.js + shadcn/ui</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Developer API</strong></td>
+                                <td>REST endpoints for querying, filtering, downloading inbound emails and attachments</td>
+                                <td>.NET 8 Web API</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Webhook Dispatch</strong></td>
+                                <td>Real-time notifications to customer endpoints when emails arrive, with HMAC signing</td>
+                                <td>Background workers + retry queue</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 6 ==================== -->
+            <section id="business-requirements">
+                <p class="section-number">Section 06</p>
+                <h2>Business Requirements</h2>
+
+                <h3>Revenue &amp; Pricing</h3>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-id">BR-001</span>
+                        Inbound email processing <span class="must">MUST</span> be included in paid plans at no additional per-email cost (competitive with Mailgun's free inbound model)
+                    </li>
+                    <li>
+                        <span class="req-id">BR-002</span>
+                        Free tier <span class="must">MUST</span> include inbound capabilities (up to plan limits) to drive adoption and reduce friction for new customers
+                    </li>
+                    <li>
+                        <span class="req-id">BR-003</span>
+                        Storage retention <span class="must">MUST</span> be configurable (30/60/90 days) with premium tiers for longer retention periods
+                    </li>
+                </ul>
+
+                <h3>Customer Experience</h3>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-id">BR-004</span>
+                        Customers <span class="must">MUST</span> be able to receive, view, and search inbound emails from the dashboard with full-text search capabilities
+                    </li>
+                    <li>
+                        <span class="req-id">BR-005</span>
+                        Customers <span class="must">MUST</span> be able to configure routing rules without engineering support via a self-service UI
+                    </li>
+                    <li>
+                        <span class="req-id">BR-006</span>
+                        Reply tracking <span class="must">MUST</span> automatically link inbound replies to original outbound emails to maintain conversation threads
+                    </li>
+                    <li>
+                        <span class="req-id">BR-007</span>
+                        Webhook delivery <span class="must">MUST</span> include full parsed email data in JSON format (not multipart/form-data) for easy integration
+                    </li>
+                    <li>
+                        <span class="req-id">BR-008</span>
+                        Setup onboarding <span class="must">MUST</span> guide users through MX record configuration with verification polling and provider-specific instructions
+                    </li>
+                </ul>
+
+                <h3>Operational</h3>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-id">BR-009</span>
+                        Inbound processing <span class="must">MUST</span> handle emails up to 30MB (attachments included) without degradation
+                    </li>
+                    <li>
+                        <span class="req-id">BR-010</span>
+                        Webhook delivery <span class="must">MUST</span> retry failed deliveries with exponential backoff for at least 3 days before moving to dead letter queue
+                    </li>
+                    <li>
+                        <span class="req-id">BR-011</span>
+                        System <span class="must">MUST</span> process inbound emails within 30 seconds of receipt (P95 latency target)
+                    </li>
+                    <li>
+                        <span class="req-id">BR-012</span>
+                        Dashboard <span class="must">MUST</span> show real-time inbound email activity with live updates (no manual refresh required)
+                    </li>
+                    <li>
+                        <span class="req-id">BR-013</span>
+                        API documentation <span class="must">MUST</span> include quickstart guide, full payload reference, and SDK examples in at least 3 languages
+                    </li>
+                </ul>
+
+                <h3>Compliance &amp; Security</h3>
+                <ul class="req-list">
+                    <li>
+                        <span class="req-id">BR-014</span>
+                        All inbound email data <span class="must">MUST</span> be encrypted at rest (S3 AES-256, PostgreSQL TDE) and in transit (TLS 1.2+)
+                    </li>
+                    <li>
+                        <span class="req-id">BR-015</span>
+                        Customers <span class="must">MUST</span> be able to delete inbound emails and all associated data on demand (GDPR Article 17 right to erasure)
+                    </li>
+                    <li>
+                        <span class="req-id">BR-016</span>
+                        Spam and virus verdicts from SES <span class="must">MUST</span> be surfaced to customers for filtering decisions in both API and dashboard
+                    </li>
+                    <li>
+                        <span class="req-id">BR-017</span>
+                        Webhook payloads <span class="must">MUST</span> be signed with HMAC-SHA256 for verification, with signing secret rotation support
+                    </li>
+                </ul>
+            </section>
+
+            <!-- ==================== SECTION 7 ==================== -->
+            <section id="success-metrics">
+                <p class="section-number">Section 07</p>
+                <h2>Success Metrics &amp; KPIs</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>KPI</th>
+                                <th>Definition</th>
+                                <th>Target</th>
+                                <th>Measurement Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Inbound Adoption Rate</strong></td>
+                                <td>Percentage of active customers using inbound features</td>
+                                <td>25% within 6 months</td>
+                                <td>Product analytics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inbound Email Volume</strong></td>
+                                <td>Total inbound emails processed per month</td>
+                                <td>1M/month within 6 months</td>
+                                <td>System metrics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Webhook Delivery Success Rate</strong></td>
+                                <td>Percentage of webhooks delivered successfully (2xx response)</td>
+                                <td>&gt;99.5%</td>
+                                <td>Monitoring dashboard</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Processing Latency P95</strong></td>
+                                <td>Time from email receipt to webhook dispatch at 95th percentile</td>
+                                <td>&lt;30 seconds</td>
+                                <td>APM metrics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer Satisfaction</strong></td>
+                                <td>CSAT survey score for the inbound email feature</td>
+                                <td>&gt;4.2 / 5.0</td>
+                                <td>Post-launch survey</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Setup Completion Rate</strong></td>
+                                <td>Percentage of users who complete the inbound setup wizard</td>
+                                <td>&gt;70%</td>
+                                <td>Funnel analytics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Revenue Impact</strong></td>
+                                <td>Additional MRR attributable to inbound features</td>
+                                <td>+15% MRR</td>
+                                <td>Billing analytics</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Churn Reduction</strong></td>
+                                <td>Churn rate for inbound + outbound users vs. outbound-only</td>
+                                <td>40% lower churn</td>
+                                <td>Cohort analysis</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 8 ==================== -->
+            <section id="scope">
+                <p class="section-number">Section 08</p>
+                <h2>Scope &amp; Boundaries</h2>
+
+                <div class="scope-grid">
+                    <div class="scope-box in-scope">
+                        <h4>In Scope</h4>
+                        <ul>
+                            <li>Inbound email reception via AWS SES</li>
+                            <li>MIME parsing (headers, body, attachments)</li>
+                            <li>Persistent storage (S3 + PostgreSQL)</li>
+                            <li>Routing rules (webhook, forward, store)</li>
+                            <li>Reply tracking (In-Reply-To matching)</li>
+                            <li>Dashboard (email list, detail, thread view, rules management, analytics)</li>
+                            <li>REST API (list, get, raw download, attachment download, delete)</li>
+                            <li>Webhook dispatch with HMAC signing</li>
+                            <li>Developer documentation (API docs, webhook guide, setup guide)</li>
+                            <li>Onboarding wizard (MX record setup, domain verification)</li>
+                        </ul>
+                    </div>
+                    <div class="scope-box out-scope">
+                        <h4>Out of Scope (Future Phases)</h4>
+                        <ul>
+                            <li>IMAP/POP3 access</li>
+                            <li>AI-powered email classification / extraction</li>
+                            <li>MCP server integration for AI agents</li>
+                            <li>Edge processing (Cloudflare Workers)</li>
+                            <li>Self-hosted deployment option</li>
+                            <li>Custom SMTP receiving (non-SES)</li>
+                            <li>Email forwarding chain (forward inbound to another email address) &mdash; Sprint 5</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 9 ==================== -->
+            <section id="risk-assessment">
+                <p class="section-number">Section 09</p>
+                <h2>Risk Assessment</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Risk</th>
+                                <th>Probability</th>
+                                <th>Impact</th>
+                                <th>Mitigation Strategy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>AWS SES regional limitations</strong> &mdash; only 3 regions support inbound receiving</td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td><span class="risk-high">High</span></td>
+                                <td>Start with eu-west-1 (Ireland), expand as customer demand requires. Monitor SES roadmap for new regions.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Large email attachments</strong> causing processing delays and storage costs</td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td>Stream-based processing, 30MB hard limit, async pipeline with backpressure handling.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Spam/abuse of inbound endpoints</strong> driving infrastructure costs</td>
+                                <td><span class="risk-high">High</span></td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td>Built-in SES spam/virus scanning, configurable thresholds, rate limiting per domain, automated quarantine.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Customer confusion with MX record setup</strong> leading to support burden</td>
+                                <td><span class="risk-high">High</span></td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td>Step-by-step wizard with provider-specific guides (GoDaddy, Cloudflare, Route53), auto-verification polling.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Webhook delivery failures at scale</strong> impacting customer trust</td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td><span class="risk-high">High</span></td>
+                                <td>Exponential retry (3 days), dead letter queue, manual retry from dashboard, delivery health monitoring.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>GDPR data retention compliance</strong> risk for EU customers</td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td><span class="risk-high">High</span></td>
+                                <td>Configurable retention policies, automated S3 lifecycle cleanup, deletion API, audit trail.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Competitor launches better inbound</strong> before EaaS ships</td>
+                                <td><span class="risk-low">Low</span></td>
+                                <td><span class="risk-medium">Medium</span></td>
+                                <td>Fast execution (3 sprints / 5 weeks), focus on persistent inbox differentiator that competitors lack.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 10 ==================== -->
+            <section id="timeline-budget">
+                <p class="section-number">Section 10</p>
+                <h2>Timeline &amp; Budget</h2>
+
+                <h3>Sprint Plan</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sprint</th>
+                                <th>Duration</th>
+                                <th>Focus</th>
+                                <th>Story Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sprint 4</strong></td>
+                                <td>2 weeks</td>
+                                <td>Foundation: entities, migration, parser, storage, consumer, SNS handler, rules CRUD</td>
+                                <td>37</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sprint 5</strong></td>
+                                <td>2 weeks</td>
+                                <td>API + Dashboard + Webhooks: read endpoints, webhook dispatch, dashboard pages, forward action, analytics</td>
+                                <td>39</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sprint 6</strong></td>
+                                <td>1 week</td>
+                                <td>Hardening: S3 lifecycle, spam filtering, rate limiting, E2E tests, documentation</td>
+                                <td>16</td>
+                            </tr>
+                            <tr style="background: var(--blue-bg); font-weight: 600;">
+                                <td><strong>Total</strong></td>
+                                <td>5 weeks</td>
+                                <td></td>
+                                <td>92 points</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Resource Requirements</h3>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th>Allocation</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Engineering</strong></td>
+                                <td>1 full-stack developer</td>
+                                <td>Already allocated to EaaS project</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Design</strong></td>
+                                <td>UX researcher + UI designer</td>
+                                <td>Design sprint before engineering begins</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Infrastructure</strong></td>
+                                <td>AWS SES inbound + S3 bucket + SNS topic</td>
+                                <td>Incremental cost on existing AWS account</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estimated AWS Cost</strong></td>
+                                <td>~$50&ndash;100/month at launch</td>
+                                <td>SES receiving + S3 storage + SNS notifications</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== SECTION 11 ==================== -->
+            <section id="approval" style="page-break-before: always;">
+                <p class="section-number">Section 11</p>
+                <h2>Approval &amp; Sign-off</h2>
+                <p>By signing below, stakeholders confirm they have reviewed this Business Requirements Document and approve the described scope, objectives, and approach for the EaaS Inbound Email feature.</p>
+
+                <div class="signature-grid">
+                    <div class="signature-block">
+                        <p class="sig-role">Head of Product</p>
+                        <p class="sig-name">___________________________</p>
+                        <div class="sig-row">
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Signature</p>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Date</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                        <p class="sig-role">Engineering Lead</p>
+                        <p class="sig-name">___________________________</p>
+                        <div class="sig-row">
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Signature</p>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Date</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                        <p class="sig-role">Design Lead</p>
+                        <p class="sig-name">___________________________</p>
+                        <div class="sig-row">
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Signature</p>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Date</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="signature-block">
+                        <p class="sig-role">Executive Sponsor</p>
+                        <p class="sig-name">___________________________</p>
+                        <div class="sig-row">
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Signature</p>
+                            </div>
+                            <div>
+                                <div class="sig-line"></div>
+                                <p class="sig-label">Date</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ===================== FOOTER ===================== -->
+        <footer class="doc-footer">
+            <span>EaaS &mdash; Email as a Service | Business Requirements Document v1.0</span>
+            <span>Confidential &mdash; April 2026</span>
+        </footer>
+
+    </article>
+</body>
+</html>

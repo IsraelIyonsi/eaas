@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { EmailStatus, DomainStatus, HealthStatus } from "@/types";
+import type { EmailStatus, DomainStatus, HealthStatus, TenantStatus, AdminRole } from "@/types";
 
 const emailStatusConfig: Record<
   EmailStatus,
@@ -14,6 +14,10 @@ const emailStatusConfig: Record<
   },
   sending: {
     label: "Sending",
+    className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  },
+  sent: {
+    label: "Sent",
     className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   },
   delivered: {
@@ -46,19 +50,19 @@ const domainStatusConfig: Record<
   DomainStatus,
   { label: string; className: string }
 > = {
-  pending_verification: {
+  PendingVerification: {
     label: "Pending",
     className: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   },
-  verified: {
+  Verified: {
     label: "Verified",
     className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
   },
-  failed: {
+  Failed: {
     label: "Failed",
     className: "bg-red-500/15 text-red-400 border-red-500/30",
   },
-  suspended: {
+  Suspended: {
     label: "Suspended",
     className: "bg-red-600/15 text-red-500 border-red-600/30",
   },
@@ -151,6 +155,66 @@ export function SuppressionReasonBadge({
     },
   };
   const config = labels[reason] ?? labels.manual;
+  return (
+    <Badge
+      variant="outline"
+      className={cn("text-xs font-medium", config.className)}
+    >
+      {config.label}
+    </Badge>
+  );
+}
+
+const tenantStatusConfig: Record<
+  TenantStatus,
+  { label: string; className: string }
+> = {
+  active: {
+    label: "Active",
+    className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  },
+  suspended: {
+    label: "Suspended",
+    className: "bg-red-500/15 text-red-400 border-red-500/30",
+  },
+  deactivated: {
+    label: "Deactivated",
+    className: "bg-gray-500/15 text-gray-400 border-gray-500/30",
+  },
+};
+
+export function TenantStatusBadge({ status }: { status: TenantStatus }) {
+  const config = tenantStatusConfig[status] ?? tenantStatusConfig.active;
+  return (
+    <Badge
+      variant="outline"
+      className={cn("text-xs font-medium", config.className)}
+    >
+      {config.label}
+    </Badge>
+  );
+}
+
+const adminRoleConfig: Record<
+  AdminRole,
+  { label: string; className: string }
+> = {
+  superadmin: {
+    label: "Super Admin",
+    className: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  },
+  admin: {
+    label: "Admin",
+    className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  },
+  readonly: {
+    label: "Read Only",
+    className: "bg-gray-500/15 text-gray-400 border-gray-500/30",
+  },
+};
+
+export function AdminRoleBadge({ role }: { role: AdminRole }) {
+  const config = adminRoleConfig[role] ?? adminRoleConfig.readonly;
   return (
     <Badge
       variant="outline"

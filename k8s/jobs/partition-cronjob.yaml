@@ -1,0 +1,106 @@
+# Monthly partition creation CronJob
+# Creates next month's partitions for time-series tables (email_events, webhook_events, etc.)
+# Runs on the 25th to give 5+ days buffer before the new month starts
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: eaas-partition-manager
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-partition-manager
+    app.kubernetes.io/component: maintenance
+    app.kubernetes.io/part-of: eaas
+spec:
+  schedule: "0 0 25 * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      ttlSecondsAfterFinished: 86400
+      activeDeadlineSeconds: 300
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: eaas-partition-manager
+            app.kubernetes.io/component: maintenance
+            app.kubernetes.io/part-of: eaas
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: eaas-migration
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: partition-manager
+              image: postgres:16-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  # Calculate next month's partition boundaries
+                  NEXT_MONTH=$(date -d "+1 month" +%Y-%m-01)
+                  MONTH_AFTER=$(date -d "+2 months" +%Y-%m-01)
+                  PARTITION_SUFFIX=$(date -d "+1 month" +%Y_%m)
+
+                  echo "Creating partitions for ${PARTITION_SUFFIX} (${NEXT_MONTH} to ${MONTH_AFTER})"
+
+                  psql "$CONNECTION_STRING" <<EOF
+                  -- Email events partition
+                  CREATE TABLE IF NOT EXISTS email_events_${PARTITION_SUFFIX}
+                    PARTITION OF email_events
+                    FOR VALUES FROM ('${NEXT_MONTH}') TO ('${MONTH_AFTER}');
+
+                  -- Webhook events partition
+                  CREATE TABLE IF NOT EXISTS webhook_events_${PARTITION_SUFFIX}
+                    PARTITION OF webhook_events
+                    FOR VALUES FROM ('${NEXT_MONTH}') TO ('${MONTH_AFTER}');
+
+                  -- Inbound emails partition
+                  CREATE TABLE IF NOT EXISTS inbound_emails_${PARTITION_SUFFIX}
+                    PARTITION OF inbound_emails
+                    FOR VALUES FROM ('${NEXT_MONTH}') TO ('${MONTH_AFTER}');
+
+                  -- Create indexes on new partitions
+                  CREATE INDEX IF NOT EXISTS idx_email_events_${PARTITION_SUFFIX}_tenant
+                    ON email_events_${PARTITION_SUFFIX} (tenant_id, created_at);
+                  CREATE INDEX IF NOT EXISTS idx_email_events_${PARTITION_SUFFIX}_message
+                    ON email_events_${PARTITION_SUFFIX} (message_id);
+                  CREATE INDEX IF NOT EXISTS idx_webhook_events_${PARTITION_SUFFIX}_tenant
+                    ON webhook_events_${PARTITION_SUFFIX} (tenant_id, created_at);
+
+                  SELECT 'Partitions created successfully for ${PARTITION_SUFFIX}';
+                  EOF
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: eaas-secrets
+                      key: Database__Password
+                - name: CONNECTION_STRING
+                  value: "postgresql://eaas_app@eaas-pgbouncer:6432/eaas"
+              resources:
+                requests:
+                  memory: "64Mi"
+                  cpu: "50m"
+                limits:
+                  memory: "128Mi"
+                  cpu: "100m"
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 10Mi

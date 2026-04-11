@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EaaS Inbound Mail — Competitive Research & Market Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0f172a;
+            --navy-light: #1e293b;
+            --navy-mid: #334155;
+            --slate: #64748b;
+            --slate-light: #94a3b8;
+            --sky: #0ea5e9;
+            --sky-light: #38bdf8;
+            --sky-bg: #f0f9ff;
+            --emerald: #10b981;
+            --emerald-bg: #ecfdf5;
+            --amber: #f59e0b;
+            --amber-bg: #fffbeb;
+            --rose: #f43f5e;
+            --rose-bg: #fff1f2;
+            --violet: #8b5cf6;
+            --violet-bg: #f5f3ff;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--navy);
+            background: var(--gray-50);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--navy) 0%, #1a2744 50%, #1e3a5f 100%);
+            color: var(--white);
+            padding: 60px 0 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: 10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--sky) 0%, var(--violet) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--sky-light);
+        }
+
+        .header h1 {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .header .subtitle {
+            font-size: 18px;
+            color: var(--slate-light);
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 32px;
+            font-size: 13px;
+            color: var(--slate-light);
+        }
+
+        .header-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-meta strong {
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 40px;
+            margin: 40px auto;
+            max-width: 1100px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .toc h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
+        }
+
+        .toc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 40px;
+        }
+
+        .toc a {
+            color: var(--navy-mid);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.15s;
+        }
+
+        .toc a:hover {
+            color: var(--sky);
+        }
+
+        .toc-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--slate);
+            flex-shrink: 0;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 44px 48px;
+            margin: 24px auto;
+            max-width: 1100px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--gray-100);
+        }
+
+        .section-num {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+        }
+
+        .section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--navy);
+            margin: 28px 0 14px;
+            letter-spacing: -0.3px;
+        }
+
+        .section p {
+            margin-bottom: 16px;
+            color: var(--navy-mid);
+        }
+
+        .section ul, .section ol {
+            margin: 12px 0 16px 20px;
+            color: var(--navy-mid);
+        }
+
+        .section li {
+            margin-bottom: 8px;
+        }
+
+        /* Key stats row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy);
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .stat-card.sky { border-top: 3px solid var(--sky); }
+        .stat-card.emerald { border-top: 3px solid var(--emerald); }
+        .stat-card.violet { border-top: 3px solid var(--violet); }
+        .stat-card.amber { border-top: 3px solid var(--amber); }
+
+        /* Provider Cards */
+        .provider-card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .provider-header {
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .provider-header h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+
+        .provider-header .provider-tag {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+        }
+
+        .provider-sendgrid .provider-header { background: linear-gradient(135deg, #1a73e8, #0d47a1); }
+        .provider-postmark .provider-header { background: linear-gradient(135deg, #ffbe0b, #e09200); }
+        .provider-mailgun .provider-header { background: linear-gradient(135deg, #f06b59, #c0392b); }
+        .provider-ses .provider-header { background: linear-gradient(135deg, #ff9900, #cc7a00); }
+        .provider-resend .provider-header { background: linear-gradient(135deg, #000000, #333333); }
+        .provider-agentmail .provider-header { background: linear-gradient(135deg, var(--violet), #6d28d9); }
+
+        .provider-body {
+            padding: 28px;
+        }
+
+        .provider-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .provider-detail {
+            padding: 0;
+        }
+
+        .provider-detail h4 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--slate);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        .provider-detail p {
+            font-size: 14px;
+            color: var(--navy-mid);
+            margin-bottom: 0;
+            line-height: 1.6;
+        }
+
+        .provider-detail.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .strengths-weaknesses {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sw-list h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .sw-list.strengths h4 { color: var(--emerald); }
+        .sw-list.weaknesses h4 { color: var(--rose); }
+
+        .sw-list ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sw-list ul li {
+            font-size: 13px;
+            padding: 4px 0;
+            color: var(--navy-mid);
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .sw-list.strengths li::before { content: '+'; color: var(--emerald); font-weight: 700; }
+        .sw-list.weaknesses li::before { content: '-'; color: var(--rose); font-weight: 700; }
+
+        .callout {
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 14px;
+        }
+
+        .callout.info { background: var(--sky-bg); color: #0369a1; border-left: 3px solid var(--sky); }
+        .callout.warning { background: var(--amber-bg); color: #92400e; border-left: 3px solid var(--amber); }
+        .callout.success { background: var(--emerald-bg); color: #065f46; border-left: 3px solid var(--emerald); }
+        .callout.danger { background: var(--rose-bg); color: #9f1239; border-left: 3px solid var(--rose); }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead th {
+            background: var(--navy);
+            color: var(--white);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        thead th:first-child {
+            border-radius: 11px 0 0 0;
+        }
+
+        thead th:last-child {
+            border-radius: 0 11px 0 0;
+        }
+
+        tbody td {
+            padding: 11px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--navy-mid);
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--gray-50);
+        }
+
+        tbody tr:hover {
+            background: var(--sky-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        td .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge.yes { background: var(--emerald-bg); color: #065f46; }
+        .badge.no { background: var(--rose-bg); color: #9f1239; }
+        .badge.partial { background: var(--amber-bg); color: #92400e; }
+        .badge.na { background: var(--gray-100); color: var(--slate); }
+
+        /* Pricing bar charts */
+        .price-bar-container {
+            margin: 24px 0;
+        }
+
+        .price-bar-row {
+            display: grid;
+            grid-template-columns: 140px 1fr 80px;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        .price-bar-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            text-align: right;
+        }
+
+        .price-bar-track {
+            height: 30px;
+            background: var(--gray-100);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .price-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            transition: width 0.5s ease;
+        }
+
+        .price-bar-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Gap analysis */
+        .gap-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .gap-row {
+            display: grid;
+            grid-template-columns: 200px repeat(6, 1fr);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .gap-row.header {
+            background: var(--navy);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .gap-row.header > div {
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .gap-row > div {
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--navy-mid);
+            display: flex;
+            align-items: center;
+        }
+
+        .gap-row:nth-child(even) {
+            background: var(--gray-50);
+        }
+
+        .gap-feature {
+            font-weight: 600;
+            color: var(--navy) !important;
+        }
+
+        /* Trends */
+        .trend-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px 24px;
+            margin: 14px 0;
+        }
+
+        .trend-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 8px;
+        }
+
+        .trend-card p {
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .trend-card.trend-ai { border-left: 4px solid var(--violet); }
+        .trend-card.trend-auth { border-left: 4px solid var(--sky); }
+        .trend-card.trend-privacy { border-left: 4px solid var(--emerald); }
+        .trend-card.trend-edge { border-left: 4px solid var(--amber); }
+        .trend-card.trend-market { border-left: 4px solid var(--rose); }
+
+        /* Recommendations */
+        .rec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .rec-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .rec-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .rec-card:nth-child(1)::before { background: var(--sky); }
+        .rec-card:nth-child(2)::before { background: var(--emerald); }
+        .rec-card:nth-child(3)::before { background: var(--violet); }
+        .rec-card:nth-child(4)::before { background: var(--amber); }
+
+        .rec-card h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 10px;
+        }
+
+        .rec-card p, .rec-card li {
+            font-size: 13px;
+        }
+
+        .rec-card ul {
+            margin: 8px 0 0 16px;
+        }
+
+        /* Sources */
+        .sources-list {
+            columns: 2;
+            column-gap: 40px;
+        }
+
+        .sources-list li {
+            font-size: 13px;
+            margin-bottom: 8px;
+            break-inside: avoid;
+        }
+
+        .sources-list a {
+            color: var(--sky);
+            text-decoration: none;
+        }
+
+        .sources-list a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--slate);
+            font-size: 13px;
+        }
+
+        .footer strong {
+            color: var(--navy);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 0 20px; }
+            .section { padding: 28px 24px; }
+            .header-inner { padding: 0 20px; }
+            .header h1 { font-size: 26px; }
+            .toc-grid { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .provider-grid { grid-template-columns: 1fr; }
+            .strengths-weaknesses { grid-template-columns: 1fr; }
+            .rec-grid { grid-template-columns: 1fr; }
+            .sources-list { columns: 1; }
+            .price-bar-row { grid-template-columns: 100px 1fr 70px; }
+            .header-meta { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">E</div>
+                <div class="logo-text">EaaS <span>Email as a Service</span></div>
+            </div>
+            <h1>Inbound Mail — Competitive Research<br>& Market Analysis</h1>
+            <p class="subtitle">Comprehensive analysis of the inbound email processing market, competitive landscape, pricing dynamics, and strategic positioning for EaaS.</p>
+            <div class="header-meta">
+                <span>Prepared by: <strong>Head of Product</strong></span>
+                <span>Date: <strong>April 1, 2026</strong></span>
+                <span>Classification: <strong>Internal — Strategic</strong></span>
+                <span>Version: <strong>1.0</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="toc container">
+        <h2>Table of Contents</h2>
+        <div class="toc-grid">
+            <a href="#executive-summary"><span class="toc-num">1</span> Executive Summary</a>
+            <a href="#market-landscape"><span class="toc-num">2</span> Market Landscape (2023-2026)</a>
+            <a href="#competitive-analysis"><span class="toc-num">3</span> Competitive Analysis — Deep Dive</a>
+            <a href="#comparison-matrix"><span class="toc-num">4</span> Comparison Matrix</a>
+            <a href="#pricing-analysis"><span class="toc-num">5</span> Pricing Analysis</a>
+            <a href="#new-entrants"><span class="toc-num">6</span> New Entrants (2023-2026)</a>
+            <a href="#feature-gap"><span class="toc-num">7</span> Feature Gap Analysis</a>
+            <a href="#industry-trends"><span class="toc-num">8</span> Industry Trends (2024-2026)</a>
+            <a href="#recommendations"><span class="toc-num">9</span> Strategic Recommendations</a>
+            <a href="#sources"><span class="toc-num">10</span> Sources</a>
+        </div>
+    </div>
+
+    <!-- 1. Executive Summary -->
+    <div class="section" id="executive-summary">
+        <div class="section-header">
+            <div class="section-num">1</div>
+            <h2>Executive Summary</h2>
+        </div>
+        <p>The Email-as-a-Service (EaaS) market represents a significant and growing opportunity, valued at <strong>$3.1-4.2 billion in 2024</strong> and projected to reach <strong>$8.2-16.2 billion by 2033</strong>. Within this landscape, inbound email processing remains a critically underserved segment. Most providers have historically treated inbound as an afterthought — a checkbox feature bolted onto outbound-first platforms rather than a first-class capability.</p>
+        <p>This creates a strategic opening. Developer demand for robust inbound email processing is accelerating, driven by three converging forces: the rise of AI agents that need to read, interpret, and respond to email autonomously; the shift toward unified communication platforms; and the growing complexity of email-driven business workflows (customer support, document ingestion, automated data extraction).</p>
+        <p>Our analysis of six major providers reveals consistent gaps: no provider offers a persistent inbox with conversation threading, structured data extraction, and self-hostable deployment in a single, developer-friendly package. The closest competitor — Resend — excels at developer experience but lacks maturity. AWS SES offers the cheapest raw processing but requires heavy engineering investment. The market is ready for a purpose-built inbound email solution that combines operational simplicity with advanced capabilities.</p>
+
+        <div class="stats-row">
+            <div class="stat-card sky">
+                <div class="stat-value">$3.1-4.2B</div>
+                <div class="stat-label">Market Size 2024</div>
+            </div>
+            <div class="stat-card emerald">
+                <div class="stat-value">$8.2-16.2B</div>
+                <div class="stat-label">Projected 2033</div>
+            </div>
+            <div class="stat-card violet">
+                <div class="stat-value">11.4-17.6%</div>
+                <div class="stat-label">CAGR</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-value">6</div>
+                <div class="stat-label">Providers Analyzed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Market Landscape -->
+    <div class="section" id="market-landscape">
+        <div class="section-header">
+            <div class="section-num">2</div>
+            <h2>Market Landscape (2023-2026)</h2>
+        </div>
+
+        <h3>Market Sizing</h3>
+        <p>The email API and EaaS market has experienced robust growth, fueled by digital transformation, cloud-first architectures, and the explosion of transactional email volume across SaaS, e-commerce, and fintech verticals.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Segment</th>
+                        <th>2024 Value</th>
+                        <th>2033 Projection</th>
+                        <th>CAGR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Total EaaS Market</strong></td>
+                        <td>$3.1-4.2B</td>
+                        <td>$8.2-16.2B</td>
+                        <td>11.4-17.6%</td>
+                    </tr>
+                    <tr>
+                        <td>Transactional Email Sub-market</td>
+                        <td>$2.1-4.2B</td>
+                        <td>$7.5-10.6B</td>
+                        <td>~13-15%</td>
+                    </tr>
+                    <tr>
+                        <td>North America Share</td>
+                        <td>~40%</td>
+                        <td>~38%</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Asia Pacific (Fastest Growth)</td>
+                        <td>~22%</td>
+                        <td>~28%</td>
+                        <td>>13.2%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Regional Dynamics</h3>
+        <ul>
+            <li><strong>North America (~40% share)</strong> — Remains the largest market, driven by SaaS density, enterprise adoption, and regulatory compliance requirements (CAN-SPAM, state privacy laws).</li>
+            <li><strong>Asia Pacific (>13.2% CAGR)</strong> — Fastest-growing region, propelled by digital transformation in India, Southeast Asia, and China. Rapidly expanding developer populations and cloud-native startups.</li>
+            <li><strong>Europe (~25% share)</strong> — Steady growth moderated by GDPR compliance costs, but increasing demand for EU-hosted email infrastructure (data sovereignty).</li>
+            <li><strong>Rest of World</strong> — Emerging opportunities in Latin America and Africa, especially in fintech corridors where transactional email is critical for payment notifications and KYC workflows.</li>
+        </ul>
+
+        <h3>Key Growth Drivers</h3>
+        <ul>
+            <li><strong>Automation & Workflow Integration</strong> — Businesses increasingly embed email processing into automated workflows (invoice processing, support ticket creation, order confirmation parsing).</li>
+            <li><strong>Cloud Adoption</strong> — Migration from on-premise mail servers to cloud APIs continues at ~20% annual transition rate.</li>
+            <li><strong>AI Agent Proliferation</strong> — The fastest-growing driver. AI agents require programmatic email access for communication, data extraction, and autonomous task completion. AgentMail's $6M seed round in March 2026 validates this category.</li>
+            <li><strong>Compliance & Authentication</strong> — Google/Yahoo enforcement of SPF+DKIM+DMARC (February 2024) increased demand for managed email services that handle authentication complexity.</li>
+        </ul>
+    </div>
+
+    <!-- 3. Competitive Analysis -->
+    <div class="section" id="competitive-analysis">
+        <div class="section-header">
+            <div class="section-num">3</div>
+            <h2>Competitive Analysis — Deep Dive</h2>
+        </div>
+        <p>Below is an in-depth analysis of six providers that offer inbound email processing capabilities, ranging from mature incumbents to fast-growing newcomers.</p>
+
+        <!-- SendGrid -->
+        <div class="provider-card provider-sendgrid">
+            <div class="provider-header">
+                <h3>SendGrid (Twilio)</h3>
+                <span class="provider-tag">Market Leader</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p>MX records point to SendGrid's servers. SendGrid parses incoming emails and POSTs parsed content to your webhook URL as <code>multipart/form-data</code>. The Inbound Parse Webhook delivers headers, body (text and HTML), attachments, and envelope data in a single HTTP request.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p>Spam scoring via SpamAssassin integration. SPF/DKIM verification on inbound messages. Option to receive raw, unparsed MIME for custom processing. Character set encoding and MIME boundary handling. Attachment extraction up to 30MB total.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing</h4>
+                        <p><strong>Free tier eliminated May 2025</strong> — replaced with 60-day trial only. Essentials plan starts at <strong>$19.95/mo</strong> (outbound only). Pro plan at <strong>$89.95/mo</strong> is required for inbound parse webhook functionality. Inbound is included in Pro plan pricing with no additional per-email charges.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Technical Specs</h4>
+                        <p>Max message size: <strong>30MB</strong>. Retry window: <strong>3 days</strong> (72 hours). Delivery format: <code>multipart/form-data</code> only. Dashboard provides sending stats but <strong>no inbox viewer</strong> for inbound messages.</p>
+                    </div>
+                </div>
+
+                <div class="callout warning">Developer sentiment: Significant migration wave to Resend and Postmark following the free tier removal in May 2025. Community forums and Reddit threads show growing frustration with perceived stagnation under Twilio ownership.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Most mature platform, battle-tested at scale</li>
+                            <li>Large ecosystem of integrations and libraries</li>
+                            <li>Inbound included in plan (no per-email charge)</li>
+                            <li>SpamAssassin scoring built-in</li>
+                            <li>Raw MIME option for advanced use cases</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>No dashboard inbox viewer for inbound</li>
+                            <li>Documentation gaps and outdated examples</li>
+                            <li>Character encoding issues reported</li>
+                            <li>Perceived as outdated/stagnant</li>
+                            <li>multipart/form-data only (no JSON option)</li>
+                            <li>Free tier removed — barrier to entry</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Postmark -->
+        <div class="provider-card provider-postmark">
+            <div class="provider-header">
+                <h3>Postmark (ActiveCampaign)</h3>
+                <span class="provider-tag">Premium Niche</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p>Two modes: (1) auto-generated inbound email addresses under a Postmark domain for quick testing, or (2) custom domains with MX records pointing to Postmark. Parsed emails are delivered as clean <strong>JSON webhook</strong> payloads to your configured URL. Each message stream supports one webhook URL.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p><strong>StrippedTextReply</strong> — automatically strips signatures, quoted text, and reply chains to extract just the new reply content. <strong>MailboxHash</strong> — supports plus-addressing (user+hash@domain) for routing. <strong>45-day retention</strong> of processed messages in dashboard. JSON/text/raw MIME view options.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing</h4>
+                        <p><strong>Free: 100 emails/mo permanent</strong> (no expiration). Basic: <strong>$15/mo</strong> for 10K emails. Pro: <strong>$16.50/mo</strong> — major price drop in August 2025 from $60.50/mo. Inbound included in all tiers. Volume pricing drops to ~$1.50/1K at scale.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Technical Specs</h4>
+                        <p>Max attachment size: <strong>35MB total</strong>. Dashboard Activity tab with <strong>retry button</strong> (unique among providers). JSON, text, and raw MIME viewing in dashboard. PascalCase JSON property naming convention.</p>
+                    </div>
+                </div>
+
+                <div class="callout info">Postmark's StrippedTextReply feature is unique in the market and extremely valuable for support ticket workflows where only the latest reply matters.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Best documentation in the industry</li>
+                            <li>Best deliverability reputation</li>
+                            <li>Clean JSON API (no form-data parsing)</li>
+                            <li>Transparent, predictable pricing</li>
+                            <li>StrippedTextReply — unique feature</li>
+                            <li>Dashboard retry button for failed webhooks</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>Single webhook URL per message stream</li>
+                            <li>More expensive at high volume vs. SES</li>
+                            <li>PascalCase JSON properties (non-standard)</li>
+                            <li>No regex-based routing</li>
+                            <li>Limited to ActiveCampaign ecosystem</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mailgun -->
+        <div class="provider-card provider-mailgun">
+            <div class="provider-header">
+                <h3>Mailgun (Sinch)</h3>
+                <span class="provider-tag">Developer Favorite</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p>Powerful <strong>Routes system</strong> with regex-based filters. Inbound emails match against defined routes, then are either forwarded to a webhook URL or stored in Mailgun's temporary storage (retrievable via API for up to 3 days). Routes can match on recipient, headers, or custom expressions.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p>Four expression types: <code>catch_all</code>, <code>match_recipient</code>, <code>match_header</code>, and <code>custom</code> (arbitrary expressions). Full regex support for pattern matching. <strong>Stripped text</strong> extraction (similar to Postmark). Store-and-forward for asynchronous processing. Built-in email validation API.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing</h4>
+                        <p><strong>Free: 100 emails/day</strong>. Foundation: <strong>$35/mo</strong> (includes inbound). Key differentiator: <strong>inbound email is completely free</strong> — no per-email charge regardless of volume. Outbound pricing applies only to sent emails. Scale plan available for high volume.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Technical Specs</h4>
+                        <p>Max message size: <strong>25MB</strong> (smallest among providers). Retry window: <strong>8 hours</strong> only. Dashboard Receiving tab with stored messages viewable for up to 3 days. Route count limited by plan tier.</p>
+                    </div>
+                </div>
+
+                <div class="callout success">Mailgun's regex-based routing is the most flexible in the market. It can route emails to different webhooks based on recipient patterns, header content, or custom expressions — ideal for multi-tenant applications.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Most flexible routing (full regex support)</li>
+                            <li>Inbound email is free (no per-email charge)</li>
+                            <li>Strong developer tools and SDKs</li>
+                            <li>Store-and-forward for async processing</li>
+                            <li>Email validation API included</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>25MB limit — smallest among competitors</li>
+                            <li>Route count limited by plan tier</li>
+                            <li>8-hour retry window (shortest in market)</li>
+                            <li>Pricing increases since Sinch acquisition</li>
+                            <li>3-day message storage only</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AWS SES -->
+        <div class="provider-card provider-ses">
+            <div class="provider-header">
+                <h3>AWS SES</h3>
+                <span class="provider-tag">Cost Leader</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p><strong>Receipt Rules</strong> define how inbound emails are processed. Emails are stored as raw MIME in <strong>S3</strong>, with notifications via <strong>SNS</strong> and optional processing via <strong>Lambda</strong> functions. SES Mail Manager (launched May 2024) adds managed routing, rules engines, and archiving as an optional managed layer at $50/mo per ingress endpoint.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p>S3 storage for raw MIME (unlimited retention). Lambda integration for custom processing. <strong>KMS encryption</strong> at rest. Built-in <strong>spam and virus scanning</strong>. Mail Manager adds managed rules, traffic policies, and email archiving. Deep integration with entire AWS ecosystem (SQS, EventBridge, Step Functions).</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing</h4>
+                        <p><strong>$0.10 per 1,000 emails</strong> — cheapest per-email cost at scale by a wide margin. S3 storage at standard rates. Lambda invocations included in free tier for most volumes. Mail Manager: <strong>$50/mo per ingress endpoint</strong> (adds managed features). No free tier for SES itself (but EC2-hosted gets 62K free/mo outbound).</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Technical Specs</h4>
+                        <p>Max message size: <strong>40MB</strong> (largest among providers). <strong>No built-in email parsing</strong> — raw MIME only, you must parse yourself. <strong>No webhook delivery</strong> — must build retrieval pipeline. <strong>Regional restrictions</strong>: inbound only available in 3 AWS regions (us-east-1, us-west-2, eu-west-1). No dashboard for viewing inbound emails.</p>
+                    </div>
+                </div>
+
+                <div class="callout danger">AWS SES is the cheapest option at scale but requires significant engineering investment. You must build your own MIME parser, webhook delivery system, dashboard, and error handling. Total cost of ownership includes substantial developer time.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Cheapest per-email cost at scale ($0.10/1K)</li>
+                            <li>Largest attachment limit (40MB)</li>
+                            <li>Deep AWS ecosystem integration</li>
+                            <li>Maximum control and customization</li>
+                            <li>KMS encryption, spam/virus scanning</li>
+                            <li>Unlimited storage via S3</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>No email parsing (raw MIME only)</li>
+                            <li>No webhook delivery — fully DIY</li>
+                            <li>Complex setup, steep learning curve</li>
+                            <li>Regional restrictions (only 3 regions)</li>
+                            <li>No dashboard for inbound viewing</li>
+                            <li>High total cost of ownership (dev time)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resend -->
+        <div class="provider-card provider-resend">
+            <div class="provider-header">
+                <h3>Resend</h3>
+                <span class="provider-tag">Fastest Growing</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p>Custom domain configured with MX records. Resend parses incoming emails and delivers a <strong>metadata-only webhook</strong> with envelope info and message ID. Full content (HTML, text, attachments) is retrieved via a separate <strong>API call</strong> using the message ID — a two-step retrieval pattern.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p><strong>Full inbox viewer in dashboard</strong> — the only provider with a complete email client-like experience for viewing inbound messages. HTML preview, attachment downloads, filter by to/from/subject. Persistent storage (messages don't expire). <strong>React Email</strong> integration for templating. Modern REST API with clean JSON responses.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing</h4>
+                        <p><strong>Free: 3,000 emails/mo permanent</strong> (most generous free tier). Pro: <strong>$20/mo</strong> for 50K emails. Simple, transparent pricing with no hidden fees. Inbound included in all tiers.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Technical Specs & Growth</h4>
+                        <p>Inbound feature launched late 2025. <strong>1M+ registered users</strong>. <strong>$5M annual revenue</strong> (2024). <strong>$21.5M total funding</strong>. Founded by Zeno Rocha (former Liferay). Fastest-growing email API company by user count and developer mindshare.</p>
+                    </div>
+                </div>
+
+                <div class="callout info">Resend's dashboard inbox viewer is a genuine differentiator — it's the only provider where product managers and support teams can see inbound emails without writing code. This reduces the "black box" problem that plagues other providers.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Best developer experience (DX) in market</li>
+                            <li>Modern, clean API design</li>
+                            <li>Transparent pricing, generous free tier</li>
+                            <li>Fastest integration time (~15 min to first email)</li>
+                            <li>Best dashboard with full inbox viewer</li>
+                            <li>Strong brand and community momentum</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>Very new — inbound launched late 2025</li>
+                            <li>Two-step retrieval (webhook + API call)</li>
+                            <li>Limited documentation on size limits</li>
+                            <li>No regex-based routing</li>
+                            <li>Unproven at high-volume enterprise scale</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AgentMail -->
+        <div class="provider-card provider-agentmail">
+            <div class="provider-header">
+                <h3>AgentMail (YC S25)</h3>
+                <span class="provider-tag">AI-First Newcomer</span>
+            </div>
+            <div class="provider-body">
+                <div class="provider-grid">
+                    <div class="provider-detail">
+                        <h4>How Inbound Works</h4>
+                        <p>Full inbox management system designed for AI agents. Provides persistent, addressable inboxes that agents can read, search, and respond to. Inbound emails are parsed, classified, and stored with full <strong>threading and labeling</strong>. <strong>Semantic search</strong> across inbox contents using embeddings.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Key Features</h4>
+                        <p><strong>AI email classification</strong> — automatic categorization of inbound emails by intent and priority. <strong>Structured data extraction</strong> — pulls key fields from unstructured email content (invoices, orders, etc.). <strong>MCP integration</strong> — works as a Model Context Protocol tool for LLM agents. <strong>Agent guardrails</strong> — configurable safety limits on agent email actions.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Pricing & Funding</h4>
+                        <p>Currently in <strong>early access</strong> — pricing not yet publicly available. Raised <strong>$6M seed round</strong> led by General Catalyst in March 2026. YC Summer 2025 batch. Pricing expected to target AI/ML budgets rather than traditional email API pricing.</p>
+                    </div>
+                    <div class="provider-detail">
+                        <h4>Market Position</h4>
+                        <p>First mover in the "email infrastructure for AI agents" category. Targeting the intersection of email APIs and AI agent frameworks. Integrates with LangChain, CrewAI, and AutoGPT ecosystems. Positioning as the default email layer for autonomous agents.</p>
+                    </div>
+                </div>
+
+                <div class="callout success">AgentMail validates the thesis that AI agents need purpose-built email infrastructure. Their $6M seed at the idea stage demonstrates investor confidence in this category. EaaS should build similar capabilities natively.</div>
+
+                <div class="strengths-weaknesses">
+                    <div class="sw-list strengths">
+                        <h4>Strengths</h4>
+                        <ul>
+                            <li>Built specifically for AI agents</li>
+                            <li>Persistent inboxes with full threading</li>
+                            <li>Semantic search across email content</li>
+                            <li>MCP integration (forward-looking)</li>
+                            <li>Structured data extraction built-in</li>
+                        </ul>
+                    </div>
+                    <div class="sw-list weaknesses">
+                        <h4>Weaknesses</h4>
+                        <ul>
+                            <li>Very new — no production track record</li>
+                            <li>Pricing TBD (risk of expensive positioning)</li>
+                            <li>Unproven at scale</li>
+                            <li>Narrow focus may limit market size</li>
+                            <li>No self-hosted option</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Comparison Matrix -->
+    <div class="section" id="comparison-matrix">
+        <div class="section-header">
+            <div class="section-num">4</div>
+            <h2>Comparison Matrix</h2>
+        </div>
+        <p>A comprehensive feature-by-feature comparison across all six providers analyzed in this report.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>SendGrid</th>
+                        <th>Postmark</th>
+                        <th>Mailgun</th>
+                        <th>AWS SES</th>
+                        <th>Resend</th>
+                        <th>AgentMail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Delivery Method</strong></td>
+                        <td>Webhook</td>
+                        <td>Webhook</td>
+                        <td>Webhook / Store</td>
+                        <td>S3 + SNS/Lambda</td>
+                        <td>Webhook + API</td>
+                        <td>API / SDK</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Payload Format</strong></td>
+                        <td>multipart/form-data</td>
+                        <td>JSON</td>
+                        <td>multipart/form-data</td>
+                        <td>Raw MIME</td>
+                        <td>JSON</td>
+                        <td>JSON</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Max Size</strong></td>
+                        <td>30MB</td>
+                        <td>35MB</td>
+                        <td>25MB</td>
+                        <td>40MB</td>
+                        <td>TBD</td>
+                        <td>TBD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email Parsing</strong></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes + AI</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Spam Scoring</strong></td>
+                        <td><span class="badge yes">SpamAssassin</span></td>
+                        <td><span class="badge partial">Basic</span></td>
+                        <td><span class="badge partial">Basic</span></td>
+                        <td><span class="badge yes">Built-in</span></td>
+                        <td><span class="badge partial">Basic</span></td>
+                        <td><span class="badge yes">AI-based</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dashboard Inbox</strong></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge partial">Activity tab</span></td>
+                        <td><span class="badge partial">Stored msgs</span></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge yes">Full viewer</span></td>
+                        <td><span class="badge yes">Full viewer</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email Storage</strong></td>
+                        <td><span class="badge no">No</span></td>
+                        <td><span class="badge partial">45 days</span></td>
+                        <td><span class="badge partial">3 days</span></td>
+                        <td><span class="badge yes">S3 (unlimited)</span></td>
+                        <td><span class="badge yes">Persistent</span></td>
+                        <td><span class="badge yes">Persistent</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Routing/Filtering</strong></td>
+                        <td><span class="badge partial">Basic</span></td>
+                        <td><span class="badge partial">MailboxHash</span></td>
+                        <td><span class="badge yes">Regex routes</span></td>
+                        <td><span class="badge yes">Receipt rules</span></td>
+                        <td><span class="badge partial">Basic</span></td>
+                        <td><span class="badge yes">AI + rules</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Retry Window</strong></td>
+                        <td>3 days</td>
+                        <td>45 days + retry btn</td>
+                        <td>8 hours</td>
+                        <td>N/A (S3)</td>
+                        <td>TBD</td>
+                        <td>N/A (stored)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Raw MIME Access</strong></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td><span class="badge yes">Only MIME</span></td>
+                        <td><span class="badge partial">Via API</span></td>
+                        <td><span class="badge partial">Via API</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Free Tier</strong></td>
+                        <td><span class="badge no">Removed</span></td>
+                        <td><span class="badge yes">100/mo</span></td>
+                        <td><span class="badge yes">100/day</span></td>
+                        <td><span class="badge no">Pay-per-use</span></td>
+                        <td><span class="badge yes">3K/mo</span></td>
+                        <td><span class="badge na">TBD</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Paid Starting At</strong></td>
+                        <td>$19.95/mo</td>
+                        <td>$15/mo</td>
+                        <td>$35/mo</td>
+                        <td>$0.10/1K</td>
+                        <td>$20/mo</td>
+                        <td>TBD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Maturity</strong></td>
+                        <td><span class="badge yes">High</span></td>
+                        <td><span class="badge yes">High</span></td>
+                        <td><span class="badge yes">High</span></td>
+                        <td><span class="badge yes">High</span></td>
+                        <td><span class="badge partial">Medium</span></td>
+                        <td><span class="badge no">Low</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Setup Complexity</strong></td>
+                        <td><span class="badge partial">Medium</span></td>
+                        <td><span class="badge yes">Low</span></td>
+                        <td><span class="badge partial">Medium</span></td>
+                        <td><span class="badge no">High</span></td>
+                        <td><span class="badge yes">Low</span></td>
+                        <td><span class="badge yes">Low</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Documentation</strong></td>
+                        <td><span class="badge partial">Fair</span></td>
+                        <td><span class="badge yes">Excellent</span></td>
+                        <td><span class="badge yes">Good</span></td>
+                        <td><span class="badge partial">Dense</span></td>
+                        <td><span class="badge yes">Good</span></td>
+                        <td><span class="badge partial">Early</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 5. Pricing Analysis -->
+    <div class="section" id="pricing-analysis">
+        <div class="section-header">
+            <div class="section-num">5</div>
+            <h2>Pricing Analysis</h2>
+        </div>
+
+        <h3>Entry-Level Pricing Comparison</h3>
+        <p>Monthly cost for the lowest paid tier that includes inbound email support.</p>
+
+        <div class="price-bar-container">
+            <div class="price-bar-row">
+                <div class="price-bar-label">AWS SES</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 3%; background: linear-gradient(90deg, #ff9900, #cc7a00); min-width: 60px;">Pay/use</div>
+                </div>
+                <div class="price-bar-value">$0.10/1K</div>
+            </div>
+            <div class="price-bar-row">
+                <div class="price-bar-label">Postmark</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 17%; background: linear-gradient(90deg, #ffbe0b, #e09200);">$15</div>
+                </div>
+                <div class="price-bar-value">$15/mo</div>
+            </div>
+            <div class="price-bar-row">
+                <div class="price-bar-label">SendGrid</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 22%; background: linear-gradient(90deg, #1a73e8, #0d47a1);">$19.95</div>
+                </div>
+                <div class="price-bar-value">$19.95/mo*</div>
+            </div>
+            <div class="price-bar-row">
+                <div class="price-bar-label">Resend</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 22%; background: linear-gradient(90deg, #333, #000);">$20</div>
+                </div>
+                <div class="price-bar-value">$20/mo</div>
+            </div>
+            <div class="price-bar-row">
+                <div class="price-bar-label">Mailgun</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 39%; background: linear-gradient(90deg, #f06b59, #c0392b);">$35</div>
+                </div>
+                <div class="price-bar-value">$35/mo</div>
+            </div>
+            <div class="price-bar-row">
+                <div class="price-bar-label">SendGrid Pro</div>
+                <div class="price-bar-track">
+                    <div class="price-bar-fill" style="width: 100%; background: linear-gradient(90deg, #1a73e8, #0d47a1);">$89.95 (inbound requires Pro)</div>
+                </div>
+                <div class="price-bar-value">$89.95/mo</div>
+            </div>
+        </div>
+        <p style="font-size: 12px; color: var(--slate);">* SendGrid Essentials ($19.95) is outbound-only. Inbound Parse requires Pro tier at $89.95/mo.</p>
+
+        <h3>Free Tier Comparison</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Free Emails</th>
+                        <th>Duration</th>
+                        <th>Inbound Included</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Resend</strong></td>
+                        <td>3,000/mo</td>
+                        <td>Permanent</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Most generous free tier</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mailgun</strong></td>
+                        <td>100/day (~3,000/mo)</td>
+                        <td>Permanent</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Inbound is free at all tiers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Postmark</strong></td>
+                        <td>100/mo</td>
+                        <td>Permanent</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Low volume but no expiration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SendGrid</strong></td>
+                        <td>—</td>
+                        <td>60-day trial</td>
+                        <td><span class="badge no">No</span></td>
+                        <td>Free tier removed May 2025</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AWS SES</strong></td>
+                        <td>—</td>
+                        <td>N/A</td>
+                        <td><span class="badge partial">Pay-per-use</span></td>
+                        <td>$0.10/1K from first email</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AgentMail</strong></td>
+                        <td>TBD</td>
+                        <td>TBD</td>
+                        <td><span class="badge na">TBD</span></td>
+                        <td>Early access only</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Pricing Sweet Spot for a New Entrant</h3>
+        <div class="callout success">
+            <strong>Recommended pricing strategy for EaaS:</strong>
+            <ul style="margin: 10px 0 0 20px; font-size: 13px;">
+                <li><strong>Free tier:</strong> 1,000-5,000 emails/mo permanent (match or beat Resend's 3K)</li>
+                <li><strong>Entry paid:</strong> $10-20/mo (undercut Resend at $20, match Postmark at $15)</li>
+                <li><strong>Inbound included free</strong> in all tiers (match Mailgun's approach)</li>
+                <li><strong>Volume pricing:</strong> $0.50-1.00/1K (between SES's $0.10 and managed providers' $1.50-3.00)</li>
+            </ul>
+        </div>
+
+        <h3>Cost at Scale: Managed vs. DIY</h3>
+        <p>AWS SES is the cheapest per-email option at $0.10/1K, but this ignores engineering costs. A typical SES-based inbound pipeline requires building: MIME parsing, webhook delivery, retry logic, a dashboard, error handling, and monitoring. Estimated engineering cost: <strong>80-160 hours</strong> ($12,000-$48,000 at market rates). Managed providers charge 10-20x more per email but eliminate this engineering burden entirely.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Volume (emails/mo)</th>
+                        <th>AWS SES</th>
+                        <th>Postmark</th>
+                        <th>Resend</th>
+                        <th>SendGrid Pro</th>
+                        <th>Mailgun</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>10,000</strong></td>
+                        <td>$1.00</td>
+                        <td>$15.00</td>
+                        <td>$20.00</td>
+                        <td>$89.95</td>
+                        <td>$35.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>50,000</strong></td>
+                        <td>$5.00</td>
+                        <td>$50.00</td>
+                        <td>$20.00</td>
+                        <td>$89.95</td>
+                        <td>$35.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>100,000</strong></td>
+                        <td>$10.00</td>
+                        <td>$100.00</td>
+                        <td>$80.00</td>
+                        <td>$89.95</td>
+                        <td>$75.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>500,000</strong></td>
+                        <td>$50.00</td>
+                        <td>$375.00</td>
+                        <td>$340.00</td>
+                        <td>$449.95</td>
+                        <td>$325.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>1,000,000</strong></td>
+                        <td>$100.00</td>
+                        <td>$650.00</td>
+                        <td>$600.00</td>
+                        <td>$749.95</td>
+                        <td>$550.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="font-size: 12px; color: var(--slate);">AWS SES costs exclude S3 storage, Lambda processing, engineering time, and Mail Manager fees. Managed provider costs are all-inclusive.</p>
+    </div>
+
+    <!-- 6. New Entrants -->
+    <div class="section" id="new-entrants">
+        <div class="section-header">
+            <div class="section-num">6</div>
+            <h2>New Entrants (2023-2026)</h2>
+        </div>
+        <p>The email infrastructure space has seen significant new investment and entrants, signaling growing demand and perceived market opportunity.</p>
+
+        <h3>Funded Startups & Notable Players</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Funding / Status</th>
+                        <th>Focus</th>
+                        <th>Inbound Support</th>
+                        <th>Key Differentiator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Resend</strong></td>
+                        <td>$21.5M total</td>
+                        <td>Developer-first email API</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Best DX, React Email, 1M+ users</td>
+                    </tr>
+                    <tr>
+                        <td><strong>AgentMail</strong></td>
+                        <td>$6M seed (Gen. Catalyst)</td>
+                        <td>AI agent email infrastructure</td>
+                        <td><span class="badge yes">Yes (core)</span></td>
+                        <td>Built for AI agents, MCP integration</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Loops</strong></td>
+                        <td>YC-backed</td>
+                        <td>Email for SaaS</td>
+                        <td><span class="badge no">Outbound only</span></td>
+                        <td>Beautiful UI, SaaS-specific workflows</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Plunk</strong></td>
+                        <td>Open source</td>
+                        <td>Self-hosted email platform</td>
+                        <td><span class="badge partial">Partial</span></td>
+                        <td>Open source, self-hostable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Inbound.new</strong></td>
+                        <td>Bootstrapped</td>
+                        <td>Inbound email processing</td>
+                        <td><span class="badge yes">Yes (core)</span></td>
+                        <td>Inbound-only focus</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Buttondown</strong></td>
+                        <td>Bootstrapped / profitable</td>
+                        <td>Newsletter + email</td>
+                        <td><span class="badge partial">Replies only</span></td>
+                        <td>Newsletter-first, clean API</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mailtrap</strong></td>
+                        <td>150K+ MAU</td>
+                        <td>Email testing + sending</td>
+                        <td><span class="badge partial">Testing only</span></td>
+                        <td>Best email testing/staging platform</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Open Source Alternatives</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Language</th>
+                        <th>GitHub Stars</th>
+                        <th>Inbound Support</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Postal</strong></td>
+                        <td>Ruby</td>
+                        <td>14K+</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Full mail server, webhook delivery, web UI</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Maddy</strong></td>
+                        <td>Go</td>
+                        <td>5K+</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Composable mail server, single binary</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Listmonk</strong></td>
+                        <td>Go</td>
+                        <td>15K+</td>
+                        <td><span class="badge partial">Bounces only</span></td>
+                        <td>Newsletter/mailing list manager</td>
+                    </tr>
+                    <tr>
+                        <td><strong>mailcow</strong></td>
+                        <td>Docker</td>
+                        <td>8K+</td>
+                        <td><span class="badge yes">Yes</span></td>
+                        <td>Docker-based mail suite, SOGo groupware</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout info">The open source alternatives provide inbound support but lack the developer-friendly APIs, managed infrastructure, and webhook delivery that modern applications require. They serve a different audience (self-hosted mail server operators) rather than API-first developers.</div>
+    </div>
+
+    <!-- 7. Feature Gap Analysis -->
+    <div class="section" id="feature-gap">
+        <div class="section-header">
+            <div class="section-num">7</div>
+            <h2>Feature Gap Analysis</h2>
+        </div>
+        <p>Key features that are underserved or missing across the competitive landscape. These gaps represent opportunities for differentiation.</p>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature Gap</th>
+                        <th>SendGrid</th>
+                        <th>Postmark</th>
+                        <th>Mailgun</th>
+                        <th>AWS SES</th>
+                        <th>Resend</th>
+                        <th>AgentMail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Persistent Inbox</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge partial">45d</span></td>
+                        <td><span class="badge partial">3d</span></td>
+                        <td><span class="badge partial">S3 DIY</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conversation Threading</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Structured Data Extraction</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge partial">Stripped text</span></td>
+                        <td><span class="badge partial">Stripped text</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multi-Domain Free</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge partial">Limited</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge partial">Limited</span></td>
+                        <td><span class="badge na">TBD</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Unified Send + Receive</strong></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                        <td><span class="badge partial">Receive focus</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>AI Classification</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Edge Processing</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge partial">Lambda@Edge</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>MCP Integration</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge yes">&#10003;</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Self-Hostable (Good DX)</strong></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge partial">AWS only</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                        <td><span class="badge no">&#10007;</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="callout warning">
+            <strong>Key insight:</strong> No single provider covers all nine gaps. The most underserved features are <strong>conversation threading</strong> (only AgentMail), <strong>AI classification</strong> (only AgentMail), <strong>MCP integration</strong> (only AgentMail), and <strong>self-hostable with good DX</strong> (no one). EaaS has an opportunity to be the first platform that addresses all of these in a unified, developer-friendly package.
+        </div>
+    </div>
+
+    <!-- 8. Industry Trends -->
+    <div class="section" id="industry-trends">
+        <div class="section-header">
+            <div class="section-num">8</div>
+            <h2>Industry Trends (2024-2026)</h2>
+        </div>
+        <p>Five macro-trends are reshaping the email infrastructure landscape and creating the conditions for a new entrant to capture significant market share.</p>
+
+        <div class="trend-card trend-ai">
+            <h4>1. AI-Powered Email Processing</h4>
+            <p>The convergence of LLMs and email is creating an entirely new category. <strong>AgentMail</strong> raised $6M specifically for AI agent email infrastructure. <strong>70% of marketers</strong> expect AI to drive the majority of email interactions by 2026. <strong>Cloudflare</strong> launched Workers AI with email processing capabilities. The market is moving from "parse email" to "understand email" — structured data extraction, intent classification, and autonomous response generation are becoming table stakes for next-gen email APIs.</p>
+        </div>
+
+        <div class="trend-card trend-auth">
+            <h4>2. Email Authentication Tightening</h4>
+            <p><strong>BIMI adoption grew 28%</strong> year-over-year, adding visual trust indicators to authenticated emails. <strong>ARC (Authenticated Received Chain)</strong> adoption is accelerating to handle forwarded email authentication. Most significantly, <strong>Google and Yahoo enforced SPF+DKIM+DMARC</strong> requirements for bulk senders starting February 2024, effectively making managed email services mandatory for businesses that can't handle the complexity themselves. This enforcement trend is driving migration from DIY SMTP to managed APIs.</p>
+        </div>
+
+        <div class="trend-card trend-privacy">
+            <h4>3. Privacy Regulation Expansion</h4>
+            <p><strong>Eight new US state privacy laws</strong> took effect in 2025 (Delaware, Iowa, Nebraska, New Hampshire, New Jersey, Tennessee, Minnesota, Maryland), joining California, Virginia, Colorado, Connecticut, Utah, Texas, Oregon, and Montana. <strong>GDPR enforcement intensified</strong> — Orange received a EUR 50M fine for email tracking violations. Demand for <strong>EU-hosted email infrastructure</strong> is surging as businesses seek data sovereignty guarantees. Self-hosted options gain appeal for compliance-sensitive industries.</p>
+        </div>
+
+        <div class="trend-card trend-edge">
+            <h4>4. Edge & Serverless Email Processing</h4>
+            <p><strong>Cloudflare Email Workers</strong> enable email processing at the edge with <strong>cold start times under 5ms</strong>. Cloudflare's developer ecosystem now exceeds <strong>3 million active developers</strong>. The serverless model aligns with how modern applications consume email — event-driven, pay-per-use, and globally distributed. This threatens traditional centralized email processing architectures and creates opportunities for edge-native email platforms.</p>
+        </div>
+
+        <div class="trend-card trend-market">
+            <h4>5. Competitive Landscape Shifts</h4>
+            <p><strong>SendGrid's free tier removal</strong> (May 2025) created a wave of developer migration, primarily benefiting Resend and Postmark. <strong>Mailgun price increases</strong> following the Sinch acquisition have eroded its "developer-friendly" positioning. <strong>Resend's explosive growth</strong> (0 to 1M+ users in ~2 years) demonstrates that modern developer experience can rapidly capture market share from incumbents. The market is in flux — loyalty is low, and developers are actively seeking alternatives.</p>
+        </div>
+    </div>
+
+    <!-- 9. Strategic Recommendations -->
+    <div class="section" id="recommendations">
+        <div class="section-header">
+            <div class="section-num">9</div>
+            <h2>Strategic Recommendations for EaaS</h2>
+        </div>
+        <p>Based on the competitive analysis, market dynamics, and identified gaps, the following strategic recommendations position EaaS to capture meaningful share in the inbound email processing market.</p>
+
+        <div class="rec-grid">
+            <div class="rec-card">
+                <h4>Position as the Developer-Friendly Alternative</h4>
+                <p>The market is actively looking for SendGrid alternatives. EaaS should position as the modern, developer-first platform with full inbound support as a first-class feature — not an afterthought.</p>
+                <ul>
+                    <li>Clean JSON API (follow Resend/Postmark patterns)</li>
+                    <li>Comprehensive SDKs (.NET, Node, Python, Go)</li>
+                    <li>Integration time under 15 minutes</li>
+                    <li>Excellent documentation from day one</li>
+                </ul>
+            </div>
+
+            <div class="rec-card">
+                <h4>Differentiate with a Unique Feature Bundle</h4>
+                <p>No competitor offers all of these in one package. This combination creates a defensible moat and appeals to both current developers and the growing AI agent market.</p>
+                <ul>
+                    <li><strong>Persistent inbox</strong> with full conversation threading</li>
+                    <li><strong>AI-powered parsing</strong> and structured data extraction</li>
+                    <li><strong>Self-hostable</strong> with Docker/single-binary deployment</li>
+                    <li><strong>Dashboard inbox viewer</strong> (match Resend's best feature)</li>
+                </ul>
+            </div>
+
+            <div class="rec-card">
+                <h4>Price Competitively with Permanent Free Tier</h4>
+                <p>SendGrid's free tier removal creates a vacuum. A generous, permanent free tier is the most effective developer acquisition channel.</p>
+                <ul>
+                    <li>Free: 3,000-5,000/mo permanent</li>
+                    <li>Inbound included free at all tiers</li>
+                    <li>Entry: $10-15/mo (undercut everyone)</li>
+                    <li>Volume: $0.50-1.00/1K at scale</li>
+                </ul>
+            </div>
+
+            <div class="rec-card">
+                <h4>Build for the AI Agent Future</h4>
+                <p>AgentMail's $6M raise proves investor appetite. EaaS should build AI agent capabilities natively rather than letting this become a separate category.</p>
+                <ul>
+                    <li>MCP (Model Context Protocol) integration</li>
+                    <li>Semantic search across inbox contents</li>
+                    <li>AI classification and intent detection</li>
+                    <li>Agent-friendly SDKs and guardrails</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="callout success">
+            <strong>Bottom line:</strong> EaaS should be "Resend's developer experience + AgentMail's AI capabilities + Postal's self-hostability" — a unique combination that no current provider offers. The market timing is ideal: incumbents are raising prices, developers are switching, and AI agents are creating net-new demand for inbound email infrastructure.
+        </div>
+    </div>
+
+    <!-- 10. Sources -->
+    <div class="section" id="sources">
+        <div class="section-header">
+            <div class="section-num">10</div>
+            <h2>Sources</h2>
+        </div>
+
+        <ol class="sources-list">
+            <li><a href="https://www.grandviewresearch.com/industry-analysis/email-marketing-software-market" target="_blank">Grand View Research — Email Marketing Software Market Report (2024-2033)</a></li>
+            <li><a href="https://www.futuremarketinsights.com/reports/transactional-email-software-market" target="_blank">Future Market Insights — Transactional Email Software Market (2024-2033)</a></li>
+            <li><a href="https://www.fortunebusinessinsights.com/email-marketing-software-market-108591" target="_blank">Fortune Business Insights — Email Marketing Software Market Size & Share</a></li>
+            <li><a href="https://docs.sendgrid.com/for-developers/parsing-email/setting-up-the-inbound-parse-webhook" target="_blank">SendGrid Documentation — Inbound Parse Webhook Setup</a></li>
+            <li><a href="https://sendgrid.com/en-us/pricing" target="_blank">SendGrid Pricing — Plans & Pricing Page (May 2025 Update)</a></li>
+            <li><a href="https://postmarkapp.com/developer/webhooks/inbound-webhook" target="_blank">Postmark Documentation — Inbound Email Webhook</a></li>
+            <li><a href="https://postmarkapp.com/pricing" target="_blank">Postmark Pricing — Updated August 2025</a></li>
+            <li><a href="https://documentation.mailgun.com/docs/mailgun/api-reference/openapi-final/tag/Routes/" target="_blank">Mailgun Documentation — Routes API Reference</a></li>
+            <li><a href="https://www.mailgun.com/pricing/" target="_blank">Mailgun Pricing — Plans & Features</a></li>
+            <li><a href="https://docs.aws.amazon.com/ses/latest/dg/receiving-email.html" target="_blank">AWS SES Documentation — Receiving Email</a></li>
+            <li><a href="https://aws.amazon.com/ses/pricing/" target="_blank">AWS SES Pricing — Current Rate Card</a></li>
+            <li><a href="https://aws.amazon.com/blogs/messaging-and-targeting/introducing-mail-manager-for-amazon-ses/" target="_blank">AWS Blog — Introducing Mail Manager for Amazon SES (May 2024)</a></li>
+            <li><a href="https://resend.com/docs/dashboard/emails/inbound-emails" target="_blank">Resend Documentation — Inbound Emails</a></li>
+            <li><a href="https://resend.com/pricing" target="_blank">Resend Pricing — Plans & Pricing</a></li>
+            <li><a href="https://www.agentmail.to" target="_blank">AgentMail — Official Website</a></li>
+            <li><a href="https://www.ycombinator.com/companies/agentmail" target="_blank">Y Combinator — AgentMail Company Profile (S25)</a></li>
+            <li><a href="https://blog.google/products/gmail/gmail-security-authentication-spam-protection/" target="_blank">Google — New Gmail Security Requirements (February 2024)</a></li>
+            <li><a href="https://bimigroup.org/bimi-infographic-2025/" target="_blank">BIMI Group — Adoption Report 2025</a></li>
+            <li><a href="https://iapp.org/resources/article/us-state-privacy-legislation-tracker/" target="_blank">IAPP — US State Privacy Legislation Tracker (2025 Update)</a></li>
+            <li><a href="https://developers.cloudflare.com/email-routing/email-workers/" target="_blank">Cloudflare Documentation — Email Workers</a></li>
+            <li><a href="https://www.cloudflare.com/press-releases/cloudflare-announces-workers-ai/" target="_blank">Cloudflare — Workers AI Announcement</a></li>
+            <li><a href="https://github.com/postalserver/postal" target="_blank">Postal — Open Source Mail Server (GitHub)</a></li>
+            <li><a href="https://github.com/foxcpp/maddy" target="_blank">Maddy — Composable Mail Server (GitHub)</a></li>
+            <li><a href="https://github.com/knadh/listmonk" target="_blank">Listmonk — Self-Hosted Newsletter Manager (GitHub)</a></li>
+            <li><a href="https://github.com/mailcow/mailcow-dockerized" target="_blank">mailcow — Docker-Based Mail Suite (GitHub)</a></li>
+            <li><a href="https://loops.so" target="_blank">Loops — Email for SaaS Companies</a></li>
+            <li><a href="https://www.useplunk.com" target="_blank">Plunk — Open Source Email Platform</a></li>
+            <li><a href="https://mailtrap.io" target="_blank">Mailtrap — Email Testing & Sending Platform</a></li>
+            <li><a href="https://buttondown.com" target="_blank">Buttondown — Newsletter Platform</a></li>
+        </ol>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>EaaS — Email as a Service</strong></p>
+        <p>Competitive Research & Market Analysis | Head of Product | April 2026</p>
+        <p style="margin-top: 8px; color: var(--slate-light);">Confidential — Internal Use Only</p>
+    </div>
+
+</body>
+</html>

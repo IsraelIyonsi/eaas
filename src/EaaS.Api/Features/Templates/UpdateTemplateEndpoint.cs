@@ -30,7 +30,6 @@ public static class UpdateTemplateEndpoint
             return Results.Ok(ApiResponse.Ok(result));
         })
         .WithName("UpdateTemplate")
-        .WithOpenApi()
         .Produces<ApiResponse<TemplateResult>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

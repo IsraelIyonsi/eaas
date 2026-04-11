@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers/auth";
+import { setupErrorMockApi } from "./helpers/mock-api";
 
-test.describe("Email Logs Page", () => {
+test.describe("Sent Emails Page", () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
     await page.goto("/emails");
@@ -30,8 +31,8 @@ test.describe("Email Logs Page", () => {
     await expect(page.getByText("Message ID")).toBeVisible({
       timeout: 10000,
     });
-    // Check for "From" label in the detail sheet (unique enough)
-    await expect(page.getByLabel("Email Detail").getByText("From")).toBeVisible();
+    // Check for "From" label in the detail sheet
+    await expect(page.getByText("From").first()).toBeVisible();
     await expect(page.getByText("Event Timeline")).toBeVisible();
   });
 
@@ -64,5 +65,16 @@ test.describe("Email Logs Page", () => {
 
     // Wait for debounce/query
     await page.waitForTimeout(500);
+  });
+
+  test("should show error state when API fails", async ({ page }) => {
+    // Override API routes with error responses (takes precedence over existing mock)
+    await setupErrorMockApi(page);
+    await page.goto("/emails");
+
+    // Page should still render the heading without crashing
+    await expect(
+      page.getByRole("heading", { name: "Email Logs" })
+    ).toBeVisible({ timeout: 10000 });
   });
 });

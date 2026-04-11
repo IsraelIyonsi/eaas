@@ -52,7 +52,6 @@ public static class SendBatchEndpoint
         .WithName("SendBatchEmail")
         .WithSummary("Send a batch of emails")
         .WithDescription("Sends up to 100 emails in a single API call. Each email is validated and queued independently. Partial success is allowed.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status202Accepted)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest);
     }

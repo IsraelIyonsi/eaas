@@ -16,7 +16,6 @@ public static class RevokeApiKeyEndpoint
             return Results.Ok(new ApiResponse<object?>(true, null));
         })
         .WithName("RevokeApiKey")
-        .WithOpenApi()
         .Produces<ApiResponse<object?>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

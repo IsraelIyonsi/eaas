@@ -30,7 +30,6 @@ public static class ListSuppressionsEndpoint
         .WithName("ListSuppressions")
         .WithSummary("List suppressed email addresses")
         .WithDescription("Returns paginated list of suppressed email addresses with optional filtering by reason and search.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

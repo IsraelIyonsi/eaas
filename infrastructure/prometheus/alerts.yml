@@ -1,0 +1,73 @@
+groups:
+  - name: eaas-critical
+    rules:
+      - alert: ServiceDown
+        expr: up{job=~"eaas-.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been unreachable for more than 1 minute."
+
+      - alert: HighApiErrorRate
+        expr: |
+          sum(rate(http_request_duration_seconds_count{job="eaas-api",code=~"5.."}[5m]))
+          / sum(rate(http_request_duration_seconds_count{job="eaas-api"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API 5xx error rate above 5%"
+          description: "The API error rate is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+      - alert: HighEmailFailureRate
+        expr: |
+          rate(eaas_emails_sent_total{status="failed"}[10m])
+          / rate(eaas_emails_sent_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Email failure rate above 10%"
+          description: "{{ $value | humanizePercentage }} of emails are failing."
+
+  - name: eaas-warning
+    rules:
+      - alert: HighBounceRate
+        expr: rate(eaas_bounces_total{bounce_type="permanent"}[1h]) > 10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High permanent bounce rate"
+          description: "More than 10 permanent bounces per second over the last hour."
+
+      - alert: WebhookDeliveryFailures
+        expr: |
+          rate(eaas_webhooks_dispatched_total{status="failed"}[10m])
+          / rate(eaas_webhooks_dispatched_total[10m]) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Webhook delivery failure rate above 20%"
+          description: "{{ $value | humanizePercentage }} of webhook deliveries are failing."
+
+      - alert: QueueBacklog
+        expr: eaas_queue_depth > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Message queue backlog exceeding 1000"
+          description: "Queue {{ $labels.queue }} has {{ $value }} pending messages."
+
+      - alert: HighMemoryUsage
+        expr: process_working_set_bytes{job=~"eaas-.*"} > 200 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.job }} memory usage above 200MB"
+          description: "{{ $labels.job }} is using {{ $value | humanize1024 }}B of memory."

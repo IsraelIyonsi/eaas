@@ -21,7 +21,6 @@ public static class AddSuppressionEndpoint
         .WithName("AddSuppression")
         .WithSummary("Manually suppress an email address")
         .WithDescription("Adds an email address to the suppression list with 'manual' reason.")
-        .WithOpenApi()
         .Produces<ApiResponse<AddSuppressionResult>>(StatusCodes.Status201Created)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest)
         .Produces<ApiErrorResponse>(StatusCodes.Status409Conflict);

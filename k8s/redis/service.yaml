@@ -1,0 +1,60 @@
+# Headless service for StatefulSet DNS
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-redis-headless
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+    - name: sentinel
+      port: 26379
+      targetPort: sentinel
+  selector:
+    app.kubernetes.io/name: eaas-redis
+---
+# Redis master service - Sentinel clients use this for initial connection
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-redis
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  selector:
+    app.kubernetes.io/name: eaas-redis
+---
+# Sentinel service - applications connect here to discover the current master
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-redis-sentinel
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis-sentinel
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: sentinel
+      port: 26379
+      targetPort: sentinel
+  selector:
+    app.kubernetes.io/name: eaas-redis

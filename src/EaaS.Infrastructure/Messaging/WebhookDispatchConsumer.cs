@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Infrastructure.Messaging.Contracts;
+using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
 using MassTransit;
@@ -81,17 +83,23 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
             var client = _httpClientFactory.CreateClient("WebhookDispatch");
             client.Timeout = TimeSpan.FromSeconds(WebhookConstants.DispatchTimeoutSeconds);
 
+            var sw = Stopwatch.StartNew();
             var response = await client.PostAsync(webhook.Url, content, cancellationToken);
+            sw.Stop();
+            EmailMetrics.WebhookDispatchDuration.WithLabels(message.TenantId.ToString()).Observe(sw.Elapsed.TotalSeconds);
+
             statusCode = (int)response.StatusCode;
             success = response.IsSuccessStatusCode;
 
             if (!success)
             {
                 errorMessage = $"HTTP {statusCode}";
+                EmailMetrics.WebhookDispatched.WithLabels("failed").Inc();
                 LogDeliveryFailed(_logger, webhook.Id, statusCode);
             }
             else
             {
+                EmailMetrics.WebhookDispatched.WithLabels("success").Inc();
                 LogDeliverySuccess(_logger, webhook.Id, message.EventType);
             }
         }

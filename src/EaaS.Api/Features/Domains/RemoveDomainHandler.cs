@@ -4,18 +4,21 @@ using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.Api.Features.Domains;
 
-public sealed class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
+public sealed partial class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
 {
     private readonly AppDbContext _dbContext;
     private readonly IDomainIdentityService _emailDeliveryService;
+    private readonly ILogger<RemoveDomainHandler> _logger;
 
-    public RemoveDomainHandler(AppDbContext dbContext, IDomainIdentityService emailDeliveryService)
+    public RemoveDomainHandler(AppDbContext dbContext, IDomainIdentityService emailDeliveryService, ILogger<RemoveDomainHandler> logger)
     {
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;
+        _logger = logger;
     }
 
     public async Task Handle(RemoveDomainCommand request, CancellationToken cancellationToken)
@@ -43,5 +46,10 @@ public sealed class RemoveDomainHandler : IRequestHandler<RemoveDomainCommand>
 
         // Optionally remove from SES
         await _emailDeliveryService.DeleteDomainIdentityAsync(domainName, cancellationToken);
+
+        LogDomainRemoved(_logger, request.Id, domainName, request.TenantId);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Domain removed: DomainId={DomainId}, DomainName={DomainName}, TenantId={TenantId}")]
+    private static partial void LogDomainRemoved(ILogger logger, Guid domainId, string domainName, Guid tenantId);
 }

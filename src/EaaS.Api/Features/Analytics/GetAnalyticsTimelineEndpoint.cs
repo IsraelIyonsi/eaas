@@ -44,7 +44,6 @@ public static class GetAnalyticsTimelineEndpoint
         .WithName("GetAnalyticsTimeline")
         .WithSummary("Get email analytics timeline")
         .WithDescription("Returns time-series email metrics grouped by hour or day.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

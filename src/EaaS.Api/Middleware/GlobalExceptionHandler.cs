@@ -21,7 +21,7 @@ public sealed partial class GlobalExceptionHandler : IExceptionHandler
     {
         var (statusCode, errorResponse) = exception switch
         {
-            ValidationException validationEx => (
+            FluentValidation.ValidationException validationEx => (
                 StatusCodes.Status400BadRequest,
                 ApiErrorResponse.Create(
                     "VALIDATION_ERROR",

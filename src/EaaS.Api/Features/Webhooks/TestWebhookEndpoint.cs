@@ -23,7 +23,6 @@ public static class TestWebhookEndpoint
         .WithName("TestWebhook")
         .WithSummary("Send a test webhook")
         .WithDescription("Sends a test payload to the webhook URL to verify connectivity.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

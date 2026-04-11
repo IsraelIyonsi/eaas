@@ -25,7 +25,6 @@ public static class AddDomainEndpoint
             }));
         })
         .WithName("AddDomain")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status201Created)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest)
         .Produces<ApiErrorResponse>(StatusCodes.Status409Conflict);

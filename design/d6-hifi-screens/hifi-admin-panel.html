@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Admin Panel — Hi-Fi Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-2: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #f8fafc;
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-light: #ede9fe;
+  --primary-text: #5b21b6;
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --success-text: #166534;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-text: #991b1b;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+  --info-text: #1e40af;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #e2e8f0;
+  --sidebar-active-bg: rgba(124, 58, 237, 0.15);
+  --sidebar-active-text: #a78bfa;
+  --sidebar-section: #475569;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-2: #334155;
+  --bg-hover: #334155;
+  --border: #334155;
+  --border-strong: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #0f172a;
+  --primary-light: rgba(124, 58, 237, 0.2);
+  --primary-text: #c4b5fd;
+  --success-light: rgba(34, 197, 94, 0.15);
+  --success-text: #86efac;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-text: #fcd34d;
+  --error-light: rgba(239, 68, 68, 0.15);
+  --error-text: #fca5a5;
+  --info-light: rgba(59, 130, 246, 0.15);
+  --info-text: #93bbfd;
+  --sidebar-bg: #020617;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+}
+
+html { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); }
+
+h1 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; }
+h2 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; }
+
+/* ============================================
+   SCREEN NAVIGATION
+   ============================================ */
+.screen-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px; padding: 8px 16px;
+  box-shadow: var(--shadow-sm); flex-wrap: wrap;
+}
+.screen-nav-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+.screen-nav button {
+  padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: inherit; white-space: nowrap;
+}
+.screen-nav button:hover { border-color: var(--primary); color: var(--primary); }
+.screen-nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
+.theme-toggle {
+  margin-left: auto; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  font-family: inherit; font-weight: 500; transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.app-layout { display: flex; min-height: 100vh; padding-top: 44px; }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text);
+  display: flex; flex-direction: column; position: fixed; top: 44px; left: 0; bottom: 0;
+  z-index: 100; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar-logo-icon svg { width: 18px; height: 18px; }
+.sidebar-logo-text { font-weight: 600; font-size: 15px; color: #f1f5f9; display: flex; flex-direction: column; }
+.sidebar-logo-text .admin-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--primary); background: rgba(124,58,237,0.15); padding: 1px 6px; border-radius: 3px;
+  width: fit-content; margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); text-decoration: none;
+  font-size: 13px; font-weight: 500; transition: all var(--transition); cursor: pointer;
+}
+.sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.sidebar-nav a.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); }
+.sidebar-nav a svg { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.sidebar-nav a.active svg { opacity: 1; }
+.sidebar-nav .nav-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 4px; }
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-footer a {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); text-decoration: none;
+  font-size: 13px; font-weight: 500; transition: all var(--transition); cursor: pointer;
+}
+.sidebar-footer a:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.sidebar-footer a svg { width: 18px; height: 18px; opacity: 0.7; }
+
+/* Main content */
+.main-content { flex: 1; margin-left: 240px; padding: 24px; min-width: 0; }
+
+/* Screen containers */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+/* Cards */
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-header h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+.stat-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-label svg { width: 14px; height: 14px; opacity: 0.6; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.1; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.stat-sub .up { color: var(--success-text); font-weight: 600; }
+.stat-sub .down { color: var(--error-text); font-weight: 600; }
+
+/* Health indicators */
+.health-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.health-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px; box-shadow: var(--shadow-sm);
+}
+.health-card-title { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+.health-card-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.health-card-detail { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+/* Status dot */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.healthy { background: var(--success); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+.status-dot.warning { background: var(--warning); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+.status-dot.error { background: var(--error); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border); background: var(--bg-surface);
+}
+td {
+  padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border);
+  color: var(--text-primary); vertical-align: middle;
+}
+tr:hover td { background: var(--bg-hover); }
+tr:last-child td { border-bottom: none; }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+}
+.badge-success { background: var(--success-light); color: var(--success-text); }
+.badge-warning { background: var(--warning-light); color: var(--warning-text); }
+.badge-error { background: var(--error-light); color: var(--error-text); }
+.badge-info { background: var(--info-light); color: var(--info-text); }
+.badge-primary { background: var(--primary-light); color: var(--primary-text); }
+.badge-neutral { background: var(--bg-surface-2); color: var(--text-secondary); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent; text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+.btn-danger { background: var(--error); color: white; border-color: var(--error); }
+.btn-danger:hover { background: #dc2626; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn svg { width: 14px; height: 14px; }
+
+/* Grid layouts */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 24px; }
+
+/* Page header */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-header h1 { display: flex; align-items: center; gap: 10px; }
+.page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Tabs */
+.tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab-bar button {
+  padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  background: none; border: none; cursor: pointer; position: relative;
+  font-family: inherit; transition: color var(--transition);
+}
+.tab-bar button:hover { color: var(--text-primary); }
+.tab-bar button.active { color: var(--primary); }
+.tab-bar button.active::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+  background: var(--primary); border-radius: 1px 1px 0 0;
+}
+
+/* Search/filter bar */
+.filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-bar input, .filter-bar select {
+  padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-primary); font-size: 13px; font-family: inherit;
+  transition: all var(--transition); outline: none;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.filter-bar input { min-width: 240px; }
+
+/* Progress bar */
+.progress-bar { height: 6px; background: var(--bg-surface-2); border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.progress-bar-fill.green { background: var(--success); }
+.progress-bar-fill.purple { background: var(--primary); }
+.progress-bar-fill.yellow { background: var(--warning); }
+.progress-bar-fill.red { background: var(--error); }
+.progress-bar-fill.blue { background: var(--info); }
+
+/* Toggle switch */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { display: flex; flex-direction: column; gap: 2px; }
+.toggle-label span:first-child { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.toggle-label span:last-child { font-size: 12px; color: var(--text-secondary); }
+.toggle-switch {
+  position: relative; width: 40px; height: 22px; background: var(--border-strong);
+  border-radius: 11px; cursor: pointer; transition: background var(--transition); flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+  background: white; border-radius: 50%; transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { transform: translateX(18px); }
+
+/* Alert/incident card */
+.alert-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 12px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 8px;
+}
+.alert-item:last-child { margin-bottom: 0; }
+.alert-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.alert-icon.warning { background: var(--warning-light); color: var(--warning-text); }
+.alert-icon.error { background: var(--error-light); color: var(--error-text); }
+.alert-icon.info { background: var(--info-light); color: var(--info-text); }
+.alert-icon svg { width: 16px; height: 16px; }
+.alert-content { flex: 1; }
+.alert-content .title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.alert-content .desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.alert-content .time { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* SVG chart area */
+.chart-container { position: relative; }
+.chart-container svg { width: 100%; display: block; }
+
+/* Settings form */
+.settings-group { margin-bottom: 24px; }
+.settings-group h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.settings-row {
+  display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.settings-label small { display: block; font-size: 11px; color: var(--text-secondary); font-weight: 400; margin-top: 2px; }
+.settings-value { font-size: 13px; color: var(--text-secondary); }
+.settings-input {
+  padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-primary); font-size: 13px; font-family: inherit;
+  width: 200px; outline: none; transition: all var(--transition);
+}
+.settings-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+/* Scrollable area */
+.scroll-area { max-height: 400px; overflow-y: auto; }
+
+/* ============================================
+   SCREEN-SPECIFIC
+   ============================================ */
+.mb-24 { margin-bottom: 24px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.gap-16 { gap: 16px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.text-sm { font-size: 12px; }
+.text-secondary { color: var(--text-secondary); }
+.text-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.font-medium { font-weight: 500; }
+
+/* Pie chart legend */
+.pie-legend { display: flex; flex-direction: column; gap: 10px; padding: 8px 0; }
+.pie-legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.pie-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.pie-legend-value { margin-left: auto; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+/* Metric bar */
+.metric-bar { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.metric-bar-label { font-size: 13px; color: var(--text-primary); width: 120px; flex-shrink: 0; }
+.metric-bar-track { flex: 1; height: 8px; background: var(--bg-surface-2); border-radius: 4px; overflow: hidden; }
+.metric-bar-fill { height: 100%; border-radius: 4px; }
+.metric-bar-value { font-size: 12px; font-weight: 600; color: var(--text-primary); width: 50px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+/* Admin user row */
+.admin-user-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.admin-user-row:last-child { border-bottom: none; }
+.admin-avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--primary-light);
+  display: flex; align-items: center; justify-content: center; font-weight: 600;
+  font-size: 14px; color: var(--primary-text); flex-shrink: 0;
+}
+.admin-user-info { flex: 1; }
+.admin-user-info .name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.admin-user-info .email { font-size: 12px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- SCREEN NAVIGATION BAR -->
+<div class="screen-nav">
+  <span class="screen-nav-label">Admin Screens:</span>
+  <button class="active" onclick="showScreen(0)">Overview</button>
+  <button onclick="showScreen(1)">Tenants</button>
+  <button onclick="showScreen(2)">System Health</button>
+  <button onclick="showScreen(3)">Analytics</button>
+  <button onclick="showScreen(4)">Infrastructure</button>
+  <button onclick="showScreen(5)">Billing</button>
+  <button onclick="showScreen(6)">Audit Logs</button>
+  <button onclick="showScreen(7)">Settings</button>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    Toggle Theme
+  </button>
+</div>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div class="sidebar-logo-text">
+        EaaS
+        <span class="admin-badge">Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a class="active" onclick="showScreen(0)" data-screen="0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a onclick="showScreen(1)" data-screen="1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Tenants
+      </a>
+      <a onclick="showScreen(2)" data-screen="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        System Health
+      </a>
+      <a onclick="showScreen(3)" data-screen="3">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+      <a onclick="showScreen(4)" data-screen="4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>
+        Infrastructure
+      </a>
+      <a onclick="showScreen(5)" data-screen="5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Billing
+      </a>
+      <a onclick="showScreen(6)" data-screen="6">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Audit Logs
+      </a>
+      <a onclick="showScreen(7)" data-screen="7">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+      <div class="nav-divider"></div>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Switch to Customer View
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- ================================================
+         SCREEN 0: ADMIN OVERVIEW DASHBOARD
+         ================================================ -->
+    <div class="screen active" id="screen-0">
+      <div class="page-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <div class="page-subtitle">System-wide overview and health monitoring</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <span class="badge badge-success"><span class="status-dot healthy"></span>All Systems Operational</span>
+        </div>
+      </div>
+
+      <!-- System-wide stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Total Tenants
+          </div>
+          <div class="stat-value">247</div>
+          <div class="stat-sub"><span class="up">+12</span> new this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            Total Emails Sent
+          </div>
+          <div class="stat-value">2.4M</div>
+          <div class="stat-sub"><span class="up">+18.3%</span> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+            Inbound Received
+          </div>
+          <div class="stat-value">892K</div>
+          <div class="stat-sub"><span class="up">+7.1%</span> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Active API Keys
+          </div>
+          <div class="stat-value">631</div>
+          <div class="stat-sub">across all tenants</div>
+        </div>
+      </div>
+
+      <!-- Health indicators -->
+      <div class="health-grid">
+        <div class="health-card">
+          <div class="health-card-title">API Latency</div>
+          <div class="health-card-value" style="color:var(--success);">45ms</div>
+          <div class="health-card-detail">P50: 45ms &middot; P95: 230ms &middot; P99: 890ms</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-title">Queue Depth (RabbitMQ)</div>
+          <div class="health-card-value" style="color:var(--success);">15</div>
+          <div class="health-card-detail">Email: 12 &middot; Webhook: 3 &middot; Inbound: 0</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-title">Error Rate (1h)</div>
+          <div class="health-card-value" style="color:var(--success);">0.3%</div>
+          <div class="health-card-detail">47 errors / 15,890 requests</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-title">S3 Storage Used</div>
+          <div class="health-card-value">128 GB</div>
+          <div class="health-card-detail">Outbound: 45GB &middot; Inbound: 83GB</div>
+        </div>
+      </div>
+
+      <!-- Chart + Alerts -->
+      <div class="grid-2-1">
+        <div class="card">
+          <div class="card-header">
+            <h3>System-wide Email Volume (30 Days)</h3>
+            <div style="display:flex;gap:16px;font-size:12px;color:var(--text-secondary);">
+              <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:3px;background:#7c3aed;border-radius:2px;display:inline-block;"></span> Sent</span>
+              <span style="display:flex;align-items:center;gap:4px;"><span style="width:12px;height:3px;background:#22c55e;border-radius:2px;display:inline-block;"></span> Received</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <svg viewBox="0 0 600 200" preserveAspectRatio="none" style="height:200px;">
+              <!-- Grid lines -->
+              <line x1="0" y1="50" x2="600" y2="50" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+              <line x1="0" y1="100" x2="600" y2="100" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+              <line x1="0" y1="150" x2="600" y2="150" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>
+              <!-- Sent line (purple) -->
+              <polyline fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                points="0,140 20,135 40,128 60,130 80,120 100,115 120,108 140,112 160,100 180,95 200,88 220,92 240,85 260,78 280,82 300,75 320,68 340,72 360,65 380,58 400,62 420,55 440,50 460,48 480,52 500,45 520,42 540,38 560,40 580,35 600,30"/>
+              <!-- Sent area fill -->
+              <polyline fill="url(#purpleGrad)" opacity="0.15" stroke="none"
+                points="0,200 0,140 20,135 40,128 60,130 80,120 100,115 120,108 140,112 160,100 180,95 200,88 220,92 240,85 260,78 280,82 300,75 320,68 340,72 360,65 380,58 400,62 420,55 440,50 460,48 480,52 500,45 520,42 540,38 560,40 580,35 600,30 600,200"/>
+              <!-- Received line (green) -->
+              <polyline fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                points="0,170 20,168 40,162 60,165 80,158 100,155 120,150 140,152 160,145 180,142 200,138 220,140 240,135 260,130 280,133 300,128 320,122 340,125 360,120 380,115 400,118 420,112 440,108 460,106 480,110 500,105 520,102 540,98 560,100 580,96 600,92"/>
+              <!-- Received area fill -->
+              <polyline fill="url(#greenGrad)" opacity="0.15" stroke="none"
+                points="0,200 0,170 20,168 40,162 60,165 80,158 100,155 120,150 140,152 160,145 180,142 200,138 220,140 240,135 260,130 280,133 300,128 320,122 340,125 360,120 380,115 400,118 420,112 440,108 460,106 480,110 500,105 520,102 540,98 560,100 580,96 600,92 600,200"/>
+              <defs>
+                <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#7c3aed"/>
+                  <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="greenGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22c55e"/>
+                  <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Y-axis labels -->
+              <text x="4" y="48" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">100K</text>
+              <text x="4" y="98" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">75K</text>
+              <text x="4" y="148" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">50K</text>
+              <!-- X-axis labels -->
+              <text x="0" y="195" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">Mar 2</text>
+              <text x="190" y="195" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">Mar 12</text>
+              <text x="390" y="195" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">Mar 22</text>
+              <text x="560" y="195" font-size="9" fill="var(--text-tertiary)" font-family="JetBrains Mono">Apr 1</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Active Alerts</h3>
+            <span class="badge badge-warning">3 Active</span>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="alert-content">
+              <div class="title">SES Sending Rate Near Limit</div>
+              <div class="desc">Currently at 85% of daily sending quota</div>
+              <div class="time">12 minutes ago</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="alert-content">
+              <div class="title">High Bounce Rate — Acme Corp</div>
+              <div class="desc">Tenant bounce rate at 8.2% (threshold: 5%)</div>
+              <div class="time">34 minutes ago</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="alert-content">
+              <div class="title">Scheduled Maintenance</div>
+              <div class="desc">PostgreSQL maintenance window: Apr 3, 2:00 AM UTC</div>
+              <div class="time">2 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 5 Tenants -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Top 5 Tenants by Volume</h3>
+          <span class="text-sm text-secondary">Last 30 days</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Tenant</th><th>Emails Sent</th><th>Inbound</th><th>Domains</th><th>API Keys</th><th>Error Rate</th><th>Plan</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Acme Corp</strong></td><td class="text-mono">845,290</td><td class="text-mono">312,400</td><td>12</td><td>8</td><td><span class="badge badge-error">8.2%</span></td><td><span class="badge badge-primary">Enterprise</span></td></tr>
+            <tr><td><strong>TechFlow Inc</strong></td><td class="text-mono">623,100</td><td class="text-mono">189,730</td><td>8</td><td>5</td><td><span class="badge badge-success">0.4%</span></td><td><span class="badge badge-primary">Enterprise</span></td></tr>
+            <tr><td><strong>StartupXYZ</strong></td><td class="text-mono">298,450</td><td class="text-mono">95,200</td><td>4</td><td>3</td><td><span class="badge badge-success">0.8%</span></td><td><span class="badge badge-info">Scale</span></td></tr>
+            <tr><td><strong>DataDrive</strong></td><td class="text-mono">187,600</td><td class="text-mono">72,150</td><td>6</td><td>4</td><td><span class="badge badge-success">0.3%</span></td><td><span class="badge badge-info">Scale</span></td></tr>
+            <tr><td><strong>CloudNine SaaS</strong></td><td class="text-mono">156,320</td><td class="text-mono">48,900</td><td>3</td><td>2</td><td><span class="badge badge-warning">2.1%</span></td><td><span class="badge badge-info">Scale</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 1: TENANT MANAGEMENT
+         ================================================ -->
+    <div class="screen" id="screen-1">
+      <div class="page-header">
+        <div>
+          <h1>Tenant Management</h1>
+          <div class="page-subtitle">Manage all platform tenants, accounts, and access</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Tenant
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" placeholder="Search tenants by name, domain, or email..." />
+        <select>
+          <option>All Statuses</option>
+          <option>Active</option>
+          <option>Suspended</option>
+          <option>Trial</option>
+        </select>
+        <select>
+          <option>All Plans</option>
+          <option>Free</option>
+          <option>Pro</option>
+          <option>Scale</option>
+          <option>Enterprise</option>
+        </select>
+      </div>
+
+      <div class="card mb-24">
+        <table>
+          <thead>
+            <tr><th>Tenant</th><th>Email Count</th><th>Domains</th><th>API Keys</th><th>Plan</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Acme Corp</strong><br><span class="text-sm text-secondary">admin@acmecorp.com</span></td>
+              <td class="text-mono">845,290</td><td>12</td><td>8</td>
+              <td><span class="badge badge-primary">Enterprise</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2024-06-15</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>TechFlow Inc</strong><br><span class="text-sm text-secondary">ops@techflow.io</span></td>
+              <td class="text-mono">623,100</td><td>8</td><td>5</td>
+              <td><span class="badge badge-primary">Enterprise</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2024-08-22</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>StartupXYZ</strong><br><span class="text-sm text-secondary">dev@startupxyz.com</span></td>
+              <td class="text-mono">298,450</td><td>4</td><td>3</td>
+              <td><span class="badge badge-info">Scale</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2024-11-03</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>DataDrive</strong><br><span class="text-sm text-secondary">platform@datadrive.co</span></td>
+              <td class="text-mono">187,600</td><td>6</td><td>4</td>
+              <td><span class="badge badge-info">Scale</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2024-09-18</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>CloudNine SaaS</strong><br><span class="text-sm text-secondary">admin@cloudnine.io</span></td>
+              <td class="text-mono">156,320</td><td>3</td><td>2</td>
+              <td><span class="badge badge-info">Scale</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2025-01-07</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>NovaPay</strong><br><span class="text-sm text-secondary">eng@novapay.com</span></td>
+              <td class="text-mono">94,520</td><td>2</td><td>3</td>
+              <td><span class="badge badge-neutral">Pro</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2025-02-14</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>MailMerge Labs</strong><br><span class="text-sm text-secondary">hello@mailmerge.dev</span></td>
+              <td class="text-mono">67,890</td><td>2</td><td>2</td>
+              <td><span class="badge badge-neutral">Pro</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2025-01-29</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>QuickInvoice</strong><br><span class="text-sm text-secondary">api@quickinvoice.ng</span></td>
+              <td class="text-mono">23,400</td><td>1</td><td>1</td>
+              <td><span class="badge badge-neutral">Pro</span></td>
+              <td><span class="badge badge-warning"><span class="status-dot warning"></span>Suspended</span></td>
+              <td class="text-sm text-secondary">2025-03-05</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>DevShop</strong><br><span class="text-sm text-secondary">team@devshop.co</span></td>
+              <td class="text-mono">8,750</td><td>1</td><td>1</td>
+              <td><span class="badge badge-neutral">Free</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2025-03-20</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>TestCo</strong><br><span class="text-sm text-secondary">dev@testco.app</span></td>
+              <td class="text-mono">1,240</td><td>1</td><td>1</td>
+              <td><span class="badge badge-neutral">Free</span></td>
+              <td><span class="badge badge-success"><span class="status-dot healthy"></span>Active</span></td>
+              <td class="text-sm text-secondary">2025-03-28</td>
+              <td><button class="btn btn-secondary btn-sm">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tenant Detail Panel -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Tenant Detail: Acme Corp</h3>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+            <button class="btn btn-secondary btn-sm" style="color:var(--warning);">Suspend Tenant</button>
+            <button class="btn btn-danger btn-sm">Delete Tenant</button>
+          </div>
+        </div>
+        <div class="grid-3" style="margin-bottom:16px;">
+          <div>
+            <div class="text-sm text-secondary mb-8">Domains (12)</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <code class="mono" style="font-size:12px;">acmecorp.com</code>
+              <code class="mono" style="font-size:12px;">mail.acmecorp.com</code>
+              <code class="mono" style="font-size:12px;">notifications.acme.io</code>
+              <span class="text-sm text-secondary">... and 9 more</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-sm text-secondary mb-8">API Keys (8)</div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div><code class="mono" style="font-size:12px;">eaas_pk_a3f2...x8m9</code> <span class="badge badge-success" style="font-size:10px;">Active</span></div>
+              <div><code class="mono" style="font-size:12px;">eaas_pk_b7d1...k4p2</code> <span class="badge badge-success" style="font-size:10px;">Active</span></div>
+              <div><code class="mono" style="font-size:12px;">eaas_pk_c9e5...n6q8</code> <span class="badge badge-error" style="font-size:10px;">Revoked</span></div>
+              <span class="text-sm text-secondary">... and 5 more</span>
+            </div>
+          </div>
+          <div>
+            <div class="text-sm text-secondary mb-8">Billing & Stats</div>
+            <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;">
+              <div>Plan: <strong>Enterprise</strong></div>
+              <div>MRR: <strong>$499/mo</strong></div>
+              <div>Email Quota: <strong>1M/mo</strong></div>
+              <div>Used: <strong>845,290 (84.5%)</strong></div>
+              <div class="progress-bar" style="margin-top:4px;"><div class="progress-bar-fill purple" style="width:84.5%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 2: SYSTEM HEALTH & MONITORING
+         ================================================ -->
+    <div class="screen" id="screen-2">
+      <div class="page-header">
+        <div>
+          <h1>System Health & Monitoring</h1>
+          <div class="page-subtitle">Real-time infrastructure metrics and service status</div>
+        </div>
+        <span class="badge badge-success"><span class="status-dot healthy"></span>All Services Healthy</span>
+      </div>
+
+      <!-- Real-time metrics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">API Response Time</div>
+          <div class="stat-value" style="font-size:24px;">45ms <span style="font-size:13px;color:var(--text-secondary);font-weight:400;">P50</span></div>
+          <div class="stat-sub" style="font-family:'JetBrains Mono',monospace;">P95: 230ms &middot; P99: 890ms</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">RabbitMQ Queue Depth</div>
+          <div class="stat-value" style="font-size:24px;">15</div>
+          <div class="stat-sub" style="font-family:'JetBrains Mono',monospace;">Email: 12 &middot; Webhook: 3 &middot; Inbound: 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Error Rate</div>
+          <div class="stat-value" style="font-size:24px;color:var(--success);">0.3%</div>
+          <div class="stat-sub">47 errors in last hour</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Worker Status</div>
+          <div class="stat-value" style="font-size:24px;color:var(--success);">3/3</div>
+          <div class="stat-sub"><span class="status-dot healthy"></span>All workers healthy</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header"><h3>API Latency (24h)</h3></div>
+          <svg viewBox="0 0 300 120" style="width:100%;height:120px;">
+            <line x1="0" y1="30" x2="300" y2="30" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="60" x2="300" y2="60" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="90" x2="300" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <polyline fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              points="0,75 15,72 30,78 45,70 60,68 75,72 90,65 105,60 120,62 135,58 150,55 165,60 180,52 195,48 210,55 225,50 240,45 255,48 270,42 285,45 300,40"/>
+            <text x="2" y="28" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">500ms</text>
+            <text x="2" y="58" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">250ms</text>
+            <text x="2" y="88" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">100ms</text>
+            <text x="2" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">00:00</text>
+            <text x="140" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">12:00</text>
+            <text x="270" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Now</text>
+          </svg>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Queue Depth (24h)</h3></div>
+          <svg viewBox="0 0 300 120" style="width:100%;height:120px;">
+            <line x1="0" y1="30" x2="300" y2="30" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="60" x2="300" y2="60" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="90" x2="300" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <!-- Bar chart style for queue -->
+            <rect x="5" y="70" width="12" height="25" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="25" y="55" width="12" height="40" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="45" y="60" width="12" height="35" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="65" y="40" width="12" height="55" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="85" y="50" width="12" height="45" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="105" y="30" width="12" height="65" rx="2" fill="#f59e0b" opacity="0.7"/>
+            <rect x="125" y="45" width="12" height="50" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="145" y="65" width="12" height="30" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="165" y="75" width="12" height="20" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="185" y="80" width="12" height="15" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="205" y="70" width="12" height="25" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="225" y="60" width="12" height="35" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="245" y="75" width="12" height="20" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="265" y="82" width="12" height="13" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <rect x="285" y="80" width="12" height="15" rx="2" fill="#7c3aed" opacity="0.7"/>
+            <text x="2" y="28" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">100</text>
+            <text x="2" y="58" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">50</text>
+            <text x="2" y="88" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">10</text>
+            <text x="2" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">00:00</text>
+            <text x="270" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Now</text>
+          </svg>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Error Rate (24h)</h3></div>
+          <svg viewBox="0 0 300 120" style="width:100%;height:120px;">
+            <line x1="0" y1="30" x2="300" y2="30" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="60" x2="300" y2="60" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="0" y1="90" x2="300" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <polyline fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              points="0,85 15,82 30,88 45,80 60,78 75,75 90,82 105,40 120,45 135,65 150,70 165,78 180,80 195,85 210,82 225,88 240,85 255,87 270,88 285,90 300,88"/>
+            <polyline fill="url(#redGrad)" opacity="0.1" stroke="none"
+              points="0,95 0,85 15,82 30,88 45,80 60,78 75,75 90,82 105,40 120,45 135,65 150,70 165,78 180,80 195,85 210,82 225,88 240,85 255,87 270,88 285,90 300,88 300,95"/>
+            <defs>
+              <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Spike annotation -->
+            <line x1="105" y1="35" x2="105" y2="95" stroke="#ef4444" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+            <text x="110" y="38" font-size="7" fill="var(--error-text)" font-family="JetBrains Mono">spike: 2.1%</text>
+            <text x="2" y="28" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">5%</text>
+            <text x="2" y="58" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">2%</text>
+            <text x="2" y="88" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">0.5%</text>
+            <text x="2" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">00:00</text>
+            <text x="270" y="115" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Now</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Service Status -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3>Service Status</h3></div>
+          <table>
+            <thead><tr><th>Service</th><th>Status</th><th>Uptime</th><th>Last Check</th></tr></thead>
+            <tbody>
+              <tr><td><strong>API</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">99.98%</td><td class="text-sm text-secondary">12s ago</td></tr>
+              <tr><td><strong>Worker</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">99.99%</td><td class="text-sm text-secondary">12s ago</td></tr>
+              <tr><td><strong>WebhookProcessor</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">99.97%</td><td class="text-sm text-secondary">12s ago</td></tr>
+              <tr><td><strong>PostgreSQL</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">99.99%</td><td class="text-sm text-secondary">30s ago</td></tr>
+              <tr><td><strong>Redis</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">100%</td><td class="text-sm text-secondary">12s ago</td></tr>
+              <tr><td><strong>RabbitMQ</strong></td><td><span class="badge badge-success"><span class="status-dot healthy"></span>Healthy</span></td><td class="text-mono">99.98%</td><td class="text-sm text-secondary">12s ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Recent Errors</h3></div>
+          <div class="scroll-area">
+            <table>
+              <thead><tr><th>Time</th><th>Service</th><th>Error</th><th>Count</th></tr></thead>
+              <tbody>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">14:23:41</td><td><span class="badge badge-error" style="font-size:10px;">API</span></td><td style="font-size:12px;">Rate limit exceeded for tenant acme_corp</td><td class="text-mono">12</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">14:21:08</td><td><span class="badge badge-error" style="font-size:10px;">Worker</span></td><td style="font-size:12px;">SES bounce notification — hard bounce</td><td class="text-mono">8</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">14:18:55</td><td><span class="badge badge-warning" style="font-size:10px;">Webhook</span></td><td style="font-size:12px;">Webhook delivery timeout to https://api.techflow.io</td><td class="text-mono">3</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">14:15:22</td><td><span class="badge badge-error" style="font-size:10px;">API</span></td><td style="font-size:12px;">Invalid API key: eaas_pk_expired_x2k...</td><td class="text-mono">5</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">14:12:01</td><td><span class="badge badge-warning" style="font-size:10px;">Worker</span></td><td style="font-size:12px;">S3 upload retry — temporary network error</td><td class="text-mono">2</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">13:58:44</td><td><span class="badge badge-error" style="font-size:10px;">API</span></td><td style="font-size:12px;">Attachment too large: 28MB (max 25MB)</td><td class="text-mono">7</td></tr>
+                <tr><td class="text-mono" style="font-size:11px;white-space:nowrap;">13:45:19</td><td><span class="badge badge-error" style="font-size:10px;">Worker</span></td><td style="font-size:12px;">Template rendering failed — missing variable</td><td class="text-mono">10</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 3: CROSS-TENANT ANALYTICS
+         ================================================ -->
+    <div class="screen" id="screen-3">
+      <div class="page-header">
+        <div>
+          <h1>Cross-Tenant Analytics</h1>
+          <div class="page-subtitle">Global email metrics, growth trends, and feature adoption</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <select style="padding:7px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text-primary);font-size:13px;font-family:inherit;">
+            <option>Last 30 Days</option>
+            <option>Last 90 Days</option>
+            <option>Last 12 Months</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Emails Processed</div>
+          <div class="stat-value">18.7M</div>
+          <div class="stat-sub">All time across all tenants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Emails Today</div>
+          <div class="stat-value">89,340</div>
+          <div class="stat-sub"><span class="up">+12.4%</span> vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monthly Growth Rate</div>
+          <div class="stat-value" style="color:var(--success);">+18.3%</div>
+          <div class="stat-sub">Email volume MoM</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">New Tenants (Month)</div>
+          <div class="stat-value">12</div>
+          <div class="stat-sub"><span class="up">+3</span> vs last month</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Pie chart -->
+        <div class="card">
+          <div class="card-header"><h3>Email Volume by Top Tenants</h3></div>
+          <div style="display:flex;gap:24px;align-items:center;">
+            <svg viewBox="0 0 200 200" width="180" height="180">
+              <!-- Pie chart segments - using stroke-dasharray technique -->
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#7c3aed" stroke-width="40"
+                stroke-dasharray="167.6 335.1" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#a78bfa" stroke-width="40"
+                stroke-dasharray="125.7 376.99" stroke-dashoffset="-167.6" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="40"
+                stroke-dasharray="75.4 427.3" stroke-dashoffset="-293.3" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#22c55e" stroke-width="40"
+                stroke-dasharray="50.3 452.4" stroke-dashoffset="-368.7" transform="rotate(-90 100 100)"/>
+              <circle cx="100" cy="100" r="80" fill="none" stroke="#94a3b8" stroke-width="40"
+                stroke-dasharray="83.8 418.9" stroke-dashoffset="-419" transform="rotate(-90 100 100)"/>
+              <!-- Center circle for donut -->
+              <circle cx="100" cy="100" r="60" fill="var(--bg)"/>
+              <text x="100" y="95" text-anchor="middle" font-size="16" font-weight="700" fill="var(--text-primary)">2.4M</text>
+              <text x="100" y="112" text-anchor="middle" font-size="9" fill="var(--text-secondary)">total / month</text>
+            </svg>
+            <div class="pie-legend">
+              <div class="pie-legend-item"><span class="pie-legend-dot" style="background:#7c3aed;"></span> Acme Corp <span class="pie-legend-value">33.4%</span></div>
+              <div class="pie-legend-item"><span class="pie-legend-dot" style="background:#a78bfa;"></span> TechFlow <span class="pie-legend-value">25.0%</span></div>
+              <div class="pie-legend-item"><span class="pie-legend-dot" style="background:#3b82f6;"></span> StartupXYZ <span class="pie-legend-value">15.0%</span></div>
+              <div class="pie-legend-item"><span class="pie-legend-dot" style="background:#22c55e;"></span> DataDrive <span class="pie-legend-value">10.0%</span></div>
+              <div class="pie-legend-item"><span class="pie-legend-dot" style="background:#94a3b8;"></span> Others <span class="pie-legend-value">16.6%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Growth Trend -->
+        <div class="card">
+          <div class="card-header"><h3>Tenant Growth Trend</h3></div>
+          <svg viewBox="0 0 400 180" style="width:100%;height:180px;">
+            <line x1="40" y1="20" x2="400" y2="20" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="40" y1="55" x2="400" y2="55" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="40" y1="90" x2="400" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="40" y1="125" x2="400" y2="125" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <!-- Bar chart: new tenants per month -->
+            <rect x="55" y="105" width="25" height="45" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="95" y="90" width="25" height="60" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="135" y="75" width="25" height="75" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="175" y="85" width="25" height="65" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="215" y="60" width="25" height="90" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="255" y="50" width="25" height="100" rx="3" fill="#7c3aed" opacity="0.7"/>
+            <rect x="295" y="40" width="25" height="110" rx="3" fill="#7c3aed" opacity="0.8"/>
+            <rect x="335" y="25" width="25" height="125" rx="3" fill="#7c3aed"/>
+            <!-- Labels -->
+            <text x="2" y="24" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">40</text>
+            <text x="2" y="59" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">30</text>
+            <text x="2" y="94" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">20</text>
+            <text x="2" y="129" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">10</text>
+            <text x="55" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Sep</text>
+            <text x="95" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Oct</text>
+            <text x="135" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Nov</text>
+            <text x="175" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Dec</text>
+            <text x="215" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Jan</text>
+            <text x="255" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Feb</text>
+            <text x="295" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Mar</text>
+            <text x="335" y="165" font-size="8" fill="var(--text-tertiary)" font-family="JetBrains Mono">Apr</text>
+            <!-- Value labels on bars -->
+            <text x="67" y="100" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">15</text>
+            <text x="107" y="85" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">20</text>
+            <text x="147" y="70" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">25</text>
+            <text x="187" y="80" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">22</text>
+            <text x="227" y="55" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">30</text>
+            <text x="267" y="45" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">33</text>
+            <text x="307" y="35" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">36</text>
+            <text x="347" y="20" text-anchor="middle" font-size="8" font-weight="600" fill="var(--text-primary)" font-family="JetBrains Mono">42</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Feature Adoption -->
+      <div class="card">
+        <div class="card-header"><h3>Feature Adoption</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;">
+          <div class="metric-bar">
+            <span class="metric-bar-label">Templates</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:72%;background:var(--primary);"></div></div>
+            <span class="metric-bar-value">72%</span>
+          </div>
+          <div class="metric-bar">
+            <span class="metric-bar-label">Webhooks</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:64%;background:var(--info);"></div></div>
+            <span class="metric-bar-value">64%</span>
+          </div>
+          <div class="metric-bar">
+            <span class="metric-bar-label">Inbound Mail</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:45%;background:var(--success);"></div></div>
+            <span class="metric-bar-value">45%</span>
+          </div>
+          <div class="metric-bar">
+            <span class="metric-bar-label">Open Tracking</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:58%;background:var(--warning);"></div></div>
+            <span class="metric-bar-value">58%</span>
+          </div>
+          <div class="metric-bar">
+            <span class="metric-bar-label">Click Tracking</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:41%;background:var(--warning);"></div></div>
+            <span class="metric-bar-value">41%</span>
+          </div>
+          <div class="metric-bar">
+            <span class="metric-bar-label">Suppressions</span>
+            <div class="metric-bar-track"><div class="metric-bar-fill" style="width:88%;background:var(--success);"></div></div>
+            <span class="metric-bar-value">88%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 4: INFRASTRUCTURE MANAGEMENT
+         ================================================ -->
+    <div class="screen" id="screen-4">
+      <div class="page-header">
+        <div>
+          <h1>Infrastructure Management</h1>
+          <div class="page-subtitle">AWS services, databases, and resource utilization</div>
+        </div>
+      </div>
+
+      <!-- AWS SES -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <h3>AWS SES</h3>
+          <span class="badge badge-warning">85% Quota Used</span>
+        </div>
+        <div class="grid-3" style="margin-bottom:0;">
+          <div>
+            <div class="text-sm text-secondary mb-8">Daily Sending Quota</div>
+            <div style="font-size:20px;font-weight:700;">50,000</div>
+            <div class="text-sm text-secondary">emails/day</div>
+          </div>
+          <div>
+            <div class="text-sm text-secondary mb-8">Used Today</div>
+            <div style="font-size:20px;font-weight:700;color:var(--warning);">42,345</div>
+            <div class="progress-bar" style="margin-top:8px;"><div class="progress-bar-fill yellow" style="width:84.7%;"></div></div>
+            <div class="text-sm text-secondary" style="margin-top:4px;">84.7% of daily quota</div>
+          </div>
+          <div>
+            <div class="text-sm text-secondary mb-8">Sending Rate</div>
+            <div style="font-size:20px;font-weight:700;">14/sec</div>
+            <div class="text-sm text-secondary">max allowed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3 Storage -->
+      <div class="card mb-24">
+        <div class="card-header"><h3>S3 Storage</h3></div>
+        <div style="display:flex;align-items:center;gap:24px;margin-bottom:16px;">
+          <div>
+            <div class="text-sm text-secondary">Total Size</div>
+            <div style="font-size:24px;font-weight:700;">128.4 GB</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Bucket</th><th>Size</th><th>Objects</th><th>Growth (30d)</th></tr></thead>
+          <tbody>
+            <tr><td><code class="mono">eaas-outbound-attachments</code></td><td class="text-mono">45.2 GB</td><td class="text-mono">1,234,567</td><td><span class="up text-sm">+3.2 GB</span></td></tr>
+            <tr><td><code class="mono">eaas-inbound-raw</code></td><td class="text-mono">62.8 GB</td><td class="text-mono">892,340</td><td><span class="up text-sm">+5.8 GB</span></td></tr>
+            <tr><td><code class="mono">eaas-inbound-attachments</code></td><td class="text-mono">20.4 GB</td><td class="text-mono">456,120</td><td><span class="up text-sm">+1.9 GB</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <!-- RabbitMQ -->
+        <div class="card">
+          <div class="card-header"><h3>RabbitMQ</h3></div>
+          <table>
+            <thead><tr><th>Queue</th><th>Messages</th><th>Consumers</th><th>Publish Rate</th></tr></thead>
+            <tbody>
+              <tr><td><code class="mono">email.send</code></td><td class="text-mono">12</td><td class="text-mono">3</td><td class="text-mono">45/s</td></tr>
+              <tr><td><code class="mono">webhook.deliver</code></td><td class="text-mono">3</td><td class="text-mono">2</td><td class="text-mono">12/s</td></tr>
+              <tr><td><code class="mono">inbound.process</code></td><td class="text-mono">0</td><td class="text-mono">2</td><td class="text-mono">8/s</td></tr>
+              <tr><td><code class="mono">email.status</code></td><td class="text-mono">0</td><td class="text-mono">1</td><td class="text-mono">32/s</td></tr>
+              <tr><td><code class="mono">dead-letter</code></td><td class="text-mono" style="color:var(--warning);">7</td><td class="text-mono">0</td><td class="text-mono">0/s</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Redis + PostgreSQL -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-header"><h3>Redis</h3></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+              <div>
+                <div class="text-sm text-secondary">Memory</div>
+                <div style="font-size:18px;font-weight:700;">256 MB</div>
+                <div class="text-sm text-secondary">of 1 GB</div>
+                <div class="progress-bar" style="margin-top:4px;"><div class="progress-bar-fill purple" style="width:25.6%;"></div></div>
+              </div>
+              <div>
+                <div class="text-sm text-secondary">Key Count</div>
+                <div style="font-size:18px;font-weight:700;">48.2K</div>
+              </div>
+              <div>
+                <div class="text-sm text-secondary">Hit Rate</div>
+                <div style="font-size:18px;font-weight:700;color:var(--success);">97.3%</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>PostgreSQL</h3></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+              <div>
+                <div class="text-sm text-secondary">Connections</div>
+                <div style="font-size:18px;font-weight:700;">24 / 100</div>
+                <div class="text-sm text-secondary">active / max</div>
+                <div class="progress-bar" style="margin-top:4px;"><div class="progress-bar-fill green" style="width:24%;"></div></div>
+              </div>
+              <div>
+                <div class="text-sm text-secondary">DB Size</div>
+                <div style="font-size:18px;font-weight:700;">8.4 GB</div>
+              </div>
+              <div>
+                <div class="text-sm text-secondary">Idle</div>
+                <div style="font-size:18px;font-weight:700;">12</div>
+                <div class="text-sm text-secondary">connections</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 5: BILLING & PLANS
+         ================================================ -->
+    <div class="screen" id="screen-5">
+      <div class="page-header">
+        <div>
+          <h1>Billing & Plans</h1>
+          <div class="page-subtitle">Plan tiers, revenue metrics, and tenant billing overview</div>
+        </div>
+      </div>
+
+      <!-- Revenue metrics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total MRR</div>
+          <div class="stat-value">$18,450</div>
+          <div class="stat-sub"><span class="up">+14.2%</span> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Subscriptions</div>
+          <div class="stat-value">189</div>
+          <div class="stat-sub">of 247 total tenants</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Monthly Growth</div>
+          <div class="stat-value" style="color:var(--success);">+$2,290</div>
+          <div class="stat-sub">net new MRR</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Churn Rate</div>
+          <div class="stat-value" style="color:var(--success);">1.2%</div>
+          <div class="stat-sub">3 tenants churned this month</div>
+        </div>
+      </div>
+
+      <!-- Plan tiers -->
+      <div class="card mb-24">
+        <div class="card-header"><h3>Plan Tiers</h3></div>
+        <table>
+          <thead>
+            <tr><th>Plan</th><th>Price</th><th>Email Limit</th><th>Domains</th><th>API Keys</th><th>Inbound</th><th>Templates</th><th>Support</th><th>Tenants</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-neutral">Free</span></td>
+              <td><strong>$0</strong></td><td class="text-mono">1,000/mo</td><td>1</td><td>1</td>
+              <td><span style="color:var(--error);">No</span></td><td>5</td><td>Community</td>
+              <td class="text-mono">58</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-info">Pro</span></td>
+              <td><strong>$29/mo</strong></td><td class="text-mono">50,000/mo</td><td>5</td><td>3</td>
+              <td><span style="color:var(--success);">Yes</span></td><td>50</td><td>Email</td>
+              <td class="text-mono">87</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-primary">Scale</span></td>
+              <td><strong>$99/mo</strong></td><td class="text-mono">500,000/mo</td><td>20</td><td>10</td>
+              <td><span style="color:var(--success);">Yes</span></td><td>Unlimited</td><td>Priority</td>
+              <td class="text-mono">34</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-warning">Enterprise</span></td>
+              <td><strong>Custom</strong></td><td class="text-mono">Custom</td><td>Unlimited</td><td>Unlimited</td>
+              <td><span style="color:var(--success);">Yes</span></td><td>Unlimited</td><td>Dedicated</td>
+              <td class="text-mono">10</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tenant billing overview -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <h3>Tenant Billing Overview</h3>
+          <span class="badge badge-warning">2 Approaching Limits</span>
+        </div>
+        <table>
+          <thead><tr><th>Tenant</th><th>Plan</th><th>Email Count</th><th>Limit</th><th>Usage</th><th>Overage</th><th>MRR</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Acme Corp</strong></td><td><span class="badge badge-warning">Enterprise</span></td>
+              <td class="text-mono">845,290</td><td class="text-mono">1,000,000</td>
+              <td>
+                <div class="progress-bar" style="width:100px;"><div class="progress-bar-fill yellow" style="width:84.5%;"></div></div>
+                <span class="text-sm text-secondary">84.5%</span>
+              </td>
+              <td class="text-mono">$0</td><td class="text-mono"><strong>$499</strong></td>
+            </tr>
+            <tr>
+              <td><strong>TechFlow Inc</strong></td><td><span class="badge badge-warning">Enterprise</span></td>
+              <td class="text-mono">623,100</td><td class="text-mono">750,000</td>
+              <td>
+                <div class="progress-bar" style="width:100px;"><div class="progress-bar-fill yellow" style="width:83%;"></div></div>
+                <span class="text-sm text-secondary">83.0%</span>
+              </td>
+              <td class="text-mono">$0</td><td class="text-mono"><strong>$399</strong></td>
+            </tr>
+            <tr>
+              <td><strong>StartupXYZ</strong></td><td><span class="badge badge-primary">Scale</span></td>
+              <td class="text-mono">298,450</td><td class="text-mono">500,000</td>
+              <td>
+                <div class="progress-bar" style="width:100px;"><div class="progress-bar-fill green" style="width:59.7%;"></div></div>
+                <span class="text-sm text-secondary">59.7%</span>
+              </td>
+              <td class="text-mono">$0</td><td class="text-mono"><strong>$99</strong></td>
+            </tr>
+            <tr>
+              <td><strong>DataDrive</strong></td><td><span class="badge badge-primary">Scale</span></td>
+              <td class="text-mono">187,600</td><td class="text-mono">500,000</td>
+              <td>
+                <div class="progress-bar" style="width:100px;"><div class="progress-bar-fill green" style="width:37.5%;"></div></div>
+                <span class="text-sm text-secondary">37.5%</span>
+              </td>
+              <td class="text-mono">$0</td><td class="text-mono"><strong>$99</strong></td>
+            </tr>
+            <tr>
+              <td><strong>NovaPay</strong></td><td><span class="badge badge-info">Pro</span></td>
+              <td class="text-mono">52,800</td><td class="text-mono">50,000</td>
+              <td>
+                <div class="progress-bar" style="width:100px;"><div class="progress-bar-fill red" style="width:100%;"></div></div>
+                <span class="text-sm" style="color:var(--error);">105.6%</span>
+              </td>
+              <td class="text-mono" style="color:var(--error);">$14</td><td class="text-mono"><strong>$43</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Billing alerts -->
+      <div class="card">
+        <div class="card-header"><h3>Billing Alerts</h3></div>
+        <div class="alert-item">
+          <div class="alert-icon warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="alert-content">
+            <div class="title">NovaPay exceeded Pro plan limit</div>
+            <div class="desc">2,800 emails over the 50,000 limit. Overage charge: $14.00</div>
+            <div class="time">2 hours ago</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="alert-content">
+            <div class="title">Acme Corp approaching Enterprise quota</div>
+            <div class="desc">84.5% of monthly email limit used with 8 days remaining</div>
+            <div class="time">6 hours ago</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-icon error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <div class="alert-content">
+            <div class="title">QuickInvoice — payment overdue</div>
+            <div class="desc">Pro plan payment of $29.00 is 14 days overdue. Account suspended.</div>
+            <div class="time">1 day ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 6: AUDIT LOGS
+         ================================================ -->
+    <div class="screen" id="screen-6">
+      <div class="page-header">
+        <div>
+          <h1>Audit Logs</h1>
+          <div class="page-subtitle">Complete audit trail of all tenant and system actions</div>
+        </div>
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" placeholder="Search by tenant, action, or IP address..." />
+        <select>
+          <option>All Tenants</option>
+          <option>Acme Corp</option>
+          <option>TechFlow Inc</option>
+          <option>StartupXYZ</option>
+          <option>DataDrive</option>
+          <option>NovaPay</option>
+        </select>
+        <select>
+          <option>All Actions</option>
+          <option>API Key Created</option>
+          <option>API Key Revoked</option>
+          <option>Domain Added</option>
+          <option>Domain Removed</option>
+          <option>Webhook Created</option>
+          <option>Email Sent</option>
+          <option>Suppression Added</option>
+        </select>
+        <input type="date" style="min-width:140px;" value="2026-03-01" />
+        <span class="text-sm text-secondary">to</span>
+        <input type="date" style="min-width:140px;" value="2026-04-01" />
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Timestamp</th><th>Tenant</th><th>Action</th><th>Actor</th><th>IP Address</th><th>Details</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 14:23:41</td>
+              <td><strong>Acme Corp</strong></td>
+              <td><span class="badge badge-primary">API Key Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_a3f2...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.42</td>
+              <td class="text-sm">New production key with send + read permissions</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 13:58:12</td>
+              <td><strong>TechFlow Inc</strong></td>
+              <td><span class="badge badge-info">Domain Added</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_b7d1...</td>
+              <td class="text-mono" style="font-size:11px;">198.51.100.7</td>
+              <td class="text-sm">Added notifications.techflow.io</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 13:45:30</td>
+              <td><strong>StartupXYZ</strong></td>
+              <td><span class="badge badge-success">Webhook Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_c9e5...</td>
+              <td class="text-mono" style="font-size:11px;">192.0.2.100</td>
+              <td class="text-sm">Webhook for delivery events: https://hooks.startupxyz.com</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 12:30:18</td>
+              <td><strong>DataDrive</strong></td>
+              <td><span class="badge badge-warning">Suppression Added</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_d4g7...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.15</td>
+              <td class="text-sm">Manual suppression: bounce@invalid-domain.com</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 11:22:05</td>
+              <td><strong>NovaPay</strong></td>
+              <td><span class="badge badge-error">API Key Revoked</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_e8h2...</td>
+              <td class="text-mono" style="font-size:11px;">198.51.100.22</td>
+              <td class="text-sm">Revoked compromised key eaas_pk_old_k9...</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 10:15:42</td>
+              <td><strong>Acme Corp</strong></td>
+              <td><span class="badge badge-error">Domain Removed</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_a3f2...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.42</td>
+              <td class="text-sm">Removed deprecated.acmecorp.com</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-04-01 09:48:33</td>
+              <td><strong>CloudNine SaaS</strong></td>
+              <td><span class="badge badge-primary">API Key Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_f1j4...</td>
+              <td class="text-mono" style="font-size:11px;">192.0.2.55</td>
+              <td class="text-sm">Staging environment key with limited permissions</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 22:10:08</td>
+              <td><strong>TechFlow Inc</strong></td>
+              <td><span class="badge badge-success">Webhook Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_b7d1...</td>
+              <td class="text-mono" style="font-size:11px;">198.51.100.7</td>
+              <td class="text-sm">Webhook for bounce events: https://api.techflow.io/hooks</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 19:55:21</td>
+              <td><strong>MailMerge Labs</strong></td>
+              <td><span class="badge badge-info">Domain Added</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_g2k5...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.88</td>
+              <td class="text-sm">Added transactional.mailmerge.dev</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 18:30:44</td>
+              <td><strong>Acme Corp</strong></td>
+              <td><span class="badge badge-warning">Suppression Added</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_a3f2...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.42</td>
+              <td class="text-sm">Bulk import: 245 addresses from bounce list</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 16:22:15</td>
+              <td><strong>StartupXYZ</strong></td>
+              <td><span class="badge badge-primary">API Key Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_c9e5...</td>
+              <td class="text-mono" style="font-size:11px;">192.0.2.100</td>
+              <td class="text-sm">Mobile app integration key</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 14:05:38</td>
+              <td><strong>DataDrive</strong></td>
+              <td><span class="badge badge-info">Domain Added</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_d4g7...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.15</td>
+              <td class="text-sm">Added alerts.datadrive.co for monitoring notifications</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 11:48:22</td>
+              <td><strong>NovaPay</strong></td>
+              <td><span class="badge badge-success">Webhook Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_e8h2...</td>
+              <td class="text-mono" style="font-size:11px;">198.51.100.22</td>
+              <td class="text-sm">Webhook for all events: https://api.novapay.com/eaas</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-31 09:20:11</td>
+              <td><strong>DevShop</strong></td>
+              <td><span class="badge badge-primary">API Key Created</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_h3l6...</td>
+              <td class="text-mono" style="font-size:11px;">192.0.2.200</td>
+              <td class="text-sm">Initial API key for testing</td>
+            </tr>
+            <tr>
+              <td class="text-mono" style="font-size:11px;white-space:nowrap;">2026-03-30 23:15:50</td>
+              <td><strong>Acme Corp</strong></td>
+              <td><span class="badge badge-error">API Key Revoked</span></td>
+              <td class="text-mono" style="font-size:11px;">eaas_pk_a3f2...</td>
+              <td class="text-mono" style="font-size:11px;">203.0.113.42</td>
+              <td class="text-sm">Rotated key eaas_pk_old_m7... per security policy</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================================================
+         SCREEN 7: ADMIN SETTINGS
+         ================================================ -->
+    <div class="screen" id="screen-7">
+      <div class="page-header">
+        <div>
+          <h1>Admin Settings</h1>
+          <div class="page-subtitle">System configuration, feature flags, and admin accounts</div>
+        </div>
+        <button class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Changes
+        </button>
+      </div>
+
+      <div class="tab-bar">
+        <button class="active">System Config</button>
+        <button>Feature Flags</button>
+        <button>Email Provider</button>
+        <button>Admin Users</button>
+      </div>
+
+      <!-- System Configuration -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><h3>Rate Limits & Quotas</h3></div>
+          <div class="settings-row">
+            <div class="settings-label">Default Rate Limit<small>Requests per minute per API key</small></div>
+            <input class="settings-input" type="number" value="100" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Max Email Size<small>Including attachments</small></div>
+            <input class="settings-input" type="text" value="25 MB" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Max Batch Size<small>Emails per batch API call</small></div>
+            <input class="settings-input" type="number" value="1000" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Max Recipients<small>Per single email</small></div>
+            <input class="settings-input" type="number" value="50" />
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Retention Policies</h3></div>
+          <div class="settings-row">
+            <div class="settings-label">Email Logs<small>How long to keep email logs</small></div>
+            <input class="settings-input" type="text" value="90 days" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Inbound Raw<small>Raw inbound email storage</small></div>
+            <input class="settings-input" type="text" value="30 days" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Audit Logs<small>Admin and tenant action logs</small></div>
+            <input class="settings-input" type="text" value="365 days" />
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">Webhook Logs<small>Delivery attempt records</small></div>
+            <input class="settings-input" type="text" value="14 days" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Flags -->
+      <div class="card mb-24">
+        <div class="card-header"><h3>Feature Flags</h3></div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <span>Enable Inbound Mail Processing</span>
+            <span>Allow tenants to configure inbound email receiving via MX records</span>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <span>Enable Open/Click Tracking</span>
+            <span>Insert tracking pixels and rewrite links for engagement analytics</span>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <span>Enable Template Engine</span>
+            <span>Allow tenants to create and use email templates with variable substitution</span>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <span>Maintenance Mode</span>
+            <span>Temporarily disable all API access and show maintenance page</span>
+          </div>
+          <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-label">
+            <span>New Tenant Registration</span>
+            <span>Allow new tenants to self-register via the API</span>
+          </div>
+          <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+
+      <!-- Email Provider -->
+      <div class="card mb-24">
+        <div class="card-header"><h3>Email Provider Configuration</h3></div>
+        <div class="grid-2" style="margin-bottom:0;">
+          <div>
+            <div class="settings-row">
+              <div class="settings-label">Primary Provider</div>
+              <div class="settings-value"><span class="badge badge-success">AWS SES</span></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Region</div>
+              <div class="settings-value"><code class="mono">us-east-1</code></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Configuration Set</div>
+              <div class="settings-value"><code class="mono">eaas-production</code></div>
+            </div>
+          </div>
+          <div>
+            <div class="settings-row">
+              <div class="settings-label">Fallback Provider</div>
+              <div class="settings-value"><span class="badge badge-neutral">SMTP (Postfix)</span></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Fallback Host</div>
+              <div class="settings-value"><code class="mono">smtp-fallback.eaas.internal:587</code></div>
+            </div>
+            <div class="settings-row">
+              <div class="settings-label">Auto-Failover</div>
+              <div class="settings-value"><span class="badge badge-success">Enabled</span> after 3 failures in 60s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Users -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Admin Users</h3>
+          <button class="btn btn-primary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Admin
+          </button>
+        </div>
+        <div class="admin-user-row">
+          <div class="admin-avatar">II</div>
+          <div class="admin-user-info">
+            <div class="name">Israel Iyonsi</div>
+            <div class="email">israel@eaas.dev</div>
+          </div>
+          <span class="badge badge-primary">Super Admin</span>
+          <span class="text-sm text-secondary" style="margin-left:auto;">Last login: 2 min ago</span>
+        </div>
+        <div class="admin-user-row">
+          <div class="admin-avatar">RK</div>
+          <div class="admin-user-info">
+            <div class="name">Roberts Kalnins</div>
+            <div class="email">roberts@eaas.dev</div>
+          </div>
+          <span class="badge badge-primary">Super Admin</span>
+          <span class="text-sm text-secondary" style="margin-left:auto;">Last login: 1 hour ago</span>
+        </div>
+        <div class="admin-user-row">
+          <div class="admin-avatar">SM</div>
+          <div class="admin-user-info">
+            <div class="name">Sarah Mitchell</div>
+            <div class="email">sarah@eaas.dev</div>
+          </div>
+          <span class="badge badge-neutral">Read-Only</span>
+          <span class="text-sm text-secondary" style="margin-left:auto;">Last login: 3 days ago</span>
+        </div>
+        <div class="admin-user-row">
+          <div class="admin-avatar">AJ</div>
+          <div class="admin-user-info">
+            <div class="name">Alex Johnson</div>
+            <div class="email">alex@eaas.dev</div>
+          </div>
+          <span class="badge badge-neutral">Read-Only</span>
+          <span class="text-sm text-secondary" style="margin-left:auto;">Last login: 1 week ago</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Screen switching
+function showScreen(index) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen-nav button:not(.theme-toggle)').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#sidebarNav a').forEach(a => a.classList.remove('active'));
+
+  document.getElementById('screen-' + index).classList.add('active');
+  document.querySelectorAll('.screen-nav button:not(.theme-toggle)')[index].classList.add('active');
+  const sidebarLink = document.querySelector('#sidebarNav a[data-screen="' + index + '"]');
+  if (sidebarLink) sidebarLink.classList.add('active');
+}
+
+// Theme toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+</script>
+
+</body>
+</html>

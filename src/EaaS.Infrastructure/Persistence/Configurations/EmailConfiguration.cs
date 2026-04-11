@@ -133,6 +133,9 @@ public sealed class EmailConfiguration : IEntityTypeConfiguration<Email>
         builder.Property(e => e.ClickedAt)
             .HasColumnName("clicked_at");
 
+        builder.Property(e => e.ScheduledAt)
+            .HasColumnName("scheduled_at");
+
         // Indexes
         builder.HasIndex(e => e.MessageId)
             .IsUnique()
@@ -159,6 +162,10 @@ public sealed class EmailConfiguration : IEntityTypeConfiguration<Email>
 
         builder.HasIndex(e => e.FromEmail)
             .HasDatabaseName("idx_emails_from");
+
+        builder.HasIndex(e => new { e.Status, e.ScheduledAt })
+            .HasFilter("status = 'scheduled'")
+            .HasDatabaseName("ix_emails_scheduled");
 
         builder.HasMany(e => e.Events)
             .WithOne(ev => ev.Email)

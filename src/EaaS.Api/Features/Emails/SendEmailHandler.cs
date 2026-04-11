@@ -11,34 +11,46 @@ using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.Api.Features.Emails;
 
-public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEmailResult>
+public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEmailResult>
 {
     private readonly AppDbContext _dbContext;
     private readonly IRateLimiter _rateLimiter;
     private readonly IIdempotencyStore _idempotencyStore;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
+    private readonly ILogger<SendEmailHandler> _logger;
 
     public SendEmailHandler(
         AppDbContext dbContext,
         IRateLimiter rateLimiter,
         IIdempotencyStore idempotencyStore,
         IPublishEndpoint publishEndpoint,
-        SuppressionChecker suppressionChecker)
+        SuppressionChecker suppressionChecker,
+        ISubscriptionLimitService subscriptionLimitService,
+        ILogger<SendEmailHandler> logger)
     {
         _dbContext = dbContext;
         _rateLimiter = rateLimiter;
         _idempotencyStore = idempotencyStore;
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
+        _subscriptionLimitService = subscriptionLimitService;
+        _logger = logger;
     }
 
     public async Task<SendEmailResult> Handle(SendEmailCommand request, CancellationToken cancellationToken)
     {
-        // 0. Check rate limit per API key
+        // 0a. Check subscription quota
+        var canSend = await _subscriptionLimitService.CanSendEmailAsync(request.TenantId, cancellationToken);
+        if (!canSend)
+            throw new QuotaExceededException("Monthly email limit exceeded. Upgrade your plan.");
+
+        // 0b. Check rate limit per API key
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
         var isAllowed = await _rateLimiter.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
         if (!isAllowed)
@@ -114,6 +126,8 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        LogEmailQueued(_logger, email.Id, email.MessageId, request.TenantId);
+
         // 5. Publish to MassTransit queue
         await _publishEndpoint.Publish(new SendEmailMessage
         {
@@ -144,4 +158,7 @@ public sealed class SendEmailHandler : IRequestHandler<SendEmailCommand, SendEma
     }
 
     private sealed record IdempotencyData(Guid Id, string MessageId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email queued: EmailId={EmailId}, MessageId={MessageId}, TenantId={TenantId}")]
+    private static partial void LogEmailQueued(ILogger logger, Guid emailId, string messageId, Guid tenantId);
 }

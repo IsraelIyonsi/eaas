@@ -16,7 +16,6 @@ public static class ListDomainsEndpoint
             return Results.Ok(ApiResponse.Ok(result));
         })
         .WithName("ListDomains")
-        .WithOpenApi()
         .Produces<ApiResponse<IReadOnlyList<DomainSummary>>>(StatusCodes.Status200OK);
     }
 

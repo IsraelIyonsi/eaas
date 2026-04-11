@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Outbound Core — Hi-Fi Dashboard Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-2: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #f8fafc;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --primary-text: #1e40af;
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --success-text: #166534;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-text: #991b1b;
+  --purple: #8b5cf6;
+  --purple-light: #ede9fe;
+  --purple-text: #6d28d9;
+  --teal: #14b8a6;
+  --teal-light: #ccfbf1;
+  --teal-text: #0f766e;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #e2e8f0;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.15);
+  --sidebar-active-text: #60a5fa;
+  --sidebar-section: #475569;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-2: #334155;
+  --bg-hover: #334155;
+  --border: #334155;
+  --border-strong: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #0f172a;
+  --primary-light: rgba(37, 99, 235, 0.2);
+  --primary-text: #93bbfd;
+  --success-light: rgba(34, 197, 94, 0.15);
+  --success-text: #86efac;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-text: #fcd34d;
+  --error-light: rgba(239, 68, 68, 0.15);
+  --error-text: #fca5a5;
+  --purple-light: rgba(139, 92, 246, 0.15);
+  --purple-text: #c4b5fd;
+  --teal-light: rgba(20, 184, 166, 0.15);
+  --teal-text: #5eead4;
+  --sidebar-bg: #020617;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+}
+
+html { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); }
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; }
+h2 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.body-text { font-size: 14px; line-height: 20px; font-weight: 400; }
+.small-text { font-size: 12px; line-height: 16px; font-weight: 400; }
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; }
+
+/* ============================================
+   SCREEN NAVIGATION
+   ============================================ */
+.screen-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px; padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.screen-nav-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+.screen-nav button {
+  padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.screen-nav button:hover { border-color: var(--primary); color: var(--primary); }
+.screen-nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
+.theme-toggle {
+  margin-left: auto; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  font-family: inherit; font-weight: 500; transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.screen { display: none; margin-top: 44px; }
+.screen.active { display: flex; min-height: calc(100vh - 44px); }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--sidebar-bg);
+  display: flex; flex-direction: column; height: calc(100vh - 44px);
+  position: sticky; top: 44px; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; color: white;
+  font-weight: 700; font-size: 14px;
+}
+.sidebar-logo-text { color: #f1f5f9; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 1px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); font-size: 13px;
+  font-weight: 400; cursor: pointer; transition: all var(--transition);
+  text-decoration: none; position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); font-weight: 500; }
+.nav-item .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto; padding: 1px 6px; border-radius: 10px; font-size: 10px;
+  font-weight: 600; background: var(--primary); color: white; letter-spacing: 0.02em;
+}
+.nav-badge.new { background: var(--success); }
+.nav-sub { padding-left: 40px; }
+.nav-section { padding: 16px 12px 6px; font-size: 11px; font-weight: 600; color: var(--sidebar-section); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sidebar-footer .nav-item { font-size: 12px; }
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px;
+}
+.sidebar-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 11px; font-weight: 600;
+}
+.sidebar-user-info { flex: 1; }
+.sidebar-user-name { color: #e2e8f0; font-size: 13px; font-weight: 500; }
+.sidebar-user-email { color: var(--sidebar-text); font-size: 11px; }
+
+/* Main Content */
+.main-content { flex: 1; padding: 24px 32px; min-width: 0; overflow-x: auto; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+
+/* Breadcrumb */
+.breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.breadcrumb span { font-size: 13px; color: var(--text-secondary); }
+.breadcrumb a { font-size: 13px; color: var(--text-secondary); text-decoration: none; }
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb .sep { color: var(--text-tertiary); font-size: 12px; }
+
+/* Page Header */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-title { display: flex; align-items: center; gap: 10px; }
+.page-title h1 { white-space: nowrap; }
+.count-badge {
+  padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;
+  background: var(--bg-surface-2); color: var(--text-secondary);
+}
+
+/* Search Input */
+.search-input { position: relative; display: flex; align-items: center; }
+.search-input input {
+  padding: 8px 12px 8px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  width: 280px; transition: border-color var(--transition); outline: none;
+}
+.search-input input::placeholder { color: var(--text-tertiary); }
+.search-input input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.search-input .search-icon { position: absolute; left: 10px; color: var(--text-tertiary); }
+
+/* Filter Bar */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.filter-item select, .filter-item input {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; transition: border-color var(--transition);
+}
+.filter-item select:focus, .filter-item input:focus { border-color: var(--primary); }
+.filter-item label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-right: 6px; }
+.clear-filters { font-size: 13px; color: var(--primary); cursor: pointer; margin-left: auto; text-decoration: none; font-weight: 500; }
+.clear-filters:hover { text-decoration: underline; }
+
+/* Data Table */
+.data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead { background: var(--bg-surface); }
+.data-table th {
+  padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px;
+  color: var(--text-secondary); border-bottom: 1px solid var(--border);
+  white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table tbody tr { transition: background var(--transition); }
+.data-table tbody tr:hover { background: var(--bg-hover); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Checkbox */
+.checkbox {
+  width: 16px; height: 16px; border: 1.5px solid var(--border-strong);
+  border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.checkbox:hover { border-color: var(--primary); }
+.checkbox.checked { background: var(--primary); border-color: var(--primary); }
+.checkbox.checked::after { content: ''; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-0.5px, -0.5px); }
+
+/* Status Dot */
+.status { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.green { background: var(--success); }
+.status-dot.blue { background: var(--primary); }
+.status-dot.red { background: var(--error); }
+.status-dot.amber { background: var(--warning); }
+.status-dot.gray { background: var(--text-tertiary); }
+.status-dot.purple { background: var(--purple); }
+.status-dot.teal { background: var(--teal); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.badge-green { background: var(--success-light); color: var(--success-text); }
+.badge-red { background: var(--error-light); color: var(--error-text); }
+.badge-blue { background: var(--primary-light); color: var(--primary-text); }
+.badge-amber { background: var(--warning-light); color: var(--warning-text); }
+.badge-gray { background: var(--bg-surface-2); color: var(--text-secondary); }
+.badge-purple { background: var(--purple-light); color: var(--purple-text); }
+.badge-teal { background: var(--teal-light); color: var(--teal-text); }
+
+/* Subject cell */
+.subject-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; font-size: 13px; color: var(--text-secondary);
+}
+.pagination-buttons { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: all var(--transition);
+}
+.page-btn:hover { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Card */
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 20px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { background: var(--bg-surface); border-color: var(--border-strong); }
+.btn-destructive { background: var(--error); color: white; border-color: var(--error); }
+.btn-destructive:hover { background: #dc2626; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: none; padding: 6px 10px; }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); gap: 0; }
+.tab {
+  padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition);
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Back link */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary);
+  font-size: 13px; cursor: pointer; text-decoration: none; margin-bottom: 16px;
+  transition: color var(--transition);
+}
+.back-link:hover { color: var(--primary); }
+
+/* Metadata grid */
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.meta-item label { display: block; font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.meta-item .meta-value { font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+
+/* Email body */
+.email-body-preview {
+  padding: 20px 24px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; line-height: 1.7;
+  color: var(--text-primary); white-space: pre-wrap; margin-top: 12px;
+}
+
+/* Mini Table */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mini-table th { padding: 8px 12px; text-align: left; font-weight: 500; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+.mini-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+
+/* Side Panel */
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; }
+.panel-overlay.show { display: block; }
+.side-panel {
+  position: fixed; top: 44px; right: -560px; width: 560px; height: calc(100vh - 44px);
+  background: var(--bg); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  z-index: 101; transition: right 250ms ease; display: flex; flex-direction: column;
+}
+.side-panel.show { right: 0; }
+.panel-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+.panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Form Fields */
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.form-helper { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+.form-input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; transition: border-color var(--transition);
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+textarea.form-input { resize: vertical; min-height: 80px; }
+.form-select {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.form-select:focus { border-color: var(--primary); }
+
+/* Toggle Switch */
+.toggle-switch {
+  width: 36px; height: 20px; background: var(--border-strong); border-radius: 10px;
+  position: relative; transition: background var(--transition); cursor: pointer;
+}
+.toggle-switch::after {
+  content: ''; width: 16px; height: 16px; border-radius: 50%; background: white;
+  position: absolute; top: 2px; left: 2px; transition: transform var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch.on::after { transform: translateX(16px); }
+
+/* Action Row */
+.action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+
+/* Section spacing */
+.section { margin-top: 24px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+/* SVG Icons */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; }
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 20px; height: 20px; }
+
+/* ============================================
+   OVERVIEW DASHBOARD
+   ============================================ */
+.metric-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
+}
+.metric-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+.metric-card:hover { box-shadow: var(--shadow-md); }
+.metric-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.metric-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1; }
+.metric-change { font-size: 12px; font-weight: 500; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.metric-change.up { color: var(--success-text); }
+.metric-change.down { color: var(--error-text); }
+.metric-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+.time-selector { display: flex; gap: 4px; }
+.time-btn {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.time-btn:hover { border-color: var(--primary); color: var(--primary); }
+.time-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.chart-card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+.chart-card-body { padding: 20px; }
+
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.activity-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.activity-icon.sent { background: var(--primary-light); color: var(--primary); }
+.activity-icon.delivered { background: var(--success-light); color: var(--success); }
+.activity-icon.bounced { background: var(--error-light); color: var(--error); }
+.activity-icon.opened { background: var(--purple-light); color: var(--purple); }
+.activity-icon.clicked { background: var(--teal-light); color: var(--teal); }
+.activity-icon.received { background: var(--primary-light); color: var(--primary); }
+.activity-text { font-size: 13px; color: var(--text-primary); line-height: 1.4; }
+.activity-time { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+.domain-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.domain-item:last-child { border-bottom: none; }
+.domain-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+.quick-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* ============================================
+   TEMPLATE CARDS
+   ============================================ */
+.template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.template-card {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; background: var(--bg); transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.template-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
+.template-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.template-name { font-size: 15px; font-weight: 600; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+.template-version { font-size: 11px; font-weight: 600; color: var(--text-tertiary); background: var(--bg-surface-2); padding: 2px 8px; border-radius: 10px; }
+.template-subject { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-style: italic; }
+.template-meta { font-size: 12px; color: var(--text-tertiary); margin-bottom: 4px; }
+.template-vars { font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px; }
+.template-vars code { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 1px 4px; background: var(--bg-surface-2); border-radius: 3px; color: var(--text-secondary); }
+.template-actions { display: flex; gap: 6px; padding-top: 12px; border-top: 1px solid var(--border); }
+
+/* ============================================
+   CODE EDITOR
+   ============================================ */
+.code-editor {
+  background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: #e2e8f0; line-height: 1.6; overflow-x: auto; min-height: 200px;
+  white-space: pre;
+}
+[data-theme="dark"] .code-editor { background: #020617; }
+.code-editor .tag { color: #f472b6; }
+.code-editor .attr { color: #38bdf8; }
+.code-editor .str { color: #a3e635; }
+.code-editor .comment { color: #64748b; }
+
+/* ============================================
+   DOMAIN CARDS
+   ============================================ */
+.domain-cards { display: flex; flex-direction: column; gap: 16px; }
+.domain-card {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; background: var(--bg); box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+}
+.domain-card:hover { box-shadow: var(--shadow-md); }
+.domain-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.domain-card-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+.domain-dns { display: flex; gap: 12px; margin-bottom: 8px; font-size: 13px; }
+.dns-item { display: flex; align-items: center; gap: 4px; }
+.dns-check { color: var(--success); font-weight: 600; }
+.dns-fail { color: var(--error); font-weight: 600; }
+.domain-card-meta { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; }
+.domain-card-footer { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+
+/* ============================================
+   EVENT TIMELINE (Detail)
+   ============================================ */
+.event-timeline { position: relative; padding-left: 28px; }
+.event-timeline::before {
+  content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px;
+  width: 2px; background: var(--border);
+}
+.event-item { position: relative; padding: 8px 0; display: flex; align-items: flex-start; gap: 12px; }
+.event-dot {
+  position: absolute; left: -28px; top: 12px; width: 10px; height: 10px;
+  border-radius: 50%; border: 2px solid var(--border); background: var(--bg); z-index: 1;
+}
+.event-dot.queued { border-color: var(--text-tertiary); background: var(--bg-surface-2); }
+.event-dot.sending { border-color: var(--primary); background: var(--primary-light); }
+.event-dot.delivered { border-color: var(--success); background: var(--success-light); }
+.event-dot.opened { border-color: var(--purple); background: var(--purple-light); }
+.event-dot.clicked { border-color: var(--teal); background: var(--teal-light); }
+.event-dot.bounced { border-color: var(--error); background: var(--error-light); }
+.event-dot.failed { border-color: var(--error); background: var(--error-light); }
+.event-time { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; min-width: 90px; font-family: 'JetBrains Mono', monospace; }
+.event-content { flex: 1; }
+.event-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.event-detail { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+
+/* Copy button */
+.copy-btn {
+  padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--text-secondary); font-size: 11px; cursor: pointer;
+  font-family: inherit; transition: all var(--transition);
+}
+.copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     SCREEN NAVIGATION BAR
+     ============================================ -->
+<nav class="screen-nav">
+  <span class="screen-nav-label">Screens:</span>
+  <button class="active" onclick="showScreen('screen1', this)">1. Overview</button>
+  <button onclick="showScreen('screen2', this)">2. Sent Emails</button>
+  <button onclick="showScreen('screen3', this)">3. Email Detail</button>
+  <button onclick="showScreen('screen4', this)">4. Templates</button>
+  <button onclick="showScreen('screen5', this)">5. Domains</button>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <svg class="icon-sm" id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-sm" id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span id="theme-label">Dark</span>
+  </button>
+</nav>
+
+<!-- ============================================
+     SIDEBAR TEMPLATE (reused via JS clone)
+     ============================================ -->
+<template id="sidebar-template">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">E</div>
+      <span class="sidebar-logo-text">EaaS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item nav-overview" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item nav-sent" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Sent
+      </a>
+      <a class="nav-item nav-received" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Received
+        <span class="nav-badge new">NEW</span>
+      </a>
+      <a class="nav-item nav-rules" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Inbound Rules
+        <span class="nav-badge new">NEW</span>
+      </a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item nav-domains" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Domains
+      </a>
+      <a class="nav-item nav-templates" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Templates
+      </a>
+      <a class="nav-item nav-apikeys" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Keys
+      </a>
+      <a class="nav-item nav-webhooks" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Webhooks
+      </a>
+      <a class="nav-item nav-suppressions" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Suppressions
+      </a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub nav-analytics-out" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Outbound
+      </a>
+      <a class="nav-item nav-sub nav-analytics-in" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Inbound
+      </a>
+      <div class="nav-section">System</div>
+      <a class="nav-item nav-notifications" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a class="nav-item nav-settings" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Documentation
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">II</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Israel Iyonsi</div>
+        <div class="sidebar-user-email">israel@eaas.dev</div>
+      </div>
+    </div>
+  </aside>
+</template>
+
+<!-- ============================================
+     SCREEN 1: OVERVIEW / HOME DASHBOARD
+     ============================================ -->
+<div id="screen1" class="screen active">
+  <aside class="sidebar" id="sidebar1"></aside>
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Dashboard</h1>
+      </div>
+      <div class="time-selector">
+        <button class="time-btn" onclick="selectTime(this)">24h</button>
+        <button class="time-btn active" onclick="selectTime(this)">7d</button>
+        <button class="time-btn" onclick="selectTime(this)">30d</button>
+      </div>
+    </div>
+
+    <!-- Top Row: 6 Metric Cards -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Emails Sent
+        </div>
+        <div class="metric-value">24,891</div>
+        <div class="metric-change up">
+          <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 7H2L6 2Z" fill="currentColor"/></svg>
+          +8.2%
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Delivered
+        </div>
+        <div class="metric-value">24,156</div>
+        <div class="metric-sub">97.1% delivery rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          Bounced
+        </div>
+        <div class="metric-value">412</div>
+        <div class="metric-sub">1.7% bounce rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Opened
+        </div>
+        <div class="metric-value">12,344</div>
+        <div class="metric-sub">49.5% open rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>
+          Clicked
+        </div>
+        <div class="metric-value">3,891</div>
+        <div class="metric-sub">15.6% click rate</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+          Inbound Received
+          <span class="badge badge-green" style="font-size:10px; padding:1px 6px;">NEW</span>
+        </div>
+        <div class="metric-value">1,247</div>
+        <div class="metric-change up">
+          <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 7H2L6 2Z" fill="currentColor"/></svg>
+          +12.3%
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Row: Two Charts -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-card-header">Email Volume (7 days)</div>
+        <div class="chart-card-body">
+          <svg viewBox="0 0 500 200" width="100%" height="200" style="display:block">
+            <!-- Grid lines -->
+            <line x1="40" y1="20" x2="40" y2="170" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="170" x2="480" y2="170" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="132" x2="480" y2="132" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="95" x2="480" y2="95" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="57" x2="480" y2="57" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="20" x2="480" y2="20" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <!-- Y axis labels -->
+            <text x="35" y="173" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">0</text>
+            <text x="35" y="135" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">1k</text>
+            <text x="35" y="98" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">2k</text>
+            <text x="35" y="60" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">3k</text>
+            <text x="35" y="23" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">4k</text>
+            <!-- X axis labels -->
+            <text x="103" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Mon</text>
+            <text x="166" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Tue</text>
+            <text x="229" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Wed</text>
+            <text x="292" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Thu</text>
+            <text x="355" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Fri</text>
+            <text x="418" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Sat</text>
+            <text x="480" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Sun</text>
+            <!-- Sent area (blue) -->
+            <defs>
+              <linearGradient id="sentGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#2563eb" stop-opacity="0.02"/>
+              </linearGradient>
+              <linearGradient id="recvGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#22c55e" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <path d="M103,60 L166,45 L229,55 L292,38 L355,50 L418,70 L480,52 L480,170 L103,170 Z" fill="url(#sentGrad)"/>
+            <polyline points="103,60 166,45 229,55 292,38 355,50 418,70 480,52" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Received area (green) -->
+            <path d="M103,145 L166,140 L229,138 L292,142 L355,135 L418,148 L480,130 L480,170 L103,170 Z" fill="url(#recvGrad)"/>
+            <polyline points="103,145 166,140 229,138 292,142 355,135 418,148 480,130" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Dots -->
+            <circle cx="103" cy="60" r="3.5" fill="#2563eb"/><circle cx="166" cy="45" r="3.5" fill="#2563eb"/><circle cx="229" cy="55" r="3.5" fill="#2563eb"/><circle cx="292" cy="38" r="3.5" fill="#2563eb"/><circle cx="355" cy="50" r="3.5" fill="#2563eb"/><circle cx="418" cy="70" r="3.5" fill="#2563eb"/><circle cx="480" cy="52" r="3.5" fill="#2563eb"/>
+            <circle cx="103" cy="145" r="3.5" fill="#22c55e"/><circle cx="166" cy="140" r="3.5" fill="#22c55e"/><circle cx="229" cy="138" r="3.5" fill="#22c55e"/><circle cx="292" cy="142" r="3.5" fill="#22c55e"/><circle cx="355" cy="135" r="3.5" fill="#22c55e"/><circle cx="418" cy="148" r="3.5" fill="#22c55e"/><circle cx="480" cy="130" r="3.5" fill="#22c55e"/>
+            <!-- Legend -->
+            <circle cx="60" cy="10" r="4" fill="#2563eb"/><text x="68" y="13" fill="var(--text-secondary)" font-size="10" font-family="Inter">Sent</text>
+            <circle cx="110" cy="10" r="4" fill="#22c55e"/><text x="118" y="13" fill="var(--text-secondary)" font-size="10" font-family="Inter">Received</text>
+          </svg>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">Delivery Performance</div>
+        <div class="chart-card-body">
+          <svg viewBox="0 0 500 200" width="100%" height="200" style="display:block">
+            <line x1="40" y1="20" x2="40" y2="170" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="170" x2="480" y2="170" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="132" x2="480" y2="132" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="95" x2="480" y2="95" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="57" x2="480" y2="57" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="20" x2="480" y2="20" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <text x="35" y="173" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">0</text>
+            <text x="35" y="135" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">1k</text>
+            <text x="35" y="98" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">2k</text>
+            <text x="35" y="60" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">3k</text>
+            <text x="35" y="23" text-anchor="end" fill="var(--text-tertiary)" font-size="10" font-family="Inter">4k</text>
+            <text x="103" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Mon</text>
+            <text x="166" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Tue</text>
+            <text x="229" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Wed</text>
+            <text x="292" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Thu</text>
+            <text x="355" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Fri</text>
+            <text x="418" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Sat</text>
+            <text x="480" y="188" text-anchor="middle" fill="var(--text-tertiary)" font-size="10" font-family="Inter">Sun</text>
+            <defs>
+              <linearGradient id="delGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#22c55e" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#22c55e" stop-opacity="0.02"/>
+              </linearGradient>
+            </defs>
+            <!-- Delivered area (green) -->
+            <path d="M103,58 L166,42 L229,52 L292,36 L355,48 L418,68 L480,50 L480,170 L103,170 Z" fill="url(#delGrad)"/>
+            <polyline points="103,58 166,42 229,52 292,36 355,48 418,68 480,50" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Bounced line (red) -->
+            <polyline points="103,164 166,162 229,165 292,160 355,163 418,166 480,161" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Failed line (amber) -->
+            <polyline points="103,168 166,167 229,168 292,166 355,167 418,169 480,167" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 3"/>
+            <!-- Dots -->
+            <circle cx="103" cy="58" r="3.5" fill="#22c55e"/><circle cx="166" cy="42" r="3.5" fill="#22c55e"/><circle cx="229" cy="52" r="3.5" fill="#22c55e"/><circle cx="292" cy="36" r="3.5" fill="#22c55e"/><circle cx="355" cy="48" r="3.5" fill="#22c55e"/><circle cx="418" cy="68" r="3.5" fill="#22c55e"/><circle cx="480" cy="50" r="3.5" fill="#22c55e"/>
+            <!-- Legend -->
+            <circle cx="60" cy="10" r="4" fill="#22c55e"/><text x="68" y="13" fill="var(--text-secondary)" font-size="10" font-family="Inter">Delivered</text>
+            <circle cx="140" cy="10" r="4" fill="#ef4444"/><text x="148" y="13" fill="var(--text-secondary)" font-size="10" font-family="Inter">Bounced</text>
+            <circle cx="210" cy="10" r="4" fill="#f59e0b"/><text x="218" y="13" fill="var(--text-secondary)" font-size="10" font-family="Inter">Failed</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Three Panels -->
+    <div class="bottom-row">
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Activity</h3>
+        </div>
+        <div class="card-body" style="padding:12px 20px;">
+          <div class="activity-item">
+            <div class="activity-icon sent">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </div>
+            <div>
+              <div class="activity-text">Email sent to <strong>john@example.com</strong></div>
+              <div class="activity-time">2 minutes ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon delivered">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <div class="activity-text">Delivered to <strong>jane@company.co</strong></div>
+              <div class="activity-time">15 minutes ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon bounced">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div>
+              <div class="activity-text">Bounced: <strong>bad@invalid.com</strong></div>
+              <div class="activity-time">1 hour ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon opened">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div>
+              <div class="activity-text">Opened by <strong>alex@startup.io</strong></div>
+              <div class="activity-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon received">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="activity-text">Received from <strong>support@vendor.com</strong></div>
+              <div class="activity-time">3 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Health -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Domain Health</h3>
+        </div>
+        <div class="card-body" style="padding:12px 20px;">
+          <div class="domain-item">
+            <div class="domain-name">example.com</div>
+            <span class="badge badge-green">Verified</span>
+          </div>
+          <div class="domain-item">
+            <div class="domain-name">myapp.io</div>
+            <span class="badge badge-amber">Pending</span>
+          </div>
+          <div class="domain-item">
+            <div class="domain-name">newsletter.co</div>
+            <span class="badge badge-green">Verified</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Quick Actions</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-actions-grid">
+            <button class="btn btn-primary" style="justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              Send Email
+            </button>
+            <button class="btn btn-secondary" style="justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Create Template
+            </button>
+            <button class="btn btn-secondary" style="justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Add Domain
+            </button>
+            <button class="btn btn-secondary" style="justify-content:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              View API Keys
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 2: SENT EMAILS LIST
+     ============================================ -->
+<div id="screen2" class="screen">
+  <aside class="sidebar" id="sidebar2"></aside>
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="#">Emails</a>
+      <span class="sep">/</span>
+      <span>Sent</span>
+    </div>
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Sent Emails</h1>
+        <span class="count-badge">24,891</span>
+      </div>
+      <div class="search-input">
+        <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search by recipient, subject, or template...">
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item">
+        <label>Date Range</label>
+        <select>
+          <option>Last 7 days</option>
+          <option>Last 24 hours</option>
+          <option>Last 30 days</option>
+          <option>Custom</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Status</label>
+        <select>
+          <option>All</option>
+          <option>Queued</option>
+          <option>Sending</option>
+          <option>Sent</option>
+          <option>Delivered</option>
+          <option>Bounced</option>
+          <option>Complained</option>
+          <option>Failed</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Domain</label>
+        <select>
+          <option>All Domains</option>
+          <option>example.com</option>
+          <option>myapp.io</option>
+          <option>newsletter.co</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Template</label>
+        <select>
+          <option>All Templates</option>
+          <option>order-confirm</option>
+          <option>welcome-email</option>
+          <option>password-reset</option>
+          <option>invoice</option>
+          <option>shipping</option>
+          <option>promo</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Tags</label>
+        <select>
+          <option>All Tags</option>
+          <option>transactional</option>
+          <option>marketing</option>
+          <option>notification</option>
+        </select>
+      </div>
+      <a class="clear-filters" href="#">Clear</a>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:40px"><div class="checkbox"></div></th>
+            <th>Status</th>
+            <th>To</th>
+            <th>Subject</th>
+            <th>Template</th>
+            <th>Sent</th>
+            <th>Opens</th>
+            <th>Clicks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Delivered</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">john@example.com</td>
+            <td><div class="subject-cell">Order #12345 Confirmed</div></td>
+            <td><span class="badge badge-gray">order-confirm</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">2m ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1</span></td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Delivered</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">jane@company.co</td>
+            <td><div class="subject-cell">Welcome to MyApp</div></td>
+            <td><span class="badge badge-gray">welcome-email</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">15m ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1</span></td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>1</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot red"></span>Bounced</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">bad@invalid.com</td>
+            <td><div class="subject-cell">Invoice #789</div></td>
+            <td><span class="badge badge-gray">invoice</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">1h ago</td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>0</span></td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot purple"></span>Opened</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">alex@startup.io</td>
+            <td><div class="subject-cell">Password Reset</div></td>
+            <td><span class="badge badge-gray">password-reset</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">2h ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>3</span></td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>1</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot blue"></span>Sent</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">maria@corp.com</td>
+            <td><div class="subject-cell">Weekly Digest</div></td>
+            <td><span class="badge badge-gray">digest</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">3h ago</td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>0</span></td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot amber"></span>Complained</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">user@isp.net</td>
+            <td><div class="subject-cell">Promo Offer</div></td>
+            <td><span class="badge badge-gray">promo</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">5h ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1</span></td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot red"></span>Failed</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">nobody@gone.com</td>
+            <td><div class="subject-cell">Shipping Update</div></td>
+            <td><span class="badge badge-gray">shipping</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">6h ago</td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>0</span></td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Delivered</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">bob@inc.com</td>
+            <td><div class="subject-cell">Receipt #456</div></td>
+            <td><span class="badge badge-gray">receipt</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">8h ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1</span></td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>2</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Delivered</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">sarah@saas.io</td>
+            <td><div class="subject-cell">Your Weekly Analytics Report</div></td>
+            <td><span class="badge badge-gray">digest</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">10h ago</td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>2</span></td>
+            <td style="color:var(--text-secondary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>1</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot gray"></span>Queued</div></td>
+            <td style="color:var(--text-primary); font-size:13px;">team@agency.dev</td>
+            <td><div class="subject-cell">Project Update: Sprint 12 Complete</div></td>
+            <td><span class="badge badge-gray">notification</span></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">12h ago</td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>0</span></td>
+            <td style="color:var(--text-tertiary)"><span style="display:flex;align-items:center;gap:4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/></svg>0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span>Showing 1-20 of 24,891</span>
+      <div class="pagination-buttons">
+        <button class="page-btn" disabled>&lt;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">...</button>
+        <button class="page-btn">1245</button>
+        <button class="page-btn">&gt;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 3: SENT EMAIL DETAIL
+     ============================================ -->
+<div id="screen3" class="screen">
+  <aside class="sidebar" id="sidebar3"></aside>
+  <div class="main-content">
+    <a class="back-link" href="#" onclick="showScreen('screen2'); return false;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Sent Emails
+    </a>
+
+    <!-- Email Info Card -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h2 style="font-size:18px">Order #12345 Confirmed</h2>
+          <span class="badge badge-green">Delivered</span>
+        </div>
+        <div class="action-row" style="margin-top:0">
+          <button class="btn btn-secondary btn-sm">Resend</button>
+          <button class="btn btn-secondary btn-sm">View Raw</button>
+          <button class="btn btn-destructive btn-sm">Delete</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="meta-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="meta-item">
+            <label>From</label>
+            <div class="meta-value">noreply@example.com</div>
+          </div>
+          <div class="meta-item">
+            <label>To</label>
+            <div class="meta-value">john@example.com</div>
+          </div>
+          <div class="meta-item">
+            <label>CC</label>
+            <div class="meta-value" style="color:var(--text-tertiary)">--</div>
+          </div>
+          <div class="meta-item">
+            <label>Template</label>
+            <div class="meta-value">
+              <span class="badge badge-gray">order-confirm</span>
+              <span style="font-size:12px; color:var(--text-tertiary)">(v3)</span>
+              <a href="#" style="font-size:12px; color:var(--primary); text-decoration:none;">View Template &rarr;</a>
+            </div>
+          </div>
+          <div class="meta-item">
+            <label>Tags</label>
+            <div class="meta-value" style="gap:4px">
+              <span class="badge badge-blue">transactional</span>
+              <span class="badge badge-blue">order</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <label>Message ID</label>
+            <div class="meta-value mono" style="font-size:12px">eaas_msg_7x8j2k...</div>
+          </div>
+          <div class="meta-item">
+            <label>SES Message ID</label>
+            <div class="meta-value mono" style="font-size:12px">0102018f...</div>
+          </div>
+          <div class="meta-item">
+            <label>Sent</label>
+            <div class="meta-value">Apr 1, 2026 at 10:00 AM</div>
+          </div>
+          <div class="meta-item">
+            <label>Delivered</label>
+            <div class="meta-value">Apr 1, 2026 at 10:00:03 AM <span style="font-size:12px; color:var(--text-tertiary)">(3s)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking Section -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <h3>Tracking</h3>
+      </div>
+      <div class="card-body">
+        <div class="meta-grid" style="grid-template-columns: repeat(2, 1fr); margin-top:0;">
+          <div class="meta-item">
+            <label>Opened</label>
+            <div class="meta-value">
+              <span class="badge badge-purple">Yes (2 times)</span>
+              <span style="font-size:12px; color:var(--text-tertiary)">First open: Apr 1, 10:05 AM</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <label>Clicked</label>
+            <div class="meta-value">
+              <span class="badge badge-teal">Yes (1 time)</span>
+              <span style="font-size:12px; color:var(--text-tertiary)">"Track Order" link - Apr 1, 10:06 AM</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:16px">
+          <div class="section-title">Click Details</div>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>URL</th>
+                <th>Click Count</th>
+                <th>First Click</th>
+                <th>Last Click</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono" style="font-size:12px; color:var(--primary)">https://myapp.com/orders/12345</td>
+                <td>1</td>
+                <td style="color:var(--text-secondary)">Apr 1, 10:06 AM</td>
+                <td style="color:var(--text-secondary)">Apr 1, 10:06 AM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Preview -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header" style="padding:0">
+        <div class="tabs" style="width:100%; border-bottom:none">
+          <div class="tab active">HTML Preview</div>
+          <div class="tab">Plain Text</div>
+          <div class="tab">Raw Headers</div>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="email-body-preview" style="border:none; border-radius:0; margin:0;">
+Hi John,
+
+Thank you for your order! Your order <strong>#12345</strong> has been confirmed and is being prepared for shipment.
+
+<strong>Order Summary:</strong>
+- 2x Widget Pro (Blue)    $49.98
+- 1x Premium Case         $19.99
+- Shipping                 $5.00
+<strong>Total: $74.97</strong>
+
+You can track your order status at any time:
+<a href="#" style="color:var(--primary); text-decoration:underline;">Track Your Order</a>
+
+If you have any questions, reply to this email or contact us at support@example.com.
+
+Best regards,
+The MyApp Team</div>
+      </div>
+    </div>
+
+    <!-- Event Timeline -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Event Timeline</h3>
+      </div>
+      <div class="card-body">
+        <div class="event-timeline">
+          <div class="event-item">
+            <div class="event-dot queued"></div>
+            <div class="event-time">10:00:00 AM</div>
+            <div class="event-content">
+              <div class="event-label"><span class="status-dot gray" style="display:inline-block; margin-right:6px;"></span>Queued</div>
+              <div class="event-detail">Email accepted and queued for delivery</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot sending"></div>
+            <div class="event-time">10:00:01 AM</div>
+            <div class="event-content">
+              <div class="event-label"><span class="status-dot blue" style="display:inline-block; margin-right:6px;"></span>Sending</div>
+              <div class="event-detail">Submitted to AWS SES for delivery</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot delivered"></div>
+            <div class="event-time">10:00:03 AM</div>
+            <div class="event-content">
+              <div class="event-label"><span class="status-dot green" style="display:inline-block; margin-right:6px;"></span>Delivered</div>
+              <div class="event-detail">Successfully delivered to recipient's mail server</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot opened"></div>
+            <div class="event-time">10:05:12 AM</div>
+            <div class="event-content">
+              <div class="event-label"><span class="status-dot purple" style="display:inline-block; margin-right:6px;"></span>Opened</div>
+              <div class="event-detail">IP: 203.0.113.42 &middot; UA: Apple Mail on macOS</div>
+            </div>
+          </div>
+          <div class="event-item">
+            <div class="event-dot clicked"></div>
+            <div class="event-time">10:06:34 AM</div>
+            <div class="event-content">
+              <div class="event-label"><span class="status-dot teal" style="display:inline-block; margin-right:6px;"></span>Clicked</div>
+              <div class="event-detail">URL: https://myapp.com/orders/12345</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 4: TEMPLATES LIST + CREATE
+     ============================================ -->
+<div id="screen4" class="screen">
+  <aside class="sidebar" id="sidebar4"></aside>
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="#">Configuration</a>
+      <span class="sep">/</span>
+      <span>Templates</span>
+    </div>
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Email Templates</h1>
+        <span class="count-badge">12</span>
+      </div>
+      <button class="btn btn-primary" onclick="toggleTemplatePanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Template
+      </button>
+    </div>
+
+    <div class="template-grid">
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">order-confirm</span>
+          <span class="template-version">v3</span>
+        </div>
+        <div class="template-subject">"Your order has been confirmed"</div>
+        <div class="template-meta">Last updated: 2h ago</div>
+        <div class="template-vars">Variables: <code>orderNumber</code> <code>customerName</code> <code>total</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">welcome-email</span>
+          <span class="template-version">v2</span>
+        </div>
+        <div class="template-subject">"Welcome to {{appName}}, {{name}}!"</div>
+        <div class="template-meta">Last updated: 1d ago</div>
+        <div class="template-vars">Variables: <code>appName</code> <code>name</code> <code>loginUrl</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">password-reset</span>
+          <span class="template-version">v1</span>
+        </div>
+        <div class="template-subject">"Reset your password"</div>
+        <div class="template-meta">Last updated: 3d ago</div>
+        <div class="template-vars">Variables: <code>resetUrl</code> <code>name</code> <code>expiresIn</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">invoice</span>
+          <span class="template-version">v4</span>
+        </div>
+        <div class="template-subject">"Invoice #{{invoiceNumber}} from {{companyName}}"</div>
+        <div class="template-meta">Last updated: 5d ago</div>
+        <div class="template-vars">Variables: <code>invoiceNumber</code> <code>companyName</code> <code>amount</code> <code>dueDate</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">shipping-update</span>
+          <span class="template-version">v2</span>
+        </div>
+        <div class="template-subject">"Your order is on its way!"</div>
+        <div class="template-meta">Last updated: 1w ago</div>
+        <div class="template-vars">Variables: <code>trackingNumber</code> <code>carrier</code> <code>estimatedDate</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+      <div class="template-card">
+        <div class="template-card-header">
+          <span class="template-name">weekly-digest</span>
+          <span class="template-version">v1</span>
+        </div>
+        <div class="template-subject">"Your weekly summary for {{weekRange}}"</div>
+        <div class="template-meta">Last updated: 2w ago</div>
+        <div class="template-vars">Variables: <code>weekRange</code> <code>highlights</code> <code>metrics</code></div>
+        <div class="template-actions">
+          <button class="btn btn-ghost btn-sm">Preview</button>
+          <button class="btn btn-ghost btn-sm">Edit</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Template Side Panel -->
+  <div id="templatePanelOverlay" class="panel-overlay" onclick="toggleTemplatePanel()"></div>
+  <div id="templatePanel" class="side-panel">
+    <div class="panel-header">
+      <h2 style="font-size:18px">Create Template</h2>
+      <button class="btn btn-ghost btn-sm" onclick="toggleTemplatePanel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label class="form-label">Template Name</label>
+        <input class="form-input mono" type="text" placeholder="e.g., order-confirm" value="">
+        <div class="form-helper">Unique slug used in API calls</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject Template</label>
+        <input class="form-input" type="text" placeholder="Order {{orderNumber}} Confirmed" value="Order {{orderNumber}} Confirmed">
+        <div class="form-helper">Use {{variable}} syntax for dynamic values</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">HTML Body</label>
+        <div class="code-editor"><span class="comment">&lt;!-- Email HTML Template --&gt;</span>
+<span class="tag">&lt;html&gt;</span>
+<span class="tag">&lt;body</span> <span class="attr">style</span>=<span class="str">"font-family: Arial, sans-serif;"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Order Confirmed<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Hi <span class="str">{{customerName}}</span>,<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Your order <span class="str">#{{orderNumber}}</span> is confirmed.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plain Text Body <span style="font-weight:400; color:var(--text-tertiary)">(optional)</span></label>
+        <textarea class="form-input" rows="4" placeholder="Plain text version of the email...">Hi {{customerName}},
+
+Your order #{{orderNumber}} is confirmed.
+
+Thanks,
+The MyApp Team</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Variables Schema</label>
+        <div class="code-editor" style="min-height:100px; font-size:11px;">{
+  <span class="attr">"orderNumber"</span>: <span class="str">"string"</span>,
+  <span class="attr">"customerName"</span>: <span class="str">"string"</span>,
+  <span class="attr">"total"</span>: <span class="str">"number"</span>
+}</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-tertiary); display:flex; align-items:center; gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Version: v1 (new)
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="toggleTemplatePanel()">Cancel</button>
+      <button class="btn btn-secondary">Preview</button>
+      <button class="btn btn-primary">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 5: DOMAINS LIST + DETAIL
+     ============================================ -->
+<div id="screen5" class="screen">
+  <aside class="sidebar" id="sidebar5"></aside>
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="#">Configuration</a>
+      <span class="sep">/</span>
+      <span>Domains</span>
+    </div>
+
+    <div id="domainListSection">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Sending Domains</h1>
+        <span class="count-badge">3</span>
+      </div>
+      <button class="btn btn-primary" onclick="toggleDomainPanel()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Domain
+      </button>
+    </div>
+
+    <!-- Domain Cards -->
+    <div class="domain-cards" id="domainList">
+      <div class="domain-card">
+        <div class="domain-card-header">
+          <div class="domain-card-title">example.com</div>
+          <span class="badge badge-green">Verified</span>
+        </div>
+        <div class="domain-card-meta">Added: Mar 27, 2026 &middot; Verified: Mar 27, 2026</div>
+        <div class="domain-dns">
+          <div class="dns-item"><span class="dns-check">SPF &#10003;</span></div>
+          <div class="dns-item"><span class="dns-check">DKIM &#10003;</span></div>
+          <div class="dns-item"><span class="dns-check">DMARC &#10003;</span></div>
+        </div>
+        <div style="font-size:13px; color:var(--text-secondary); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+          <span class="badge badge-green" style="font-size:10px;">Inbound: Enabled</span>
+        </div>
+        <div class="domain-card-footer">
+          <button class="btn btn-secondary btn-sm" onclick="showDomainDetail()">View Details</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button>
+        </div>
+      </div>
+
+      <div class="domain-card">
+        <div class="domain-card-header">
+          <div class="domain-card-title">myapp.io</div>
+          <span class="badge badge-amber">Pending</span>
+        </div>
+        <div class="domain-card-meta">Added: Mar 30, 2026 &middot; Not yet verified</div>
+        <div class="domain-dns">
+          <div class="dns-item"><span class="dns-fail">SPF &#10007;</span></div>
+          <div class="dns-item"><span class="dns-fail">DKIM &#10007;</span></div>
+          <div class="dns-item"><span class="dns-fail">DMARC &#10007;</span></div>
+        </div>
+        <div style="font-size:13px; color:var(--text-tertiary); margin-bottom:12px;">Inbound: Not configured</div>
+        <div class="domain-card-footer">
+          <button class="btn btn-secondary btn-sm">View Details</button>
+          <button class="btn btn-primary btn-sm">Verify Now</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button>
+        </div>
+      </div>
+
+      <div class="domain-card">
+        <div class="domain-card-header">
+          <div class="domain-card-title">newsletter.co</div>
+          <span class="badge badge-green">Verified</span>
+        </div>
+        <div class="domain-card-meta">Added: Mar 28, 2026 &middot; Verified: Mar 28, 2026</div>
+        <div class="domain-dns">
+          <div class="dns-item"><span class="dns-check">SPF &#10003;</span></div>
+          <div class="dns-item"><span class="dns-check">DKIM &#10003;</span></div>
+          <div class="dns-item"><span class="dns-fail">DMARC &#10007;</span></div>
+        </div>
+        <div style="font-size:13px; color:var(--text-tertiary); margin-bottom:12px;">Inbound: Not configured</div>
+        <div class="domain-card-footer">
+          <button class="btn btn-secondary btn-sm">View Details</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Domain Detail (shown via JS) -->
+    <div id="domainDetail" style="display:none;">
+      <a class="back-link" href="#" onclick="hideDomainDetail(); return false;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Domains
+      </a>
+
+      <div class="page-header" style="margin-bottom:24px">
+        <div class="page-title">
+          <h1>example.com</h1>
+          <span class="badge badge-green">Verified</span>
+        </div>
+        <button class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Verify Records
+        </button>
+      </div>
+
+      <!-- DNS Records Table -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>DNS Records</h3>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-gray">TXT</span></td>
+                <td class="mono" style="font-size:12px">example.com</td>
+                <td class="mono" style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">v=spf1 include:amazonses.com ~all</td>
+                <td style="color:var(--text-secondary)">SPF</td>
+                <td><span class="badge badge-green">Verified</span></td>
+                <td><button class="copy-btn">Copy</button></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">CNAME</span></td>
+                <td class="mono" style="font-size:12px">dkim1._domainkey.example.com</td>
+                <td class="mono" style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">dkim1.amazonses.com</td>
+                <td style="color:var(--text-secondary)">DKIM</td>
+                <td><span class="badge badge-green">Verified</span></td>
+                <td><button class="copy-btn">Copy</button></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">TXT</span></td>
+                <td class="mono" style="font-size:12px">_dmarc.example.com</td>
+                <td class="mono" style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">v=DMARC1; p=quarantine</td>
+                <td style="color:var(--text-secondary)">DMARC</td>
+                <td><span class="badge badge-green">Verified</span></td>
+                <td><button class="copy-btn">Copy</button></td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">MX</span></td>
+                <td class="mono" style="font-size:12px">example.com</td>
+                <td class="mono" style="font-size:12px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">inbound-smtp.eu-west-1.amazonaws.com</td>
+                <td style="color:var(--text-secondary)">Inbound</td>
+                <td><span class="badge badge-green">Verified</span></td>
+                <td><button class="copy-btn">Copy</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Inbound Email Section -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <h3>Inbound Email</h3>
+          <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary);">
+            <div class="toggle-switch on"></div>
+            Enabled
+          </div>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+            Inbound email processing is enabled for this domain. Emails sent to any address @example.com will be received and processed according to your inbound rules.
+          </p>
+          <a href="#" style="font-size:13px; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            View Inbound Setup Wizard
+          </a>
+        </div>
+      </div>
+
+      <!-- Remove Domain -->
+      <div class="card" style="border-color: var(--error); border-color: rgba(239,68,68,0.3);">
+        <div class="card-header" style="background:var(--error-light)">
+          <h3 style="color:var(--error-text)">Danger Zone</h3>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+            Removing this domain will stop all email sending and receiving for this domain. This action cannot be undone.
+          </p>
+          <button class="btn btn-destructive">Remove Domain</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Domain Side Panel -->
+  <div id="domainPanelOverlay" class="panel-overlay" onclick="toggleDomainPanel()"></div>
+  <div id="domainPanel" class="side-panel">
+    <div class="panel-header">
+      <h2 style="font-size:18px">Add Domain</h2>
+      <button class="btn btn-ghost btn-sm" onclick="toggleDomainPanel()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label class="form-label">Domain Name</label>
+        <input class="form-input" type="text" placeholder="e.g., mydomain.com">
+        <div class="form-helper">Enter the domain you want to send emails from</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Enable Inbound Email</label>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+          <div class="toggle-switch"></div>
+          <span style="font-size:13px; color:var(--text-secondary)">Receive emails for this domain</span>
+        </div>
+      </div>
+      <div style="padding:16px; background:var(--bg-surface); border-radius:var(--radius-sm); border:1px solid var(--border); margin-top:12px;">
+        <div style="font-size:13px; font-weight:500; color:var(--text-primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          After adding the domain
+        </div>
+        <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+          You will need to add DNS records (SPF, DKIM, and optionally DMARC) to verify domain ownership. We will provide the exact records to add after the domain is created.
+        </p>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="toggleDomainPanel()">Cancel</button>
+      <button class="btn btn-primary">Add Domain</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+// Sidebar initialization via template
+function initSidebars() {
+  const template = document.getElementById('sidebar-template');
+  const mapping = {
+    sidebar1: 'nav-overview',
+    sidebar2: 'nav-sent',
+    sidebar3: 'nav-sent',
+    sidebar4: 'nav-templates',
+    sidebar5: 'nav-domains',
+  };
+  for (const [id, activeClass] of Object.entries(mapping)) {
+    const container = document.getElementById(id);
+    if (!container) continue;
+    const clone = template.content.cloneNode(true);
+    const activeItem = clone.querySelector('.' + activeClass);
+    if (activeItem) activeItem.classList.add('active');
+    container.replaceWith(clone.querySelector('.sidebar') || clone);
+  }
+}
+initSidebars();
+
+// Screen navigation
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  const buttons = Array.from(document.querySelectorAll('.screen-nav button:not(.theme-toggle)'));
+  buttons.forEach(b => b.classList.remove('active'));
+  const screenIds = ['screen1','screen2','screen3','screen4','screen5'];
+  const idx = screenIds.indexOf(id);
+  if (idx >= 0 && buttons[idx]) buttons[idx].classList.add('active');
+}
+
+// Theme Toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon-sun').style.display = isDark ? 'inline-block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'inline-block';
+  document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+}
+
+// Time selector
+function selectTime(btn) {
+  btn.parentElement.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Template Panel
+function toggleTemplatePanel() {
+  document.getElementById('templatePanel').classList.toggle('show');
+  document.getElementById('templatePanelOverlay').classList.toggle('show');
+}
+
+// Domain Panel
+function toggleDomainPanel() {
+  document.getElementById('domainPanel').classList.toggle('show');
+  document.getElementById('domainPanelOverlay').classList.toggle('show');
+}
+
+// Domain Detail toggle
+function showDomainDetail() {
+  document.getElementById('domainListSection').style.display = 'none';
+  document.getElementById('domainDetail').style.display = 'block';
+}
+function hideDomainDetail() {
+  document.getElementById('domainListSection').style.display = 'block';
+  document.getElementById('domainDetail').style.display = 'none';
+}
+
+// Toggle switches
+document.querySelectorAll('.toggle-switch').forEach(el => {
+  el.addEventListener('click', function() { this.classList.toggle('on'); });
+});
+
+// Checkbox clicks
+document.querySelectorAll('.checkbox').forEach(el => {
+  el.addEventListener('click', function() { this.classList.toggle('checked'); });
+});
+
+// Tab clicks
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Copy buttons
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const row = this.closest('tr');
+    const val = row.querySelectorAll('td')[2].textContent.trim();
+    navigator.clipboard.writeText(val).then(() => {
+      this.textContent = 'Copied!';
+      setTimeout(() => { this.textContent = 'Copy'; }, 1500);
+    });
+  });
+});
+
+// Initialize first screen
+showScreen('screen1');
+</script>
+</body>
+</html>

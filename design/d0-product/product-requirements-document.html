@@ -1,0 +1,1939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRD — Inbound Email Feature | EaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a1a2e;
+            --navy-light: #16213e;
+            --blue: #4361ee;
+            --blue-light: #4895ef;
+            --blue-bg: #eef2ff;
+            --white: #ffffff;
+            --gray-50: #f8f9fa;
+            --gray-100: #f1f3f5;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #868e96;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --red: #e63946;
+            --red-bg: #fef2f2;
+            --red-border: #fecaca;
+            --yellow: #f59e0b;
+            --yellow-bg: #fffbeb;
+            --yellow-border: #fde68a;
+            --green: #10b981;
+            --green-bg: #ecfdf5;
+            --green-border: #a7f3d0;
+            --purple: #7c3aed;
+            --purple-bg: #f5f3ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--gray-800);
+            background: var(--gray-50);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: var(--white);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 10px 40px rgba(0,0,0,0.04);
+        }
+
+        /* HEADER */
+        .doc-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            color: var(--white);
+            padding: 56px 64px 48px;
+            position: relative;
+            overflow: hidden;
+        }
+        .doc-header::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(67,97,238,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .doc-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(72,149,239,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .doc-header .label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-light);
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .doc-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .doc-header .subtitle {
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            position: relative;
+        }
+        .meta-item {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 14px 18px;
+        }
+        .meta-item .meta-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 4px;
+        }
+        .meta-item .meta-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        .meta-item .meta-value.status-draft {
+            color: var(--yellow);
+        }
+
+        /* CONTENT */
+        .content {
+            padding: 48px 64px 64px;
+        }
+
+        /* TOC */
+        .toc {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 32px 36px;
+            margin-bottom: 48px;
+        }
+        .toc h2 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--navy);
+            margin-bottom: 16px;
+        }
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+            columns: 2;
+            column-gap: 32px;
+        }
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            break-inside: avoid;
+        }
+        .toc li a {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color 0.15s;
+        }
+        .toc li a:hover { color: var(--blue); }
+        .toc li a::before {
+            content: counter(toc-counter, decimal-leading-zero);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--blue);
+            background: var(--blue-bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* SECTIONS */
+        .section {
+            margin-bottom: 56px;
+            scroll-margin-top: 24px;
+        }
+        .section-number {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 8px;
+        }
+        h2.section-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--blue);
+            display: inline-block;
+        }
+        h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+            margin: 32px 0 16px;
+        }
+        h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 24px 0 12px;
+        }
+        p { margin-bottom: 16px; color: var(--gray-700); }
+
+        /* VISION QUOTE */
+        .vision-quote {
+            background: linear-gradient(135deg, var(--blue-bg) 0%, var(--purple-bg) 100%);
+            border-left: 4px solid var(--blue);
+            border-radius: 0 12px 12px 0;
+            padding: 28px 32px;
+            margin: 24px 0;
+            font-size: 18px;
+            font-weight: 500;
+            font-style: italic;
+            color: var(--navy);
+            line-height: 1.6;
+        }
+
+        /* PERSONA CARDS */
+        .persona-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .persona-card {
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .persona-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .persona-card.primary { border-left: 4px solid var(--blue); }
+        .persona-card.secondary { border-left: 4px solid var(--purple); }
+        .persona-card.tertiary { border-left: 4px solid var(--green); }
+        .persona-header {
+            padding: 20px 24px 0;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .persona-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            flex-shrink: 0;
+        }
+        .persona-card.primary .persona-avatar { background: var(--blue); }
+        .persona-card.secondary .persona-avatar { background: var(--purple); }
+        .persona-card.tertiary .persona-avatar { background: var(--green); }
+        .persona-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .persona-role {
+            font-size: 13px;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+        .persona-type-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .persona-card.primary .persona-type-badge { background: var(--blue-bg); color: var(--blue); }
+        .persona-card.secondary .persona-type-badge { background: var(--purple-bg); color: var(--purple); }
+        .persona-card.tertiary .persona-type-badge { background: var(--green-bg); color: var(--green); }
+        .persona-body {
+            padding: 16px 24px 20px;
+        }
+        .persona-detail {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 8px 12px;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .persona-detail dt {
+            font-weight: 600;
+            color: var(--gray-600);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .persona-detail dd { color: var(--gray-700); }
+        .persona-quote {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-style: italic;
+            color: var(--gray-600);
+            font-size: 14px;
+            margin-top: 12px;
+            border-left: 3px solid var(--gray-300);
+        }
+
+        /* USER STORIES */
+        .epic-header {
+            background: var(--navy);
+            color: var(--white);
+            padding: 14px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 700;
+            font-size: 16px;
+            margin-top: 32px;
+        }
+        .story-card {
+            border: 1px solid var(--gray-200);
+            border-top: none;
+            padding: 20px 24px;
+            background: var(--white);
+        }
+        .story-card:last-child { border-radius: 0 0 8px 8px; }
+        .story-card + .story-card { border-top: 1px solid var(--gray-100); }
+        .story-id {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--blue);
+            background: var(--blue-bg);
+            padding: 2px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .story-text {
+            font-size: 15px;
+            color: var(--navy);
+            font-weight: 500;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+        .story-text em { font-style: normal; color: var(--blue); font-weight: 600; }
+        .ac-list {
+            list-style: none;
+            padding: 0;
+        }
+        .ac-list li {
+            position: relative;
+            padding: 6px 0 6px 28px;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+        .ac-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--gray-400);
+            border-radius: 3px;
+        }
+
+        /* TABLES */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        thead th {
+            background: var(--navy);
+            color: var(--white);
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 14px 16px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        tbody tr { border-bottom: 1px solid var(--gray-100); }
+        tbody tr:nth-child(even) { background: var(--gray-50); }
+        tbody tr:hover { background: var(--blue-bg); }
+        tbody td {
+            padding: 12px 16px;
+            color: var(--gray-700);
+            vertical-align: top;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .badge-p0 { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+        .badge-p1 { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+        .badge-p2 { background: var(--blue-bg); color: var(--blue); border: 1px solid #c7d2fe; }
+        .badge-sprint {
+            background: var(--navy);
+            color: var(--white);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-method {
+            font-family: 'Inter', monospace;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+        .badge-get { background: #dbeafe; color: #1d4ed8; }
+        .badge-post { background: #dcfce7; color: #166534; }
+        .badge-put { background: #fef3c7; color: #92400e; }
+        .badge-delete { background: #fce4ec; color: #c62828; }
+        .badge-open { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
+        .badge-decided { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+        /* CODE BLOCK */
+        .code-block {
+            background: #0d1117;
+            color: #c9d1d9;
+            border-radius: 8px;
+            padding: 24px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 24px 0;
+        }
+        .code-block .key { color: #79c0ff; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; font-style: italic; }
+        .code-block .bracket { color: #c9d1d9; }
+
+        /* CHECKLIST */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 10px 0 10px 36px;
+            position: relative;
+            font-size: 14px;
+            color: var(--gray-700);
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-400);
+            border-radius: 4px;
+        }
+
+        /* DESIGN SCREENS LIST */
+        .screen-list {
+            counter-reset: screen-counter;
+            list-style: none;
+            padding: 0;
+        }
+        .screen-list li {
+            counter-increment: screen-counter;
+            padding: 16px 20px 16px 64px;
+            position: relative;
+            border-bottom: 1px solid var(--gray-100);
+            font-size: 14px;
+        }
+        .screen-list li::before {
+            content: counter(screen-counter, decimal-leading-zero);
+            position: absolute;
+            left: 16px;
+            top: 16px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--blue);
+            background: var(--blue-bg);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+        .screen-list li strong {
+            color: var(--navy);
+            font-weight: 600;
+        }
+
+        /* CALLOUT BOX */
+        .callout {
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        .callout.info {
+            background: var(--blue-bg);
+            border: 1px solid #c7d2fe;
+        }
+        .callout.warning {
+            background: var(--yellow-bg);
+            border: 1px solid var(--yellow-border);
+        }
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .callout.info .callout-title { color: var(--blue); }
+        .callout.warning .callout-title { color: var(--yellow); }
+
+        /* COMPETITIVE TABLE */
+        .comp-check { color: var(--green); font-weight: 700; }
+        .comp-x { color: var(--red); font-weight: 700; }
+        .comp-partial { color: var(--yellow); font-weight: 700; }
+        .comp-eaas { background: var(--blue-bg) !important; }
+
+        /* DEPENDENCY LIST */
+        .dep-list {
+            list-style: none;
+            padding: 0;
+        }
+        .dep-list li {
+            padding: 8px 0 8px 24px;
+            position: relative;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+        .dep-list li::before {
+            content: '';
+            position: absolute;
+            left: 2px;
+            top: 16px;
+            width: 8px;
+            height: 8px;
+            background: var(--blue);
+            border-radius: 50%;
+        }
+
+        /* CONSTRAINTS */
+        .constraint-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .constraint-item {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+
+        /* PATH */
+        code {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: var(--red);
+        }
+
+        /* POSITIONING BOX */
+        .positioning-box {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            border-radius: 12px;
+            padding: 28px 32px;
+            margin: 24px 0;
+            color: var(--white);
+        }
+        .positioning-box p {
+            color: rgba(255,255,255,0.85);
+            font-size: 15px;
+        }
+        .positioning-box strong {
+            color: var(--blue-light);
+        }
+
+        /* FOOTER */
+        .doc-footer {
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            padding: 24px 64px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* PRINT */
+        @media print {
+            body { background: white; }
+            .page-wrapper { box-shadow: none; }
+            .doc-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .toc { break-after: page; }
+            .section { break-inside: avoid; }
+            table { font-size: 12px; }
+            thead th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .doc-header { padding: 36px 24px 32px; }
+            .doc-header h1 { font-size: 26px; }
+            .content { padding: 32px 24px 40px; }
+            .toc ol { columns: 1; }
+            .meta-grid { grid-template-columns: 1fr 1fr; }
+            .persona-header { flex-wrap: wrap; }
+            .constraint-grid { grid-template-columns: 1fr; }
+            .doc-footer { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <!-- HEADER -->
+    <header class="doc-header">
+        <div class="label">EaaS - Email as a Service</div>
+        <h1>Product Requirements Document</h1>
+        <div class="subtitle">Inbound Email Feature</div>
+        <div class="meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Version</div>
+                <div class="meta-value">1.0</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Date</div>
+                <div class="meta-value">April 1, 2026</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Prepared By</div>
+                <div class="meta-value">Head of Product</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Status</div>
+                <div class="meta-value status-draft">Draft &mdash; Pending Review</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Related Documents</div>
+                <div class="meta-value">BRD v1.0, INBOUND_MAIL_SPEC.md</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <!-- TABLE OF CONTENTS -->
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#vision">Product Vision</a></li>
+                <li><a href="#personas">Target Users &amp; Personas</a></li>
+                <li><a href="#stories">User Stories with Acceptance Criteria</a></li>
+                <li><a href="#functional">Functional Requirements</a></li>
+                <li><a href="#nonfunctional">Non-Functional Requirements</a></li>
+                <li><a href="#api">API Contract Summary</a></li>
+                <li><a href="#webhook">Webhook Payload Schema</a></li>
+                <li><a href="#design">Design Requirements</a></li>
+                <li><a href="#release">Release Criteria</a></li>
+                <li><a href="#dependencies">Dependencies &amp; Assumptions</a></li>
+                <li><a href="#questions">Open Questions</a></li>
+                <li><a href="#competitive">Appendix: Competitive Positioning</a></li>
+            </ol>
+        </nav>
+
+        <!-- 1. PRODUCT VISION -->
+        <section class="section" id="vision">
+            <div class="section-number">Section 01</div>
+            <h2 class="section-title">Product Vision</h2>
+
+            <div class="vision-quote">
+                "Make EaaS the only email API developers need &mdash; send, receive, and manage email conversations through a single, elegant platform."
+            </div>
+
+            <p>EaaS inbound email transforms our product from a send-only API into a complete email platform. Developers can receive emails, parse content, route to webhooks, track conversation threads, and monitor everything from a modern dashboard &mdash; all without managing SMTP infrastructure.</p>
+
+            <p>Today, developers who need both outbound and inbound email are forced to stitch together multiple vendors: one for sending (SendGrid, Postmark) and another for receiving (Mailgun, AWS SES raw). This creates fragmented billing, no thread linking between sent and received messages, inconsistent APIs, and operational overhead managing two systems.</p>
+
+            <p>EaaS inbound email eliminates this fragmentation. With a single API key, a single dashboard, and a single billing relationship, developers get send + receive + thread linking + persistent inbox + a modern management UI. No other provider offers this combination today.</p>
+
+            <div class="positioning-box">
+                <p><strong>Positioning:</strong> Developer-friendly email platform with persistent inbox, conversation threading, and modern dashboard &mdash; capabilities only Resend partially offers today. EaaS will be the first platform to natively link outbound and inbound emails into conversation threads, giving developers conversation-level context that no competitor provides out of the box.</p>
+            </div>
+        </section>
+
+        <!-- 2. TARGET USERS & PERSONAS -->
+        <section class="section" id="personas">
+            <div class="section-number">Section 02</div>
+            <h2 class="section-title">Target Users &amp; Personas</h2>
+
+            <div class="persona-grid">
+                <!-- Alex -->
+                <div class="persona-card primary">
+                    <div class="persona-header">
+                        <div class="persona-avatar">A</div>
+                        <div>
+                            <div class="persona-name">Alex &mdash; SaaS Developer</div>
+                            <div class="persona-role">Full-stack developer at a 20-person SaaS startup</div>
+                        </div>
+                        <span class="persona-type-badge">Primary</span>
+                    </div>
+                    <div class="persona-body">
+                        <dl class="persona-detail">
+                            <dt>Goal</dt>
+                            <dd>Add reply-by-email to their helpdesk product</dd>
+                            <dt>Pain</dt>
+                            <dd>Currently stitching SendGrid outbound + Mailgun inbound, managing 2 vendors, no thread linking</dd>
+                            <dt>Need</dt>
+                            <dd>Single API for send+receive with automatic reply tracking</dd>
+                            <dt>Tech</dt>
+                            <dd>Node.js/TypeScript, uses REST APIs, reads docs thoroughly</dd>
+                        </dl>
+                        <div class="persona-quote">"I just want to send an email and know when someone replies, without managing MX records and MIME parsers."</div>
+                    </div>
+                </div>
+
+                <!-- Sarah -->
+                <div class="persona-card secondary">
+                    <div class="persona-header">
+                        <div class="persona-avatar">S</div>
+                        <div>
+                            <div class="persona-name">Sarah &mdash; Support Team Lead</div>
+                            <div class="persona-role">Customer support manager at a mid-size e-commerce company</div>
+                        </div>
+                        <span class="persona-type-badge">Secondary</span>
+                    </div>
+                    <div class="persona-body">
+                        <dl class="persona-detail">
+                            <dt>Goal</dt>
+                            <dd>Route inbound emails to the right team and track response times</dd>
+                            <dt>Pain</dt>
+                            <dd>Support emails go to a shared Gmail inbox, no automation, no analytics</dd>
+                            <dt>Need</dt>
+                            <dd>Rules-based routing, dashboard for monitoring, analytics on volume and response times</dd>
+                            <dt>Tech</dt>
+                            <dd>Non-technical, needs intuitive UI, doesn't want to touch DNS</dd>
+                        </dl>
+                        <div class="persona-quote">"I need to see every email that comes in and know it got to the right person."</div>
+                    </div>
+                </div>
+
+                <!-- Marcus -->
+                <div class="persona-card tertiary">
+                    <div class="persona-header">
+                        <div class="persona-avatar">M</div>
+                        <div>
+                            <div class="persona-name">Marcus &mdash; Business Owner</div>
+                            <div class="persona-role">CTO of a 5-person startup building an AI agent product</div>
+                        </div>
+                        <span class="persona-type-badge">Tertiary</span>
+                    </div>
+                    <div class="persona-body">
+                        <dl class="persona-detail">
+                            <dt>Goal</dt>
+                            <dd>Give AI agents email capabilities (send, receive, parse, reply)</dd>
+                            <dt>Pain</dt>
+                            <dd>Building custom email infrastructure is a 2-month project, not core business</dd>
+                            <dt>Need</dt>
+                            <dd>API-first email with persistent storage, structured data, programmatic access</dd>
+                            <dt>Tech</dt>
+                            <dd>Python, building AI agents, needs reliable infrastructure</dd>
+                        </dl>
+                        <div class="persona-quote">"My agents need to read, understand, and respond to emails autonomously."</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. USER STORIES -->
+        <section class="section" id="stories">
+            <div class="section-number">Section 03</div>
+            <h2 class="section-title">User Stories with Acceptance Criteria</h2>
+
+            <!-- Epic 1 -->
+            <div class="epic-header">Epic 1: Inbound Email Reception</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.1</span>
+                <div class="story-text">As <em>Alex</em>, I want EaaS to receive emails sent to my domain, so that I can process customer replies in my app.</div>
+                <ul class="ac-list">
+                    <li>Emails sent to configured domain are received by EaaS within 30 seconds</li>
+                    <li>Raw MIME is stored in S3 for forensic access</li>
+                    <li>Parsed metadata (from, to, subject, body, headers) is stored in PostgreSQL</li>
+                    <li>Email appears in dashboard within 60 seconds of receipt</li>
+                    <li>SPF, DKIM, DMARC, spam, and virus verdicts are captured</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.2</span>
+                <div class="story-text">As <em>Alex</em>, I want inbound emails automatically parsed into structured JSON, so that I don't have to deal with MIME parsing.</div>
+                <ul class="ac-list">
+                    <li>HTML body and text body are extracted separately</li>
+                    <li>All headers are parsed into key-value pairs</li>
+                    <li>In-Reply-To and References headers are extracted for threading</li>
+                    <li>Attachments are extracted with filename, content type, size, and download URL</li>
+                    <li>Inline images (CID) are identified separately from file attachments</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.3</span>
+                <div class="story-text">As <em>Alex</em>, I want replies to my outbound emails automatically linked, so that I can show conversation threads.</div>
+                <ul class="ac-list">
+                    <li>In-Reply-To header is matched against outbound email Message-IDs</li>
+                    <li>Matching inbound email has outbound_email_id set</li>
+                    <li>API response includes the linked outbound email ID</li>
+                    <li>Thread view in dashboard shows the full conversation chain</li>
+                </ul>
+            </div>
+
+            <!-- Epic 2 -->
+            <div class="epic-header">Epic 2: Routing Rules</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.4</span>
+                <div class="story-text">As <em>Sarah</em>, I want to create rules that route emails to different webhooks based on the recipient address, so that support@ goes to our helpdesk and billing@ goes to our accounting system.</div>
+                <ul class="ac-list">
+                    <li>Rules can match on recipient pattern (exact, wildcard, prefix like "support@")</li>
+                    <li>Rules support 3 actions: webhook, forward, store</li>
+                    <li>Rules have configurable priority (lower number = higher priority)</li>
+                    <li>Multiple rules can be active simultaneously</li>
+                    <li>Rules are scoped to a specific verified domain</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.5</span>
+                <div class="story-text">As <em>Sarah</em>, I want to manage routing rules from the dashboard without writing code, so that I can update routing without bothering developers.</div>
+                <ul class="ac-list">
+                    <li>Dashboard provides create/edit/delete UI for rules</li>
+                    <li>Rule form validates webhook URLs and email addresses</li>
+                    <li>Rules can be enabled/disabled with a toggle</li>
+                    <li>Priority can be reordered</li>
+                    <li>Changes take effect within 60 seconds</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.6</span>
+                <div class="story-text">As <em>Alex</em>, I want a CRUD API for managing inbound rules programmatically, so that I can automate rule management in my deployment pipeline.</div>
+                <ul class="ac-list">
+                    <li><code>POST /api/v1/inbound/rules</code> &mdash; create rule (returns 201)</li>
+                    <li><code>GET /api/v1/inbound/rules</code> &mdash; list rules with pagination</li>
+                    <li><code>GET /api/v1/inbound/rules/{id}</code> &mdash; get rule detail</li>
+                    <li><code>PUT /api/v1/inbound/rules/{id}</code> &mdash; update rule</li>
+                    <li><code>DELETE /api/v1/inbound/rules/{id}</code> &mdash; delete rule (returns 204)</li>
+                    <li>All endpoints require authentication and enforce tenant isolation</li>
+                </ul>
+            </div>
+
+            <!-- Epic 3 -->
+            <div class="epic-header">Epic 3: Webhook Dispatch</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.7</span>
+                <div class="story-text">As <em>Alex</em>, I want to receive a webhook when an email arrives, so that my app can process it in real-time.</div>
+                <ul class="ac-list">
+                    <li>Webhook POST contains full parsed email data in JSON (not multipart/form-data)</li>
+                    <li>Webhook includes HMAC-SHA256 signature in <code>X-EaaS-Signature</code> header</li>
+                    <li>Webhook includes timestamp for replay protection</li>
+                    <li>Payload includes: id, messageId, from, to, cc, subject, textBody, htmlBody, headers, attachments (with download URLs), verdicts, receivedAt, inReplyTo, outboundEmailId</li>
+                    <li>Webhook is dispatched within 30 seconds of email receipt</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.8</span>
+                <div class="story-text">As <em>Alex</em>, I want failed webhooks to be retried automatically, so that I don't lose emails during temporary outages.</div>
+                <ul class="ac-list">
+                    <li>Failed webhooks (5xx, timeout) are retried with exponential backoff</li>
+                    <li>Retry schedule: 1min, 5min, 30min, 2hr, 8hr, 24hr, 48hr, 72hr</li>
+                    <li>After all retries exhausted, email moves to dead letter queue</li>
+                    <li>Webhook delivery attempts are logged with status codes and response times</li>
+                    <li>Manual retry available from dashboard</li>
+                </ul>
+            </div>
+
+            <!-- Epic 4 -->
+            <div class="epic-header">Epic 4: Inbound Email API</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.9</span>
+                <div class="story-text">As <em>Alex</em>, I want to query received emails via REST API, so that I can build custom views in my app.</div>
+                <ul class="ac-list">
+                    <li><code>GET /api/v1/inbound/emails</code> &mdash; paginated list with filters (from, to, dateFrom, dateTo, status, hasAttachments)</li>
+                    <li><code>GET /api/v1/inbound/emails/{id}</code> &mdash; full email detail with attachments list</li>
+                    <li><code>GET /api/v1/inbound/emails/{id}/raw</code> &mdash; download raw MIME (302 redirect to S3 presigned URL)</li>
+                    <li><code>GET /api/v1/inbound/emails/{id}/attachments/{attId}</code> &mdash; download attachment (302 redirect to S3 presigned URL)</li>
+                    <li><code>DELETE /api/v1/inbound/emails/{id}</code> &mdash; delete email + attachments from S3 and DB</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.10</span>
+                <div class="story-text">As <em>Marcus</em>, I want to search inbound emails by content, so that my AI agents can find relevant conversations.</div>
+                <ul class="ac-list">
+                    <li>Full-text search across subject, from_email, to_emails</li>
+                    <li>Filter by date range, status, and attachment presence</li>
+                    <li>Results paginated with total count</li>
+                    <li>Response time &lt;500ms for up to 10K emails per tenant</li>
+                </ul>
+            </div>
+
+            <!-- Epic 5 -->
+            <div class="epic-header">Epic 5: Dashboard</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.11</span>
+                <div class="story-text">As <em>Sarah</em>, I want to see all received emails in a dashboard list view, so that I can monitor what's coming in.</div>
+                <ul class="ac-list">
+                    <li>Paginated table with columns: Status, From, To, Subject, Received, Attachments, Webhook Status</li>
+                    <li>Filters: date range, status, sender, has attachments</li>
+                    <li>Search bar for subject/sender/recipient</li>
+                    <li>Real-time updates (new emails appear without refresh)</li>
+                    <li>Empty state with setup instructions if no inbound configured</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.12</span>
+                <div class="story-text">As <em>Sarah</em>, I want to view the full content of a received email, so that I can review what was sent.</div>
+                <ul class="ac-list">
+                    <li>Email detail shows: from, to, cc, subject, received timestamp</li>
+                    <li>Tabs for: HTML preview (rendered), Plain text, Raw headers, JSON payload</li>
+                    <li>Attachments listed with filename, type, size, and download button</li>
+                    <li>Security verdicts displayed as badges (SPF, DKIM, DMARC, Spam, Virus)</li>
+                    <li>Thread link to original outbound email if this is a reply</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.13</span>
+                <div class="story-text">As <em>Sarah</em>, I want to see conversation threads linking outbound and inbound emails, so that I can follow the full email exchange.</div>
+                <ul class="ac-list">
+                    <li>Thread view shows chronological list of all emails in conversation</li>
+                    <li>Each email shows direction (sent/received), timestamp, and preview</li>
+                    <li>Click any email to see full detail</li>
+                    <li>Thread is constructed from In-Reply-To/References headers</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.14</span>
+                <div class="story-text">As <em>Sarah</em>, I want an analytics dashboard for inbound email, so that I can track volume and issues.</div>
+                <ul class="ac-list">
+                    <li>Metric cards: Total Received (24h), Processed, Failed, Avg Processing Time</li>
+                    <li>Volume chart: emails received over time (hourly/daily/weekly)</li>
+                    <li>Status breakdown: pie/donut chart of received/processed/failed/forwarded</li>
+                    <li>Top senders table: email address, count, last received</li>
+                    <li>Time range selector: 24h, 7d, 30d, custom</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.15</span>
+                <div class="story-text">As <em>Sarah</em>, I want to configure notification preferences for inbound events, so that I get alerted when important things happen.</div>
+                <ul class="ac-list">
+                    <li>Configurable alerts per domain: email volume spike, processing failures, spam threshold</li>
+                    <li>Notification channels: webhook, email</li>
+                    <li>Threshold settings: alert when failed &gt; X in Y minutes</li>
+                </ul>
+            </div>
+
+            <!-- Epic 6 -->
+            <div class="epic-header">Epic 6: Setup &amp; Onboarding</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.16</span>
+                <div class="story-text">As <em>Alex</em>, I want a guided setup wizard to configure inbound email for my domain, so that I don't have to figure out MX records on my own.</div>
+                <ul class="ac-list">
+                    <li>Step 1: Select verified domain (or add new one)</li>
+                    <li>Step 2: Display MX record values with copy-to-clipboard buttons</li>
+                    <li>Step 3: Auto-verify MX records (poll every 30 seconds)</li>
+                    <li>Step 4: Configure default webhook URL</li>
+                    <li>Step 5: Send test email and verify receipt</li>
+                    <li>Provider-specific DNS guides (Cloudflare, Route53, GoDaddy, Namecheap)</li>
+                    <li>Save &amp; resume &mdash; user can leave and come back without losing progress</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.17</span>
+                <div class="story-text">As <em>Alex</em>, I want to enable/disable inbound email per domain, so that I have control over which domains accept inbound mail.</div>
+                <ul class="ac-list">
+                    <li>Toggle in domain settings to enable/disable inbound</li>
+                    <li>Disabling inbound stops processing but preserves existing data</li>
+                    <li>Re-enabling resumes processing without re-setup</li>
+                </ul>
+            </div>
+
+            <!-- Epic 7 -->
+            <div class="epic-header">Epic 7: Developer Documentation</div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.18</span>
+                <div class="story-text">As <em>Alex</em>, I want comprehensive API documentation for inbound features, so that I can integrate quickly.</div>
+                <ul class="ac-list">
+                    <li>API reference with all 10 inbound endpoints documented</li>
+                    <li>Request/response examples for every endpoint</li>
+                    <li>Full webhook payload schema with field descriptions</li>
+                    <li>Authentication section</li>
+                    <li>Error codes and troubleshooting</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.19</span>
+                <div class="story-text">As <em>Alex</em>, I want a webhook integration guide with code examples, so that I can set up my webhook handler correctly.</div>
+                <ul class="ac-list">
+                    <li>Code examples in Node.js, Python, C#, Go</li>
+                    <li>HMAC signature verification example</li>
+                    <li>Idempotency implementation guide</li>
+                    <li>Testing with ngrok/webhook.site instructions</li>
+                    <li>Sample webhook payloads for different email types</li>
+                </ul>
+            </div>
+
+            <div class="story-card">
+                <span class="story-id">US-4.20</span>
+                <div class="story-text">As <em>Alex</em>, I want a setup guide with step-by-step instructions, so that I can get inbound working in under 30 minutes.</div>
+                <ul class="ac-list">
+                    <li>Quickstart: first inbound email in 5 minutes</li>
+                    <li>Full setup guide: domain, MX records, rules, webhook, verification</li>
+                    <li>Architecture diagram showing the inbound flow</li>
+                    <li>FAQ section with common issues</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. FUNCTIONAL REQUIREMENTS -->
+        <section class="section" id="functional">
+            <div class="section-number">Section 04</div>
+            <h2 class="section-title">Functional Requirements</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Requirement</th>
+                            <th>Priority</th>
+                            <th>Sprint</th>
+                            <th>Story</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>FR-001</strong></td>
+                            <td>System SHALL receive inbound emails via AWS SES receipt rules</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-002</strong></td>
+                            <td>System SHALL parse MIME messages extracting headers, body (HTML+text), and attachments</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-003</strong></td>
+                            <td>System SHALL store raw MIME in S3 and parsed metadata in PostgreSQL</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-004</strong></td>
+                            <td>System SHALL match In-Reply-To header to outbound email Message-IDs for thread linking</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.3</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-005</strong></td>
+                            <td>System SHALL support CRUD operations for inbound routing rules</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.6</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-006</strong></td>
+                            <td>System SHALL evaluate inbound rules by priority and execute matching actions</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                            <td>US-4.4</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-007</strong></td>
+                            <td>System SHALL dispatch webhook with full parsed email data in JSON format</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.7</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-008</strong></td>
+                            <td>System SHALL retry failed webhook deliveries with exponential backoff for up to 72 hours</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.8</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-009</strong></td>
+                            <td>System SHALL provide paginated REST API for listing/querying inbound emails</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.9</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-010</strong></td>
+                            <td>System SHALL serve raw MIME and attachments via S3 presigned URLs (302 redirect)</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.9</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-011</strong></td>
+                            <td>System SHALL provide dashboard list view with filters and real-time updates</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.11</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-012</strong></td>
+                            <td>System SHALL provide email detail view with HTML preview, headers, attachments</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.12</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-013</strong></td>
+                            <td>System SHALL provide thread view linking outbound and inbound emails</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.13</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-014</strong></td>
+                            <td>System SHALL provide routing rules management UI</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.5</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-015</strong></td>
+                            <td>System SHALL provide inbound analytics dashboard with volume charts and metrics</td>
+                            <td><span class="badge badge-p2">P2</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.14</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-016</strong></td>
+                            <td>System SHALL provide guided setup wizard with MX record instructions and auto-verification</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.16</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-017</strong></td>
+                            <td>System SHALL provide configurable notification alerts for inbound events</td>
+                            <td><span class="badge badge-p2">P2</span></td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                            <td>US-4.15</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-018</strong></td>
+                            <td>System SHALL enforce S3 lifecycle policies for configurable data retention</td>
+                            <td><span class="badge badge-p0">P0</span></td>
+                            <td><span class="badge-sprint">Sprint 6</span></td>
+                            <td>BR-003</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-019</strong></td>
+                            <td>System SHALL support spam/virus filtering with configurable thresholds</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 6</span></td>
+                            <td>BR-016</td>
+                        </tr>
+                        <tr>
+                            <td><strong>FR-020</strong></td>
+                            <td>System SHALL provide rate limiting per domain for inbound processing</td>
+                            <td><span class="badge badge-p1">P1</span></td>
+                            <td><span class="badge-sprint">Sprint 6</span></td>
+                            <td>BR-009</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. NON-FUNCTIONAL REQUIREMENTS -->
+        <section class="section" id="nonfunctional">
+            <div class="section-number">Section 05</div>
+            <h2 class="section-title">Non-Functional Requirements</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Requirement</th>
+                            <th>Target</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NFR-001</strong></td>
+                            <td>Performance</td>
+                            <td>Email processing latency (receipt to DB)</td>
+                            <td>P95 &lt; 10 seconds</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-002</strong></td>
+                            <td>Performance</td>
+                            <td>Webhook dispatch latency (receipt to webhook POST)</td>
+                            <td>P95 &lt; 30 seconds</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-003</strong></td>
+                            <td>Performance</td>
+                            <td>API response time for list queries</td>
+                            <td>P95 &lt; 500ms</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-004</strong></td>
+                            <td>Performance</td>
+                            <td>Dashboard page load time</td>
+                            <td>&lt; 2 seconds</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-005</strong></td>
+                            <td>Reliability</td>
+                            <td>Webhook delivery success rate</td>
+                            <td>&gt; 99.5%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-006</strong></td>
+                            <td>Reliability</td>
+                            <td>System uptime</td>
+                            <td>&gt; 99.9%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-007</strong></td>
+                            <td>Scalability</td>
+                            <td>Concurrent inbound email processing</td>
+                            <td>100 emails/second per tenant</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-008</strong></td>
+                            <td>Scalability</td>
+                            <td>Maximum stored inbound emails per tenant</td>
+                            <td>1M+</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-009</strong></td>
+                            <td>Security</td>
+                            <td>Data encryption at rest</td>
+                            <td>AES-256 (S3), TDE (PostgreSQL)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-010</strong></td>
+                            <td>Security</td>
+                            <td>Data encryption in transit</td>
+                            <td>TLS 1.2+</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-011</strong></td>
+                            <td>Security</td>
+                            <td>Webhook payload signing</td>
+                            <td>HMAC-SHA256</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-012</strong></td>
+                            <td>Compliance</td>
+                            <td>GDPR data deletion</td>
+                            <td>Complete within 72 hours of request</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-013</strong></td>
+                            <td>Compliance</td>
+                            <td>Data retention</td>
+                            <td>Configurable 30/60/90 days with auto-cleanup</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-014</strong></td>
+                            <td>Usability</td>
+                            <td>Setup wizard completion rate</td>
+                            <td>&gt; 70% of users</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NFR-015</strong></td>
+                            <td>Usability</td>
+                            <td>Time to first inbound email</td>
+                            <td>&lt; 30 minutes</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. API CONTRACT SUMMARY -->
+        <section class="section" id="api">
+            <div class="section-number">Section 06</div>
+            <h2 class="section-title">API Contract Summary</h2>
+
+            <p>All endpoints require <code>Authorization: Bearer &lt;api-key&gt;</code> header. Responses follow the standard EaaS envelope: <code>{ "data": ..., "meta": { "page", "pageSize", "total" } }</code>. All IDs are UUIDs. Timestamps are ISO 8601 UTC.</p>
+
+            <h3>Inbound API Endpoints</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Path</th>
+                            <th>Description</th>
+                            <th>Sprint</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-method badge-post">POST</span></td>
+                            <td><code>/api/v1/inbound/rules</code></td>
+                            <td>Create routing rule</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/rules</code></td>
+                            <td>List rules (paginated)</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/rules/{id}</code></td>
+                            <td>Get rule by ID</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-put">PUT</span></td>
+                            <td><code>/api/v1/inbound/rules/{id}</code></td>
+                            <td>Update rule</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-delete">DELETE</span></td>
+                            <td><code>/api/v1/inbound/rules/{id}</code></td>
+                            <td>Delete rule</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/emails</code></td>
+                            <td>List inbound emails (paginated, filtered)</td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/emails/{id}</code></td>
+                            <td>Get email detail with attachments</td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/emails/{id}/raw</code></td>
+                            <td>Download raw MIME (S3 presigned URL)</td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-get">GET</span></td>
+                            <td><code>/api/v1/inbound/emails/{id}/attachments/{attId}</code></td>
+                            <td>Download attachment</td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-method badge-delete">DELETE</span></td>
+                            <td><code>/api/v1/inbound/emails/{id}</code></td>
+                            <td>Delete inbound email</td>
+                            <td><span class="badge-sprint">Sprint 5</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Internal Endpoint</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Path</th>
+                            <th>Description</th>
+                            <th>Sprint</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-method badge-post">POST</span></td>
+                            <td><code>/webhooks/sns/inbound</code></td>
+                            <td>SNS inbound notification (internal &mdash; not exposed to customers)</td>
+                            <td><span class="badge-sprint">Sprint 4</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Note</div>
+                The SNS inbound endpoint handles AWS SNS subscription confirmation and notification messages. It is not part of the public API and is secured via SNS message signature verification, not API key authentication.
+            </div>
+        </section>
+
+        <!-- 7. WEBHOOK PAYLOAD SCHEMA -->
+        <section class="section" id="webhook">
+            <div class="section-number">Section 07</div>
+            <h2 class="section-title">Webhook Payload Schema</h2>
+
+            <p>When an inbound email is received and a routing rule matches with a <code>webhook</code> action, EaaS dispatches an HTTP POST to the configured URL with the following JSON payload. The request includes an <code>X-EaaS-Signature</code> header containing an HMAC-SHA256 signature for verification, and an <code>X-EaaS-Timestamp</code> header for replay protection.</p>
+
+            <div class="code-block"><pre><span class="bracket">{</span>
+  <span class="key">"event"</span>: <span class="string">"email.received"</span>,
+  <span class="key">"data"</span>: <span class="bracket">{</span>
+    <span class="key">"id"</span>: <span class="string">"a1b2c3d4-e5f6-7890-abcd-ef1234567890"</span>,
+    <span class="key">"messageId"</span>: <span class="string">"&lt;CABx28Z=abc123@mail.gmail.com&gt;"</span>,
+    <span class="key">"from"</span>: <span class="bracket">{</span>
+      <span class="key">"email"</span>: <span class="string">"sender@example.com"</span>,
+      <span class="key">"name"</span>: <span class="string">"John Doe"</span>
+    <span class="bracket">}</span>,
+    <span class="key">"to"</span>: <span class="bracket">[</span>
+      <span class="bracket">{</span>
+        <span class="key">"email"</span>: <span class="string">"support@customer.com"</span>,
+        <span class="key">"name"</span>: <span class="string">""</span>
+      <span class="bracket">}</span>
+    <span class="bracket">]</span>,
+    <span class="key">"cc"</span>: <span class="bracket">[]</span>,
+    <span class="key">"subject"</span>: <span class="string">"Re: Order #12345"</span>,
+    <span class="key">"textBody"</span>: <span class="string">"Thanks for the update. I'll review the invoice and get back to you."</span>,
+    <span class="key">"htmlBody"</span>: <span class="string">"&lt;p&gt;Thanks for the update. I'll review the invoice and get back to you.&lt;/p&gt;"</span>,
+    <span class="key">"headers"</span>: <span class="bracket">{</span>
+      <span class="key">"In-Reply-To"</span>: <span class="string">"&lt;original-message-id@eaas.dev&gt;"</span>,
+      <span class="key">"References"</span>: <span class="string">"&lt;original-message-id@eaas.dev&gt;"</span>,
+      <span class="key">"X-Mailer"</span>: <span class="string">"Apple Mail"</span>
+    <span class="bracket">}</span>,
+    <span class="key">"attachments"</span>: <span class="bracket">[</span>
+      <span class="bracket">{</span>
+        <span class="key">"id"</span>: <span class="string">"f7e8d9c0-b1a2-3456-7890-abcdef123456"</span>,
+        <span class="key">"filename"</span>: <span class="string">"invoice.pdf"</span>,
+        <span class="key">"contentType"</span>: <span class="string">"application/pdf"</span>,
+        <span class="key">"sizeBytes"</span>: <span class="string">45000</span>,
+        <span class="key">"downloadUrl"</span>: <span class="string">"/api/v1/inbound/emails/{id}/attachments/{attId}"</span>
+      <span class="bracket">}</span>
+    <span class="bracket">]</span>,
+    <span class="key">"verdicts"</span>: <span class="bracket">{</span>
+      <span class="key">"spam"</span>: <span class="string">"pass"</span>,
+      <span class="key">"virus"</span>: <span class="string">"pass"</span>,
+      <span class="key">"spf"</span>: <span class="string">"pass"</span>,
+      <span class="key">"dkim"</span>: <span class="string">"pass"</span>,
+      <span class="key">"dmarc"</span>: <span class="string">"pass"</span>
+    <span class="bracket">}</span>,
+    <span class="key">"receivedAt"</span>: <span class="string">"2026-04-01T12:00:00Z"</span>,
+    <span class="key">"inReplyTo"</span>: <span class="string">"&lt;original-message-id@eaas.dev&gt;"</span>,
+    <span class="key">"outboundEmailId"</span>: <span class="string">"b2c3d4e5-f6a7-8901-bcde-f12345678901"</span>
+  <span class="bracket">}</span>,
+  <span class="key">"timestamp"</span>: <span class="string">"2026-04-01T12:00:01Z"</span>
+<span class="bracket">}</span></pre></div>
+
+            <div class="callout info">
+                <div class="callout-title">Signature Verification</div>
+                Compute <code>HMAC-SHA256(webhook_secret, timestamp + "." + raw_body)</code> and compare with the <code>X-EaaS-Signature</code> header value. Reject requests where <code>X-EaaS-Timestamp</code> is more than 5 minutes old to prevent replay attacks.
+            </div>
+
+            <h3>Payload Field Reference</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>event</code></td>
+                            <td>string</td>
+                            <td>Always <code>"email.received"</code> for inbound emails</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.id</code></td>
+                            <td>UUID</td>
+                            <td>Unique EaaS identifier for this inbound email</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.messageId</code></td>
+                            <td>string</td>
+                            <td>RFC 2822 Message-ID header from the email</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.from</code></td>
+                            <td>object</td>
+                            <td>Sender with <code>email</code> and <code>name</code> fields</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.to</code></td>
+                            <td>array</td>
+                            <td>Array of recipient objects with <code>email</code> and <code>name</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>data.cc</code></td>
+                            <td>array</td>
+                            <td>Array of CC recipient objects (may be empty)</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.subject</code></td>
+                            <td>string</td>
+                            <td>Email subject line</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.textBody</code></td>
+                            <td>string|null</td>
+                            <td>Plain text body (null if not present)</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.htmlBody</code></td>
+                            <td>string|null</td>
+                            <td>HTML body (null if not present)</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.headers</code></td>
+                            <td>object</td>
+                            <td>All email headers as key-value pairs</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.attachments</code></td>
+                            <td>array</td>
+                            <td>Attachment metadata with download URLs (not base64 content)</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.verdicts</code></td>
+                            <td>object</td>
+                            <td>Security verdicts: spam, virus, spf, dkim, dmarc &mdash; each <code>"pass"</code> or <code>"fail"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>data.receivedAt</code></td>
+                            <td>ISO 8601</td>
+                            <td>Timestamp when EaaS received the email</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.inReplyTo</code></td>
+                            <td>string|null</td>
+                            <td>In-Reply-To header value (null if not a reply)</td>
+                        </tr>
+                        <tr>
+                            <td><code>data.outboundEmailId</code></td>
+                            <td>UUID|null</td>
+                            <td>Linked outbound email ID if this is a reply to a sent email</td>
+                        </tr>
+                        <tr>
+                            <td><code>timestamp</code></td>
+                            <td>ISO 8601</td>
+                            <td>Timestamp when the webhook was dispatched</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 8. DESIGN REQUIREMENTS -->
+        <section class="section" id="design">
+            <div class="section-number">Section 08</div>
+            <h2 class="section-title">Design Requirements</h2>
+
+            <h3>Screens to Design</h3>
+            <p>The following 10 screens must be designed as part of the inbound email feature. Each screen requires high-fidelity mockups in Figma, delivered as interactive prototypes for engineering handoff.</p>
+
+            <div class="table-wrapper" style="border: none; box-shadow: none;">
+                <ol class="screen-list">
+                    <li><strong>Inbound Email List</strong> &mdash; Paginated table with filters, search, real-time updates, and bulk actions. Columns: Status, From, To, Subject, Received, Attachments, Webhook Status.</li>
+                    <li><strong>Inbound Email Detail</strong> &mdash; Full email view with tabs for HTML preview (rendered in sandboxed iframe), plain text, raw headers, and JSON payload. Attachment list with download buttons. Security verdict badges.</li>
+                    <li><strong>Thread View</strong> &mdash; Conversation chain linking sent and received emails in chronological order. Direction indicators (sent/received), expandable message previews, and click-through to full detail.</li>
+                    <li><strong>Inbound Rules Management</strong> &mdash; List view of all routing rules with enable/disable toggles, drag-to-reorder priority, and inline create/edit forms. Rule form includes pattern matcher, action selector, and webhook URL input.</li>
+                    <li><strong>Inbound Setup Wizard</strong> &mdash; 5-step guided onboarding flow: domain selection, MX record display with copy buttons, auto-verification polling, webhook configuration, and test email verification. Provider-specific DNS guides.</li>
+                    <li><strong>Inbound Analytics Dashboard</strong> &mdash; Metric cards (Total Received, Processed, Failed, Avg Processing Time), volume chart (hourly/daily/weekly), status breakdown donut chart, top senders table, and time range selector.</li>
+                    <li><strong>Notification Preferences</strong> &mdash; Alert configuration per domain: volume spike, processing failures, spam threshold. Channel selection (webhook, email) with threshold inputs.</li>
+                    <li><strong>API Documentation Page</strong> &mdash; Endpoint reference with request/response examples, authentication guide, error codes, and interactive API explorer.</li>
+                    <li><strong>Webhook Integration Guide</strong> &mdash; Code snippets in 4 languages (Node.js, Python, C#, Go), HMAC verification walkthrough, payload schema reference, and testing tool recommendations.</li>
+                    <li><strong>Inbound Setup Guide</strong> &mdash; Step-by-step instructions with architecture diagram showing the full inbound flow (SES &rarr; S3 &rarr; SNS &rarr; EaaS &rarr; Webhook). FAQ section addressing common issues.</li>
+                </ol>
+            </div>
+
+            <h3>Design Constraints</h3>
+            <div class="constraint-grid">
+                <div class="constraint-item"><strong>Design System:</strong> Must use existing EaaS design system (Next.js + shadcn/ui + Tailwind CSS)</div>
+                <div class="constraint-item"><strong>Dark Mode:</strong> Must support dark mode with proper contrast ratios</div>
+                <div class="constraint-item"><strong>Responsive:</strong> Desktop-first, mobile-friendly (min 375px viewport)</div>
+                <div class="constraint-item"><strong>Accessibility:</strong> Must follow WCAG 2.2 AA accessibility standards</div>
+                <div class="constraint-item"><strong>Component States:</strong> Must include default, hover, active, disabled, empty, error, and loading states</div>
+                <div class="constraint-item"><strong>Consistency:</strong> Must match existing outbound email screens in visual language and interaction patterns</div>
+            </div>
+        </section>
+
+        <!-- 9. RELEASE CRITERIA -->
+        <section class="section" id="release">
+            <div class="section-number">Section 09</div>
+            <h2 class="section-title">Release Criteria</h2>
+
+            <p>All items below must be satisfied before the inbound email feature can be released to production. The release decision is made jointly by Product, Engineering, and QA leads.</p>
+
+            <ul class="checklist">
+                <li>All P0 functional requirements passing acceptance tests</li>
+                <li>All P0 non-functional requirements meeting targets</li>
+                <li>Zero critical/high severity bugs</li>
+                <li>API documentation complete and published</li>
+                <li>Webhook integration guide with code examples in 4 languages</li>
+                <li>Setup wizard tested with 3 DNS providers (Cloudflare, Route53, GoDaddy)</li>
+                <li>Dashboard screens match approved hi-fi designs</li>
+                <li>Security review passed (HMAC signing, encryption, tenant isolation)</li>
+                <li>Load test: 100 concurrent inbound emails processed within SLA</li>
+                <li>GDPR compliance verified (deletion, retention, encryption)</li>
+                <li>Monitoring dashboards configured (latency, error rate, queue depth)</li>
+                <li>Runbook for common operational issues documented</li>
+            </ul>
+        </section>
+
+        <!-- 10. DEPENDENCIES & ASSUMPTIONS -->
+        <section class="section" id="dependencies">
+            <div class="section-number">Section 10</div>
+            <h2 class="section-title">Dependencies &amp; Assumptions</h2>
+
+            <h3>Dependencies</h3>
+            <ul class="dep-list">
+                <li>AWS SES inbound receiving enabled for <code>eu-west-1</code> region</li>
+                <li>S3 bucket provisioned with appropriate IAM policies for raw MIME and attachment storage</li>
+                <li>SNS topic configured with HTTPS subscription to the EaaS WebhookProcessor endpoint</li>
+                <li>MX records manageable by customers at their DNS provider (Cloudflare, Route53, GoDaddy, Namecheap, etc.)</li>
+                <li>MimeKit library supports all required MIME parsing operations (already validated in Sprint 3 spike)</li>
+            </ul>
+
+            <h3>Assumptions</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Assumption</th>
+                            <th>Value</th>
+                            <th>Impact if Wrong</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Average inbound email size (including attachments)</td>
+                            <td>500 KB</td>
+                            <td>S3 storage costs, processing time</td>
+                        </tr>
+                        <tr>
+                            <td>Peak inbound volume per tenant (launch estimate)</td>
+                            <td>1,000 emails/hour</td>
+                            <td>Scaling architecture, queue sizing</td>
+                        </tr>
+                        <tr>
+                            <td>Plain text replies (percentage of total inbound)</td>
+                            <td>80% (&lt; 50 KB each)</td>
+                            <td>Processing time estimates</td>
+                        </tr>
+                        <tr>
+                            <td>Emails with attachments (percentage of total inbound)</td>
+                            <td>20% (avg 2 attachments, 2 MB total)</td>
+                            <td>S3 storage projections</td>
+                        </tr>
+                        <tr>
+                            <td>Customer webhook endpoint response time (P95)</td>
+                            <td>&lt; 5 seconds</td>
+                            <td>Webhook timeout configuration, retry scheduling</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 11. OPEN QUESTIONS -->
+        <section class="section" id="questions">
+            <div class="section-number">Section 11</div>
+            <h2 class="section-title">Open Questions</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Question</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th>Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>Should we support catch-all routing (process ALL inbound email for a domain)?</td>
+                            <td>Product</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Likely yes, as default rule</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>What is the maximum number of routing rules per tenant?</td>
+                            <td>Engineering</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Suggest 50</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>Should we charge for inbound email storage beyond 90 days?</td>
+                            <td>Business</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Suggest premium retention tiers</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4</strong></td>
+                            <td>Do we need IMAP/POP3 access for AI agent use cases?</td>
+                            <td>Product</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Deferred to future phase</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5</strong></td>
+                            <td>Should webhook payloads include full attachment content (base64) or just download URLs?</td>
+                            <td>Engineering</td>
+                            <td><span class="badge badge-decided">Decided</span></td>
+                            <td>Download URLs only (Resend pattern, serverless-friendly)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 12. COMPETITIVE POSITIONING -->
+        <section class="section" id="competitive">
+            <div class="section-number">Section 12</div>
+            <h2 class="section-title">Appendix: Competitive Positioning</h2>
+
+            <p>The following comparison illustrates where EaaS inbound email will stand relative to existing providers. EaaS is uniquely positioned as the only platform offering persistent inbox storage, native outbound-inbound thread linking, and a modern email viewer &mdash; all through a developer-friendly API with a polished dashboard.</p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th style="background: var(--blue);">EaaS (Planned)</th>
+                            <th>SendGrid</th>
+                            <th>Postmark</th>
+                            <th>Mailgun</th>
+                            <th>AWS SES</th>
+                            <th>Resend</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Inbound Email</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Persistent Inbox</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-partial">5 days</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thread Linking</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dashboard Viewer</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-partial">Basic</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>JSON Webhooks</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Multipart</span></td>
+                            <td><span class="comp-check">JSON</span></td>
+                            <td><span class="comp-partial">Multipart</span></td>
+                            <td><span class="comp-partial">SNS</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Free Inbound</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Limited</span></td>
+                            <td><span class="comp-partial">1,000/mo free</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Routing Rules</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Basic</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HMAC Signing</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">SHA-256</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Basic auth</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Attachment Storage</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">S3 + URLs</span></td>
+                            <td><span class="comp-partial">Inline only</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Inline only</span></td>
+                            <td><span class="comp-check">S3</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Modern DX</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">Legacy</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">Mixed</span></td>
+                            <td><span class="comp-x">Complex</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Setup Wizard</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">No</span></td>
+                            <td><span class="comp-x">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics Dashboard</strong></td>
+                            <td class="comp-eaas"><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-check">Yes</span></td>
+                            <td><span class="comp-partial">CloudWatch</span></td>
+                            <td><span class="comp-partial">Basic</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout info">
+                <div class="callout-title">Key Differentiators</div>
+                EaaS will be the only email API platform that combines: (1) persistent inbox with configurable retention, (2) native outbound-inbound thread linking via Message-ID matching, (3) a modern email viewer with HTML preview, raw headers, and JSON payload tabs, and (4) a guided setup wizard with auto-verification &mdash; all through a single API and dashboard. No competitor offers all four today.
+            </div>
+        </section>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="doc-footer">
+        EaaS &mdash; Email as a Service &bull; Product Requirements Document v1.0 &bull; April 1, 2026 &bull; Confidential
+    </footer>
+
+</div>
+
+</body>
+</html>

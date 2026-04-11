@@ -196,12 +196,15 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
       - NEXT_PUBLIC_API_URL=http://api:8080
+      - EAAS_API_INTERNAL_URL=http://api:8080
+      - EAAS_API_KEY=eaas_dashboard_key_for_local_dev
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>{process.exit(r.ok?0:1)}).catch(()=>process.exit(1))"]
+      test: ["CMD-SHELL", "wget -q --spider http://0.0.0.0:3000/api/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -210,6 +213,58 @@ services:
       resources:
         limits:
           memory: 256M
+
+  # ============================================================
+  # MONITORING
+  # ============================================================
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: eaas-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - "127.0.0.1:9090:9090"
+    profiles:
+      - local
+
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: eaas-loki
+    restart: unless-stopped
+    volumes:
+      - ./infrastructure/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "127.0.0.1:3100:3100"
+    profiles:
+      - local
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: eaas-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+      - loki
+    profiles:
+      - local
 
   # ============================================================
   # LOCAL DEV TOOLS
@@ -273,3 +328,6 @@ volumes:
   redis_data:
   rabbitmq_data:
   certbot_data:
+  prometheus_data:
+  loki_data:
+  grafana_data:

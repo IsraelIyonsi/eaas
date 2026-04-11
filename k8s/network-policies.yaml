@@ -1,0 +1,375 @@
+# Network policies enforce least-privilege network access
+# Default-deny all traffic, then explicitly allow required paths
+#
+# Traffic flow:
+#   Internet -> Ingress -> API / WebhookProcessor
+#   API / Worker / WebhookProcessor -> PgBouncer -> PostgreSQL
+#   API / Worker / WebhookProcessor -> Redis
+#   API / Worker / WebhookProcessor -> RabbitMQ
+#   Worker -> S3 (egress)
+#   WebhookProcessor -> Internet (egress for SNS confirmations)
+
+# Default deny all ingress and egress in the namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow DNS resolution for all pods (required for service discovery)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# API: can receive from ingress, can reach pgbouncer, redis, rabbitmq
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-api-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Accept traffic from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-pgbouncer
+      ports:
+        - protocol: TCP
+          port: 6432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672
+---
+# Worker: can reach pgbouncer, redis, rabbitmq, and AWS S3 (egress to internet)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-worker-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-worker
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-pgbouncer
+      ports:
+        - protocol: TCP
+          port: 6432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672
+    # AWS S3 and SES egress (HTTPS)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# WebhookProcessor: receives from ingress, reaches pgbouncer/redis/rabbitmq and internet (SNS)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-webhook-processor-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-webhook-processor
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-pgbouncer
+      ports:
+        - protocol: TCP
+          port: 6432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672
+    # SNS subscription confirmation and external webhook delivery (HTTPS)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+---
+# PostgreSQL: only reachable from PgBouncer
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-postgres-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-pgbouncer
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# PgBouncer: reachable from API, Worker, WebhookProcessor; can reach PostgreSQL
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-pgbouncer-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-pgbouncer
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-worker
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-webhook-processor
+      ports:
+        - protocol: TCP
+          port: 6432
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+# Redis: only reachable from API, Worker, WebhookProcessor
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-redis-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-redis
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-worker
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-webhook-processor
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+    # Redis-to-Redis replication
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+  egress:
+    # Redis replicas need to reach master; Sentinel needs to reach all nodes
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+---
+# RabbitMQ: reachable from API, Worker, WebhookProcessor; cluster peers can communicate
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: eaas-rabbitmq-policy
+  namespace: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-rabbitmq
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-worker
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-webhook-processor
+      ports:
+        - protocol: TCP
+          port: 5672
+    # Inter-node clustering
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-rabbitmq
+      ports:
+        - protocol: TCP
+          port: 4369
+        - protocol: TCP
+          port: 25672
+    # Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15692
+  egress:
+    # Cluster peer communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: eaas-rabbitmq
+      ports:
+        - protocol: TCP
+          port: 4369
+        - protocol: TCP
+          port: 25672

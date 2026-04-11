@@ -1,0 +1,13 @@
+# Grafana dashboard provisioning -- auto-load dashboard JSON files on startup
+apiVersion: 1
+
+providers:
+  - name: EaaS
+    orgId: 1
+    folder: EaaS
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

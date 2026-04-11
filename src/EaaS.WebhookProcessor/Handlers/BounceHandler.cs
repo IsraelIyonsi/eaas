@@ -2,6 +2,7 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Messaging.Contracts;
+using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
 using EaaS.WebhookProcessor.Models;
 using EaaS.WebhookProcessor.Services;
@@ -46,6 +47,7 @@ public sealed partial class BounceHandler
 
         var isPermanent = bounce.BounceType.Equals("Permanent", StringComparison.OrdinalIgnoreCase);
         LogBounceReceived(_logger, bounce.BounceType, bounce.BounceSubType, email.Id);
+        EmailMetrics.BouncesTotal.WithLabels(email.TenantId.ToString(), bounce.BounceType.ToLowerInvariant()).Inc();
 
         if (isPermanent)
         {

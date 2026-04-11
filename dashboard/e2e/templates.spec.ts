@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers/auth";
+import { setupEmptyMockApi } from "./helpers/mock-api";
 
 test.describe("Templates Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -71,6 +72,17 @@ test.describe("Templates Page", () => {
     // Iframe should be visible
     const iframe = page.locator("iframe[title='Template preview']");
     await expect(iframe).toBeVisible();
+  });
+
+  test("should show empty state when no templates", async ({ page }) => {
+    await setupEmptyMockApi(page);
+    await page.goto("/templates");
+
+    await expect(
+      page.getByRole("heading", { name: "Templates" })
+    ).toBeVisible({ timeout: 10000 });
+
+    await expect(page.getByText("No templates yet")).toBeVisible({ timeout: 10000 });
   });
 
   test("should open edit dialog when clicking edit on a template", async ({

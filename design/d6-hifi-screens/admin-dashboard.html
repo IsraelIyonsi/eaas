@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-2: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #f8fafc;
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --primary-light: #ede9fe;
+  --primary-text: #5b21b6;
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --success-text: #166534;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-text: #991b1b;
+  --info: #3b82f6;
+  --info-light: #dbeafe;
+  --info-text: #1e40af;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #e2e8f0;
+  --sidebar-active-bg: rgba(124, 58, 237, 0.15);
+  --sidebar-active-text: #a78bfa;
+  --sidebar-section: #475569;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-2: #334155;
+  --bg-hover: #334155;
+  --border: #334155;
+  --border-strong: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #0f172a;
+  --primary-light: rgba(124, 58, 237, 0.2);
+  --primary-text: #c4b5fd;
+  --success-light: rgba(34, 197, 94, 0.15);
+  --success-text: #86efac;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-text: #fcd34d;
+  --error-light: rgba(239, 68, 68, 0.15);
+  --error-text: #fca5a5;
+  --info-light: rgba(59, 130, 246, 0.15);
+  --info-text: #93bbfd;
+  --sidebar-bg: #020617;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+}
+
+html { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); }
+
+h1 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; }
+h2 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; }
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.app-layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar-logo-icon svg { width: 18px; height: 18px; }
+.sidebar-logo-text { font-weight: 600; font-size: 15px; color: #f1f5f9; display: flex; flex-direction: column; }
+.sidebar-logo-text .admin-badge {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--primary); background: rgba(124,58,237,0.15); padding: 1px 6px; border-radius: 3px;
+  width: fit-content; margin-top: 2px;
+}
+
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px; }
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); text-decoration: none;
+  font-size: 13px; font-weight: 500; transition: all var(--transition); cursor: pointer;
+}
+.sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.sidebar-nav a.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); }
+.sidebar-nav a svg { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.sidebar-nav a.active svg { opacity: 1; }
+.sidebar-nav .nav-section {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--sidebar-section); padding: 16px 12px 6px; user-select: none;
+}
+.sidebar-nav .nav-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 8px 4px; }
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-footer a {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); text-decoration: none;
+  font-size: 13px; font-weight: 500; transition: all var(--transition); cursor: pointer;
+}
+.sidebar-footer a:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.sidebar-footer a svg { width: 18px; height: 18px; opacity: 0.7; }
+
+/* Main content */
+.main-content { flex: 1; margin-left: 240px; min-width: 0; display: flex; flex-direction: column; }
+
+/* Page header */
+.page-header {
+  padding: 20px 28px 0; display: flex; align-items: center; justify-content: space-between;
+}
+.page-header-left { display: flex; flex-direction: column; gap: 4px; }
+.page-header h1 { font-size: 22px; }
+.page-header .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.page-header .breadcrumb a { color: var(--primary); text-decoration: none; cursor: pointer; }
+.page-header .breadcrumb a:hover { text-decoration: underline; }
+.page-header .breadcrumb .sep { color: var(--text-tertiary); }
+.page-header-actions { display: flex; gap: 8px; align-items: center; }
+
+.page-body { padding: 20px 28px 40px; flex: 1; }
+
+/* Topbar */
+.topbar {
+  height: 52px; border-bottom: 1px solid var(--border); display: flex; align-items: center;
+  justify-content: flex-end; padding: 0 28px; gap: 12px; background: var(--bg);
+}
+
+/* Screen containers */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+/* Cards */
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-header h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+.stats-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.stats-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.stat-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+.stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-strong); }
+.stat-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-label svg { width: 14px; height: 14px; opacity: 0.6; }
+.stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1.1; }
+.stat-value-sm { font-size: 22px; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+.stat-sub .up { color: var(--success-text); font-weight: 600; }
+.stat-sub .down { color: var(--error-text); font-weight: 600; }
+
+/* Health indicators */
+.health-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.health-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 16px; box-shadow: var(--shadow-sm);
+}
+.health-card-title { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+.health-card-value { font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.health-card-detail { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+/* Status dot */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+.status-dot.healthy { background: var(--success); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+.status-dot.warning { background: var(--warning); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+.status-dot.error { background: var(--error); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+.status-dot.neutral { background: var(--text-tertiary); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 10px 12px; font-size: 11px; font-weight: 600;
+  color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border); background: var(--bg-surface);
+}
+td {
+  padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border);
+  color: var(--text-primary); vertical-align: middle;
+}
+tr:hover td { background: var(--bg-hover); }
+tr:last-child td { border-bottom: none; }
+tr.clickable { cursor: pointer; }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  border-radius: 9999px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+}
+.badge-success { background: var(--success-light); color: var(--success-text); }
+.badge-warning { background: var(--warning-light); color: var(--warning-text); }
+.badge-error { background: var(--error-light); color: var(--error-text); }
+.badge-info { background: var(--info-light); color: var(--info-text); }
+.badge-primary { background: var(--primary-light); color: var(--primary-text); }
+.badge-neutral { background: var(--bg-surface-2); color: var(--text-secondary); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; font-family: inherit;
+  cursor: pointer; transition: all var(--transition); border: 1px solid transparent;
+  text-decoration: none; white-space: nowrap;
+}
+.btn svg { width: 16px; height: 16px; }
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+.btn-secondary { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { border-color: var(--border-strong); background: var(--bg-hover); }
+.btn-danger { background: var(--error); color: white; border-color: var(--error); }
+.btn-danger:hover { background: #dc2626; border-color: #dc2626; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: none; padding: 6px 10px; }
+.btn-ghost:hover { color: var(--text-primary); background: var(--bg-hover); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-sm svg { width: 14px; height: 14px; }
+
+/* Inputs */
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.input-group .hint { font-size: 12px; color: var(--text-tertiary); }
+input[type="text"], input[type="email"], input[type="number"], input[type="password"], input[type="search"],
+select, textarea {
+  padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  transition: border-color var(--transition); width: 100%; outline: none;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; }
+
+/* Search bar */
+.search-bar {
+  display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;
+}
+.search-bar input[type="search"] { max-width: 320px; }
+.search-bar select { width: auto; min-width: 140px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition);
+  background: none; border-top: none; border-left: none; border-right: none; font-family: inherit;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Two column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* Progress bar */
+.progress-bar { height: 8px; background: var(--bg-surface-2); border-radius: 4px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+.progress-bar-fill.primary { background: var(--primary); }
+.progress-bar-fill.success { background: var(--success); }
+.progress-bar-fill.warning { background: var(--warning); }
+.progress-bar-fill.error { background: var(--error); }
+
+/* Toggles */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.toggle-row:last-child { border-bottom: none; }
+.toggle-info { flex: 1; }
+.toggle-info .toggle-label { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.toggle-info .toggle-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.toggle-switch {
+  width: 44px; height: 24px; border-radius: 12px; cursor: pointer; position: relative;
+  background: var(--border-strong); transition: background var(--transition); flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch::after {
+  content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: white; top: 3px; left: 3px; transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { transform: translateX(20px); }
+
+/* Alert cards */
+.alert {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  border-radius: var(--radius-md); font-size: 13px; margin-bottom: 10px;
+}
+.alert-error { background: var(--error-light); color: var(--error-text); border: 1px solid rgba(239,68,68,0.2); }
+.alert-warning { background: var(--warning-light); color: var(--warning-text); border: 1px solid rgba(245,158,11,0.2); }
+.alert-success { background: var(--success-light); color: var(--success-text); border: 1px solid rgba(34,197,94,0.2); }
+.alert-info { background: var(--info-light); color: var(--info-text); border: 1px solid rgba(59,130,246,0.2); }
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  border: 1px solid var(--border);
+}
+.modal-lg { max-width: 640px; }
+.modal-header {
+  padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h2 { font-size: 18px; }
+.modal-close {
+  width: 32px; height: 32px; border-radius: var(--radius-sm); border: none;
+  background: transparent; color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all var(--transition);
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Expanded row / detail panel */
+.detail-panel {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 16px; margin-top: 8px; display: none;
+}
+.detail-panel.open { display: block; }
+
+/* Heatmap / chart containers */
+.chart-container { margin-bottom: 24px; }
+.chart-container svg { width: 100%; height: auto; }
+
+/* Feature adoption bars */
+.feature-bar { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.feature-bar-label { width: 120px; font-size: 13px; font-weight: 500; color: var(--text-primary); flex-shrink: 0; }
+.feature-bar-track { flex: 1; height: 24px; background: var(--bg-surface-2); border-radius: 4px; overflow: hidden; position: relative; }
+.feature-bar-fill { height: 100%; background: var(--primary); border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; }
+.feature-bar-val { font-size: 11px; font-weight: 600; color: white; }
+
+/* Revenue cards use stat-card styling */
+
+/* Dark mode toggle button in topbar */
+.dm-toggle {
+  width: 36px; height: 36px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); transition: all var(--transition);
+}
+.dm-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.dm-toggle svg { width: 18px; height: 18px; }
+
+/* Avatar */
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--primary-light);
+  color: var(--primary-text); display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+
+/* Grid helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-24 { margin-bottom: 24px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+.gap-20 { gap: 20px; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.w-full { width: 100%; }
+
+/* Scrollable table wrapper */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.table-wrap table { margin: 0; }
+.table-wrap th:first-child, .table-wrap td:first-child { padding-left: 16px; }
+.table-wrap th:last-child, .table-wrap td:last-child { padding-right: 16px; }
+
+/* Service drill-down */
+.service-detail { display: none; }
+.service-detail.open { display: block; }
+
+/* Toast notification */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 2000;
+  padding: 12px 20px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+  display: none; align-items: center; gap: 8px; box-shadow: var(--shadow-lg);
+  animation: slideUp 0.3s ease;
+}
+.toast.show { display: flex; }
+.toast-success { background: #166534; color: white; }
+.toast-error { background: #991b1b; color: white; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     SIDEBAR
+     ============================================ -->
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div class="sidebar-logo-text">
+        EaaS
+        <span class="admin-badge">Admin</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="#overview" class="active" data-nav="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="#tenants" data-nav="tenants">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Tenants
+      </a>
+      <a href="#health" data-nav="health">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        System Health
+      </a>
+      <a href="#analytics" data-nav="analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Infrastructure</div>
+      <a href="#infrastructure" data-nav="infrastructure">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        Infrastructure
+      </a>
+      <a href="#billing" data-nav="billing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Billing & Plans
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">System</div>
+      <a href="#audit-logs" data-nav="audit-logs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Audit Logs
+      </a>
+      <a href="#settings" data-nav="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#" onclick="event.preventDefault();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Switch to Customer View
+      </a>
+    </div>
+  </aside>
+
+  <!-- ============================================
+       MAIN CONTENT
+       ============================================ -->
+  <div class="main-content">
+    <!-- Top bar -->
+    <div class="topbar">
+      <button class="dm-toggle" id="themeToggle" title="Toggle dark mode">
+        <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="moonIcon" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="avatar">IA</div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 1: ADMIN OVERVIEW
+         ========================================== -->
+    <div class="screen active" id="screen-overview">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Admin Overview</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">System-wide metrics and health status</p>
+        </div>
+        <div class="page-header-actions">
+          <span style="font-size:12px;color:var(--text-tertiary);">Last refreshed: 2 min ago</span>
+          <button class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- System Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Total Tenants
+            </div>
+            <div class="stat-value">247</div>
+            <div class="stat-sub"><span class="up">+12</span> this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Total Emails Sent
+            </div>
+            <div class="stat-value">2.4M</div>
+            <div class="stat-sub"><span class="up">+8.3%</span> vs last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+              Total Inbound
+            </div>
+            <div class="stat-value">892K</div>
+            <div class="stat-sub"><span class="up">+14.1%</span> vs last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              Active API Keys
+            </div>
+            <div class="stat-value">631</div>
+            <div class="stat-sub"><span class="up">+24</span> this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              System Uptime
+            </div>
+            <div class="stat-value" style="color:var(--success);">99.97%</div>
+            <div class="stat-sub">Last 30 days</div>
+          </div>
+        </div>
+
+        <!-- Health Indicators -->
+        <h3 style="margin-bottom:14px;">Health Indicators</h3>
+        <div class="health-grid">
+          <div class="health-card">
+            <div class="health-card-title">API Latency (P50 / P95 / P99)</div>
+            <div class="health-card-value" style="font-size:18px;">12ms <span style="font-size:13px;color:var(--text-secondary);">/ 45ms / 120ms</span></div>
+            <div class="health-card-detail"><span class="status-dot healthy"></span>Healthy</div>
+          </div>
+          <div class="health-card">
+            <div class="health-card-title">Queue Depth</div>
+            <div class="health-card-value">342</div>
+            <div class="health-card-detail"><span class="status-dot healthy"></span>Processing normally</div>
+          </div>
+          <div class="health-card">
+            <div class="health-card-title">Error Rate</div>
+            <div class="health-card-value">0.08%</div>
+            <div class="health-card-detail"><span class="status-dot healthy"></span>Below threshold</div>
+          </div>
+          <div class="health-card">
+            <div class="health-card-title">S3 Storage</div>
+            <div class="health-card-value">47.2 GB</div>
+            <div class="health-card-detail"><span class="status-dot healthy"></span>62% of quota</div>
+          </div>
+        </div>
+
+        <!-- Volume Chart -->
+        <div class="card mb-24">
+          <div class="card-header">
+            <h3>Email Volume (30 Days)</h3>
+            <div class="flex gap-16 items-center">
+              <span class="flex items-center gap-8" style="font-size:12px;color:var(--text-secondary);"><span style="display:inline-block;width:12px;height:3px;background:var(--primary);border-radius:2px;"></span> Sent</span>
+              <span class="flex items-center gap-8" style="font-size:12px;color:var(--text-secondary);"><span style="display:inline-block;width:12px;height:3px;background:var(--info);border-radius:2px;"></span> Received</span>
+            </div>
+          </div>
+          <svg viewBox="0 0 800 200" style="width:100%;height:200px;">
+            <!-- Grid lines -->
+            <line x1="40" y1="20" x2="40" y2="180" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="180" x2="780" y2="180" stroke="var(--border)" stroke-width="1"/>
+            <line x1="40" y1="140" x2="780" y2="140" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="100" x2="780" y2="100" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <line x1="40" y1="60" x2="780" y2="60" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4"/>
+            <text x="10" y="184" font-size="10" fill="var(--text-tertiary)">0</text>
+            <text x="10" y="144" font-size="10" fill="var(--text-tertiary)">25K</text>
+            <text x="10" y="104" font-size="10" fill="var(--text-tertiary)">50K</text>
+            <text x="10" y="64" font-size="10" fill="var(--text-tertiary)">75K</text>
+            <!-- Sent line -->
+            <polyline points="40,120 65,115 90,108 115,110 140,100 165,95 190,88 215,92 240,85 265,80 290,78 315,82 340,75 365,70 390,68 415,72 440,65 465,60 490,55 515,58 540,50 565,48 590,52 615,45 640,42 665,38 690,35 715,40 740,32 765,28" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Received line -->
+            <polyline points="40,155 65,152 90,148 115,150 140,145 165,142 190,138 215,140 240,136 265,133 290,132 315,135 340,130 365,128 390,126 415,129 440,124 465,120 490,118 515,121 540,115 565,112 590,116 615,110 640,108 665,105 690,102 715,106 740,100 765,96" fill="none" stroke="var(--info)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- X-axis labels -->
+            <text x="40" y="196" font-size="9" fill="var(--text-tertiary)">Mar 1</text>
+            <text x="188" y="196" font-size="9" fill="var(--text-tertiary)">Mar 7</text>
+            <text x="336" y="196" font-size="9" fill="var(--text-tertiary)">Mar 14</text>
+            <text x="484" y="196" font-size="9" fill="var(--text-tertiary)">Mar 21</text>
+            <text x="632" y="196" font-size="9" fill="var(--text-tertiary)">Mar 28</text>
+            <text x="740" y="196" font-size="9" fill="var(--text-tertiary)">Mar 31</text>
+          </svg>
+        </div>
+
+        <div class="grid-2 mb-24">
+          <!-- Active Alerts -->
+          <div class="card">
+            <div class="card-header"><h3>Active Alerts</h3><span class="badge badge-error">3 active</span></div>
+            <div class="alert alert-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div><strong>High error rate on webhook-dispatch</strong><br><span style="font-size:11px;opacity:0.8;">Error rate exceeded 5% threshold - 12 min ago</span></div>
+            </div>
+            <div class="alert alert-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>SES sending quota at 85%</strong><br><span style="font-size:11px;opacity:0.8;">Approaching daily limit of 50,000 - 34 min ago</span></div>
+            </div>
+            <div class="alert alert-warning">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div><strong>Tenant "Acme Corp" nearing rate limit</strong><br><span style="font-size:11px;opacity:0.8;">92% of 10K/hr limit reached - 1 hr ago</span></div>
+            </div>
+          </div>
+
+          <!-- Top 5 Tenants -->
+          <div class="card">
+            <div class="card-header"><h3>Top 5 Tenants by Volume</h3></div>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead><tr><th>#</th><th>Tenant</th><th>Emails Sent</th><th>Plan</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td><strong>Acme Corp</strong></td><td class="mono">482,301</td><td><span class="badge badge-primary">Enterprise</span></td></tr>
+                  <tr><td>2</td><td><strong>TechFlow Inc</strong></td><td class="mono">312,847</td><td><span class="badge badge-primary">Enterprise</span></td></tr>
+                  <tr><td>3</td><td><strong>CloudMail Pro</strong></td><td class="mono">198,432</td><td><span class="badge badge-info">Scale</span></td></tr>
+                  <tr><td>4</td><td><strong>StartupXYZ</strong></td><td class="mono">145,219</td><td><span class="badge badge-info">Scale</span></td></tr>
+                  <tr><td>5</td><td><strong>DataSync Ltd</strong></td><td class="mono">98,745</td><td><span class="badge badge-success">Pro</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 2: TENANTS LIST
+         ========================================== -->
+    <div class="screen" id="screen-tenants">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Tenants</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">Manage all tenant accounts</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-primary" onclick="openModal('createTenantModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Tenant
+          </button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="search-bar">
+          <input type="search" placeholder="Search tenants..." style="max-width:300px;">
+          <select><option>All Plans</option><option>Free</option><option>Pro</option><option>Scale</option><option>Enterprise</option></select>
+          <select><option>All Status</option><option>Active</option><option>Suspended</option><option>Trial</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Email Count</th><th>Domains</th><th>API Keys</th><th>Plan</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>Acme Corp</strong><br><span style="font-size:11px;color:var(--text-tertiary);">admin@acmecorp.com</span></td><td class="mono">482,301</td><td>3</td><td>5</td><td><span class="badge badge-primary">Enterprise</span></td><td><span class="badge badge-success">Active</span></td><td>2024-08-12</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>TechFlow Inc</strong><br><span style="font-size:11px;color:var(--text-tertiary);">ops@techflow.io</span></td><td class="mono">312,847</td><td>2</td><td>4</td><td><span class="badge badge-primary">Enterprise</span></td><td><span class="badge badge-success">Active</span></td><td>2024-06-03</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>CloudMail Pro</strong><br><span style="font-size:11px;color:var(--text-tertiary);">hello@cloudmail.pro</span></td><td class="mono">198,432</td><td>4</td><td>3</td><td><span class="badge badge-info">Scale</span></td><td><span class="badge badge-success">Active</span></td><td>2024-09-21</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>StartupXYZ</strong><br><span style="font-size:11px;color:var(--text-tertiary);">dev@startupxyz.com</span></td><td class="mono">145,219</td><td>1</td><td>2</td><td><span class="badge badge-info">Scale</span></td><td><span class="badge badge-success">Active</span></td><td>2024-11-15</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>DataSync Ltd</strong><br><span style="font-size:11px;color:var(--text-tertiary);">api@datasync.co</span></td><td class="mono">98,745</td><td>2</td><td>3</td><td><span class="badge badge-success">Pro</span></td><td><span class="badge badge-success">Active</span></td><td>2025-01-08</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>MailBridge</strong><br><span style="font-size:11px;color:var(--text-tertiary);">info@mailbridge.dev</span></td><td class="mono">76,102</td><td>1</td><td>2</td><td><span class="badge badge-success">Pro</span></td><td><span class="badge badge-success">Active</span></td><td>2025-01-22</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>NotifyHub</strong><br><span style="font-size:11px;color:var(--text-tertiary);">admin@notifyhub.io</span></td><td class="mono">54,380</td><td>1</td><td>1</td><td><span class="badge badge-success">Pro</span></td><td><span class="badge badge-warning">Trial</span></td><td>2025-02-14</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>PingMail</strong><br><span style="font-size:11px;color:var(--text-tertiary);">dev@pingmail.app</span></td><td class="mono">31,204</td><td>1</td><td>1</td><td><span class="badge badge-neutral">Free</span></td><td><span class="badge badge-success">Active</span></td><td>2025-03-01</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>BulkSender Co</strong><br><span style="font-size:11px;color:var(--text-tertiary);">ops@bulksender.co</span></td><td class="mono">22,891</td><td>2</td><td>2</td><td><span class="badge badge-info">Scale</span></td><td><span class="badge badge-error">Suspended</span></td><td>2024-12-05</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+              <tr class="clickable" onclick="navigateTo('tenant-detail')"><td><strong>QuickPost</strong><br><span style="font-size:11px;color:var(--text-tertiary);">hello@quickpost.dev</span></td><td class="mono">8,412</td><td>1</td><td>1</td><td><span class="badge badge-neutral">Free</span></td><td><span class="badge badge-success">Active</span></td><td>2025-03-18</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 3: TENANT DETAIL
+         ========================================== -->
+    <div class="screen" id="screen-tenant-detail">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="breadcrumb"><a onclick="navigateTo('tenants')">Tenants</a><span class="sep">/</span><span>Acme Corp</span></div>
+          <h1>Acme Corp</h1>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openModal('suspendTenantModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Suspend
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="openModal('deleteTenantModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- Tenant info card -->
+        <div class="card mb-24" style="display:flex;align-items:center;gap:20px;">
+          <div class="avatar" style="width:48px;height:48px;font-size:18px;">AC</div>
+          <div style="flex:1;">
+            <div style="font-size:16px;font-weight:600;">Acme Corp</div>
+            <div style="font-size:13px;color:var(--text-secondary);">admin@acmecorp.com</div>
+          </div>
+          <div style="text-align:right;">
+            <span class="badge badge-primary" style="margin-bottom:4px;">Enterprise</span><br>
+            <span style="font-size:12px;color:var(--text-secondary);">Created Aug 12, 2024</span>
+          </div>
+          <span class="badge badge-success" style="font-size:12px;padding:4px 12px;">Active</span>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="tenantTabs">
+          <button class="tab active" data-tab="td-overview">Overview</button>
+          <button class="tab" data-tab="td-domains">Domains</button>
+          <button class="tab" data-tab="td-apikeys">API Keys</button>
+          <button class="tab" data-tab="td-emails">Emails</button>
+          <button class="tab" data-tab="td-billing">Billing</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="td-overview">
+          <div class="stats-grid stats-grid-4 mb-24">
+            <div class="stat-card"><div class="stat-label">Emails Sent</div><div class="stat-value stat-value-sm">482,301</div><div class="stat-sub"><span class="up">+6.2%</span> this month</div></div>
+            <div class="stat-card"><div class="stat-label">Inbound Received</div><div class="stat-value stat-value-sm">34,521</div><div class="stat-sub"><span class="up">+11.4%</span> this month</div></div>
+            <div class="stat-card"><div class="stat-label">Delivery Rate</div><div class="stat-value stat-value-sm">99.2%</div><div class="stat-sub">Last 30 days</div></div>
+            <div class="stat-card"><div class="stat-label">Bounce Rate</div><div class="stat-value stat-value-sm">0.6%</div><div class="stat-sub"><span class="down">-0.1%</span> improving</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><div class="card-header"><h3>Quick Stats</h3></div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Domains Verified</span><span class="mono">3 / 3</span></div>
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Active API Keys</span><span class="mono">5</span></div>
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Webhook Endpoints</span><span class="mono">2</span></div>
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Templates</span><span class="mono">18</span></div>
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Monthly Limit</span><span class="mono">500,000</span></div>
+                <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Rate Limit</span><span class="mono">10,000/hr</span></div>
+              </div>
+            </div>
+            <div class="card"><div class="card-header"><h3>Recent Activity</h3></div>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
+                <div class="flex gap-8"><span class="mono" style="color:var(--text-tertiary);white-space:nowrap;">14:32</span><span>API key <code class="mono" style="background:var(--bg-surface-2);padding:1px 6px;border-radius:3px;">sk_live_8f3...x2p</code> created</span></div>
+                <div class="flex gap-8"><span class="mono" style="color:var(--text-tertiary);white-space:nowrap;">12:18</span><span>Domain <code class="mono" style="background:var(--bg-surface-2);padding:1px 6px;border-radius:3px;">mail.acmecorp.com</code> verified</span></div>
+                <div class="flex gap-8"><span class="mono" style="color:var(--text-tertiary);white-space:nowrap;">09:45</span><span>Batch send: 2,400 emails dispatched</span></div>
+                <div class="flex gap-8"><span class="mono" style="color:var(--text-tertiary);white-space:nowrap;">08:12</span><span>Webhook endpoint updated</span></div>
+                <div class="flex gap-8"><span class="mono" style="color:var(--text-tertiary);white-space:nowrap;">Yesterday</span><span>Plan upgraded from Scale to Enterprise</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Domains Tab -->
+        <div class="tab-content" id="td-domains">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Domain</th><th>SPF</th><th>DKIM</th><th>DMARC</th><th>Status</th><th>Added</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">acmecorp.com</td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Verified</span></td><td>2024-08-12</td></tr>
+                <tr><td class="mono">mail.acmecorp.com</td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-success">Verified</span></td><td>2024-09-03</td></tr>
+                <tr><td class="mono">notifications.acmecorp.com</td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-warning">Pending</span></td><td><span class="badge badge-success">Pass</span></td><td><span class="badge badge-warning">Partial</span></td><td>2025-03-20</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- API Keys Tab -->
+        <div class="tab-content" id="td-apikeys">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Key Prefix</th><th>Permissions</th><th>Last Used</th><th>Created</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Production Send</td><td class="mono">sk_live_8f3...</td><td><span class="badge badge-primary">Full Access</span></td><td>2 min ago</td><td>2024-08-12</td><td><span class="badge badge-success">Active</span></td></tr>
+                <tr><td>Staging</td><td class="mono">sk_test_2a1...</td><td><span class="badge badge-info">Send Only</span></td><td>3 hrs ago</td><td>2024-09-15</td><td><span class="badge badge-success">Active</span></td></tr>
+                <tr><td>Analytics Read</td><td class="mono">sk_live_f92...</td><td><span class="badge badge-neutral">Read Only</span></td><td>1 day ago</td><td>2024-11-02</td><td><span class="badge badge-success">Active</span></td></tr>
+                <tr><td>Webhook Svc</td><td class="mono">sk_live_d45...</td><td><span class="badge badge-info">Send + Webhooks</span></td><td>5 min ago</td><td>2025-01-10</td><td><span class="badge badge-success">Active</span></td></tr>
+                <tr><td>Deprecated</td><td class="mono">sk_live_a12...</td><td><span class="badge badge-primary">Full Access</span></td><td>34 days ago</td><td>2024-08-12</td><td><span class="badge badge-error">Revoked</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Emails Tab -->
+        <div class="tab-content" id="td-emails">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Message ID</th><th>To</th><th>Subject</th><th>Status</th><th>Sent At</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" style="font-size:11px;">msg_8f3a2b1c...</td><td>user@example.com</td><td>Welcome to Acme</td><td><span class="badge badge-success">Delivered</span></td><td>2 min ago</td></tr>
+                <tr><td class="mono" style="font-size:11px;">msg_7e2d4f9a...</td><td>client@corp.net</td><td>Invoice #4521</td><td><span class="badge badge-success">Delivered</span></td><td>15 min ago</td></tr>
+                <tr><td class="mono" style="font-size:11px;">msg_6c1b3e8d...</td><td>team@startup.io</td><td>Monthly Report</td><td><span class="badge badge-success">Delivered</span></td><td>1 hr ago</td></tr>
+                <tr><td class="mono" style="font-size:11px;">msg_5a0f2d7c...</td><td>admin@test.org</td><td>Password Reset</td><td><span class="badge badge-warning">Bounced</span></td><td>2 hrs ago</td></tr>
+                <tr><td class="mono" style="font-size:11px;">msg_4d9e1c6b...</td><td>noreply@old.com</td><td>Account Update</td><td><span class="badge badge-error">Failed</span></td><td>3 hrs ago</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Billing Tab -->
+        <div class="tab-content" id="td-billing">
+          <div class="stats-grid stats-grid-3 mb-24">
+            <div class="stat-card"><div class="stat-label">Current Plan</div><div class="stat-value stat-value-sm">Enterprise</div><div class="stat-sub">$299/month</div></div>
+            <div class="stat-card"><div class="stat-label">Usage This Month</div><div class="stat-value stat-value-sm">482,301</div><div class="stat-sub">of 500,000 limit (96.5%)</div></div>
+            <div class="stat-card"><div class="stat-label">Overage</div><div class="stat-value stat-value-sm" style="color:var(--warning);">$0.00</div><div class="stat-sub">No overage yet</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Recent Invoices</h3></div>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead><tr><th>Invoice</th><th>Period</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  <tr><td class="mono">INV-2025-0312</td><td>March 2025</td><td>$299.00</td><td><span class="badge badge-success">Paid</span></td><td>2025-03-01</td></tr>
+                  <tr><td class="mono">INV-2025-0211</td><td>February 2025</td><td>$299.00</td><td><span class="badge badge-success">Paid</span></td><td>2025-02-01</td></tr>
+                  <tr><td class="mono">INV-2025-0110</td><td>January 2025</td><td>$249.00 + $32.50</td><td><span class="badge badge-success">Paid</span></td><td>2025-01-01</td></tr>
+                  <tr><td class="mono">INV-2024-1209</td><td>December 2024</td><td>$249.00</td><td><span class="badge badge-success">Paid</span></td><td>2024-12-01</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 4: SYSTEM HEALTH
+         ========================================== -->
+    <div class="screen" id="screen-health">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>System Health</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">Real-time monitoring and service status</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- Metric cards -->
+        <div class="stats-grid stats-grid-4 mb-24">
+          <div class="stat-card">
+            <div class="stat-label">API Response Time</div>
+            <div class="stat-value stat-value-sm">12ms</div>
+            <div class="stat-sub mono">P95: 45ms / P99: 120ms</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Queue Depth</div>
+            <div class="stat-value stat-value-sm">342</div>
+            <div class="stat-sub mono">email-send: 210 / webhook: 82 / inbound: 50</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Error Rate</div>
+            <div class="stat-value stat-value-sm" style="color:var(--success);">0.08%</div>
+            <div class="stat-sub"><span class="down">-0.02%</span> vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Worker Status</div>
+            <div class="stat-value stat-value-sm" style="color:var(--success);">8 / 8</div>
+            <div class="stat-sub"><span class="status-dot healthy"></span>All workers healthy</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-3 mb-24">
+          <div class="card">
+            <div class="card-header"><h3>API Latency (24h)</h3></div>
+            <svg viewBox="0 0 300 150" style="width:100%;height:150px;">
+              <line x1="30" y1="130" x2="290" y2="130" stroke="var(--border)" stroke-width="1"/>
+              <line x1="30" y1="100" x2="290" y2="100" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="70" x2="290" y2="70" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="40" x2="290" y2="40" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <text x="5" y="134" font-size="8" fill="var(--text-tertiary)">0ms</text>
+              <text x="5" y="104" font-size="8" fill="var(--text-tertiary)">50ms</text>
+              <text x="5" y="74" font-size="8" fill="var(--text-tertiary)">100ms</text>
+              <text x="5" y="44" font-size="8" fill="var(--text-tertiary)">150ms</text>
+              <!-- P99 area -->
+              <path d="M30,95 55,92 80,98 105,90 130,85 155,88 180,92 205,86 230,80 255,84 280,78 280,130 30,130Z" fill="var(--error-light)" opacity="0.5"/>
+              <!-- P95 area -->
+              <path d="M30,108 55,105 80,110 105,104 130,100 155,103 180,107 205,102 230,98 255,101 280,96 280,130 30,130Z" fill="var(--warning-light)" opacity="0.5"/>
+              <!-- P50 line -->
+              <polyline points="30,122 55,120 80,123 105,119 130,118 155,120 180,121 205,118 230,116 255,119 280,115" fill="none" stroke="var(--primary)" stroke-width="2"/>
+              <text x="30" y="145" font-size="7" fill="var(--text-tertiary)">00:00</text>
+              <text x="155" y="145" font-size="7" fill="var(--text-tertiary)">12:00</text>
+              <text x="270" y="145" font-size="7" fill="var(--text-tertiary)">Now</text>
+            </svg>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Queue Depth (24h)</h3></div>
+            <svg viewBox="0 0 300 150" style="width:100%;height:150px;">
+              <line x1="30" y1="130" x2="290" y2="130" stroke="var(--border)" stroke-width="1"/>
+              <line x1="30" y1="90" x2="290" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="50" x2="290" y2="50" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <text x="5" y="134" font-size="8" fill="var(--text-tertiary)">0</text>
+              <text x="5" y="94" font-size="8" fill="var(--text-tertiary)">500</text>
+              <text x="5" y="54" font-size="8" fill="var(--text-tertiary)">1K</text>
+              <path d="M30,110 55,105 80,95 105,100 130,85 155,70 180,78 205,90 230,95 255,100 280,105 280,130 30,130Z" fill="var(--primary-light)" opacity="0.6"/>
+              <polyline points="30,110 55,105 80,95 105,100 130,85 155,70 180,78 205,90 230,95 255,100 280,105" fill="none" stroke="var(--primary)" stroke-width="2"/>
+              <text x="30" y="145" font-size="7" fill="var(--text-tertiary)">00:00</text>
+              <text x="155" y="145" font-size="7" fill="var(--text-tertiary)">12:00</text>
+              <text x="270" y="145" font-size="7" fill="var(--text-tertiary)">Now</text>
+            </svg>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Error Rate (24h)</h3></div>
+            <svg viewBox="0 0 300 150" style="width:100%;height:150px;">
+              <line x1="30" y1="130" x2="290" y2="130" stroke="var(--border)" stroke-width="1"/>
+              <line x1="30" y1="90" x2="290" y2="90" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="50" x2="290" y2="50" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <text x="5" y="134" font-size="8" fill="var(--text-tertiary)">0%</text>
+              <text x="5" y="94" font-size="8" fill="var(--text-tertiary)">1%</text>
+              <text x="5" y="54" font-size="8" fill="var(--text-tertiary)">2%</text>
+              <!-- Threshold line -->
+              <line x1="30" y1="70" x2="290" y2="70" stroke="var(--error)" stroke-width="1" stroke-dasharray="5,3"/>
+              <text x="240" y="67" font-size="7" fill="var(--error-text)">Threshold</text>
+              <polyline points="30,125 55,124 80,126 105,123 130,124 155,120 180,115 205,118 230,122 255,124 280,125" fill="none" stroke="var(--error)" stroke-width="2"/>
+              <text x="30" y="145" font-size="7" fill="var(--text-tertiary)">00:00</text>
+              <text x="155" y="145" font-size="7" fill="var(--text-tertiary)">12:00</text>
+              <text x="270" y="145" font-size="7" fill="var(--text-tertiary)">Now</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Service Status -->
+        <div class="card mb-24">
+          <div class="card-header"><h3>Service Status</h3></div>
+          <div class="table-wrap" style="border:none;">
+            <table>
+              <thead><tr><th>Service</th><th>Status</th><th>Uptime (30d)</th><th>Avg Latency</th><th>Error Rate</th><th>Details</th></tr></thead>
+              <tbody>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-api')"><td><span class="status-dot healthy"></span><strong>API Gateway</strong></td><td><span class="badge badge-success">Healthy</span></td><td>99.99%</td><td class="mono">12ms</td><td class="mono">0.02%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-api"><div class="grid-3"><div><strong style="font-size:12px;">Requests/min:</strong><br><span class="mono">2,450</span></div><div><strong style="font-size:12px;">Active connections:</strong><br><span class="mono">312</span></div><div><strong style="font-size:12px;">Memory:</strong><br><span class="mono">1.2 GB / 4 GB</span></div></div></div></td></tr>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-worker')"><td><span class="status-dot healthy"></span><strong>Email Worker</strong></td><td><span class="badge badge-success">Healthy</span></td><td>99.97%</td><td class="mono">85ms</td><td class="mono">0.05%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-worker"><div class="grid-3"><div><strong style="font-size:12px;">Processing/min:</strong><br><span class="mono">1,820</span></div><div><strong style="font-size:12px;">Workers active:</strong><br><span class="mono">8 / 8</span></div><div><strong style="font-size:12px;">Queue backlog:</strong><br><span class="mono">210</span></div></div></div></td></tr>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-webhook')"><td><span class="status-dot warning"></span><strong>Webhook Processor</strong></td><td><span class="badge badge-warning">Degraded</span></td><td>99.82%</td><td class="mono">234ms</td><td class="mono">1.2%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-webhook"><div class="grid-3"><div><strong style="font-size:12px;">Dispatches/min:</strong><br><span class="mono">340</span></div><div><strong style="font-size:12px;">Retry queue:</strong><br><span class="mono">82</span></div><div><strong style="font-size:12px;">Failed (24h):</strong><br><span class="mono">47</span></div></div></div></td></tr>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-pg')"><td><span class="status-dot healthy"></span><strong>PostgreSQL</strong></td><td><span class="badge badge-success">Healthy</span></td><td>99.99%</td><td class="mono">3ms</td><td class="mono">0.00%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-pg"><div class="grid-3"><div><strong style="font-size:12px;">Connections:</strong><br><span class="mono">45 / 100</span></div><div><strong style="font-size:12px;">DB Size:</strong><br><span class="mono">12.4 GB</span></div><div><strong style="font-size:12px;">Slow queries (24h):</strong><br><span class="mono">3</span></div></div></div></td></tr>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-redis')"><td><span class="status-dot healthy"></span><strong>Redis</strong></td><td><span class="badge badge-success">Healthy</span></td><td>99.99%</td><td class="mono">0.4ms</td><td class="mono">0.00%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-redis"><div class="grid-3"><div><strong style="font-size:12px;">Memory:</strong><br><span class="mono">2.1 GB / 8 GB</span></div><div><strong style="font-size:12px;">Keys:</strong><br><span class="mono">48,291</span></div><div><strong style="font-size:12px;">Hit rate:</strong><br><span class="mono">97.3%</span></div></div></div></td></tr>
+                <tr class="clickable" onclick="toggleServiceDetail('svc-rmq')"><td><span class="status-dot healthy"></span><strong>RabbitMQ</strong></td><td><span class="badge badge-success">Healthy</span></td><td>99.98%</td><td class="mono">1.2ms</td><td class="mono">0.01%</td><td><button class="btn btn-ghost btn-sm">Expand</button></td></tr>
+                <tr><td colspan="6"><div class="detail-panel" id="svc-rmq"><div class="grid-3"><div><strong style="font-size:12px;">Queues:</strong><br><span class="mono">5 active</span></div><div><strong style="font-size:12px;">Messages/sec:</strong><br><span class="mono">420</span></div><div><strong style="font-size:12px;">Consumers:</strong><br><span class="mono">24</span></div></div></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Errors -->
+        <div class="card">
+          <div class="card-header"><h3>Recent Errors</h3><span class="badge badge-error">10 in last 24h</span></div>
+          <div class="table-wrap" style="border:none;">
+            <table>
+              <thead><tr><th>Timestamp</th><th>Service</th><th>Message</th><th>Count</th></tr></thead>
+              <tbody>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 14:32:18</td><td><span class="badge badge-warning">Webhook</span></td><td>Connection timeout to endpoint https://api.client.com/hook</td><td class="mono">12</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 14:28:05</td><td><span class="badge badge-warning">Webhook</span></td><td>HTTP 503 from https://hooks.partner.io/events</td><td class="mono">8</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 13:55:41</td><td><span class="badge badge-error">Worker</span></td><td>SES rate limit exceeded - throttled 200ms</td><td class="mono">5</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 13:12:33</td><td><span class="badge badge-info">API</span></td><td>Invalid API key: sk_test_expired_x9f...</td><td class="mono">4</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 12:45:19</td><td><span class="badge badge-error">Worker</span></td><td>MIME parse error: malformed Content-Type header</td><td class="mono">3</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 11:30:02</td><td><span class="badge badge-info">API</span></td><td>Rate limit exceeded for tenant t_4f2a...</td><td class="mono">2</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 10:18:45</td><td><span class="badge badge-warning">Webhook</span></td><td>Signature verification failed for endpoint #82</td><td class="mono">2</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 09:42:11</td><td><span class="badge badge-primary">Inbound</span></td><td>S3 PutObject timeout for msg_a8f3...</td><td class="mono">1</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 08:15:28</td><td><span class="badge badge-info">API</span></td><td>Request body exceeds 25MB limit</td><td class="mono">1</td></tr>
+                <tr><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 07:02:55</td><td><span class="badge badge-error">Worker</span></td><td>DNS resolution failed for mx.legacy-domain.net</td><td class="mono">1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 5: CROSS-TENANT ANALYTICS
+         ========================================== -->
+    <div class="screen" id="screen-analytics">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Cross-Tenant Analytics</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">Global email metrics and tenant insights</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- Global metrics -->
+        <div class="stats-grid stats-grid-3 mb-24">
+          <div class="stat-card"><div class="stat-label">Total Processed (All-Time)</div><div class="stat-value">3.29M</div><div class="stat-sub">Sent + Inbound</div></div>
+          <div class="stat-card"><div class="stat-label">Today's Count</div><div class="stat-value">87,432</div><div class="stat-sub"><span class="up">+12.3%</span> vs yesterday</div></div>
+          <div class="stat-card"><div class="stat-label">Growth Rate (MoM)</div><div class="stat-value" style="color:var(--success);">+8.3%</div><div class="stat-sub">Email volume growth</div></div>
+        </div>
+
+        <div class="grid-2 mb-24">
+          <!-- Tenant Distribution Donut -->
+          <div class="card">
+            <div class="card-header"><h3>Tenant Distribution by Plan</h3></div>
+            <div style="display:flex;align-items:center;gap:24px;">
+              <svg viewBox="0 0 200 200" style="width:180px;height:180px;flex-shrink:0;">
+                <!-- Enterprise: 18% = 64.8deg -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="var(--primary)" stroke-width="28" stroke-dasharray="79.6 351.9" stroke-dashoffset="0" transform="rotate(-90 100 100)"/>
+                <!-- Scale: 25% = 90deg -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="var(--info)" stroke-width="28" stroke-dasharray="110 351.9" stroke-dashoffset="-79.6" transform="rotate(-90 100 100)"/>
+                <!-- Pro: 35% -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="var(--success)" stroke-width="28" stroke-dasharray="154 351.9" stroke-dashoffset="-189.6" transform="rotate(-90 100 100)"/>
+                <!-- Free: 22% -->
+                <circle cx="100" cy="100" r="70" fill="none" stroke="var(--text-tertiary)" stroke-width="28" stroke-dasharray="96.8 351.9" stroke-dashoffset="-343.6" transform="rotate(-90 100 100)"/>
+                <text x="100" y="95" text-anchor="middle" font-size="22" font-weight="700" fill="var(--text-primary)">247</text>
+                <text x="100" y="115" text-anchor="middle" font-size="10" fill="var(--text-secondary)">tenants</text>
+              </svg>
+              <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
+                <div class="flex items-center gap-8"><span style="width:10px;height:10px;border-radius:2px;background:var(--primary);flex-shrink:0;"></span><span>Enterprise</span><span class="mono" style="margin-left:auto;">44 (18%)</span></div>
+                <div class="flex items-center gap-8"><span style="width:10px;height:10px;border-radius:2px;background:var(--info);flex-shrink:0;"></span><span>Scale</span><span class="mono" style="margin-left:auto;">62 (25%)</span></div>
+                <div class="flex items-center gap-8"><span style="width:10px;height:10px;border-radius:2px;background:var(--success);flex-shrink:0;"></span><span>Pro</span><span class="mono" style="margin-left:auto;">87 (35%)</span></div>
+                <div class="flex items-center gap-8"><span style="width:10px;height:10px;border-radius:2px;background:var(--text-tertiary);flex-shrink:0;"></span><span>Free</span><span class="mono" style="margin-left:auto;">54 (22%)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Growth Trend Bar Chart -->
+          <div class="card">
+            <div class="card-header"><h3>New Tenants Per Month</h3></div>
+            <svg viewBox="0 0 360 180" style="width:100%;height:180px;">
+              <line x1="30" y1="160" x2="350" y2="160" stroke="var(--border)" stroke-width="1"/>
+              <text x="5" y="164" font-size="8" fill="var(--text-tertiary)">0</text>
+              <text x="5" y="124" font-size="8" fill="var(--text-tertiary)">10</text>
+              <text x="5" y="84" font-size="8" fill="var(--text-tertiary)">20</text>
+              <text x="5" y="44" font-size="8" fill="var(--text-tertiary)">30</text>
+              <line x1="30" y1="120" x2="350" y2="120" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="80" x2="350" y2="80" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <line x1="30" y1="40" x2="350" y2="40" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+              <!-- Bars -->
+              <rect x="40" y="120" width="22" height="40" rx="3" fill="var(--primary-light)"/><text x="51" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Oct</text>
+              <rect x="75" y="100" width="22" height="60" rx="3" fill="var(--primary-light)"/><text x="86" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Nov</text>
+              <rect x="110" y="112" width="22" height="48" rx="3" fill="var(--primary-light)"/><text x="121" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Dec</text>
+              <rect x="145" y="88" width="22" height="72" rx="3" fill="var(--primary-light)"/><text x="156" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Jan</text>
+              <rect x="180" y="72" width="22" height="88" rx="3" fill="var(--primary-light)"/><text x="191" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Feb</text>
+              <rect x="215" y="56" width="22" height="104" rx="3" fill="var(--primary)"/><text x="226" y="175" text-anchor="middle" font-size="7" fill="var(--text-tertiary)">Mar</text>
+              <!-- Values on bars -->
+              <text x="51" y="116" text-anchor="middle" font-size="9" font-weight="600" fill="var(--primary-text)">10</text>
+              <text x="86" y="96" text-anchor="middle" font-size="9" font-weight="600" fill="var(--primary-text)">15</text>
+              <text x="121" y="108" text-anchor="middle" font-size="9" font-weight="600" fill="var(--primary-text)">12</text>
+              <text x="156" y="84" text-anchor="middle" font-size="9" font-weight="600" fill="var(--primary-text)">18</text>
+              <text x="191" y="68" text-anchor="middle" font-size="9" font-weight="600" fill="var(--primary-text)">22</text>
+              <text x="226" y="52" text-anchor="middle" font-size="9" font-weight="600" fill="white">26</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Feature Adoption -->
+        <div class="card mb-24">
+          <div class="card-header"><h3>Feature Adoption</h3></div>
+          <div class="feature-bar"><span class="feature-bar-label">Templates</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:78%;"><span class="feature-bar-val">78%</span></div></div></div>
+          <div class="feature-bar"><span class="feature-bar-label">Webhooks</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:65%;"><span class="feature-bar-val">65%</span></div></div></div>
+          <div class="feature-bar"><span class="feature-bar-label">Inbound</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:42%;"><span class="feature-bar-val">42%</span></div></div></div>
+          <div class="feature-bar"><span class="feature-bar-label">Tracking</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:56%;"><span class="feature-bar-val">56%</span></div></div></div>
+          <div class="feature-bar"><span class="feature-bar-label">Batch Send</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:34%;"><span class="feature-bar-val">34%</span></div></div></div>
+          <div class="feature-bar"><span class="feature-bar-label">Attachments</span><div class="feature-bar-track"><div class="feature-bar-fill" style="width:51%;"><span class="feature-bar-val">51%</span></div></div></div>
+        </div>
+
+        <!-- Volume by Tier -->
+        <div class="card">
+          <div class="card-header"><h3>Email Volume by Tenant Tier (Last 7 Days)</h3></div>
+          <svg viewBox="0 0 700 160" style="width:100%;height:160px;">
+            <!-- Y labels -->
+            <text x="5" y="30" font-size="9" fill="var(--text-secondary)" font-weight="500">Enterprise</text>
+            <text x="5" y="60" font-size="9" fill="var(--text-secondary)" font-weight="500">Scale</text>
+            <text x="5" y="90" font-size="9" fill="var(--text-secondary)" font-weight="500">Pro</text>
+            <text x="5" y="120" font-size="9" fill="var(--text-secondary)" font-weight="500">Free</text>
+            <!-- X labels -->
+            <text x="95" y="145" font-size="8" fill="var(--text-tertiary)">Mon</text>
+            <text x="180" y="145" font-size="8" fill="var(--text-tertiary)">Tue</text>
+            <text x="265" y="145" font-size="8" fill="var(--text-tertiary)">Wed</text>
+            <text x="350" y="145" font-size="8" fill="var(--text-tertiary)">Thu</text>
+            <text x="435" y="145" font-size="8" fill="var(--text-tertiary)">Fri</text>
+            <text x="520" y="145" font-size="8" fill="var(--text-tertiary)">Sat</text>
+            <text x="605" y="145" font-size="8" fill="var(--text-tertiary)">Sun</text>
+            <!-- Heatmap cells: Enterprise row -->
+            <rect x="80" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.9"/><text x="117" y="33" text-anchor="middle" font-size="8" fill="white" font-weight="500">42K</text>
+            <rect x="165" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.85"/><text x="202" y="33" text-anchor="middle" font-size="8" fill="white" font-weight="500">38K</text>
+            <rect x="250" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.95"/><text x="287" y="33" text-anchor="middle" font-size="8" fill="white" font-weight="500">45K</text>
+            <rect x="335" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.8"/><text x="372" y="33" text-anchor="middle" font-size="8" fill="white" font-weight="500">36K</text>
+            <rect x="420" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.88"/><text x="457" y="33" text-anchor="middle" font-size="8" fill="white" font-weight="500">40K</text>
+            <rect x="505" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.4"/><text x="542" y="33" text-anchor="middle" font-size="8" fill="var(--primary-text)" font-weight="500">18K</text>
+            <rect x="590" y="18" width="75" height="22" rx="3" fill="var(--primary)" opacity="0.3"/><text x="627" y="33" text-anchor="middle" font-size="8" fill="var(--primary-text)" font-weight="500">12K</text>
+            <!-- Scale row -->
+            <rect x="80" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.7"/><text x="117" y="63" text-anchor="middle" font-size="8" fill="white" font-weight="500">22K</text>
+            <rect x="165" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.65"/><text x="202" y="63" text-anchor="middle" font-size="8" fill="white" font-weight="500">20K</text>
+            <rect x="250" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.75"/><text x="287" y="63" text-anchor="middle" font-size="8" fill="white" font-weight="500">24K</text>
+            <rect x="335" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.6"/><text x="372" y="63" text-anchor="middle" font-size="8" fill="white" font-weight="500">19K</text>
+            <rect x="420" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.72"/><text x="457" y="63" text-anchor="middle" font-size="8" fill="white" font-weight="500">23K</text>
+            <rect x="505" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.3"/><text x="542" y="63" text-anchor="middle" font-size="8" fill="var(--info-text)" font-weight="500">8K</text>
+            <rect x="590" y="48" width="75" height="22" rx="3" fill="var(--info)" opacity="0.2"/><text x="627" y="63" text-anchor="middle" font-size="8" fill="var(--info-text)" font-weight="500">5K</text>
+            <!-- Pro row -->
+            <rect x="80" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.5"/><text x="117" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">9K</text>
+            <rect x="165" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.45"/><text x="202" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">8K</text>
+            <rect x="250" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.55"/><text x="287" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">10K</text>
+            <rect x="335" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.48"/><text x="372" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">8.5K</text>
+            <rect x="420" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.52"/><text x="457" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">9.5K</text>
+            <rect x="505" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.2"/><text x="542" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">3K</text>
+            <rect x="590" y="78" width="75" height="22" rx="3" fill="var(--success)" opacity="0.15"/><text x="627" y="93" text-anchor="middle" font-size="8" fill="var(--success-text)" font-weight="500">2K</text>
+            <!-- Free row -->
+            <rect x="80" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.3"/><text x="117" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">1.2K</text>
+            <rect x="165" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.25"/><text x="202" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">1K</text>
+            <rect x="250" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.32"/><text x="287" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">1.4K</text>
+            <rect x="335" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.28"/><text x="372" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">1.1K</text>
+            <rect x="420" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.3"/><text x="457" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">1.3K</text>
+            <rect x="505" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.12"/><text x="542" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">0.4K</text>
+            <rect x="590" y="108" width="75" height="22" rx="3" fill="var(--text-tertiary)" opacity="0.1"/><text x="627" y="123" text-anchor="middle" font-size="8" fill="var(--text-secondary)" font-weight="500">0.3K</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 6: INFRASTRUCTURE
+         ========================================== -->
+    <div class="screen" id="screen-infrastructure">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Infrastructure</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">AWS SES, S3, RabbitMQ, Redis, PostgreSQL status</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- AWS SES -->
+        <div class="card mb-20">
+          <div class="card-header"><h3>AWS SES</h3><span class="badge badge-success">Operational</span></div>
+          <div class="stats-grid stats-grid-4" style="margin-bottom:12px;">
+            <div><div class="stat-label">Sending Quota (24h)</div><div style="font-size:20px;font-weight:700;">50,000</div></div>
+            <div><div class="stat-label">Used Today</div><div style="font-size:20px;font-weight:700;">42,350</div></div>
+            <div><div class="stat-label">Remaining</div><div style="font-size:20px;font-weight:700;color:var(--warning);">7,650</div></div>
+            <div><div class="stat-label">Send Rate</div><div style="font-size:20px;font-weight:700;">14/sec</div></div>
+          </div>
+          <div class="stat-label" style="margin-bottom:6px;">Quota Usage (84.7%)</div>
+          <div class="progress-bar"><div class="progress-bar-fill warning" style="width:84.7%;"></div></div>
+        </div>
+
+        <!-- S3 Storage -->
+        <div class="card mb-20">
+          <div class="card-header"><h3>S3 Storage</h3><span class="badge badge-success">Healthy</span></div>
+          <div class="stats-grid stats-grid-4" style="margin-bottom:0;">
+            <div><div class="stat-label">Total Size</div><div style="font-size:20px;font-weight:700;">47.2 GB</div></div>
+            <div>
+              <div class="stat-label">eaas-attachments</div><div style="font-size:16px;font-weight:600;">28.1 GB</div>
+              <div style="font-size:11px;color:var(--text-tertiary);">Lifecycle: 90d archive</div>
+            </div>
+            <div>
+              <div class="stat-label">eaas-inbound-raw</div><div style="font-size:16px;font-weight:600;">14.8 GB</div>
+              <div style="font-size:11px;color:var(--text-tertiary);">Lifecycle: 30d expire</div>
+            </div>
+            <div>
+              <div class="stat-label">eaas-templates</div><div style="font-size:16px;font-weight:600;">4.3 GB</div>
+              <div style="font-size:11px;color:var(--text-tertiary);">Lifecycle: none</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RabbitMQ -->
+        <div class="card mb-20">
+          <div class="card-header"><h3>RabbitMQ</h3><span class="badge badge-success">Healthy</span></div>
+          <div class="table-wrap" style="border:none;">
+            <table>
+              <thead><tr><th>Queue</th><th>Messages</th><th>Consumers</th><th>Publish Rate</th><th>Deliver Rate</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">email-send</td><td class="mono">210</td><td class="mono">8</td><td class="mono">320/s</td><td class="mono">318/s</td><td><span class="status-dot healthy"></span>OK</td></tr>
+                <tr><td class="mono">webhook-dispatch</td><td class="mono">82</td><td class="mono">4</td><td class="mono">85/s</td><td class="mono">82/s</td><td><span class="status-dot healthy"></span>OK</td></tr>
+                <tr><td class="mono">inbound-process</td><td class="mono">50</td><td class="mono">4</td><td class="mono">42/s</td><td class="mono">41/s</td><td><span class="status-dot healthy"></span>OK</td></tr>
+                <tr><td class="mono">email-send.dlq</td><td class="mono">3</td><td class="mono">1</td><td class="mono">0.1/s</td><td class="mono">0.1/s</td><td><span class="status-dot warning"></span>Review</td></tr>
+                <tr><td class="mono">webhook-dispatch.dlq</td><td class="mono">12</td><td class="mono">1</td><td class="mono">0.3/s</td><td class="mono">0.2/s</td><td><span class="status-dot warning"></span>Review</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid-2 mb-20">
+          <!-- Redis -->
+          <div class="card">
+            <div class="card-header"><h3>Redis</h3><span class="badge badge-success">Healthy</span></div>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Memory Usage</span><span class="mono">2.1 GB / 8 GB (26.3%)</span></div>
+              <div class="progress-bar"><div class="progress-bar-fill success" style="width:26.3%;"></div></div>
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Key Count</span><span class="mono">48,291</span></div>
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Hit Rate</span><span class="mono">97.3%</span></div>
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Connected Clients</span><span class="mono">24</span></div>
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Evicted Keys (24h)</span><span class="mono">0</span></div>
+            </div>
+          </div>
+
+          <!-- PostgreSQL -->
+          <div class="card">
+            <div class="card-header"><h3>PostgreSQL</h3><span class="badge badge-success">Healthy</span></div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:16px;">
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Connection Pool</span><span class="mono">45 active / 12 idle / 100 max</span></div>
+              <div class="progress-bar"><div class="progress-bar-fill primary" style="width:45%;"></div></div>
+              <div class="flex justify-between"><span style="color:var(--text-secondary);font-size:13px;">Database Size</span><span class="mono">12.4 GB</span></div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">Table Sizes</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+              <div class="flex justify-between"><span class="mono">emails</span><span class="mono">6.2 GB</span></div>
+              <div class="flex justify-between"><span class="mono">email_events</span><span class="mono">3.1 GB</span></div>
+              <div class="flex justify-between"><span class="mono">inbound_messages</span><span class="mono">1.8 GB</span></div>
+              <div class="flex justify-between"><span class="mono">tenants</span><span class="mono">0.4 GB</span></div>
+              <div class="flex justify-between"><span class="mono">audit_logs</span><span class="mono">0.9 GB</span></div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin:12px 0 8px;">Slow Queries (24h): <span class="mono">3</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 7: BILLING & PLANS
+         ========================================== -->
+    <div class="screen" id="screen-billing">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Billing & Plans</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">Revenue, plan management, and tenant billing</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <!-- Revenue Cards -->
+        <div class="stats-grid stats-grid-4 mb-24">
+          <div class="stat-card"><div class="stat-label">Total MRR</div><div class="stat-value">$18,450</div><div class="stat-sub"><span class="up">+4.2%</span> vs last month</div></div>
+          <div class="stat-card"><div class="stat-label">Growth</div><div class="stat-value" style="color:var(--success);">+4.2%</div><div class="stat-sub">Month-over-month</div></div>
+          <div class="stat-card"><div class="stat-label">Churn</div><div class="stat-value" style="color:var(--warning);">1.2%</div><div class="stat-sub">3 tenants lost</div></div>
+          <div class="stat-card"><div class="stat-label">ARPU</div><div class="stat-value">$74.70</div><div class="stat-sub"><span class="up">+$2.30</span> vs last month</div></div>
+        </div>
+
+        <!-- Plan Tiers -->
+        <div class="card mb-24">
+          <div class="card-header"><h3>Plan Tiers</h3></div>
+          <div class="table-wrap" style="border:none;">
+            <table>
+              <thead><tr><th>Plan</th><th>Price</th><th>Email Limit</th><th>Rate Limit</th><th>Domains</th><th>API Keys</th><th>Tenants</th><th>Revenue</th></tr></thead>
+              <tbody>
+                <tr><td><span class="badge badge-neutral">Free</span></td><td>$0</td><td class="mono">1,000/mo</td><td class="mono">100/hr</td><td>1</td><td>1</td><td class="mono">54</td><td>$0</td></tr>
+                <tr><td><span class="badge badge-success">Pro</span></td><td>$29/mo</td><td class="mono">50,000/mo</td><td class="mono">2,000/hr</td><td>3</td><td>3</td><td class="mono">87</td><td>$2,523</td></tr>
+                <tr><td><span class="badge badge-info">Scale</span></td><td>$99/mo</td><td class="mono">200,000/mo</td><td class="mono">5,000/hr</td><td>10</td><td>5</td><td class="mono">62</td><td>$6,138</td></tr>
+                <tr><td><span class="badge badge-primary">Enterprise</span></td><td>$299/mo</td><td class="mono">500,000/mo</td><td class="mono">10,000/hr</td><td>Unlimited</td><td>Unlimited</td><td class="mono">44</td><td>$13,156</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tenant Billing Table -->
+        <div class="card mb-24">
+          <div class="card-header"><h3>Tenant Billing</h3></div>
+          <div class="table-wrap" style="border:none;">
+            <table>
+              <thead><tr><th>Tenant</th><th>Plan</th><th>Usage</th><th>Limit</th><th>Overage</th><th>Payment</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Acme Corp</strong></td><td><span class="badge badge-primary">Enterprise</span></td><td class="mono">482,301</td><td class="mono">500,000</td><td>$0.00</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>TechFlow Inc</strong></td><td><span class="badge badge-primary">Enterprise</span></td><td class="mono">312,847</td><td class="mono">500,000</td><td>$0.00</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>CloudMail Pro</strong></td><td><span class="badge badge-info">Scale</span></td><td class="mono">198,432</td><td class="mono">200,000</td><td style="color:var(--warning);font-weight:600;">$0.00</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>StartupXYZ</strong></td><td><span class="badge badge-info">Scale</span></td><td class="mono">145,219</td><td class="mono">200,000</td><td>$0.00</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>DataSync Ltd</strong></td><td><span class="badge badge-success">Pro</span></td><td class="mono">52,810</td><td class="mono">50,000</td><td style="color:var(--error);font-weight:600;">$14.05</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>MailBridge</strong></td><td><span class="badge badge-success">Pro</span></td><td class="mono">38,200</td><td class="mono">50,000</td><td>$0.00</td><td><span class="badge badge-success">Current</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>NotifyHub</strong></td><td><span class="badge badge-success">Pro</span></td><td class="mono">54,380</td><td class="mono">50,000</td><td style="color:var(--error);font-weight:600;">$21.90</td><td><span class="badge badge-warning">Overdue</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>PingMail</strong></td><td><span class="badge badge-neutral">Free</span></td><td class="mono">980</td><td class="mono">1,000</td><td>$0.00</td><td><span class="badge badge-neutral">Free</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>BulkSender Co</strong></td><td><span class="badge badge-info">Scale</span></td><td class="mono">0</td><td class="mono">200,000</td><td>$0.00</td><td><span class="badge badge-error">Suspended</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+                <tr><td><strong>QuickPost</strong></td><td><span class="badge badge-neutral">Free</span></td><td class="mono">842</td><td class="mono">1,000</td><td>$0.00</td><td><span class="badge badge-neutral">Free</span></td><td><button class="btn btn-ghost btn-sm" onclick="openModal('editPlanModal')">Edit Plan</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Billing Alerts -->
+        <div class="card">
+          <div class="card-header"><h3>Billing Alerts</h3></div>
+          <div class="alert alert-warning">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div><strong>CloudMail Pro</strong> is at 99.2% of their 200K email limit. Consider reaching out about an upgrade to Enterprise.</div>
+          </div>
+          <div class="alert alert-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div><strong>NotifyHub</strong> has an overdue payment of $50.90. Last payment attempt failed 3 days ago.</div>
+          </div>
+          <div class="alert alert-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div><strong>DataSync Ltd</strong> has exceeded their Pro plan limit. Overage charges of $14.05 will apply on next billing cycle.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 8: AUDIT LOGS
+         ========================================== -->
+    <div class="screen" id="screen-audit-logs">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Audit Logs</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">Track all actions across the platform</p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="search-bar">
+          <select><option>All Tenants</option><option>Acme Corp</option><option>TechFlow Inc</option><option>CloudMail Pro</option><option>StartupXYZ</option><option>DataSync Ltd</option></select>
+          <select><option>All Actions</option><option>email.send</option><option>api_key.create</option><option>api_key.revoke</option><option>domain.verify</option><option>tenant.create</option><option>tenant.suspend</option><option>settings.update</option><option>webhook.create</option></select>
+          <input type="text" placeholder="Date range..." style="max-width:200px;" value="Last 7 days">
+          <input type="search" placeholder="Search logs..." style="max-width:240px;">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Tenant</th><th>Action</th><th>Actor</th><th>IP Address</th><th>Details</th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 14:32:18</td><td>Acme Corp</td><td><span class="badge badge-info">api_key.create</span></td><td class="mono" style="font-size:11px;">sk_live_8f3...</td><td class="mono" style="font-size:11px;">203.0.113.42</td><td style="font-size:12px;">Created API key "Production Send v2"</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 14:18:05</td><td>TechFlow Inc</td><td><span class="badge badge-primary">email.send</span></td><td class="mono" style="font-size:11px;">sk_live_2a1...</td><td class="mono" style="font-size:11px;">198.51.100.8</td><td style="font-size:12px;">Batch send: 1,200 recipients</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 13:55:41</td><td>CloudMail Pro</td><td><span class="badge badge-success">domain.verify</span></td><td class="mono" style="font-size:11px;">sk_live_f92...</td><td class="mono" style="font-size:11px;">192.0.2.100</td><td style="font-size:12px;">Domain notifications.cloudmail.pro verified</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 13:42:19</td><td>System</td><td><span class="badge badge-warning">settings.update</span></td><td class="mono" style="font-size:11px;">admin@eaas</td><td class="mono" style="font-size:11px;">10.0.1.50</td><td style="font-size:12px;">Updated default rate limit: 2000 -> 2500/hr</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 12:30:08</td><td>StartupXYZ</td><td><span class="badge badge-info">webhook.create</span></td><td class="mono" style="font-size:11px;">sk_live_d45...</td><td class="mono" style="font-size:11px;">172.16.0.55</td><td style="font-size:12px;">New webhook: https://api.startupxyz.com/hooks/email</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 11:15:33</td><td>DataSync Ltd</td><td><span class="badge badge-error">api_key.revoke</span></td><td class="mono" style="font-size:11px;">admin@eaas</td><td class="mono" style="font-size:11px;">10.0.1.50</td><td style="font-size:12px;">Revoked key sk_live_old1... (security concern)</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 10:48:21</td><td>BulkSender Co</td><td><span class="badge badge-error">tenant.suspend</span></td><td class="mono" style="font-size:11px;">admin@eaas</td><td class="mono" style="font-size:11px;">10.0.1.50</td><td style="font-size:12px;">Suspended: TOS violation - spam complaints</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 09:20:14</td><td>MailBridge</td><td><span class="badge badge-primary">email.send</span></td><td class="mono" style="font-size:11px;">sk_live_m82...</td><td class="mono" style="font-size:11px;">203.0.113.88</td><td style="font-size:12px;">Template send: "welcome_v3" to 450 recipients</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-31 08:05:47</td><td>NotifyHub</td><td><span class="badge badge-info">api_key.create</span></td><td class="mono" style="font-size:11px;">sk_test_n12...</td><td class="mono" style="font-size:11px;">198.51.100.22</td><td style="font-size:12px;">Created test API key "staging-v2"</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 23:45:02</td><td>System</td><td><span class="badge badge-warning">settings.update</span></td><td class="mono" style="font-size:11px;">admin@eaas</td><td class="mono" style="font-size:11px;">10.0.1.50</td><td style="font-size:12px;">Enabled feature flag: inbound_mail_v2</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 22:12:38</td><td>Acme Corp</td><td><span class="badge badge-primary">email.send</span></td><td class="mono" style="font-size:11px;">sk_live_8f3...</td><td class="mono" style="font-size:11px;">203.0.113.42</td><td style="font-size:12px;">Single send to ceo@partner.com - "Proposal Q2"</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 20:30:15</td><td>PingMail</td><td><span class="badge badge-success">domain.verify</span></td><td class="mono" style="font-size:11px;">sk_live_p34...</td><td class="mono" style="font-size:11px;">192.0.2.77</td><td style="font-size:12px;">Domain pingmail.app verified via DNS TXT</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 18:55:44</td><td>QuickPost</td><td><span class="badge badge-primary">email.send</span></td><td class="mono" style="font-size:11px;">sk_live_q56...</td><td class="mono" style="font-size:11px;">172.16.0.99</td><td style="font-size:12px;">Send to dev@quickpost.dev - test email</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 16:20:09</td><td>TechFlow Inc</td><td><span class="badge badge-info">webhook.create</span></td><td class="mono" style="font-size:11px;">sk_live_2a1...</td><td class="mono" style="font-size:11px;">198.51.100.8</td><td style="font-size:12px;">Updated webhook URL: https://events.techflow.io/v2</td></tr>
+              <tr class="clickable" onclick="toggleAuditDetail(this)"><td class="mono" style="font-size:11px;white-space:nowrap;">2025-03-30 14:08:33</td><td>System</td><td><span class="badge badge-info">tenant.create</span></td><td class="mono" style="font-size:11px;">admin@eaas</td><td class="mono" style="font-size:11px;">10.0.1.50</td><td style="font-size:12px;">Created tenant "QuickPost" on Free plan</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Expanded detail panel (shown on row click) -->
+        <div class="detail-panel mt-16" id="auditDetailPanel">
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;">Action Payload</div>
+          <pre class="mono" style="background:var(--bg-surface-2);padding:12px;border-radius:var(--radius-sm);font-size:11px;line-height:1.6;overflow-x:auto;white-space:pre-wrap;">{
+  "action": "api_key.create",
+  "tenant_id": "t_acme_8f3a2b",
+  "actor": "sk_live_8f3a2b1c",
+  "ip": "203.0.113.42",
+  "user_agent": "EaaS-SDK/1.2.0 (Node.js)",
+  "metadata": {
+    "key_name": "Production Send v2",
+    "permissions": ["send", "read", "webhooks"],
+    "key_prefix": "sk_live_x2p"
+  },
+  "timestamp": "2025-03-31T14:32:18.442Z"
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         SCREEN 9: ADMIN SETTINGS
+         ========================================== -->
+    <div class="screen" id="screen-settings">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Settings</h1>
+          <p style="font-size:13px;color:var(--text-secondary);">System configuration and admin management</p>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="tabs" id="settingsTabs">
+          <button class="tab active" data-tab="st-system">System</button>
+          <button class="tab" data-tab="st-features">Features</button>
+          <button class="tab" data-tab="st-provider">Email Provider</button>
+          <button class="tab" data-tab="st-admins">Admin Users</button>
+        </div>
+
+        <!-- System Tab -->
+        <div class="tab-content active" id="st-system">
+          <div class="card">
+            <div class="card-header"><h3>Default Settings</h3></div>
+            <div class="grid-2" style="gap:24px;">
+              <div class="input-group">
+                <label>Default Rate Limit (per hour)</label>
+                <input type="number" value="2500">
+                <span class="hint">Applied to new tenants on Free plan</span>
+              </div>
+              <div class="input-group">
+                <label>Max Rate Limit (per hour)</label>
+                <input type="number" value="10000">
+                <span class="hint">Maximum rate limit for Enterprise plan</span>
+              </div>
+              <div class="input-group">
+                <label>Max Email Size</label>
+                <input type="text" value="25 MB">
+                <span class="hint">Maximum size including attachments</span>
+              </div>
+              <div class="input-group">
+                <label>Max Batch Size</label>
+                <input type="number" value="5000">
+                <span class="hint">Maximum recipients per batch send</span>
+              </div>
+              <div class="input-group">
+                <label>Email Retention</label>
+                <select>
+                  <option>30 days</option>
+                  <option selected>90 days</option>
+                  <option>180 days</option>
+                  <option>365 days</option>
+                </select>
+                <span class="hint">How long email records are kept</span>
+              </div>
+              <div class="input-group">
+                <label>Audit Log Retention</label>
+                <select>
+                  <option>90 days</option>
+                  <option>180 days</option>
+                  <option selected>365 days</option>
+                  <option>Indefinite</option>
+                </select>
+                <span class="hint">How long audit logs are retained</span>
+              </div>
+            </div>
+            <div style="margin-top:20px;display:flex;justify-content:flex-end;">
+              <button class="btn btn-primary" onclick="showToast('Settings saved successfully','success')">Save Changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features Tab -->
+        <div class="tab-content" id="st-features">
+          <div class="card">
+            <div class="card-header"><h3>Feature Flags</h3></div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Inbound Mail Processing</div><div class="toggle-desc">Allow tenants to receive and process incoming emails via MX records</div></div>
+              <div class="toggle-switch on" onclick="toggleFeatureFlag(this, 'Inbound Mail Processing')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Open & Click Tracking</div><div class="toggle-desc">Enable pixel tracking for email opens and link click tracking</div></div>
+              <div class="toggle-switch on" onclick="toggleFeatureFlag(this, 'Open & Click Tracking')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Email Templates</div><div class="toggle-desc">Allow tenants to create and manage reusable email templates</div></div>
+              <div class="toggle-switch on" onclick="toggleFeatureFlag(this, 'Email Templates')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Batch Sending</div><div class="toggle-desc">Enable sending emails to multiple recipients in a single API call</div></div>
+              <div class="toggle-switch on" onclick="toggleFeatureFlag(this, 'Batch Sending')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Attachments</div><div class="toggle-desc">Allow file attachments on outbound emails (up to max email size)</div></div>
+              <div class="toggle-switch on" onclick="toggleFeatureFlag(this, 'Attachments')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-label">Maintenance Mode</div><div class="toggle-desc">Temporarily disable all API endpoints. Returns 503 to all requests.</div></div>
+              <div class="toggle-switch" onclick="toggleFeatureFlag(this, 'Maintenance Mode')"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Provider Tab -->
+        <div class="tab-content" id="st-provider">
+          <div class="card mb-20">
+            <div class="card-header"><h3>Email Provider Configuration</h3></div>
+            <div style="margin-bottom:20px;">
+              <label style="font-size:13px;font-weight:500;display:block;margin-bottom:10px;">Provider Type</label>
+              <div style="display:flex;gap:16px;">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+                  <input type="radio" name="provider" checked style="accent-color:var(--primary);"> AWS SES
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+                  <input type="radio" name="provider" style="accent-color:var(--primary);"> SMTP
+                </label>
+              </div>
+            </div>
+            <div class="grid-2" style="gap:20px;">
+              <div class="input-group">
+                <label>AWS Region</label>
+                <select>
+                  <option selected>us-east-1 (N. Virginia)</option>
+                  <option>us-west-2 (Oregon)</option>
+                  <option>eu-west-1 (Ireland)</option>
+                  <option>eu-central-1 (Frankfurt)</option>
+                  <option>ap-southeast-1 (Singapore)</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label>Configuration Set</label>
+                <input type="text" value="eaas-production">
+              </div>
+              <div class="input-group">
+                <label>Access Key ID</label>
+                <input type="password" value="AKIA************">
+              </div>
+              <div class="input-group">
+                <label>Secret Access Key</label>
+                <input type="password" value="****************************">
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-20">
+            <div class="card-header"><h3>SMTP Fallback</h3><span class="badge badge-neutral">Inactive</span></div>
+            <div class="grid-2" style="gap:20px;">
+              <div class="input-group"><label>SMTP Host</label><input type="text" placeholder="smtp.example.com"></div>
+              <div class="input-group"><label>SMTP Port</label><input type="number" placeholder="587"></div>
+              <div class="input-group"><label>Username</label><input type="text" placeholder="user@example.com"></div>
+              <div class="input-group"><label>Password</label><input type="password" placeholder=""></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;justify-content:flex-end;">
+            <button class="btn btn-secondary" onclick="openModal('testConnectionModal')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Test Connection
+            </button>
+            <button class="btn btn-primary" onclick="showToast('Provider settings saved','success')">Save Changes</button>
+          </div>
+        </div>
+
+        <!-- Admin Users Tab -->
+        <div class="tab-content" id="st-admins">
+          <div class="card">
+            <div class="card-header">
+              <h3>Admin Users</h3>
+              <button class="btn btn-primary btn-sm" onclick="openModal('inviteAdminModal')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Invite Admin
+              </button>
+            </div>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last Login</th><th>Actions</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><div class="flex items-center gap-8"><div class="avatar">IA</div><strong>Israel Iyonsi</strong></div></td>
+                    <td class="mono" style="font-size:12px;">israel@eaas.dev</td>
+                    <td><span class="badge badge-primary">Super Admin</span></td>
+                    <td>2 min ago</td>
+                    <td><span style="font-size:12px;color:var(--text-tertiary);">Cannot remove</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="flex items-center gap-8"><div class="avatar">RK</div><strong>Roberts K</strong></div></td>
+                    <td class="mono" style="font-size:12px;">roberts@eaas.dev</td>
+                    <td><span class="badge badge-info">Admin</span></td>
+                    <td>1 hr ago</td>
+                    <td><button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="openModal('removeAdminModal')">Remove</button></td>
+                  </tr>
+                  <tr>
+                    <td><div class="flex items-center gap-8"><div class="avatar">JM</div><strong>Jane M</strong></div></td>
+                    <td class="mono" style="font-size:12px;">jane@eaas.dev</td>
+                    <td><span class="badge badge-neutral">Viewer</span></td>
+                    <td>3 days ago</td>
+                    <td><button class="btn btn-ghost btn-sm" style="color:var(--error);" onclick="openModal('removeAdminModal')">Remove</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+
+<!-- ============================================
+     MODALS
+     ============================================ -->
+
+<!-- Create Tenant Modal -->
+<div class="modal-overlay" id="createTenantModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Create Tenant</h2>
+      <button class="modal-close" onclick="closeModal('createTenantModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group mb-16"><label>Company Name</label><input type="text" placeholder="e.g. Acme Corp"></div>
+      <div class="input-group mb-16"><label>Admin Email</label><input type="email" placeholder="admin@company.com"></div>
+      <div class="input-group"><label>Plan</label>
+        <select><option>Free</option><option>Pro</option><option selected>Scale</option><option>Enterprise</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createTenantModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('createTenantModal');showToast('Tenant created successfully','success')">Create Tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend Tenant Modal -->
+<div class="modal-overlay" id="suspendTenantModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Suspend Tenant</h2>
+      <button class="modal-close" onclick="closeModal('suspendTenantModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>Are you sure you want to suspend <strong>Acme Corp</strong>? All API keys will be immediately disabled and no emails will be processed.</div>
+      </div>
+      <div class="input-group"><label>Reason for suspension</label><textarea rows="3" placeholder="TOS violation, abuse, non-payment..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('suspendTenantModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="closeModal('suspendTenantModal');showToast('Tenant suspended','error')">Suspend Tenant</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Tenant Modal -->
+<div class="modal-overlay" id="deleteTenantModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Delete Tenant</h2>
+      <button class="modal-close" onclick="closeModal('deleteTenantModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-error" style="margin-bottom:16px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>Are you sure you want to delete <strong>Acme Corp</strong>? This action is <strong>permanent</strong>. All data, API keys, domains, and email history will be permanently destroyed.</div>
+      </div>
+      <div class="input-group"><label>Type "Acme Corp" to confirm</label><input type="text" placeholder="Acme Corp"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('deleteTenantModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="closeModal('deleteTenantModal');showToast('Tenant deleted permanently','error')">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Plan Modal -->
+<div class="modal-overlay" id="editPlanModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h2>Edit Plan</h2>
+      <button class="modal-close" onclick="closeModal('editPlanModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group mb-16"><label>Tenant</label><input type="text" value="Acme Corp" disabled></div>
+      <div class="grid-2" style="gap:16px;">
+        <div class="input-group"><label>Plan</label>
+          <select><option>Free</option><option>Pro</option><option>Scale</option><option selected>Enterprise</option></select>
+        </div>
+        <div class="input-group"><label>Monthly Email Limit</label><input type="number" value="500000"></div>
+        <div class="input-group"><label>Rate Limit (per hour)</label><input type="number" value="10000"></div>
+        <div class="input-group"><label>Max Domains</label><input type="number" value="0"><span class="hint">0 = Unlimited</span></div>
+        <div class="input-group"><label>Max API Keys</label><input type="number" value="0"><span class="hint">0 = Unlimited</span></div>
+        <div class="input-group"><label>Overage Rate</label><input type="text" value="$0.50 per 1,000"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editPlanModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('editPlanModal');showToast('Plan updated successfully','success')">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Test Connection Modal -->
+<div class="modal-overlay" id="testConnectionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Test Connection</h2>
+      <button class="modal-close" onclick="closeModal('testConnectionModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div>
+          <strong>Connection successful!</strong><br>
+          <span style="font-size:12px;">AWS SES (us-east-1) responded in 142ms. Configuration set "eaas-production" verified.</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('testConnectionModal')">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invite Admin Modal -->
+<div class="modal-overlay" id="inviteAdminModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Invite Admin</h2>
+      <button class="modal-close" onclick="closeModal('inviteAdminModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group mb-16"><label>Email Address</label><input type="email" placeholder="newadmin@company.com"></div>
+      <div class="input-group"><label>Role</label>
+        <select><option>Viewer</option><option selected>Admin</option><option>Super Admin</option></select>
+        <span class="hint">Admins can manage tenants and settings. Viewers have read-only access.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('inviteAdminModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('inviteAdminModal');showToast('Invitation sent','success')">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Admin Modal -->
+<div class="modal-overlay" id="removeAdminModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Remove Admin</h2>
+      <button class="modal-close" onclick="closeModal('removeAdminModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>Are you sure you want to remove <strong>Roberts K</strong> from admin access? They will no longer be able to log in to the admin panel.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('removeAdminModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="closeModal('removeAdminModal');showToast('Admin removed','error')">Remove Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feature Flag Toggle Modal -->
+<div class="modal-overlay" id="featureFlagModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="featureFlagTitle">Toggle Feature</h2>
+      <button class="modal-close" onclick="closeModal('featureFlagModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div id="featureFlagMsg">This change affects all tenants immediately.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cancelFeatureFlag()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmFeatureFlag()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+// ---- ROUTING ----
+const screens = ['overview','tenants','tenant-detail','health','analytics','infrastructure','billing','audit-logs','settings'];
+const navLinks = document.querySelectorAll('.sidebar-nav a[data-nav]');
+
+function navigateTo(screen) {
+  window.location.hash = '#' + screen;
+}
+
+function activateScreen(hash) {
+  const screen = hash.replace('#','') || 'overview';
+  // Hide all screens
+  screens.forEach(s => {
+    const el = document.getElementById('screen-' + s);
+    if (el) el.classList.remove('active');
+  });
+  // Show target
+  const target = document.getElementById('screen-' + screen);
+  if (target) target.classList.add('active');
+
+  // Update sidebar active state
+  navLinks.forEach(a => {
+    a.classList.remove('active');
+    if (a.dataset.nav === screen) a.classList.add('active');
+  });
+  // For tenant-detail, highlight tenants link
+  if (screen === 'tenant-detail') {
+    navLinks.forEach(a => { if (a.dataset.nav === 'tenants') a.classList.add('active'); });
+  }
+}
+
+window.addEventListener('hashchange', () => activateScreen(window.location.hash));
+window.addEventListener('DOMContentLoaded', () => {
+  activateScreen(window.location.hash || '#overview');
+});
+
+
+// ---- DARK MODE ----
+const themeToggle = document.getElementById('themeToggle');
+const sunIcon = document.getElementById('sunIcon');
+const moonIcon = document.getElementById('moonIcon');
+
+themeToggle.addEventListener('click', () => {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  sunIcon.style.display = isDark ? 'block' : 'none';
+  moonIcon.style.display = isDark ? 'none' : 'block';
+});
+
+
+// ---- MODALS ----
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+
+// ---- TABS ----
+function setupTabs(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const tabs = container.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Deactivate all tabs in this container
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      // Find parent screen and toggle tab-content
+      const screen = container.closest('.screen') || container.closest('.page-body') || container.parentElement;
+      const tabId = tab.dataset.tab;
+      screen.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+      const targetContent = document.getElementById(tabId);
+      if (targetContent) targetContent.classList.add('active');
+    });
+  });
+}
+setupTabs('tenantTabs');
+setupTabs('settingsTabs');
+
+
+// ---- SERVICE DETAIL TOGGLE ----
+function toggleServiceDetail(id) {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.toggle('open');
+}
+
+
+// ---- AUDIT LOG DETAIL ----
+function toggleAuditDetail(row) {
+  const panel = document.getElementById('auditDetailPanel');
+  if (panel) panel.classList.toggle('open');
+}
+
+
+// ---- FEATURE FLAG TOGGLE ----
+let pendingToggle = null;
+
+function toggleFeatureFlag(el, name) {
+  pendingToggle = el;
+  const isOn = el.classList.contains('on');
+  const action = isOn ? 'Disable' : 'Enable';
+  document.getElementById('featureFlagTitle').textContent = action + ' Feature';
+  document.getElementById('featureFlagMsg').innerHTML =
+    '<strong>' + action + ' ' + name + '?</strong> This change affects all tenants immediately.';
+  openModal('featureFlagModal');
+}
+
+function confirmFeatureFlag() {
+  if (pendingToggle) {
+    pendingToggle.classList.toggle('on');
+    const isNowOn = pendingToggle.classList.contains('on');
+    showToast('Feature ' + (isNowOn ? 'enabled' : 'disabled'), 'success');
+  }
+  pendingToggle = null;
+  closeModal('featureFlagModal');
+}
+
+function cancelFeatureFlag() {
+  pendingToggle = null;
+  closeModal('featureFlagModal');
+}
+
+
+// ---- TOAST ----
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast show toast-' + (type || 'success');
+  setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+</script>
+
+</body>
+</html>

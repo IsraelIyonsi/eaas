@@ -15,7 +15,6 @@ public static class DeleteTemplateEndpoint
             return Results.NoContent();
         })
         .WithName("DeleteTemplate")
-        .WithOpenApi()
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound);
     }

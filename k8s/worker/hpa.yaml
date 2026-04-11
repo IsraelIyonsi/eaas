@@ -1,0 +1,49 @@
+# HPA for EaaS Worker
+# Primary scaling signal: RabbitMQ queue depth (via KEDA or Prometheus adapter)
+# Secondary: CPU utilization
+# Queue depth > 1000 triggers scale-up to drain the backlog faster
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: eaas-worker
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-worker
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/part-of: eaas
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eaas-worker
+  minReplicas: 3
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    # Custom metric: requires prometheus-adapter or KEDA
+    # Measures messages waiting in the email sending queue
+    - type: Pods
+      pods:
+        metric:
+          name: rabbitmq_queue_messages_ready
+        target:
+          type: AverageValue
+          averageValue: "1000"
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300

@@ -37,6 +37,17 @@ public static class DependencyInjection
         dataSourceBuilder.MapEnum<ApiKeyStatus>();
         dataSourceBuilder.MapEnum<SuppressionReason>();
         dataSourceBuilder.MapEnum<DnsRecordPurpose>();
+        dataSourceBuilder.MapEnum<InboundEmailStatus>();
+        dataSourceBuilder.MapEnum<InboundRuleAction>();
+        dataSourceBuilder.MapEnum<AdminRole>();
+        dataSourceBuilder.MapEnum<TenantStatus>();
+        dataSourceBuilder.MapEnum<AuditAction>();
+        dataSourceBuilder.MapEnum<PaymentProvider>();
+        dataSourceBuilder.MapEnum<PlanTier>();
+        dataSourceBuilder.MapEnum<SubscriptionStatus>();
+        dataSourceBuilder.MapEnum<InvoiceStatus>();
+        dataSourceBuilder.MapEnum<WebhookStatus>();
+        dataSourceBuilder.MapEnum<DnsRecordType>();
 
         var dataSource = dataSourceBuilder.Build();
 
@@ -47,6 +58,23 @@ public static class DependencyInjection
             {
                 npgsqlOptions.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
                 npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3);
+                npgsqlOptions.MapEnum<EmailStatus>();
+                npgsqlOptions.MapEnum<EventType>();
+                npgsqlOptions.MapEnum<DomainStatus>();
+                npgsqlOptions.MapEnum<ApiKeyStatus>();
+                npgsqlOptions.MapEnum<SuppressionReason>();
+                npgsqlOptions.MapEnum<DnsRecordPurpose>();
+                npgsqlOptions.MapEnum<InboundEmailStatus>();
+                npgsqlOptions.MapEnum<InboundRuleAction>();
+                npgsqlOptions.MapEnum<AdminRole>();
+                npgsqlOptions.MapEnum<TenantStatus>();
+                npgsqlOptions.MapEnum<AuditAction>();
+                npgsqlOptions.MapEnum<PaymentProvider>();
+                npgsqlOptions.MapEnum<PlanTier>();
+                npgsqlOptions.MapEnum<SubscriptionStatus>();
+                npgsqlOptions.MapEnum<InvoiceStatus>();
+                npgsqlOptions.MapEnum<WebhookStatus>();
+                npgsqlOptions.MapEnum<DnsRecordType>();
             }));
 
         // Redis
@@ -62,6 +90,9 @@ public static class DependencyInjection
         services.AddSingleton<IIdempotencyStore>(sp => sp.GetRequiredService<RedisCacheService>());
         services.AddSingleton<ITemplateCache>(sp => sp.GetRequiredService<RedisCacheService>());
 
+        // Subscription limit service
+        services.AddScoped<ISubscriptionLimitService, SubscriptionLimitService>();
+
         // Tracking services
         services.Configure<TrackingSettings>(configuration.GetSection(TrackingSettings.SectionName));
         services.AddSingleton<ITrackingTokenService, TrackingTokenService>();
@@ -73,6 +104,25 @@ public static class DependencyInjection
             services.AddMassTransitPublishOnly();
         else if (includeMassTransit)
             services.AddMassTransitWithRabbitMq();
+
+        return services;
+    }
+
+    public static IServiceCollection AddInboundServices(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.Configure<InboundSettings>(configuration.GetSection(InboundSettings.SectionName));
+
+        var inboundSettings = configuration.GetSection(InboundSettings.SectionName).Get<InboundSettings>()
+            ?? new InboundSettings();
+
+        services.AddSingleton<Amazon.S3.IAmazonS3>(_ =>
+            new Amazon.S3.AmazonS3Client(
+                Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region)));
+
+        services.AddSingleton<IInboundEmailStorage, S3InboundEmailStorage>();
+        services.AddSingleton<IInboundEmailParser, MimeKitInboundParser>();
 
         return services;
     }

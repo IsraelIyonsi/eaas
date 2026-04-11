@@ -1,0 +1,79 @@
+using EaaS.Domain.Enums;
+
+namespace EaaS.Domain.Interfaces;
+
+/// <summary>
+/// Abstraction for payment provider operations.
+/// Each provider (Stripe, PayStack, Flutterwave, PayPal) implements this interface.
+/// </summary>
+public interface IPaymentProvider
+{
+    PaymentProvider ProviderType { get; }
+
+    // Customer management
+    Task<CreateCustomerResult> CreateCustomerAsync(CreateCustomerRequest request, CancellationToken ct = default);
+    Task<bool> DeleteCustomerAsync(string externalCustomerId, CancellationToken ct = default);
+
+    // Subscription management
+    Task<CreateSubscriptionResult> CreateSubscriptionAsync(CreateSubscriptionRequest request, CancellationToken ct = default);
+    Task<bool> CancelSubscriptionAsync(string externalSubscriptionId, bool immediate, CancellationToken ct = default);
+    Task<SubscriptionInfo> GetSubscriptionAsync(string externalSubscriptionId, CancellationToken ct = default);
+
+    // Payment
+    Task<InitiatePaymentResult> InitiatePaymentAsync(InitiatePaymentRequest request, CancellationToken ct = default);
+    Task<bool> VerifyPaymentAsync(string externalPaymentId, CancellationToken ct = default);
+
+    // Webhook verification
+    Task<WebhookEvent?> ParseWebhookAsync(string payload, string signature, CancellationToken ct = default);
+}
+
+// --- Request/Response Records ---
+
+public sealed record CreateCustomerRequest(
+    string Email,
+    string Name,
+    string? CompanyName,
+    Dictionary<string, string>? Metadata = null);
+
+public sealed record CreateCustomerResult(
+    string ExternalCustomerId,
+    string Email);
+
+public sealed record CreateSubscriptionRequest(
+    string ExternalCustomerId,
+    string PlanExternalId,
+    string? CouponCode = null);
+
+public sealed record CreateSubscriptionResult(
+    string ExternalSubscriptionId,
+    string Status,
+    DateTime CurrentPeriodStart,
+    DateTime CurrentPeriodEnd,
+    string? PaymentUrl = null);
+
+public sealed record InitiatePaymentRequest(
+    string ExternalCustomerId,
+    decimal AmountInMinorUnits,
+    string Currency,
+    string Description,
+    string CallbackUrl,
+    Dictionary<string, string>? Metadata = null);
+
+public sealed record InitiatePaymentResult(
+    string ExternalPaymentId,
+    string PaymentUrl,
+    string Status);
+
+public sealed record SubscriptionInfo(
+    string ExternalSubscriptionId,
+    string Status,
+    DateTime CurrentPeriodStart,
+    DateTime CurrentPeriodEnd,
+    string? CancelAtPeriodEnd);
+
+public sealed record WebhookEvent(
+    string EventType,
+    string ExternalId,
+    string? ExternalCustomerId,
+    string? ExternalSubscriptionId,
+    Dictionary<string, object> Data);

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace EaaS.Api.Authentication;
 
-public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
+public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOptions>
 {
     public const string SchemeName = "ApiKey";
 
@@ -34,7 +34,10 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue("Authorization", out var authHeader))
+        {
+            LogMissingAuthHeader(Logger);
             return AuthenticateResult.NoResult();
+        }
 
         var headerValue = authHeader.ToString();
 
@@ -70,11 +73,16 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
             .FirstOrDefaultAsync();
 
         if (dbKey is null)
+        {
+            LogInvalidApiKey(Logger, Request.Path);
             return AuthenticateResult.Fail("Invalid or revoked API key.");
+        }
 
         // Cache the result
         var dataToCache = new CachedApiKeyData(dbKey.TenantId, dbKey.Id, dbKey.Name);
         await _apiKeyCache.SetApiKeyCacheAsync(keyHash, JsonSerializer.Serialize(dataToCache));
+
+        LogApiKeyAuthenticated(Logger, dbKey.Id, dbKey.TenantId, Request.Path);
 
         var principal = BuildClaimsPrincipal(dbKey.TenantId, dbKey.Id, dbKey.Name);
         return AuthenticateResult.Success(new AuthenticationTicket(principal, SchemeName));
@@ -100,4 +108,13 @@ public sealed class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuthSchemeOp
     }
 
     private sealed record CachedApiKeyData(Guid TenantId, Guid ApiKeyId, string Name);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "No Authorization header present on request")]
+    private static partial void LogMissingAuthHeader(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Invalid or revoked API key used on {RequestPath}")]
+    private static partial void LogInvalidApiKey(ILogger logger, string requestPath);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "API key {ApiKeyId} authenticated for TenantId={TenantId} on {RequestPath}")]
+    private static partial void LogApiKeyAuthenticated(ILogger logger, Guid apiKeyId, Guid tenantId, string requestPath);
 }

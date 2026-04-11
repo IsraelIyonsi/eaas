@@ -37,25 +37,25 @@ export function EmailTable({
 }: EmailTableProps) {
   return (
     <div>
-      <div className="rounded-lg border border-white/10 bg-[#1E1E2E]">
+      <div className="rounded-lg border border-border bg-card">
         <Table>
           <TableHeader>
-            <TableRow className="border-white/10 hover:bg-transparent">
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+            <TableRow className="border-border hover:bg-transparent">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                 Status
               </TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                 To
               </TableHead>
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                 Subject
               </TableHead>
               {!compact && (
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-white/40 md:table-cell">
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 md:table-cell">
                   From
                 </TableHead>
               )}
-              <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                 Date
               </TableHead>
             </TableRow>
@@ -65,7 +65,7 @@ export function EmailTable({
               <TableRow>
                 <TableCell
                   colSpan={compact ? 4 : 5}
-                  className="h-24 text-center text-sm text-white/40"
+                  className="h-24 text-center text-sm text-muted-foreground/60"
                 >
                   No emails match your filters
                 </TableCell>
@@ -74,25 +74,25 @@ export function EmailTable({
               emails.map((email) => (
                 <TableRow
                   key={email.id}
-                  className="cursor-pointer border-white/5 transition-colors hover:bg-white/[0.06] even:bg-white/[0.02]"
+                  className="cursor-pointer border-border transition-colors hover:bg-muted even:bg-muted/30"
                   onClick={() => onRowClick(email)}
                 >
                   <TableCell>
                     <EmailStatusBadge status={email.status} />
                   </TableCell>
-                  <TableCell className="text-sm text-white/70">
+                  <TableCell className="text-sm text-foreground/80">
                     {email.to}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-sm text-white/80">
+                  <TableCell className="max-w-[200px] truncate text-sm text-foreground">
                     {email.subject}
                   </TableCell>
                   {!compact && (
-                    <TableCell className="hidden text-sm text-white/50 md:table-cell">
+                    <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
                       {email.from}
                     </TableCell>
                   )}
-                  <TableCell className="text-xs text-white/40 whitespace-nowrap">
-                    {format(parseISO(email.created_at), "MMM d, HH:mm")}
+                  <TableCell className="text-xs text-muted-foreground/60 whitespace-nowrap">
+                    {format(parseISO(email.createdAt), "MMM d, HH:mm")}
                   </TableCell>
                 </TableRow>
               ))
@@ -102,7 +102,7 @@ export function EmailTable({
       </div>
       {!compact && totalPages > 1 && (
         <div className="mt-3 flex items-center justify-between">
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-muted-foreground/60">
             Showing {(page - 1) * pageSize + 1}
             {" - "}
             {Math.min(page * pageSize, total)} of {total}
@@ -113,11 +113,11 @@ export function EmailTable({
               size="sm"
               disabled={page === 1}
               onClick={() => onPageChange(page - 1)}
-              className="text-white/40 hover:text-white"
+              className="text-muted-foreground/60 hover:text-foreground"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="px-2 text-xs text-white/60">
+            <span className="px-2 text-xs text-muted-foreground">
               {page} / {totalPages}
             </span>
             <Button
@@ -125,7 +125,7 @@ export function EmailTable({
               size="sm"
               disabled={page === totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="text-white/40 hover:text-white"
+              className="text-muted-foreground/60 hover:text-foreground"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

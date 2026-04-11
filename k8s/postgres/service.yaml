@@ -1,0 +1,21 @@
+# Headless service for StatefulSet DNS resolution
+# Pods are addressable as eaas-postgres-0.eaas-postgres-headless.eaas.svc.cluster.local
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-postgres-headless
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: eaas-postgres

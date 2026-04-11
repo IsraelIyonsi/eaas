@@ -1,0 +1,140 @@
+# RabbitMQ 3-node cluster
+# Quorum queues for durability (replicated across all 3 nodes)
+# Peer discovery via K8s DNS using the headless service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eaas-rabbitmq
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-rabbitmq
+    app.kubernetes.io/component: message-queue
+    app.kubernetes.io/part-of: eaas
+spec:
+  serviceName: eaas-rabbitmq-headless
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: eaas-rabbitmq
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: eaas-rabbitmq
+        app.kubernetes.io/component: message-queue
+        app.kubernetes.io/part-of: eaas
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15692"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: eaas-rabbitmq
+      automountServiceAccountToken: true
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      # Spread RabbitMQ nodes across different K8s nodes for fault tolerance
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: eaas-rabbitmq
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.13-management-alpine
+          ports:
+            - name: amqp
+              containerPort: 5672
+              protocol: TCP
+            - name: management
+              containerPort: 15672
+              protocol: TCP
+            - name: epmd
+              containerPort: 4369
+              protocol: TCP
+            - name: clustering
+              containerPort: 25672
+              protocol: TCP
+            - name: prometheus
+              containerPort: 15692
+              protocol: TCP
+          env:
+            - name: RABBITMQ_USE_LONGNAME
+              value: "true"
+            - name: RABBITMQ_NODENAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_SERVICE_NAME
+              value: "eaas-rabbitmq-headless"
+            - name: RABBITMQ_DEFAULT_USER
+              value: "eaas_app"
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: eaas-secrets
+                  key: RabbitMQ__Password
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: "eaas"
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: eaas-secrets
+                  key: RabbitMQ__ErlangCookie
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          livenessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - check_running
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/rabbitmq
+            - name: config
+              mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+            - name: config
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
+      volumes:
+        - name: config
+          configMap:
+            name: eaas-rabbitmq-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app.kubernetes.io/name: eaas-rabbitmq
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ssd
+        resources:
+          requests:
+            storage: 20Gi

@@ -28,7 +28,6 @@ public static class ListWebhooksEndpoint
         .WithName("ListWebhooks")
         .WithSummary("List webhook endpoints")
         .WithDescription("Returns paginated list of webhook configurations for the tenant.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

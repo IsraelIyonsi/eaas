@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EaaS Inbound Mail — Lo-Fi Wireframes (Dashboard Screens)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --wire-bg: #ffffff;
+            --wire-border: #999;
+            --wire-border-light: #ccc;
+            --wire-border-dashed: #aaa;
+            --wire-text: #333;
+            --wire-text-light: #777;
+            --wire-text-muted: #aaa;
+            --wire-fill: #e0e0e0;
+            --wire-fill-dark: #bbb;
+            --wire-fill-light: #f0f0f0;
+            --wire-blue: #4a7bbd;
+            --wire-blue-light: #d6e4f0;
+            --wire-green: #6a6a6a;
+            --wire-red: #8a8a8a;
+            --sidebar-bg: #e8e8e8;
+            --skeleton: #ddd;
+            --annotation-bg: #fffde7;
+            --annotation-border: #999;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--wire-text);
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .doc-header {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+            padding: 40px;
+            background: var(--wire-bg);
+            border: 2px solid var(--wire-border);
+        }
+
+        .doc-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .doc-header .subtitle {
+            font-size: 14px;
+            color: var(--wire-text-light);
+            margin-bottom: 20px;
+        }
+
+        .doc-header .meta {
+            display: flex;
+            gap: 30px;
+            font-size: 12px;
+            color: var(--wire-text-muted);
+            border-top: 1px solid var(--wire-border-light);
+            padding-top: 16px;
+        }
+
+        .doc-header .meta span { font-weight: 500; color: var(--wire-text-light); }
+
+        /* Screen Section */
+        .screen-section {
+            max-width: 1200px;
+            margin: 0 auto 80px;
+        }
+
+        .screen-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            padding-left: 12px;
+            border-left: 4px solid var(--wire-border);
+        }
+
+        .screen-desc {
+            font-size: 13px;
+            color: var(--wire-text-light);
+            margin-bottom: 24px;
+            padding-left: 16px;
+        }
+
+        .state-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--wire-text-light);
+            background: var(--wire-fill);
+            padding: 4px 12px;
+            margin-bottom: 12px;
+        }
+
+        /* Wireframe Container */
+        .wireframe {
+            background: var(--wire-bg);
+            border: 2px solid var(--wire-border);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wireframe-inner {
+            display: flex;
+            min-height: 520px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            min-width: 200px;
+            background: var(--sidebar-bg);
+            border-right: 2px solid var(--wire-border);
+            padding: 16px 0;
+            font-size: 12px;
+        }
+
+        .sidebar-logo {
+            padding: 8px 16px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            border-bottom: 1px solid var(--wire-border-light);
+            margin-bottom: 12px;
+        }
+
+        .sidebar-logo .x-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 1px dashed var(--wire-border-dashed);
+            text-align: center;
+            line-height: 20px;
+            font-size: 10px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+
+        .nav-item {
+            padding: 7px 16px 7px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--wire-text-light);
+        }
+
+        .nav-item:hover { background: rgba(0,0,0,0.04); }
+
+        .nav-item.active {
+            background: rgba(0,0,0,0.08);
+            color: var(--wire-text);
+            font-weight: 600;
+        }
+
+        .nav-item .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: 1px solid var(--wire-text-light);
+        }
+
+        .nav-item.active .dot {
+            background: var(--wire-text);
+            border-color: var(--wire-text);
+        }
+
+        .nav-item.sub { padding-left: 44px; font-size: 11px; }
+
+        .nav-section {
+            padding: 12px 16px 4px 24px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--wire-text-muted);
+        }
+
+        .nav-divider {
+            border-top: 1px solid var(--wire-border-light);
+            margin: 8px 16px;
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            width: 200px;
+            padding: 0 16px;
+        }
+
+        .sidebar-footer a {
+            font-size: 11px;
+            color: var(--wire-blue);
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 24px 28px;
+            position: relative;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--wire-text-muted);
+            margin-bottom: 16px;
+        }
+
+        .breadcrumb .current { color: var(--wire-text); font-weight: 500; }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 12px;
+            color: var(--wire-text-light);
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-family: inherit;
+            border: 1px solid var(--wire-border);
+            background: var(--wire-bg);
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--wire-text);
+        }
+
+        .btn:hover { background: var(--wire-fill-light); }
+
+        .btn-primary {
+            background: var(--wire-text);
+            color: white;
+            border-color: var(--wire-text);
+        }
+
+        .btn-primary:hover { background: #555; }
+
+        .btn-blue {
+            background: var(--wire-blue);
+            color: white;
+            border-color: var(--wire-blue);
+        }
+
+        .btn-ghost {
+            border: 1px dashed var(--wire-border-light);
+            color: var(--wire-blue);
+            background: transparent;
+        }
+
+        .btn-sm { padding: 3px 8px; font-size: 11px; }
+
+        .btn-danger {
+            border-color: #999;
+            color: #666;
+        }
+
+        /* Search Input */
+        .search-input {
+            border: 1px solid var(--wire-border-light);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            width: 220px;
+            background: var(--wire-bg);
+        }
+
+        .input {
+            border: 1px solid var(--wire-border-light);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            width: 100%;
+            background: var(--wire-bg);
+        }
+
+        .select {
+            border: 1px solid var(--wire-border-light);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--wire-bg);
+            cursor: pointer;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar label {
+            font-size: 11px;
+            color: var(--wire-text-light);
+            font-weight: 500;
+        }
+
+        /* Table */
+        .wire-table {
+            width: 100%;
+            border: 1px solid var(--wire-border-light);
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .wire-table th {
+            background: var(--wire-fill-light);
+            border-bottom: 2px solid var(--wire-border-light);
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            color: var(--wire-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .wire-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--wire-fill);
+            vertical-align: middle;
+        }
+
+        .wire-table tr:hover td { background: var(--wire-fill-light); }
+
+        .wire-table .checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--wire-border-light);
+            display: inline-block;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+
+        .status-dot.processed { background: #888; }
+        .status-dot.failed { background: #ccc; border: 1px solid #999; }
+        .status-dot.forwarded { background: #aaa; }
+        .status-dot.pending { background: transparent; border: 1px solid #999; }
+
+        .badge {
+            display: inline-block;
+            padding: 1px 6px;
+            font-size: 10px;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-fill-light);
+        }
+
+        .badge.delivered { border-color: #999; }
+        .badge.failed { border-style: dashed; }
+        .badge.pending { border-style: dotted; }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--wire-text-light);
+        }
+
+        .pagination .pages {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pagination .page-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--wire-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            background: var(--wire-bg);
+            cursor: pointer;
+        }
+
+        .pagination .page-btn.active {
+            background: var(--wire-text);
+            color: white;
+            border-color: var(--wire-text);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+            border: 2px dashed var(--wire-border-dashed);
+            margin: 40px auto;
+            max-width: 400px;
+        }
+
+        .empty-state .illustration {
+            width: 120px;
+            height: 80px;
+            border: 1px dashed var(--wire-border-dashed);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--wire-text-muted);
+        }
+
+        .empty-state h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+            color: var(--wire-text-light);
+            margin-bottom: 16px;
+        }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--skeleton) 25%, #e8e8e8 50%, var(--skeleton) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 2px;
+            height: 12px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-row {
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            border-bottom: 1px solid var(--wire-fill);
+        }
+
+        .skeleton-row .skeleton { height: 10px; }
+
+        /* Error Banner */
+        .error-banner {
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            background: var(--wire-fill-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        .error-banner .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 1px solid var(--wire-border);
+            text-align: center;
+            line-height: 16px;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+
+        /* Stat Cards */
+        .stat-cards {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-bg);
+        }
+
+        .stat-card .label {
+            font-size: 10px;
+            color: var(--wire-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 2px 0;
+        }
+
+        .stat-card .change {
+            font-size: 10px;
+            color: var(--wire-text-light);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--wire-border-light);
+            margin-bottom: 16px;
+            gap: 0;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            color: var(--wire-text-light);
+        }
+
+        .tab.active {
+            border-bottom-color: var(--wire-text);
+            color: var(--wire-text);
+            font-weight: 600;
+        }
+
+        /* Detail Section */
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .detail-row .label {
+            width: 80px;
+            color: var(--wire-text-light);
+            font-weight: 500;
+        }
+
+        .verdict-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .verdict {
+            padding: 2px 8px;
+            font-size: 10px;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-fill-light);
+        }
+
+        .verdict.pass { border-color: #999; }
+
+        .content-box {
+            border: 1px solid var(--wire-border-light);
+            padding: 16px;
+            font-size: 12px;
+            line-height: 1.7;
+            background: var(--wire-fill-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .attachment-list {
+            border: 1px solid var(--wire-border-light);
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            font-size: 12px;
+            border-bottom: 1px solid var(--wire-fill);
+        }
+
+        .attachment-item:last-child { border-bottom: none; }
+
+        /* Thread */
+        .thread-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .thread-email {
+            border: 1px solid var(--wire-border-light);
+            padding: 14px 18px;
+            width: 100%;
+            max-width: 560px;
+            font-size: 12px;
+            position: relative;
+            margin-bottom: 0;
+        }
+
+        .thread-email.sent {
+            background: var(--wire-fill-light);
+            border-left: 3px solid var(--wire-border);
+        }
+
+        .thread-email.received {
+            background: var(--wire-bg);
+            border-left: 3px solid var(--wire-blue);
+        }
+
+        .thread-email .thread-tag {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-fill);
+            font-weight: 600;
+        }
+
+        .thread-email .thread-time {
+            font-size: 10px;
+            color: var(--wire-text-muted);
+            margin-bottom: 6px;
+        }
+
+        .thread-email .thread-direction {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .thread-email .thread-subject {
+            font-size: 11px;
+            color: var(--wire-text-light);
+            margin-bottom: 4px;
+        }
+
+        .thread-email .thread-preview {
+            font-size: 11px;
+            color: var(--wire-text-light);
+            font-style: italic;
+        }
+
+        .thread-arrow {
+            font-size: 18px;
+            color: var(--wire-border-light);
+            padding: 4px 0;
+            line-height: 1;
+        }
+
+        /* Rules */
+        .rule-card {
+            border: 1px solid var(--wire-border-light);
+            margin-bottom: -1px;
+        }
+
+        .rule-card-inner {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 12px;
+        }
+
+        .rule-priority {
+            width: 32px;
+            height: 32px;
+            border: 1px dashed var(--wire-border-dashed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .rule-info { flex: 1; }
+
+        .rule-info .rule-name { font-weight: 600; margin-bottom: 2px; }
+
+        .rule-info .rule-pattern {
+            font-size: 11px;
+            color: var(--wire-text-light);
+            font-family: 'Courier New', monospace;
+        }
+
+        .rule-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .rule-status {
+            font-size: 11px;
+            margin-right: 10px;
+        }
+
+        .rule-status .dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 3px;
+            vertical-align: middle;
+        }
+
+        .rule-status .dot.on { background: #888; }
+        .rule-status .dot.off { background: transparent; border: 1px solid #aaa; }
+
+        /* Toggle */
+        .toggle {
+            width: 36px;
+            height: 18px;
+            border: 1px solid var(--wire-border-light);
+            border-radius: 9px;
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .toggle .knob {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-bg);
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            transition: left 0.2s;
+        }
+
+        .toggle.on { background: var(--wire-fill-dark); }
+        .toggle.on .knob { left: 19px; }
+
+        /* Form */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .form-group .hint {
+            font-size: 10px;
+            color: var(--wire-text-muted);
+            margin-top: 3px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+        }
+
+        .radio-group label { font-weight: 400; }
+
+        /* Stepper */
+        .stepper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--wire-text-muted);
+        }
+
+        .step.active { color: var(--wire-text); font-weight: 600; }
+        .step.done { color: var(--wire-text-light); }
+
+        .step .circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--wire-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .step.active .circle { border-color: var(--wire-text); background: var(--wire-text); color: white; }
+        .step.done .circle { border-color: #999; background: #999; color: white; }
+
+        .step-line {
+            flex: 1;
+            height: 1px;
+            background: var(--wire-border-light);
+            margin: 0 8px;
+        }
+
+        .step-line.done { background: #999; }
+
+        /* Chart placeholder */
+        .chart-placeholder {
+            border: 1px dashed var(--wire-border-dashed);
+            padding: 20px;
+            text-align: center;
+            color: var(--wire-text-muted);
+            font-size: 11px;
+            position: relative;
+            min-height: 140px;
+        }
+
+        .chart-placeholder .chart-art {
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.2;
+            white-space: pre;
+            color: var(--wire-text-light);
+            text-align: left;
+            display: inline-block;
+        }
+
+        /* Two Column Layout */
+        .two-col {
+            display: flex;
+            gap: 16px;
+        }
+
+        .two-col > div { flex: 1; }
+
+        /* Annotations */
+        .annotation-marker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--annotation-bg);
+            border: 1px solid var(--annotation-border);
+            font-size: 9px;
+            font-weight: 700;
+            color: #666;
+            position: absolute;
+            z-index: 10;
+            cursor: help;
+        }
+
+        .annotations-box {
+            background: var(--annotation-bg);
+            border: 1px solid var(--annotation-border);
+            padding: 14px 18px;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+
+        .annotations-box h5 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            color: var(--wire-text-light);
+        }
+
+        .annotations-box ol {
+            padding-left: 18px;
+            color: var(--wire-text-light);
+        }
+
+        .annotations-box li { margin-bottom: 4px; }
+
+        /* Notification */
+        .notif-card {
+            border: 1px solid var(--wire-border-light);
+            margin-bottom: -1px;
+        }
+
+        .notif-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            font-size: 12px;
+        }
+
+        .notif-inner .notif-title { font-weight: 600; margin-bottom: 2px; }
+        .notif-inner .notif-desc { font-size: 11px; color: var(--wire-text-light); }
+
+        /* DNS Record Box */
+        .dns-box {
+            border: 1px solid var(--wire-border-light);
+            padding: 14px 18px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            background: var(--wire-fill-light);
+            margin-bottom: 16px;
+        }
+
+        .dns-box .dns-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .dns-box .dns-label { color: var(--wire-text-light); width: 60px; }
+
+        /* Wizard Container */
+        .wizard-container {
+            background: var(--wire-bg);
+            border: 2px solid var(--wire-border);
+            padding: 32px 40px;
+            margin-bottom: 32px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .wizard-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .wizard-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 28px;
+            padding-top: 16px;
+            border-top: 1px solid var(--wire-border-light);
+        }
+
+        /* Provider Links */
+        .provider-links {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .provider-link {
+            padding: 4px 10px;
+            border: 1px solid var(--wire-border-light);
+            font-size: 11px;
+            cursor: pointer;
+            background: var(--wire-bg);
+        }
+
+        .provider-link:hover { background: var(--wire-fill-light); }
+
+        /* Warning Box */
+        .warning-box {
+            padding: 10px 14px;
+            border: 1px solid var(--wire-border-light);
+            background: var(--wire-fill-light);
+            font-size: 11px;
+            color: var(--wire-text-light);
+            margin-bottom: 16px;
+        }
+
+        /* Info Box */
+        .info-box {
+            padding: 10px 14px;
+            border: 1px dashed var(--wire-border-dashed);
+            font-size: 11px;
+            color: var(--wire-text-light);
+            margin-bottom: 16px;
+        }
+
+        /* Confetti placeholder */
+        .confetti-placeholder {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .confetti-placeholder .confetti-art {
+            font-size: 32px;
+            margin-bottom: 12px;
+            letter-spacing: 8px;
+            color: var(--wire-text-muted);
+        }
+
+        /* Back link */
+        .back-link {
+            font-size: 12px;
+            color: var(--wire-blue);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+
+        /* Design Notes Section */
+        .design-notes {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+            background: var(--wire-bg);
+            border: 2px solid var(--wire-border);
+        }
+
+        .design-notes h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--wire-border);
+        }
+
+        .design-notes h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        .design-notes ul {
+            padding-left: 20px;
+            font-size: 13px;
+            color: var(--wire-text-light);
+            line-height: 1.8;
+        }
+
+        .design-notes li { margin-bottom: 4px; }
+
+        .note-card {
+            border: 1px solid var(--wire-border-light);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .note-card h4 {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--wire-fill);
+        }
+
+        /* Webhook delivery table */
+        .webhook-table {
+            width: 100%;
+            font-size: 11px;
+            border: 1px solid var(--wire-border-light);
+            border-collapse: collapse;
+        }
+
+        .webhook-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--wire-fill);
+        }
+
+        /* Header row for screen wireframes */
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        /* Thread info */
+        .thread-meta {
+            font-size: 12px;
+            color: var(--wire-text-light);
+            margin-bottom: 20px;
+        }
+
+        /* Full width wrapper for wizard screens */
+        .full-page-wireframe {
+            background: var(--wire-bg);
+            border: 2px solid var(--wire-border);
+            margin-bottom: 32px;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Document Header -->
+<div class="doc-header">
+    <h1>EaaS Inbound Mail -- Lo-Fi Wireframes</h1>
+    <div class="subtitle">Dashboard Screens -- 7 screen wireframes with all states (default, empty, loading, error)</div>
+    <div class="meta">
+        <div><span>Project:</span> Email as a Service (EaaS)</div>
+        <div><span>Phase:</span> Sprint 4 -- Inbound Mail</div>
+        <div><span>Deliverable:</span> D5 -- Lo-Fi Wireframes</div>
+        <div><span>Author:</span> UX Designer</div>
+        <div><span>Date:</span> April 1, 2026</div>
+        <div><span>Version:</span> 1.0</div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 1: INBOUND EMAIL LIST ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 1: Inbound Email List (Received Emails)</h2>
+    <p class="screen-desc">Primary list view showing all received inbound emails with filtering, bulk actions, and pagination.</p>
+
+    <!-- Default State -->
+    <div class="state-label">Default State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <!-- Sidebar -->
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item"><span class="dot"></span> Overview</div>
+                <div class="nav-section">Email</div>
+                <div class="nav-item sub"><span class="dot"></span> Sent</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+                <div class="nav-divider"></div>
+                <div class="nav-item"><span class="dot"></span> Inbound Rules</div>
+                <div class="nav-item"><span class="dot"></span> Domains</div>
+                <div class="nav-item"><span class="dot"></span> Templates</div>
+                <div class="nav-item"><span class="dot"></span> API Keys</div>
+                <div class="nav-item"><span class="dot"></span> Webhooks</div>
+                <div class="nav-item"><span class="dot"></span> Suppressions</div>
+                <div class="nav-item"><span class="dot"></span> Analytics</div>
+                <div class="nav-item"><span class="dot"></span> Notifications</div>
+                <div class="nav-item"><span class="dot"></span> Settings</div>
+                <div class="sidebar-footer"><a href="#">Docs &#8599;</a></div>
+            </div>
+            <!-- Main -->
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <div class="breadcrumb">Emails &gt; <span class="current">Received</span></div>
+                <div class="header-bar">
+                    <div>
+                        <div class="page-title">Received Emails (1,247)</div>
+                    </div>
+                    <input class="search-input" placeholder="Search emails..." />
+                </div>
+                <div class="filter-bar">
+                    <label>Filters:</label>
+                    <select class="select"><option>Date Range &#9660;</option></select>
+                    <select class="select"><option>Status &#9660;</option></select>
+                    <label style="font-size:12px;display:flex;align-items:center;gap:4px;">
+                        <span class="checkbox" style="width:12px;height:12px;border:1px solid #ccc;display:inline-block;"></span>
+                        Has Attachments
+                    </label>
+                    <a href="#" style="font-size:11px;color:var(--wire-blue);text-decoration:none;">Clear Filters</a>
+                    <span class="annotation-marker" style="position:relative;top:0;right:0;">2</span>
+                </div>
+
+                <table class="wire-table">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;"><span class="checkbox"></span></th>
+                            <th>Status</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Subject</th>
+                            <th>Received</th>
+                            <th>Attach.</th>
+                            <th>Webhook</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot processed"></span> Processed</td>
+                            <td>john@example.com</td>
+                            <td>support@myapp.com</td>
+                            <td>Re: Order #12345</td>
+                            <td>2m ago</td>
+                            <td>&#128206; 2</td>
+                            <td><span class="badge delivered">delivered</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot processed"></span> Processed</td>
+                            <td>jane@example.com</td>
+                            <td>billing@myapp.com</td>
+                            <td>Invoice Question</td>
+                            <td>15m ago</td>
+                            <td>&#128206; 1</td>
+                            <td><span class="badge delivered">delivered</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot failed"></span> Failed</td>
+                            <td>spam@bad.co</td>
+                            <td>info@myapp.com</td>
+                            <td>Winner!! Claim N...</td>
+                            <td>32m ago</td>
+                            <td>--</td>
+                            <td><span class="badge failed">failed</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot processed"></span> Processed</td>
+                            <td>alex@company.com</td>
+                            <td>support@myapp.com</td>
+                            <td>Help with integr...</td>
+                            <td>1h ago</td>
+                            <td>--</td>
+                            <td><span class="badge delivered">delivered</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot forwarded"></span> Forwarded</td>
+                            <td>bob@inc.com</td>
+                            <td>returns@myapp.com</td>
+                            <td>Return Request #...</td>
+                            <td>2h ago</td>
+                            <td>&#128206; 1</td>
+                            <td><span class="badge delivered">delivered</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="checkbox"></span></td>
+                            <td><span class="status-dot processed"></span> Processed</td>
+                            <td>maria@co.org</td>
+                            <td>support@myapp.com</td>
+                            <td>Account access i...</td>
+                            <td>3h ago</td>
+                            <td>--</td>
+                            <td><span class="badge pending">pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <span>Showing 1-20 of 1,247</span>
+                    <div class="pages">
+                        <div class="page-btn">&lt;</div>
+                        <div class="page-btn active">1</div>
+                        <div class="page-btn">2</div>
+                        <div class="page-btn">3</div>
+                        <div class="page-btn" style="width:auto;padding:0 6px;">...</div>
+                        <div class="page-btn">63</div>
+                        <div class="page-btn">&gt;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Search:</strong> Full-text search across from, to, subject, and body. Debounced input (300ms) to reduce API calls.</li>
+            <li><strong>Filters:</strong> Additive filters. URL-persisted state so filters survive page refresh and are shareable.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Emails &gt; <span class="current">Received</span></div>
+                <div class="page-title" style="margin-bottom:4px;">Received Emails (0)</div>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>No inbound emails yet</h3>
+                    <p>Set up your domain to start receiving emails.</p>
+                    <a class="btn btn-blue" href="#">Set Up Inbound &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Emails &gt; <span class="current">Received</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <div class="skeleton" style="width:200px;height:20px;"></div>
+                    <div class="skeleton" style="width:180px;height:28px;"></div>
+                </div>
+                <div class="skeleton" style="width:400px;height:14px;margin-bottom:16px;"></div>
+                <!-- Skeleton table header -->
+                <div style="display:flex;gap:12px;padding:10px;background:var(--wire-fill-light);border:1px solid var(--wire-border-light);border-bottom:none;">
+                    <div class="skeleton" style="width:20px;height:12px;"></div>
+                    <div class="skeleton" style="width:60px;"></div>
+                    <div class="skeleton" style="width:120px;"></div>
+                    <div class="skeleton" style="width:100px;"></div>
+                    <div class="skeleton" style="width:150px;"></div>
+                    <div class="skeleton" style="width:50px;"></div>
+                    <div class="skeleton" style="width:40px;"></div>
+                    <div class="skeleton" style="width:60px;"></div>
+                </div>
+                <div style="border:1px solid var(--wire-border-light);border-top:none;">
+                    <div class="skeleton-row"><div class="skeleton" style="width:20px;"></div><div class="skeleton" style="width:65px;"></div><div class="skeleton" style="width:130px;"></div><div class="skeleton" style="width:95px;"></div><div class="skeleton" style="width:140px;"></div><div class="skeleton" style="width:45px;"></div><div class="skeleton" style="width:30px;"></div><div class="skeleton" style="width:55px;"></div></div>
+                    <div class="skeleton-row"><div class="skeleton" style="width:20px;"></div><div class="skeleton" style="width:55px;"></div><div class="skeleton" style="width:110px;"></div><div class="skeleton" style="width:100px;"></div><div class="skeleton" style="width:120px;"></div><div class="skeleton" style="width:50px;"></div><div class="skeleton" style="width:25px;"></div><div class="skeleton" style="width:50px;"></div></div>
+                    <div class="skeleton-row"><div class="skeleton" style="width:20px;"></div><div class="skeleton" style="width:70px;"></div><div class="skeleton" style="width:100px;"></div><div class="skeleton" style="width:85px;"></div><div class="skeleton" style="width:155px;"></div><div class="skeleton" style="width:40px;"></div><div class="skeleton" style="width:35px;"></div><div class="skeleton" style="width:60px;"></div></div>
+                    <div class="skeleton-row"><div class="skeleton" style="width:20px;"></div><div class="skeleton" style="width:60px;"></div><div class="skeleton" style="width:115px;"></div><div class="skeleton" style="width:90px;"></div><div class="skeleton" style="width:130px;"></div><div class="skeleton" style="width:48px;"></div><div class="skeleton" style="width:28px;"></div><div class="skeleton" style="width:52px;"></div></div>
+                    <div class="skeleton-row"><div class="skeleton" style="width:20px;"></div><div class="skeleton" style="width:50px;"></div><div class="skeleton" style="width:125px;"></div><div class="skeleton" style="width:105px;"></div><div class="skeleton" style="width:145px;"></div><div class="skeleton" style="width:42px;"></div><div class="skeleton" style="width:32px;"></div><div class="skeleton" style="width:58px;"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Emails &gt; <span class="current">Received</span></div>
+                <div class="page-title" style="margin-bottom:16px;">Received Emails</div>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load emails. Please check your connection and try again.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 2: INBOUND EMAIL DETAIL ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 2: Inbound Email Detail</h2>
+    <p class="screen-desc">Detailed view of a single received email with headers, body, attachments, and webhook delivery status.</p>
+
+    <!-- Default State -->
+    <div class="state-label">Default State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content" style="position:relative;overflow-y:auto;max-height:760px;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <a class="back-link" href="#">&larr; Back to Received Emails</a>
+
+                <div style="font-size:18px;font-weight:600;margin-bottom:4px;">Re: Order #12345</div>
+                <div style="height:1px;background:var(--wire-border-light);margin-bottom:14px;"></div>
+
+                <div class="detail-section">
+                    <div class="detail-row"><div class="label">From:</div><div>John Doe &lt;john@example.com&gt;</div></div>
+                    <div class="detail-row"><div class="label">To:</div><div>support@myapp.com</div></div>
+                    <div class="detail-row"><div class="label">CC:</div><div>team@myapp.com</div></div>
+                    <div class="detail-row"><div class="label">Received:</div><div>Apr 1, 2026, 10:23 AM (2h ago)</div></div>
+                </div>
+
+                <div style="margin-bottom:14px;position:relative;">
+                    <span class="annotation-marker" style="position:relative;top:0;right:0;float:right;">2</span>
+                    <div style="font-size:12px;font-weight:600;margin-bottom:6px;">Verdicts:</div>
+                    <div class="verdict-badges">
+                        <span class="verdict pass">SPF &#10003;</span>
+                        <span class="verdict pass">DKIM &#10003;</span>
+                        <span class="verdict pass">DMARC &#10003;</span>
+                        <span class="verdict pass">Spam: Pass</span>
+                        <span class="verdict pass">Virus: Pass</span>
+                    </div>
+                </div>
+
+                <div style="border:1px dashed var(--wire-border-dashed);padding:10px 14px;margin-bottom:16px;font-size:11px;color:var(--wire-text-light);">
+                    <div style="font-weight:600;margin-bottom:2px;">Thread</div>
+                    &#8617; Reply to: "Order #12345 Confirmation"
+                    <br><a href="#" style="color:var(--wire-blue);text-decoration:none;">View original sent email &rarr;</a>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active">HTML Preview</div>
+                    <div class="tab">Plain Text</div>
+                    <div class="tab">Headers</div>
+                    <div class="tab">JSON</div>
+                </div>
+
+                <div class="content-box" style="margin-bottom:20px;min-height:120px;">
+Hi Support Team,
+
+I have a question about my order #12345.
+The tracking shows it was delivered but
+I haven't received it.
+
+Please help.
+- John
+                </div>
+
+                <div class="detail-section">
+                    <h4>Attachments (2)</h4>
+                    <div class="attachment-list">
+                        <div class="attachment-item">
+                            <span>&#128206; invoice.pdf (45 KB)</span>
+                            <button class="btn btn-sm">Download</button>
+                        </div>
+                        <div class="attachment-item">
+                            <span>&#128206; photo.jpg (1.2 MB)</span>
+                            <button class="btn btn-sm">Download</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4>Webhook Delivery</h4>
+                    <table class="webhook-table">
+                        <tr>
+                            <td style="font-weight:500;">Attempt 1</td>
+                            <td>200 OK</td>
+                            <td>120ms</td>
+                            <td>Apr 1, 10:23 AM</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:16px;">
+                    <button class="btn btn-sm">Download Raw MIME</button>
+                    <button class="btn btn-sm">Retry Webhook</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Back Navigation:</strong> Preserves list filters and scroll position when returning.</li>
+            <li><strong>Verdicts:</strong> Authentication verdicts (SPF, DKIM, DMARC) plus spam/virus results from SES. Visual pass/fail indicators for quick scanning.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State (Email Not Found)</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <a class="back-link" href="#">&larr; Back to Received Emails</a>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>Email not found</h3>
+                    <p>This email may have been deleted or the ID is invalid.</p>
+                    <a class="btn" href="#">Back to Received Emails</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <div class="skeleton" style="width:180px;height:14px;margin-bottom:20px;"></div>
+                <div class="skeleton" style="width:300px;height:22px;margin-bottom:8px;"></div>
+                <div style="height:1px;background:var(--wire-fill);margin-bottom:16px;"></div>
+                <div class="skeleton" style="width:250px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:200px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:180px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:280px;margin-bottom:20px;"></div>
+                <div style="display:flex;gap:6px;margin-bottom:20px;">
+                    <div class="skeleton" style="width:60px;height:20px;"></div>
+                    <div class="skeleton" style="width:60px;height:20px;"></div>
+                    <div class="skeleton" style="width:70px;height:20px;"></div>
+                    <div class="skeleton" style="width:70px;height:20px;"></div>
+                </div>
+                <div class="skeleton" style="width:100%;height:160px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <a class="back-link" href="#">&larr; Back to Received Emails</a>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load email details. The server may be temporarily unavailable.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 3: THREAD VIEW ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 3: Thread View</h2>
+    <p class="screen-desc">Chronological thread view showing sent and received emails in a conversation. Visual distinction between directions.</p>
+
+    <!-- Default State -->
+    <div class="state-label">Default State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <a class="back-link" href="#">&larr; Back</a>
+                <div class="page-title">Thread: Order #12345</div>
+                <div class="thread-meta">3 emails &bull; 2 participants</div>
+
+                <div class="thread-connector">
+                    <!-- Email 1: Sent -->
+                    <div class="thread-email sent">
+                        <div class="thread-tag">SENT</div>
+                        <div class="thread-time">Apr 1, 10:00 AM</div>
+                        <div class="thread-direction">&rarr; To: john@example.com</div>
+                        <div class="thread-subject">Subject: Order #12345 Confirmation</div>
+                        <div class="thread-preview">Your order has been confirmed and is being processed...</div>
+                        <a href="#" style="font-size:10px;color:var(--wire-blue);text-decoration:none;display:block;margin-top:6px;">View full email &rarr;</a>
+                    </div>
+                    <div class="thread-arrow">|<br>&#9660;</div>
+
+                    <!-- Email 2: Received -->
+                    <div class="thread-email received" style="position:relative;">
+                        <span class="annotation-marker" style="top:8px;right:8px;">2</span>
+                        <div class="thread-tag" style="background:var(--wire-blue-light);">RECEIVED</div>
+                        <div class="thread-time">Apr 1, 10:23 AM</div>
+                        <div class="thread-direction">&larr; From: john@example.com</div>
+                        <div class="thread-subject">Subject: Re: Order #12345</div>
+                        <div class="thread-preview">I have a question about my order...</div>
+                        <div style="font-size:10px;color:var(--wire-text-muted);margin-top:4px;">&#128206; 2 attachments</div>
+                        <a href="#" style="font-size:10px;color:var(--wire-blue);text-decoration:none;display:block;margin-top:4px;">View full email &rarr;</a>
+                    </div>
+                    <div class="thread-arrow">|<br>&#9660;</div>
+
+                    <!-- Email 3: Sent -->
+                    <div class="thread-email sent">
+                        <div class="thread-tag">SENT</div>
+                        <div class="thread-time">Apr 1, 11:45 AM</div>
+                        <div class="thread-direction">&rarr; To: john@example.com</div>
+                        <div class="thread-subject">Subject: Re: Re: Order #12345</div>
+                        <div class="thread-preview">Thank you for reaching out. We're looking into the delivery issue...</div>
+                        <a href="#" style="font-size:10px;color:var(--wire-blue);text-decoration:none;display:block;margin-top:6px;">View full email &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Thread Timeline:</strong> Chronological ordering with visual connector. Sent (gray, right-arrow) vs Received (blue-tint, left-arrow) for quick scanning.</li>
+            <li><strong>Received Emails:</strong> Blue-tinted border to visually separate inbound from outbound. Attachment count shown inline.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State (No Thread Found)</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <a class="back-link" href="#">&larr; Back</a>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>No thread found</h3>
+                    <p>This email is not part of a thread, or the thread could not be reconstructed.</p>
+                    <a class="btn" href="#">View Single Email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <div class="skeleton" style="width:80px;height:14px;margin-bottom:20px;"></div>
+                <div class="skeleton" style="width:260px;height:20px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:160px;height:12px;margin-bottom:24px;"></div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+                    <div class="skeleton" style="width:90%;height:90px;"></div>
+                    <div class="skeleton" style="width:2px;height:20px;"></div>
+                    <div class="skeleton" style="width:90%;height:90px;"></div>
+                    <div class="skeleton" style="width:2px;height:20px;"></div>
+                    <div class="skeleton" style="width:90%;height:90px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item sub active"><span class="dot"></span> Received</div>
+            </div>
+            <div class="main-content">
+                <a class="back-link" href="#">&larr; Back</a>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load thread. Some emails may be missing.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 4: INBOUND RULES MANAGEMENT ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 4: Inbound Rules Management</h2>
+    <p class="screen-desc">Create, edit, and manage inbound email routing rules with priority ordering.</p>
+
+    <!-- Default State (With Rules) -->
+    <div class="state-label">Default State (With Rules)</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Inbound Rules</div>
+            </div>
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <div class="breadcrumb"><span class="current">Inbound Rules</span></div>
+                <div class="header-bar">
+                    <div>
+                        <div class="page-title">Inbound Rules</div>
+                        <div class="page-subtitle">3 active rules &bull; 1 inactive</div>
+                    </div>
+                    <button class="btn btn-primary">+ Create Rule</button>
+                </div>
+
+                <div class="rule-card">
+                    <div class="rule-card-inner">
+                        <div class="rule-priority">#0</div>
+                        <div class="rule-info">
+                            <div class="rule-name">Support Inbox</div>
+                            <div class="rule-pattern">support@ &rarr; Webhook &bull; example.com</div>
+                        </div>
+                        <div class="rule-status"><span class="dot on"></span> Active</div>
+                        <div class="rule-actions">
+                            <div class="toggle on"><div class="knob"></div></div>
+                            <button class="btn btn-sm">Edit</button>
+                            <button class="btn btn-sm btn-danger">Del</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-card-inner">
+                        <div class="rule-priority">#1</div>
+                        <div class="rule-info">
+                            <div class="rule-name">Billing Forward</div>
+                            <div class="rule-pattern">billing@ &rarr; Forward &bull; example.com</div>
+                        </div>
+                        <div class="rule-status"><span class="dot on"></span> Active</div>
+                        <div class="rule-actions">
+                            <div class="toggle on"><div class="knob"></div></div>
+                            <button class="btn btn-sm">Edit</button>
+                            <button class="btn btn-sm btn-danger">Del</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-card-inner">
+                        <div class="rule-priority">#2</div>
+                        <div class="rule-info">
+                            <div class="rule-name">Returns Store</div>
+                            <div class="rule-pattern">returns@ &rarr; Store &bull; example.com</div>
+                        </div>
+                        <div class="rule-status"><span class="dot on"></span> Active</div>
+                        <div class="rule-actions">
+                            <div class="toggle on"><div class="knob"></div></div>
+                            <button class="btn btn-sm">Edit</button>
+                            <button class="btn btn-sm btn-danger">Del</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="rule-card" style="opacity:0.6;">
+                    <div class="rule-card-inner">
+                        <div class="rule-priority">#5</div>
+                        <div class="rule-info">
+                            <div class="rule-name">Catch-All</div>
+                            <div class="rule-pattern">*@ &rarr; Store &bull; example.com</div>
+                        </div>
+                        <div class="rule-status"><span class="dot off"></span> Inactive</div>
+                        <div class="rule-actions">
+                            <div class="toggle"><div class="knob"></div></div>
+                            <button class="btn btn-sm">Edit</button>
+                            <button class="btn btn-sm btn-danger">Del</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Priority:</strong> Rules are evaluated in priority order (lower number = higher priority). Users can reorder via drag-and-drop (future enhancement) or by editing priority numbers.</li>
+        </ol>
+    </div>
+
+    <!-- Create/Edit Rule -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Create / Edit Rule</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Inbound Rules</div>
+            </div>
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <a class="back-link" href="#">&larr; Back</a>
+                <div class="page-title" style="margin-bottom:24px;">Create Inbound Rule</div>
+
+                <div style="max-width:480px;">
+                    <div class="form-group">
+                        <label>Rule Name *</label>
+                        <input class="input" value="Support Inbox" />
+                    </div>
+                    <div class="form-group">
+                        <label>Domain *</label>
+                        <select class="input" style="cursor:pointer;">
+                            <option>example.com</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Match Pattern *</label>
+                        <input class="input" value="support@" />
+                        <div class="hint">&#8505; Matches emails to support@example.com</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Action *</label>
+                        <div class="radio-group">
+                            <label>(&#9679;) Webhook</label>
+                            <label>(&#9675;) Forward</label>
+                            <label>(&#9675;) Store</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Webhook URL *</label>
+                        <input class="input" value="https://myapp.com/webhooks/email" />
+                        <div style="margin-top:6px;">
+                            <button class="btn btn-sm btn-ghost">Test Webhook &#10003;</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <input class="input" style="width:80px;" value="0" />
+                        <div class="hint">&#8505; Lower number = higher priority</div>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+                        <label style="margin-bottom:0;">Active</label>
+                        <div class="toggle on"><div class="knob"></div></div>
+                        <span style="font-size:11px;color:var(--wire-text-light);">ON</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:28px;padding-top:16px;border-top:1px solid var(--wire-border-light);">
+                        <button class="btn">Cancel</button>
+                        <button class="btn btn-primary">Create Rule</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Test Webhook:</strong> Sends a test payload to the URL and shows response status. Prevents saving rules with unreachable webhook endpoints.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Inbound Rules</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Inbound Rules</span></div>
+                <div class="page-title" style="margin-bottom:4px;">Inbound Rules</div>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>No inbound rules configured</h3>
+                    <p>Create rules to route incoming emails to webhooks, forward addresses, or storage.</p>
+                    <a class="btn btn-blue" href="#">+ Create Your First Rule</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Inbound Rules</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Inbound Rules</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <div class="skeleton" style="width:160px;height:20px;"></div>
+                    <div class="skeleton" style="width:120px;height:30px;"></div>
+                </div>
+                <div class="skeleton" style="width:180px;height:12px;margin-bottom:16px;"></div>
+                <div class="skeleton" style="width:100%;height:60px;margin-bottom:4px;"></div>
+                <div class="skeleton" style="width:100%;height:60px;margin-bottom:4px;"></div>
+                <div class="skeleton" style="width:100%;height:60px;margin-bottom:4px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Inbound Rules</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Inbound Rules</span></div>
+                <div class="page-title" style="margin-bottom:16px;">Inbound Rules</div>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load inbound rules.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 5: INBOUND SETUP WIZARD ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 5: Inbound Setup Wizard</h2>
+    <p class="screen-desc">5-step guided wizard for configuring inbound email on a domain.</p>
+
+    <!-- Step 1: Select Domain -->
+    <div class="state-label">Step 1: Select Domain</div>
+    <div class="wizard-container">
+        <div class="wizard-title">Set Up Inbound Email</div>
+        <div class="stepper">
+            <div class="step active"><div class="circle">1</div> Domain</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">2</div> MX Records</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">3</div> Webhook</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <p style="font-size:13px;margin-bottom:16px;">Select a verified domain to enable inbound email:</p>
+
+        <div class="form-group">
+            <select class="input" style="cursor:pointer;">
+                <option>example.com</option>
+            </select>
+        </div>
+
+        <div class="info-box">
+            &#8505; Only verified domains are available. Need to add a domain?<br>
+            <a href="#" style="color:var(--wire-blue);text-decoration:none;">Add New Domain &rarr;</a>
+        </div>
+
+        <div class="wizard-actions">
+            <div></div>
+            <button class="btn btn-primary">Next: MX Records &rarr;</button>
+        </div>
+    </div>
+
+    <!-- Step 2: MX Records -->
+    <div class="state-label">Step 2: MX Records</div>
+    <div class="wizard-container" style="position:relative;">
+        <span class="annotation-marker" style="top:12px;right:12px;">1</span>
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">2</div> MX Records</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">3</div> Webhook</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <p style="font-size:14px;font-weight:600;margin-bottom:4px;">Configure MX Records for example.com</p>
+        <p style="font-size:12px;color:var(--wire-text-light);margin-bottom:16px;">Add these MX records at your DNS provider:</p>
+
+        <div class="dns-box">
+            <div class="dns-row"><span class="dns-label">Type:</span> <span>MX</span></div>
+            <div class="dns-row"><span class="dns-label">Name:</span> <span>example.com</span> <button class="btn btn-sm" style="margin-left:auto;">Copy</button></div>
+            <div class="dns-row"><span class="dns-label">Value:</span> <span>inbound-smtp.eu-west-1.amazonaws.com</span></div>
+            <div class="dns-row"><span class="dns-label">Priority:</span> <span>10</span> <button class="btn btn-sm" style="margin-left:auto;">Copy</button></div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--wire-border-light);font-size:11px;color:var(--wire-text-muted);">Status: &#9675; Pending verification</div>
+        </div>
+
+        <div style="font-size:12px;margin-bottom:6px;">Provider Guides:</div>
+        <div class="provider-links">
+            <span class="provider-link">Cloudflare</span>
+            <span class="provider-link">Route53</span>
+            <span class="provider-link">GoDaddy</span>
+            <span class="provider-link">Namecheap</span>
+            <span class="provider-link">Other</span>
+        </div>
+
+        <div class="warning-box">&#9888; DNS changes can take 15-72 hours to propagate.</div>
+
+        <div class="wizard-actions">
+            <button class="btn">&larr; Back</button>
+            <div style="display:flex;gap:8px;">
+                <button class="btn">Save &amp; Continue Later</button>
+                <button class="btn btn-primary">Verify MX Records</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Webhook -->
+    <div class="state-label">Step 3: Webhook Configuration</div>
+    <div class="wizard-container">
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> MX Records</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">3</div> Webhook</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <p style="font-size:14px;font-weight:600;margin-bottom:4px;">Configure Default Webhook</p>
+        <p style="font-size:12px;color:var(--wire-text-light);margin-bottom:16px;">Where should we deliver inbound emails?</p>
+
+        <div class="form-group">
+            <label>Webhook URL *</label>
+            <input class="input" placeholder="https://myapp.com/webhooks/inbound" />
+        </div>
+
+        <div class="form-group">
+            <label>Authentication (Optional)</label>
+            <div class="radio-group" style="margin-bottom:8px;">
+                <label>(&#9679;) None</label>
+                <label>(&#9675;) Basic Auth</label>
+                <label>(&#9675;) Bearer Token</label>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="btn btn-ghost">Send Test Payload</button>
+        </div>
+
+        <div class="wizard-actions">
+            <button class="btn">&larr; Back</button>
+            <button class="btn btn-primary">Next: Send Test Email &rarr;</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Test Email -->
+    <div class="state-label">Step 4: Test Email</div>
+    <div class="wizard-container">
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> MX Records</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> Webhook</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <p style="font-size:14px;font-weight:600;margin-bottom:4px;">Send a Test Email</p>
+        <p style="font-size:12px;color:var(--wire-text-light);margin-bottom:16px;">Send an email to verify everything is working end-to-end.</p>
+
+        <div class="info-box">
+            Send an email to: <strong style="font-family:'Courier New',monospace;">test@example.com</strong><br>
+            We'll detect it and show the result below.
+        </div>
+
+        <div style="border:2px dashed var(--wire-border-dashed);padding:30px;text-align:center;margin-bottom:16px;">
+            <div style="font-size:12px;color:var(--wire-text-muted);margin-bottom:8px;">Waiting for test email...</div>
+            <div style="font-size:11px;color:var(--wire-text-muted);">&#9203; Checking every 5 seconds</div>
+        </div>
+
+        <div class="wizard-actions">
+            <button class="btn">&larr; Back</button>
+            <button class="btn">Skip Test &rarr;</button>
+        </div>
+    </div>
+
+    <!-- Step 5: Complete -->
+    <div class="state-label">Step 5: Complete</div>
+    <div class="wizard-container">
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> MX Records</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> Webhook</div>
+            <div class="step-line done"></div>
+            <div class="step done"><div class="circle">&#10003;</div> Test</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">5</div> Done</div>
+        </div>
+
+        <div class="confetti-placeholder">
+            <div class="confetti-art">* * * * *</div>
+            <div style="border:2px dashed var(--wire-border-dashed);width:100px;height:80px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:var(--wire-text-muted);font-size:10px;">[confetti]</div>
+            <h3 style="font-size:16px;margin-bottom:4px;">Inbound Email is Ready!</h3>
+            <p style="font-size:12px;color:var(--wire-text-light);margin-bottom:20px;">example.com is now configured to receive inbound emails.</p>
+            <div style="display:flex;gap:8px;justify-content:center;">
+                <a class="btn" href="#">View Inbound Rules</a>
+                <a class="btn btn-primary" href="#">Go to Received Emails</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>MX Records:</strong> Copy buttons for each DNS value to reduce user errors. Provider-specific guides open in a modal or new tab for common DNS hosts.</li>
+        </ol>
+    </div>
+
+    <!-- Wizard Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State (MX Verification Failed)</div>
+    <div class="wizard-container">
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">2</div> MX Records</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">3</div> Webhook</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <div class="error-banner">
+            <div><span class="icon">!</span> MX records not found. Please ensure you added the records correctly and allow time for DNS propagation.</div>
+            <button class="btn btn-sm">Re-verify</button>
+        </div>
+
+        <div class="warning-box">&#9888; DNS changes can take 15-72 hours. You can save progress and return later.</div>
+
+        <div class="wizard-actions">
+            <button class="btn">&larr; Back</button>
+            <button class="btn">Save &amp; Continue Later</button>
+        </div>
+    </div>
+
+    <!-- Wizard Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State (Verifying)</div>
+    <div class="wizard-container">
+        <div class="stepper">
+            <div class="step done"><div class="circle">&#10003;</div> Domain</div>
+            <div class="step-line done"></div>
+            <div class="step active"><div class="circle">2</div> MX Records</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">3</div> Webhook</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">4</div> Test</div>
+            <div class="step-line"></div>
+            <div class="step"><div class="circle">5</div> Done</div>
+        </div>
+
+        <div style="text-align:center;padding:40px;">
+            <div style="width:40px;height:40px;border:3px solid var(--wire-fill);border-top-color:var(--wire-text);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;"></div>
+            <div style="font-size:13px;font-weight:500;">Verifying MX Records...</div>
+            <div style="font-size:11px;color:var(--wire-text-muted);margin-top:4px;">This may take a few seconds</div>
+        </div>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 6: INBOUND ANALYTICS DASHBOARD ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 6: Inbound Analytics Dashboard</h2>
+    <p class="screen-desc">High-level analytics for inbound email volume, processing status, and trends.</p>
+
+    <!-- Default State -->
+    <div class="state-label">Default State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Analytics</div>
+            </div>
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <div class="breadcrumb">Analytics &gt; <span class="current">Inbound</span></div>
+                <div class="header-bar">
+                    <div class="page-title">Inbound Analytics</div>
+                    <div style="display:flex;gap:4px;">
+                        <button class="btn btn-sm">24h</button>
+                        <button class="btn btn-sm" style="background:var(--wire-text);color:white;">7d</button>
+                        <button class="btn btn-sm">30d</button>
+                        <button class="btn btn-sm">Custom</button>
+                    </div>
+                </div>
+
+                <div class="stat-cards">
+                    <div class="stat-card">
+                        <div class="label">Received</div>
+                        <div class="value">1,247</div>
+                        <div class="change">+12% &#8593;</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Processed</div>
+                        <div class="value">1,198</div>
+                        <div class="change">+11% &#8593;</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Failed</div>
+                        <div class="value">49</div>
+                        <div class="change">-3% &#8595;</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Avg Processing</div>
+                        <div class="value">4.2s</div>
+                        <div class="change">-0.5s</div>
+                    </div>
+                </div>
+
+                <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Email Volume</div>
+                <div class="chart-placeholder" style="margin-bottom:20px;">
+                    <div class="chart-art">
+  140|
+  120|         /\
+  100|        /  \    /\
+   80|   /\  /    \  /  \
+   60|  /  \/      \/    \     /\
+   40| /                   \   /  \
+   20|/                     \_/    \___
+    0+---+---+---+---+---+---+---+---
+     12am 4am 8am 12pm 4pm 8pm 12am</div>
+                </div>
+
+                <div class="two-col">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Status Breakdown</div>
+                        <div class="chart-placeholder" style="min-height:120px;">
+                            <div class="chart-art" style="font-size:12px;">
+  +----------+
+  |          |
+  |          |  Processed  96%
+  |          |
+  +----------+
+  +--+
+  |  |  Failed  4%
+  +--+</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Top Senders</div>
+                        <div style="border:1px solid var(--wire-border-light);font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--wire-fill);">
+                                <span>john@example.com</span><span style="font-weight:600;">145</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--wire-fill);">
+                                <span>jane@example.com</span><span style="font-weight:600;">98</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--wire-fill);">
+                                <span>bob@inc.com</span><span style="font-weight:600;">67</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--wire-fill);">
+                                <span>spam@bad.co</span><span style="font-weight:600;">43</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;padding:8px 12px;">
+                                <span>alex@company.com</span><span style="font-weight:600;">31</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Time Range:</strong> Selector persists across page navigations. "Custom" opens a date range picker modal. Data auto-refreshes every 60 seconds when the tab is visible.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Analytics</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Analytics &gt; <span class="current">Inbound</span></div>
+                <div class="page-title" style="margin-bottom:4px;">Inbound Analytics</div>
+                <div class="stat-cards" style="opacity:0.4;">
+                    <div class="stat-card"><div class="label">Received</div><div class="value">0</div><div class="change">--</div></div>
+                    <div class="stat-card"><div class="label">Processed</div><div class="value">0</div><div class="change">--</div></div>
+                    <div class="stat-card"><div class="label">Failed</div><div class="value">0</div><div class="change">--</div></div>
+                    <div class="stat-card"><div class="label">Avg Processing</div><div class="value">--</div><div class="change">--</div></div>
+                </div>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>No analytics data yet</h3>
+                    <p>Analytics will appear once you start receiving inbound emails.</p>
+                    <a class="btn btn-blue" href="#">Set Up Inbound &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Analytics</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Analytics &gt; <span class="current">Inbound</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <div class="skeleton" style="width:180px;height:20px;"></div>
+                    <div class="skeleton" style="width:200px;height:28px;"></div>
+                </div>
+                <div style="display:flex;gap:12px;margin-bottom:20px;">
+                    <div class="skeleton" style="flex:1;height:70px;"></div>
+                    <div class="skeleton" style="flex:1;height:70px;"></div>
+                    <div class="skeleton" style="flex:1;height:70px;"></div>
+                    <div class="skeleton" style="flex:1;height:70px;"></div>
+                </div>
+                <div class="skeleton" style="width:100%;height:160px;margin-bottom:20px;"></div>
+                <div style="display:flex;gap:12px;">
+                    <div class="skeleton" style="flex:1;height:140px;"></div>
+                    <div class="skeleton" style="flex:1;height:140px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Analytics</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb">Analytics &gt; <span class="current">Inbound</span></div>
+                <div class="page-title" style="margin-bottom:16px;">Inbound Analytics</div>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load analytics data. The metrics service may be temporarily unavailable.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SCREEN 7: NOTIFICATION PREFERENCES ==================== -->
+<div class="screen-section">
+    <h2 class="screen-title">Screen 7: Notification Preferences</h2>
+    <p class="screen-desc">Configure alert thresholds and notification channels for inbound email events.</p>
+
+    <!-- Default State -->
+    <div class="state-label">Default State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Notifications</div>
+            </div>
+            <div class="main-content" style="position:relative;">
+                <span class="annotation-marker" style="top:6px;right:6px;">1</span>
+                <div class="breadcrumb"><span class="current">Notifications</span></div>
+                <div class="page-title" style="margin-bottom:4px;">Notifications</div>
+                <p style="font-size:12px;color:var(--wire-text-light);margin-bottom:16px;">Configure alerts for inbound email events.</p>
+
+                <div class="form-group">
+                    <label>Domain:</label>
+                    <select class="input" style="max-width:300px;cursor:pointer;">
+                        <option>example.com</option>
+                    </select>
+                </div>
+
+                <div style="max-width:560px;">
+                    <div class="notif-card">
+                        <div class="notif-inner">
+                            <div>
+                                <div class="notif-title">Volume Spike Alert</div>
+                                <div class="notif-desc">Alert when received &gt; <input class="input" style="width:50px;display:inline;padding:2px 6px;" value="100"> in <input class="input" style="width:40px;display:inline;padding:2px 6px;" value="5"> min</div>
+                            </div>
+                            <div class="toggle on"><div class="knob"></div></div>
+                        </div>
+                    </div>
+                    <div class="notif-card">
+                        <div class="notif-inner">
+                            <div>
+                                <div class="notif-title">Processing Failures</div>
+                                <div class="notif-desc">Alert when failed &gt; <input class="input" style="width:50px;display:inline;padding:2px 6px;" value="10"> in <input class="input" style="width:40px;display:inline;padding:2px 6px;" value="15"> min</div>
+                            </div>
+                            <div class="toggle on"><div class="knob"></div></div>
+                        </div>
+                    </div>
+                    <div class="notif-card">
+                        <div class="notif-inner">
+                            <div>
+                                <div class="notif-title">Spam Threshold</div>
+                                <div class="notif-desc">Alert when spam score &gt; <input class="input" style="width:50px;display:inline;padding:2px 6px;" value="5.0"></div>
+                            </div>
+                            <div class="toggle"><div class="knob"></div></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:24px;">
+                        <div class="form-group">
+                            <label>Notification Channel</label>
+                            <div class="radio-group">
+                                <label>(&#9679;) Webhook</label>
+                                <label>(&#9675;) Email</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Webhook URL</label>
+                            <input class="input" style="max-width:400px;" value="https://myapp.com/alerts" />
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;text-align:right;">
+                        <button class="btn btn-primary">Save Preferences</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="annotations-box">
+        <h5>Annotations</h5>
+        <ol>
+            <li><strong>Per-Domain Config:</strong> Each domain can have independent notification settings. Switching domains reloads the configuration for that domain.</li>
+        </ol>
+    </div>
+
+    <!-- Empty State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Empty State (No Domains)</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Notifications</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Notifications</span></div>
+                <div class="page-title" style="margin-bottom:4px;">Notifications</div>
+                <div class="empty-state">
+                    <div class="illustration">X</div>
+                    <h3>No domains configured</h3>
+                    <p>Add and verify a domain before configuring notification preferences.</p>
+                    <a class="btn btn-blue" href="#">Add Domain &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Loading State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Notifications</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Notifications</span></div>
+                <div class="skeleton" style="width:160px;height:20px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:260px;height:12px;margin-bottom:20px;"></div>
+                <div class="skeleton" style="width:300px;height:32px;margin-bottom:20px;"></div>
+                <div class="skeleton" style="width:100%;max-width:500px;height:60px;margin-bottom:4px;"></div>
+                <div class="skeleton" style="width:100%;max-width:500px;height:60px;margin-bottom:4px;"></div>
+                <div class="skeleton" style="width:100%;max-width:500px;height:60px;margin-bottom:20px;"></div>
+                <div class="skeleton" style="width:300px;height:32px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:400px;height:32px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div style="margin-top:32px;"></div>
+    <div class="state-label">Error State</div>
+    <div class="wireframe">
+        <div class="wireframe-inner">
+            <div class="sidebar" style="position:relative;">
+                <div class="sidebar-logo"><span class="x-box">X</span> EaaS</div>
+                <div class="nav-item active"><span class="dot"></span> Notifications</div>
+            </div>
+            <div class="main-content">
+                <div class="breadcrumb"><span class="current">Notifications</span></div>
+                <div class="page-title" style="margin-bottom:16px;">Notifications</div>
+                <div class="error-banner">
+                    <div><span class="icon">!</span> Failed to load notification preferences.</div>
+                    <button class="btn btn-sm">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== DESIGN NOTES ==================== -->
+<div class="design-notes">
+    <h2>Design Notes</h2>
+
+    <div class="note-card">
+        <h4>Responsive Considerations</h4>
+        <ul>
+            <li><strong>Sidebar:</strong> Collapses to a hamburger menu on screens below 768px. Icon-only mode available at 1024px breakpoint.</li>
+            <li><strong>Email List Table:</strong> Transforms to a card-based list on mobile. Each card shows From, Subject, Status, and Time. Columns like Webhook Status and Attachments move inside the card as secondary details.</li>
+            <li><strong>Analytics Dashboard:</strong> Stat cards stack 2x2 on tablet, 1-column on mobile. Charts resize responsively. Two-column layout (Status Breakdown + Top Senders) stacks vertically on smaller screens.</li>
+            <li><strong>Setup Wizard:</strong> Stepper becomes vertical on mobile with current step highlighted. Action buttons stack vertically with primary action on top.</li>
+            <li><strong>Forms:</strong> All inputs become full-width on mobile. Radio groups stack vertically below 480px.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h4>Interaction Notes</h4>
+        <ul>
+            <li><strong>Real-time Updates:</strong> Email list polls every 30 seconds for new emails. New arrivals animate in at the top with a subtle highlight. Analytics refresh every 60 seconds.</li>
+            <li><strong>Optimistic UI:</strong> Rule toggle (active/inactive) applies immediately in the UI. If the API call fails, the toggle reverts with an error toast notification.</li>
+            <li><strong>Bulk Actions:</strong> Selecting multiple emails via checkboxes reveals a floating action bar at the bottom of the table with options: Delete, Retry Webhook, Export.</li>
+            <li><strong>Table Sorting:</strong> All columns in the email list are sortable. Default sort is "Received" descending (newest first). Sort state persists in URL query params.</li>
+            <li><strong>Webhook Test:</strong> In the setup wizard and rule editor, "Test Webhook" sends a sample payload and shows the HTTP response code and latency inline below the button.</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h4>Accessibility Notes</h4>
+        <ul>
+            <li><strong>Keyboard Navigation:</strong> All interactive elements are reachable via Tab key. Table rows are focusable with Enter/Space to open detail view. Escape closes modals and returns focus to the trigger element.</li>
+            <li><strong>Screen Reader Labels:</strong> Status dots include aria-label (e.g., "Status: Processed"). Toggles announce their state ("Active: On/Off"). Charts include sr-only summary text describing the data.</li>
+            <li><strong>Focus Management:</strong> On page transitions (e.g., list to detail), focus moves to the page heading. Error banners receive focus when they appear. Modal traps focus within the dialog.</li>
+            <li><strong>Color Independence:</strong> Status is conveyed through both color and text labels. Badges include text in addition to visual styling. Chart data is also available in tabular form.</li>
+            <li><strong>Contrast:</strong> All text meets WCAG AA minimum contrast ratios (4.5:1 for normal text, 3:1 for large text).</li>
+        </ul>
+    </div>
+
+    <div class="note-card">
+        <h4>Screen-by-Screen UX Decisions</h4>
+        <ul>
+            <li><strong>Screen 1 (Email List):</strong> Filters are additive and URL-persisted for shareability. Relative timestamps ("2m ago") improve scannability over absolute dates. Webhook status column provides at-a-glance delivery health without navigating to detail.</li>
+            <li><strong>Screen 2 (Email Detail):</strong> Authentication verdicts (SPF, DKIM, DMARC) are shown prominently because they are critical for debugging delivery issues. Tabs for body content prevent information overload while keeping all data accessible.</li>
+            <li><strong>Screen 3 (Thread View):</strong> Visual direction indicators (arrows, color tints) make it immediately clear which emails were sent vs received. Timeline connector creates a clear narrative flow.</li>
+            <li><strong>Screen 4 (Rules):</strong> Priority numbers are explicit rather than hidden to help users understand evaluation order. Test webhook button prevents saving broken configurations.</li>
+            <li><strong>Screen 5 (Setup Wizard):</strong> "Save and Continue Later" at every step respects that DNS propagation can take hours. Provider-specific guides reduce friction at the most error-prone step (MX records).</li>
+            <li><strong>Screen 6 (Analytics):</strong> KPI cards at the top give immediate health signal. Percentage changes provide trend context. Top Senders helps identify patterns or potential abuse.</li>
+            <li><strong>Screen 7 (Notifications):</strong> Inline threshold editing (not a separate form) reduces clicks. Per-domain configuration prevents alert noise from low-priority domains.</li>
+        </ul>
+    </div>
+</div>
+
+<div style="max-width:1200px;margin:40px auto;text-align:center;font-size:11px;color:var(--wire-text-muted);padding:20px;">
+    EaaS Inbound Mail -- Lo-Fi Wireframes -- D5 Deliverable -- April 2026
+</div>
+
+</body>
+</html>

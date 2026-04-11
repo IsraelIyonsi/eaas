@@ -1,0 +1,73 @@
+# Redis configuration for master/replica and Sentinel
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eaas-redis-config
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: eaas
+data:
+  # NOTE: Requires init container to substitute secrets before use
+  redis-master.conf: |
+    bind 0.0.0.0
+    port 6379
+    requirepass ${REDIS_PASSWORD}
+    masterauth ${REDIS_PASSWORD}
+
+    # Memory management - evict least recently used keys when full
+    # Critical for rate limiting: old counters get evicted automatically
+    maxmemory 400mb
+    maxmemory-policy allkeys-lru
+
+    # Persistence - AOF for durability, RDB for fast restarts
+    appendonly yes
+    appendfsync everysec
+    save 900 1
+    save 300 10
+    save 60 10000
+
+    # Performance
+    tcp-backlog 511
+    tcp-keepalive 300
+    timeout 0
+
+  redis-replica.conf: |
+    bind 0.0.0.0
+    port 6379
+    requirepass ${REDIS_PASSWORD}
+    masterauth ${REDIS_PASSWORD}
+
+    # Connect to master (pod ordinal 0)
+    replicaof eaas-redis-0.eaas-redis-headless.eaas.svc.cluster.local 6379
+
+    maxmemory 400mb
+    maxmemory-policy allkeys-lru
+
+    appendonly yes
+    appendfsync everysec
+    save 900 1
+    save 300 10
+    save 60 10000
+
+    tcp-backlog 511
+    tcp-keepalive 300
+    timeout 0
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eaas-redis-sentinel-config
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-redis-sentinel
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: eaas
+data:
+  sentinel.conf: |
+    port 26379
+    sentinel monitor eaas-master eaas-redis-0.eaas-redis-headless.eaas.svc.cluster.local 6379 2
+    sentinel down-after-milliseconds eaas-master 5000
+    sentinel failover-timeout eaas-master 30000
+    sentinel parallel-syncs eaas-master 1

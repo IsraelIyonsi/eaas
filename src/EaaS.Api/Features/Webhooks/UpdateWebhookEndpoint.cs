@@ -23,7 +23,6 @@ public static class UpdateWebhookEndpoint
         .WithName("UpdateWebhook")
         .WithSummary("Update a webhook endpoint")
         .WithDescription("Updates an existing webhook configuration. Partial updates are supported.")
-        .WithOpenApi()
         .Produces<ApiResponse<WebhookDto>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);

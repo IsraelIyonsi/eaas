@@ -27,7 +27,6 @@ public static class ListTemplatesEndpoint
             }));
         })
         .WithName("ListTemplates")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

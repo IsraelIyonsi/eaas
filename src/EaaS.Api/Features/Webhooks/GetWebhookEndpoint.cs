@@ -18,7 +18,6 @@ public static class GetWebhookEndpoint
         .WithName("GetWebhook")
         .WithSummary("Get webhook detail")
         .WithDescription("Returns a single webhook configuration by ID.")
-        .WithOpenApi()
         .Produces<ApiResponse<WebhookDto>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

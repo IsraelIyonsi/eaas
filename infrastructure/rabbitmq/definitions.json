@@ -1,0 +1,177 @@
+{
+  "rabbit_version": "3.13.0",
+  "users": [
+    {
+      "name": "eaas_app",
+      "password_hash": "CHANGE_ME_ON_FIRST_BOOT",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "eaas"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "eaas_app",
+      "vhost": "eaas",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [],
+  "policies": [
+    {
+      "vhost": "eaas",
+      "name": "quorum-queues-ha",
+      "pattern": "^eaas-",
+      "apply-to": "queues",
+      "definition": {
+        "delivery-limit": 5,
+        "dead-letter-exchange": "eaas.dlx",
+        "dead-letter-routing-key": "dead-letter"
+      },
+      "priority": 0
+    }
+  ],
+  "queues": [
+    {
+      "name": "eaas-emails-send",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-delivery-limit": 5,
+        "x-dead-letter-exchange": "eaas.dlx",
+        "x-dead-letter-routing-key": "dead-letter.emails-send"
+      }
+    },
+    {
+      "name": "eaas-webhook-dispatch",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-delivery-limit": 5,
+        "x-dead-letter-exchange": "eaas.dlx",
+        "x-dead-letter-routing-key": "dead-letter.webhook-dispatch"
+      }
+    },
+    {
+      "name": "eaas-inbound-process",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-delivery-limit": 5,
+        "x-dead-letter-exchange": "eaas.dlx",
+        "x-dead-letter-routing-key": "dead-letter.inbound-process"
+      }
+    },
+    {
+      "name": "eaas-dlq-emails-send",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "eaas-dlq-webhook-dispatch",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    },
+    {
+      "name": "eaas-dlq-inbound-process",
+      "vhost": "eaas",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum"
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "eaas",
+      "vhost": "eaas",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "eaas.dlx",
+      "vhost": "eaas",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "eaas",
+      "vhost": "eaas",
+      "destination": "eaas-emails-send",
+      "destination_type": "queue",
+      "routing_key": "email.send",
+      "arguments": {}
+    },
+    {
+      "source": "eaas",
+      "vhost": "eaas",
+      "destination": "eaas-webhook-dispatch",
+      "destination_type": "queue",
+      "routing_key": "webhook.dispatch",
+      "arguments": {}
+    },
+    {
+      "source": "eaas",
+      "vhost": "eaas",
+      "destination": "eaas-inbound-process",
+      "destination_type": "queue",
+      "routing_key": "inbound.process",
+      "arguments": {}
+    },
+    {
+      "source": "eaas.dlx",
+      "vhost": "eaas",
+      "destination": "eaas-dlq-emails-send",
+      "destination_type": "queue",
+      "routing_key": "dead-letter.emails-send",
+      "arguments": {}
+    },
+    {
+      "source": "eaas.dlx",
+      "vhost": "eaas",
+      "destination": "eaas-dlq-webhook-dispatch",
+      "destination_type": "queue",
+      "routing_key": "dead-letter.webhook-dispatch",
+      "arguments": {}
+    },
+    {
+      "source": "eaas.dlx",
+      "vhost": "eaas",
+      "destination": "eaas-dlq-inbound-process",
+      "destination_type": "queue",
+      "routing_key": "dead-letter.inbound-process",
+      "arguments": {}
+    }
+  ]
+}

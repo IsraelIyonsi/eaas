@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers/auth";
+import { setupErrorMockApi } from "./helpers/mock-api";
 
 test.describe("Domains Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -43,17 +44,28 @@ test.describe("Domains Page", () => {
     await expect(addButton).toBeEnabled();
   });
 
+  test("should show error state when API fails", async ({ page }) => {
+    await setupErrorMockApi(page);
+    await page.goto("/domains");
+
+    // Page should still render the heading without crashing
+    await expect(
+      page.getByRole("heading", { name: "Domains" })
+    ).toBeVisible({ timeout: 10000 });
+  });
+
   test("should show DNS records section for existing domains", async ({
     page,
   }) => {
-    // If there are domains in the mock data, check for DNS records
-    const domainItem = page.getByText("example.com").first();
-    const isVisible = await domainItem.isVisible().catch(() => false);
+    // Wait for domains to load
+    const domainTrigger = page.getByRole("button", { name: /mail\.example\.com/ });
+    const isVisible = await domainTrigger.isVisible().catch(() => false);
 
     if (isVisible) {
-      // Click to expand the accordion
-      await domainItem.click();
-      await expect(page.getByText("DNS Records")).toBeVisible({
+      // Click the accordion trigger to expand it
+      await domainTrigger.click();
+      // DNS Records heading should appear inside the expanded accordion
+      await expect(page.getByText("DNS Records", { exact: true })).toBeVisible({
         timeout: 5000,
       });
     }

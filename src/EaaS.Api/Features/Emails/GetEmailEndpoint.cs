@@ -16,7 +16,6 @@ public static class GetEmailEndpoint
             return Results.Ok(ApiResponse.Ok(result));
         })
         .WithName("GetEmail")
-        .WithOpenApi()
         .Produces<ApiResponse<EmailDetailResult>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

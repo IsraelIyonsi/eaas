@@ -19,8 +19,12 @@ public static class SeedCommand
         if (args.Contains("--dashboard-password"))
             return SeedDashboardPassword(args);
 
+        if (args.Contains("--admin"))
+            return await SeedAdminAsync(args, services);
+
         Console.Error.WriteLine("Usage: dotnet run -- seed --api-key");
         Console.Error.WriteLine("       dotnet run -- seed --dashboard-password <password>");
+        Console.Error.WriteLine("       dotnet run -- seed --admin <email> <password>");
         return 1;
     }
 
@@ -82,6 +86,73 @@ public static class SeedCommand
         Console.WriteLine($"DASHBOARD_PASSWORD_HASH={hash}");
         Console.WriteLine();
         Console.WriteLine("Add this to your .env file.");
+        return 0;
+    }
+
+    private static async Task<int> SeedAdminAsync(string[] args, IServiceProvider services)
+    {
+        var adminIndex = Array.IndexOf(args, "--admin");
+        var emailIndex = adminIndex + 1;
+        var passwordIndex = adminIndex + 2;
+
+        if (emailIndex >= args.Length || passwordIndex >= args.Length
+            || string.IsNullOrWhiteSpace(args[emailIndex])
+            || string.IsNullOrWhiteSpace(args[passwordIndex]))
+        {
+            Console.Error.WriteLine("ERROR: Email and password arguments are required.");
+            Console.Error.WriteLine("Usage: dotnet run -- seed --admin <email> <password>");
+            return 1;
+        }
+
+        var email = args[emailIndex];
+        var password = args[passwordIndex];
+
+        // Validate email format
+        if (!email.Contains('@') || !email.Contains('.'))
+        {
+            Console.Error.WriteLine("ERROR: Invalid email format.");
+            return 1;
+        }
+
+        // Validate password length
+        if (password.Length < 8)
+        {
+            Console.Error.WriteLine("ERROR: Password must be at least 8 characters.");
+            return 1;
+        }
+
+        using var scope = services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // Check if email already exists
+        var exists = await dbContext.AdminUsers
+            .AnyAsync(u => u.Email == email);
+
+        if (exists)
+        {
+            Console.Error.WriteLine($"ERROR: Admin user with email '{email}' already exists.");
+            return 1;
+        }
+
+        var adminUser = new AdminUser
+        {
+            Id = Guid.NewGuid(),
+            Email = email,
+            DisplayName = email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password, workFactor: SecurityConstants.BCryptWorkFactor),
+            Role = AdminRole.SuperAdmin,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        dbContext.AdminUsers.Add(adminUser);
+        await dbContext.SaveChangesAsync();
+
+        Console.WriteLine("SuperAdmin user created successfully.");
+        Console.WriteLine($"UserId: {adminUser.Id}");
+        Console.WriteLine($"Email:  {adminUser.Email}");
+        Console.WriteLine($"Role:   {adminUser.Role}");
         return 0;
     }
 

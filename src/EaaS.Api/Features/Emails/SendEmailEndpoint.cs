@@ -51,7 +51,6 @@ public static class SendEmailEndpoint
             }));
         })
         .WithName("SendEmail")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status202Accepted)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest);
     }

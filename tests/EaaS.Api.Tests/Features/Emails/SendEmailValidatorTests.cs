@@ -84,8 +84,8 @@ public sealed class SendEmailValidatorTests
 
         var result = _sut.TestValidate(command);
 
-        result.ShouldHaveValidationErrorFor(x => x.To)
-            .WithErrorMessage("Maximum 50 recipients allowed.");
+        result.ShouldHaveAnyValidationError()
+            .WithErrorMessage($"Combined To + CC + BCC recipients must not exceed {EaaS.Shared.Constants.EmailConstants.MaxRecipientsPerEmail}.");
     }
 
     [Fact]

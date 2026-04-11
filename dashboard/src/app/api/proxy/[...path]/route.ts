@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifySession, getSessionData } from "@/lib/auth/session";
 
 // Internal URL for server-side calls (container-to-container in Docker)
 const API_INTERNAL_URL =
@@ -13,7 +14,7 @@ async function proxyRequest(
 ): Promise<NextResponse> {
   // Verify dashboard session
   const session = request.cookies.get("eaas_session");
-  if (!session || session.value !== "authenticated") {
+  if (!session || !verifySession(session.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -28,8 +29,21 @@ async function proxyRequest(
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${API_KEY}`,
   };
+
+  // For admin routes, forward session data as trusted headers
+  if (apiPath.startsWith("/api/v1/admin/")) {
+    const sessionData = getSessionData(session.value);
+    if (sessionData) {
+      headers["X-Admin-User-Id"] = sessionData.userId;
+      headers["X-Admin-Email"] = sessionData.email;
+      headers["X-Admin-Role"] = sessionData.role;
+    }
+    // Still send API key for proxy identification
+    headers["Authorization"] = `Bearer ${API_KEY}`;
+  } else {
+    headers["Authorization"] = `Bearer ${API_KEY}`;
+  }
 
   const fetchOptions: RequestInit = {
     method: request.method,

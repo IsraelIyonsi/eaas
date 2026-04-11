@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - 'alerts.yml'
+
+scrape_configs:
+  - job_name: 'eaas-api'
+    static_configs:
+      - targets: ['api:8080']
+    metrics_path: /metrics
+
+  - job_name: 'eaas-webhook-processor'
+    static_configs:
+      - targets: ['webhook-processor:8081']
+    metrics_path: /metrics
+
+  - job_name: 'eaas-worker'
+    static_configs:
+      - targets: ['worker:9090']
+    metrics_path: /metrics
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

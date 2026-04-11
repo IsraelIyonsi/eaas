@@ -41,7 +41,6 @@ public static class ListEmailsEndpoint
         .WithName("ListEmails")
         .WithSummary("List emails with advanced filtering")
         .WithDescription("Returns paginated list of emails with optional filtering by status, date range, tags, sender, recipient, template, and batch.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

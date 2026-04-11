@@ -29,7 +29,6 @@ public static class CreateTemplateEndpoint
             return Results.Created($"/api/v1/templates/{result.Id}", ApiResponse.Ok(result));
         })
         .WithName("CreateTemplate")
-        .WithOpenApi()
         .Produces<ApiResponse<TemplateResult>>(StatusCodes.Status201Created)
         .Produces<ApiErrorResponse>(StatusCodes.Status400BadRequest)
         .Produces<ApiErrorResponse>(StatusCodes.Status409Conflict);

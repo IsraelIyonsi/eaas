@@ -31,7 +31,6 @@ public static class PreviewTemplateEndpoint
         .WithName("PreviewTemplate")
         .WithSummary("Preview a rendered template")
         .WithDescription("Renders a template with the provided variables without sending an email.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

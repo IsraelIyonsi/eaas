@@ -43,7 +43,6 @@ public static class GetAnalyticsSummaryEndpoint
         .WithName("GetAnalyticsSummary")
         .WithSummary("Get email analytics summary")
         .WithDescription("Returns aggregated email metrics for the specified date range.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK);
     }
 

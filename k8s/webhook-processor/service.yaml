@@ -1,0 +1,20 @@
+# ClusterIP service for webhook processor
+# Receives traffic from Ingress for SNS/SES webhook callbacks
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-webhook-processor
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-webhook-processor
+    app.kubernetes.io/component: webhook-processor
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: eaas-webhook-processor

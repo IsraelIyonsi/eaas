@@ -23,7 +23,6 @@ public static class VerifyDomainEndpoint
             }));
         })
         .WithName("VerifyDomain")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

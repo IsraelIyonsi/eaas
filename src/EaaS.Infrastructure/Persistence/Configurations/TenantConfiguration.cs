@@ -1,4 +1,5 @@
 using EaaS.Domain.Entities;
+using EaaS.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,6 +21,34 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnName("name")
             .HasMaxLength(255)
             .IsRequired();
+
+        builder.Property(t => t.Status)
+            .HasColumnName("status")
+            .HasDefaultValue(TenantStatus.Active);
+
+        builder.Property(t => t.ContactEmail)
+            .HasColumnName("contact_email")
+            .HasMaxLength(255);
+
+        builder.Property(t => t.CompanyName)
+            .HasColumnName("company_name")
+            .HasMaxLength(255);
+
+        builder.Property(t => t.MaxApiKeys)
+            .HasColumnName("max_api_keys");
+
+        builder.Property(t => t.MaxDomainsCount)
+            .HasColumnName("max_domains_count");
+
+        builder.Property(t => t.MonthlyEmailLimit)
+            .HasColumnName("monthly_email_limit");
+
+        builder.Property(t => t.PasswordHash)
+            .HasColumnName("password_hash");
+
+        builder.Property(t => t.Notes)
+            .HasColumnName("notes")
+            .HasColumnType("text");
 
         builder.Property(t => t.CreatedAt)
             .HasColumnName("created_at")

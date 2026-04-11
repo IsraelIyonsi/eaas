@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Personas & Research Synthesis — EaaS Inbound Email</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-bg: #fafbfc;
+    --color-surface: #ffffff;
+    --color-text: #1a1a2e;
+    --color-text-secondary: #5a5a7a;
+    --color-text-muted: #8888a4;
+    --color-border: #e8e8f0;
+    --color-border-light: #f0f0f6;
+
+    --color-alex: #3b82f6;
+    --color-alex-light: #eff6ff;
+    --color-alex-gradient: linear-gradient(135deg, #3b82f6, #2563eb);
+
+    --color-sarah: #10b981;
+    --color-sarah-light: #ecfdf5;
+    --color-sarah-gradient: linear-gradient(135deg, #10b981, #059669);
+
+    --color-marcus: #8b5cf6;
+    --color-marcus-light: #f5f3ff;
+    --color-marcus-gradient: linear-gradient(135deg, #8b5cf6, #7c3aed);
+
+    --color-accent: #6366f1;
+    --color-accent-light: #eef2ff;
+
+    --color-finding-1: #f59e0b;
+    --color-finding-2: #ef4444;
+    --color-finding-3: #3b82f6;
+    --color-finding-4: #10b981;
+    --color-finding-5: #8b5cf6;
+    --color-finding-6: #ec4899;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04);
+    --shadow-xl: 0 20px 48px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.05);
+
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ---- HEADER ---- */
+  .doc-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    color: white;
+    padding: 80px 0 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .doc-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .doc-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+  }
+  .header-badge .dot {
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+  }
+  .doc-header h1 {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin-bottom: 12px;
+  }
+  .doc-header .subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 32px;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+  }
+  .header-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ---- LAYOUT ---- */
+  .container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .content { padding: 64px 0 80px; }
+
+  /* ---- SECTIONS ---- */
+  .section { margin-bottom: 72px; }
+  .section-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--color-text);
+  }
+  .section-subtitle {
+    font-size: 16px;
+    color: var(--color-text-secondary);
+    margin-bottom: 36px;
+    max-width: 640px;
+  }
+
+  /* ---- METHODOLOGY CARDS ---- */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .method-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .method-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .method-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 14px;
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+  }
+  .method-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .method-card p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.55;
+  }
+  .method-note {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: var(--color-accent-light);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* ---- PERSONA CARDS ---- */
+  .persona-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 48px;
+    transition: box-shadow 0.3s;
+  }
+  .persona-card:hover { box-shadow: var(--shadow-lg); }
+
+  .persona-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    padding: 36px 40px;
+    align-items: center;
+    position: relative;
+  }
+  .persona-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 40px;
+    right: 40px;
+    height: 1px;
+    background: var(--color-border-light);
+  }
+
+  .persona-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .persona-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.06);
+  }
+
+  .persona-header-info h3 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 2px;
+  }
+  .persona-role {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+  }
+  .persona-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .persona-tag {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 100px;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    background: var(--color-bg);
+  }
+  .user-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border-radius: 100px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .persona-body {
+    padding: 32px 40px 40px;
+  }
+  .persona-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 40px;
+    margin-bottom: 32px;
+  }
+  .persona-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+  .persona-section-label::before {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 13px;
+  }
+
+  .persona-list {
+    list-style: none;
+    padding: 0;
+  }
+  .persona-list li {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    padding: 5px 0;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.55;
+  }
+  .persona-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border);
+  }
+  .frustration-list li::before { background: #fca5a5; }
+  .goal-list li::before { background: #86efac; }
+
+  .persona-quote {
+    padding: 24px 28px;
+    border-radius: var(--radius-md);
+    margin-bottom: 32px;
+    position: relative;
+    font-size: 16px;
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+  .persona-quote::before {
+    content: '\201C';
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    font-size: 48px;
+    font-style: normal;
+    line-height: 1;
+    opacity: 0.2;
+  }
+
+  .persona-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .persona-metric {
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-light);
+  }
+  .persona-metric .label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+  .persona-metric .value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+  .tech-bar {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 4px;
+  }
+  .tech-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-border);
+  }
+  .tech-dot.filled { background: currentColor; }
+
+  /* ---- SCENARIO ---- */
+  .scenario-box {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .scenario-box h5 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+  .scenario-box p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+
+  /* ---- EMPATHY MAP ---- */
+  .empathy-map {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+  .empathy-quadrant {
+    background: var(--color-surface);
+    padding: 24px;
+  }
+  .empathy-quadrant h5 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .empathy-quadrant ul {
+    list-style: none;
+    padding: 0;
+  }
+  .empathy-quadrant li {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    padding: 4px 0;
+    line-height: 1.5;
+  }
+
+  /* ---- FINDINGS ---- */
+  .findings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .finding-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .finding-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .finding-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 14px;
+  }
+  .finding-card h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .finding-card p,
+  .finding-card li {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  .finding-card ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+  .finding-card li {
+    padding: 3px 0 3px 18px;
+    position: relative;
+  }
+  .finding-card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-border);
+  }
+
+  /* ---- COMPETITIVE ---- */
+  .competitive-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .comp-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .comp-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .comp-card p {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+  .comp-highlight {
+    background: linear-gradient(135deg, var(--color-accent-light), #f0f7ff);
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    font-size: 15px;
+    color: var(--color-text);
+    line-height: 1.65;
+    position: relative;
+  }
+  .comp-highlight strong { color: var(--color-accent); }
+  .comp-highlight::before {
+    content: 'Design Opportunity';
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 8px;
+  }
+
+  /* ---- IMPLICATIONS TABLE ---- */
+  .impl-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .impl-table thead {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+  }
+  .impl-table th {
+    padding: 16px 24px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.8);
+  }
+  .impl-table td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border-light);
+    line-height: 1.55;
+  }
+  .impl-table tbody tr:hover { background: var(--color-bg); }
+  .priority-badge {
+    display: inline-flex;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .priority-p0 {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+  .priority-p1 {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+
+  /* ---- FOOTER ---- */
+  .doc-footer {
+    border-top: 1px solid var(--color-border);
+    padding: 40px 0;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 13px;
+  }
+  .doc-footer strong { color: var(--color-text-secondary); font-weight: 600; }
+
+  /* ---- PERSONA-SPECIFIC ACCENTS ---- */
+  .persona-alex .persona-header { background: var(--color-alex-light); }
+  .persona-alex .persona-avatar { background: var(--color-alex-gradient); }
+  .persona-alex .user-type-badge { background: var(--color-alex); }
+  .persona-alex .persona-quote { background: var(--color-alex-light); }
+  .persona-alex .persona-quote::before { color: var(--color-alex); }
+  .persona-alex .tech-dot.filled { color: var(--color-alex); }
+  .persona-alex .empathy-quadrant h5 { color: var(--color-alex); }
+
+  .persona-sarah .persona-header { background: var(--color-sarah-light); }
+  .persona-sarah .persona-avatar { background: var(--color-sarah-gradient); }
+  .persona-sarah .user-type-badge { background: var(--color-sarah); }
+  .persona-sarah .persona-quote { background: var(--color-sarah-light); }
+  .persona-sarah .persona-quote::before { color: var(--color-sarah); }
+  .persona-sarah .tech-dot.filled { color: var(--color-sarah); }
+  .persona-sarah .empathy-quadrant h5 { color: var(--color-sarah); }
+
+  .persona-marcus .persona-header { background: var(--color-marcus-light); }
+  .persona-marcus .persona-avatar { background: var(--color-marcus-gradient); }
+  .persona-marcus .user-type-badge { background: var(--color-marcus); }
+  .persona-marcus .persona-quote { background: var(--color-marcus-light); }
+  .persona-marcus .persona-quote::before { color: var(--color-marcus); }
+  .persona-marcus .tech-dot.filled { color: var(--color-marcus); }
+  .persona-marcus .empathy-quadrant h5 { color: var(--color-marcus); }
+
+  /* ---- BEHAVIORS ---- */
+  .behavior-list li::before { background: #93c5fd; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 900px) {
+    .method-grid { grid-template-columns: 1fr 1fr; }
+    .persona-grid { grid-template-columns: 1fr; }
+    .persona-metrics { grid-template-columns: 1fr 1fr; }
+    .findings-grid { grid-template-columns: 1fr; }
+    .competitive-grid { grid-template-columns: 1fr; }
+    .doc-header h1 { font-size: 32px; }
+    .persona-header { grid-template-columns: 1fr; justify-items: start; }
+    .container { padding: 0 24px; }
+  }
+  @media (max-width: 600px) {
+    .method-grid { grid-template-columns: 1fr; }
+    .header-meta { flex-direction: column; gap: 8px; }
+    .empathy-map { grid-template-columns: 1fr; }
+    .impl-table { font-size: 12px; }
+    .impl-table th, .impl-table td { padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="doc-header">
+  <div class="header-inner">
+    <div class="header-badge">
+      <span class="dot"></span>
+      UX Research Deliverable
+    </div>
+    <h1>User Personas &amp; Research Synthesis</h1>
+    <p class="subtitle">EaaS Inbound Email Feature</p>
+    <div class="header-meta">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M1 6h14" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        April 1, 2026
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Prepared by: UX Research Team
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 5 6-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/></svg>
+        EaaS Platform
+      </span>
+    </div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="container">
+
+    <!-- ============ 1. METHODOLOGY ============ -->
+    <section class="section">
+      <div class="section-label">Section 01</div>
+      <h2 class="section-title">Research Methodology</h2>
+      <p class="section-subtitle">A multi-method approach combining competitive analysis, developer community research, and pain point synthesis to build evidence-based personas.</p>
+
+      <div class="method-grid">
+        <div class="method-card">
+          <div class="method-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4h14M3 8h10M3 12h12M3 16h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h4>Competitive Analysis</h4>
+          <p>Deep-dive comparison of 6 email infrastructure providers: SendGrid, Postmark, Mailgun, AWS SES, Resend, and AgentMail.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h4>Developer Forum Analysis</h4>
+          <p>Systematic analysis of discussions on Hacker News, Reddit (r/webdev, r/node), and Stack Overflow for inbound email pain points.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 5h12v10H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 8h6M7 11h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <h4>Documentation Review</h4>
+          <p>Evaluated onboarding flows, API reference quality, quickstart guides, and developer experience across all 6 providers.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <h4>Pain Point Synthesis</h4>
+          <p>Aggregated and categorized friction points across setup, integration, monitoring, and ongoing maintenance workflows.</p>
+        </div>
+      </div>
+
+      <div class="method-note">
+        <strong>Note:</strong> Personas are based on the PRD target user segments, enriched with behavioral patterns and pain points identified through community research and competitive analysis.
+      </div>
+    </section>
+
+    <!-- ============ 2. PERSONAS ============ -->
+    <section class="section">
+      <div class="section-label">Section 02</div>
+      <h2 class="section-title">User Personas</h2>
+      <p class="section-subtitle">Three detailed personas representing the core user segments for EaaS inbound email, from hands-on developers to non-technical team leads and AI builders.</p>
+
+      <!-- ---- PERSONA 1: ALEX ---- -->
+      <article class="persona-card persona-alex">
+        <div class="persona-header">
+          <div class="persona-avatar">AC</div>
+          <div class="persona-header-info">
+            <div class="user-type-badge">Primary User</div>
+            <h3>Alex Chen</h3>
+            <p class="persona-role">SaaS Developer &mdash; Full-stack engineer building a helpdesk product</p>
+            <div class="persona-tags">
+              <span class="persona-tag">Age 29</span>
+              <span class="persona-tag">Austin, TX</span>
+              <span class="persona-tag">5 yrs experience</span>
+              <span class="persona-tag">20-person startup</span>
+              <span class="persona-tag">Lead Developer</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-body">
+          <!-- Metrics -->
+          <div class="persona-metrics">
+            <div class="persona-metric">
+              <div class="label">Tech Comfort</div>
+              <div class="value">Expert</div>
+              <div class="tech-bar">
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+              </div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #1</div>
+              <div class="value">API Quality</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #2</div>
+              <div class="value">Price</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #3</div>
+              <div class="value">Documentation</div>
+            </div>
+          </div>
+
+          <!-- Quote -->
+          <div class="persona-quote">
+            I just want to send an email and know when someone replies, without managing MX records and MIME parsers.
+          </div>
+
+          <!-- Details Grid -->
+          <div class="persona-grid">
+            <div>
+              <div class="persona-section-label">Technical Profile</div>
+              <ul class="persona-list">
+                <li>Node.js / TypeScript primary stack</li>
+                <li>React frontend, PostgreSQL database</li>
+                <li>AWS infrastructure</li>
+                <li>REST API consumer</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Goals</div>
+              <ul class="persona-list goal-list">
+                <li>Add reply-by-email to helpdesk product</li>
+                <li>Single vendor for send + receive</li>
+                <li>Ship in 1 sprint, not 3</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Frustrations</div>
+              <ul class="persona-list frustration-list">
+                <li>Currently stitching SendGrid outbound + Mailgun inbound &mdash; 2 vendors, 2 dashboards, no thread linking</li>
+                <li>Mailgun's regex routes are powerful but the docs are confusing</li>
+                <li>SendGrid's multipart/form-data webhook payload is annoying &mdash; wants JSON</li>
+                <li>No way to test inbound without completing full DNS setup</li>
+                <li>MIME parsing is a nightmare &mdash; spent 2 days debugging attachment encoding</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Behaviors</div>
+              <ul class="persona-list behavior-list">
+                <li>Reads docs before signing up</li>
+                <li>Evaluates API design quality in first 5 minutes</li>
+                <li>Checks GitHub stars and npm downloads</li>
+                <li>Wants quickstart guide under 5 minutes</li>
+                <li>Will leave if setup takes &gt; 30 minutes</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Scenario -->
+          <div class="scenario-box">
+            <h5>Key Scenario</h5>
+            <p>Alex needs to add reply-by-email to the helpdesk. Customer sends support ticket via email, agent replies through app, customer replies back via email &mdash; this reply needs to appear in the ticket thread. Currently this requires 2 email providers, custom MIME parsing, and manual In-Reply-To header tracking.</p>
+          </div>
+
+          <!-- Empathy Map -->
+          <div class="persona-section-label" style="margin-bottom: 12px;">Empathy Map</div>
+          <div class="empathy-map">
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12c0-2 2-3 4-4s4-2 4-4-1.5-3-4-3S2 2 2 4s2 2 4 4 4 2 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Says
+              </h5>
+              <ul>
+                <li>"Why do I need two providers for sending and receiving?"</li>
+                <li>"The docs are outdated, this example doesn't work."</li>
+                <li>"Just give me clean JSON, not multipart form data."</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><circle cx="6" cy="7" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><path d="M6 10c.5.8 1.5 1 2 1s1.5-.2 2-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Thinks
+              </h5>
+              <ul>
+                <li>"Email shouldn't be this hard in 2026."</li>
+                <li>"I could build this myself... but it'll take months."</li>
+                <li>"If I can't get this working today, I'm trying another provider."</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h2l2-4 2 8 2-4h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Does
+              </h5>
+              <ul>
+                <li>Reads entire quickstart before writing any code</li>
+                <li>Tests webhook payload in Postman first</li>
+                <li>Searches GitHub issues for edge cases before committing to a provider</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3C5.5 3 3 5 3 8s2.5 5 5 5 5-2 5-5-2.5-5-5-5z" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg>
+                Feels
+              </h5>
+              <ul>
+                <li>Frustrated by fragmented tooling that should be unified</li>
+                <li>Anxious about MIME edge cases breaking in production</li>
+                <li>Excited when an API "just works" on first try</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ---- PERSONA 2: SARAH ---- -->
+      <article class="persona-card persona-sarah">
+        <div class="persona-header">
+          <div class="persona-avatar">SM</div>
+          <div class="persona-header-info">
+            <div class="user-type-badge">Secondary User</div>
+            <h3>Sarah Martinez</h3>
+            <p class="persona-role">Support Team Lead &mdash; Customer Support Manager at mid-size e-commerce</p>
+            <div class="persona-tags">
+              <span class="persona-tag">Age 34</span>
+              <span class="persona-tag">Chicago, IL</span>
+              <span class="persona-tag">8 yrs in support</span>
+              <span class="persona-tag">200 employees</span>
+              <span class="persona-tag">Manages 12-person team</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-body">
+          <div class="persona-metrics">
+            <div class="persona-metric">
+              <div class="label">Tech Comfort</div>
+              <div class="value">Basic</div>
+              <div class="tech-bar">
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot"></span>
+                <span class="tech-dot"></span>
+                <span class="tech-dot"></span>
+              </div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #1</div>
+              <div class="value">Ease of Use</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #2</div>
+              <div class="value">Dashboard</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #3</div>
+              <div class="value">Reliability</div>
+            </div>
+          </div>
+
+          <div class="persona-quote">
+            I need to see every email that comes in and know it got to the right person.
+          </div>
+
+          <div class="persona-grid">
+            <div>
+              <div class="persona-section-label">Technical Profile</div>
+              <ul class="persona-list">
+                <li>Non-technical &mdash; does not write code</li>
+                <li>Uses Zendesk, Slack, Google Workspace daily</li>
+                <li>Comfortable with web dashboards</li>
+                <li>Relies on engineering for integrations</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Goals</div>
+              <ul class="persona-list goal-list">
+                <li>Route support@, billing@, returns@ to different teams automatically</li>
+                <li>Monitor inbound email volume and response times</li>
+                <li>Reduce missed emails &mdash; currently 5&ndash;10 per week fall through cracks in shared Gmail</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Frustrations</div>
+              <ul class="persona-list frustration-list">
+                <li>Shared Gmail inbox is chaos &mdash; no routing, no analytics, emails get lost</li>
+                <li>Can't see which emails triggered webhooks vs which failed</li>
+                <li>No visibility into email volume trends or response times</li>
+                <li>DNS/MX record setup is intimidating &mdash; needs engineering help for everything</li>
+                <li>Existing tools don't show conversation threads across sent + received</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Behaviors</div>
+              <ul class="persona-list behavior-list">
+                <li>Needs intuitive UI &mdash; won't adopt tools that require reading docs</li>
+                <li>Evaluates tools by "can I do this without asking engineering?"</li>
+                <li>Tests with real support emails immediately</li>
+                <li>Wants drag-and-drop or visual rule builder</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="scenario-box">
+            <h5>Key Scenario</h5>
+            <p>Sarah receives 500 support emails per day. She needs support@ routed to Zendesk webhook, billing@ forwarded to accounting team's email, and returns@ stored for daily batch processing. She wants a dashboard showing real-time volume, failed deliveries, and top senders.</p>
+          </div>
+
+          <div class="persona-section-label" style="margin-bottom: 12px;">Empathy Map</div>
+          <div class="empathy-map">
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12c0-2 2-3 4-4s4-2 4-4-1.5-3-4-3S2 2 2 4s2 2 4 4 4 2 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Says
+              </h5>
+              <ul>
+                <li>"Another email fell through the cracks this week."</li>
+                <li>"I shouldn't need to file a Jira ticket to change a routing rule."</li>
+                <li>"Where do I see which emails failed?"</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><circle cx="6" cy="7" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><path d="M6 10c.5.8 1.5 1 2 1s1.5-.2 2-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Thinks
+              </h5>
+              <ul>
+                <li>"Email management shouldn't require an engineering degree."</li>
+                <li>"If I had proper analytics, I could justify hiring another agent."</li>
+                <li>"I wish I could just drag emails to the right team."</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h2l2-4 2 8 2-4h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Does
+              </h5>
+              <ul>
+                <li>Manually checks shared Gmail every 30 minutes for missed emails</li>
+                <li>Keeps a spreadsheet to track volume because no tool provides it</li>
+                <li>Asks engineering for every configuration change</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3C5.5 3 3 5 3 8s2.5 5 5 5 5-2 5-5-2.5-5-5-5z" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg>
+                Feels
+              </h5>
+              <ul>
+                <li>Overwhelmed by email volume without proper tooling</li>
+                <li>Dependent on engineering, which slows her team down</li>
+                <li>Empowered when she can self-serve configuration changes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ---- PERSONA 3: MARCUS ---- -->
+      <article class="persona-card persona-marcus">
+        <div class="persona-header">
+          <div class="persona-avatar">MT</div>
+          <div class="persona-header-info">
+            <div class="user-type-badge">Emerging User</div>
+            <h3>Marcus Thompson</h3>
+            <p class="persona-role">AI Agent Builder &mdash; CTO &amp; Co-founder of AI customer service startup</p>
+            <div class="persona-tags">
+              <span class="persona-tag">Age 31</span>
+              <span class="persona-tag">San Francisco, CA</span>
+              <span class="persona-tag">7 yrs in tech</span>
+              <span class="persona-tag">5-person startup</span>
+              <span class="persona-tag">Technical Co-founder</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-body">
+          <div class="persona-metrics">
+            <div class="persona-metric">
+              <div class="label">Tech Comfort</div>
+              <div class="value">Expert</div>
+              <div class="tech-bar">
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+                <span class="tech-dot filled"></span>
+              </div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #1</div>
+              <div class="value">API Completeness</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #2</div>
+              <div class="value">Reliability</div>
+            </div>
+            <div class="persona-metric">
+              <div class="label">Priority #3</div>
+              <div class="value">Persistent Storage</div>
+            </div>
+          </div>
+
+          <div class="persona-quote">
+            My agents need to read, understand, and respond to emails autonomously.
+          </div>
+
+          <div class="persona-grid">
+            <div>
+              <div class="persona-section-label">Technical Profile</div>
+              <ul class="persona-list">
+                <li>Python, LangChain / LangGraph</li>
+                <li>OpenAI / Anthropic APIs</li>
+                <li>PostgreSQL, Docker</li>
+                <li>Building AI agents with email read/write capabilities</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Goals</div>
+              <ul class="persona-list goal-list">
+                <li>Give AI agents email read/write capabilities</li>
+                <li>Persistent inbox &mdash; agents need to search past emails for context</li>
+                <li>Structured data extraction &mdash; parse order numbers, dates, amounts</li>
+                <li>Ship MVP in 2 weeks, not 2 months</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Frustrations</div>
+              <ul class="persona-list frustration-list">
+                <li>Building custom SMTP receiving infrastructure is a 2-month project &mdash; not core business</li>
+                <li>Most email APIs are stateless webhooks &mdash; agents need persistent access to email history</li>
+                <li>No email API has native AI/MCP integration</li>
+                <li>Attachment handling is unreliable across providers</li>
+                <li>Threading is manual &mdash; has to build In-Reply-To tracking from scratch</li>
+              </ul>
+            </div>
+            <div>
+              <div class="persona-section-label">Behaviors</div>
+              <ul class="persona-list behavior-list">
+                <li>Evaluates by API design and SDK quality</li>
+                <li>Needs Python SDK or clean REST</li>
+                <li>Will pay premium for "it just works" reliability</li>
+                <li>Evaluates new tools on Product Hunt and Hacker News</li>
+                <li>Values startups over enterprise vendors</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="scenario-box">
+            <h5>Key Scenario</h5>
+            <p>Marcus's AI agent receives customer emails, extracts order numbers, checks order status in their database, drafts a response, and sends it &mdash; all autonomously. Needs persistent inbox to search past conversations for context when handling follow-up queries.</p>
+          </div>
+
+          <div class="persona-section-label" style="margin-bottom: 12px;">Empathy Map</div>
+          <div class="empathy-map">
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 12c0-2 2-3 4-4s4-2 4-4-1.5-3-4-3S2 2 2 4s2 2 4 4 4 2 4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Says
+              </h5>
+              <ul>
+                <li>"I need an inbox my AI agent can query, not a webhook it has to catch."</li>
+                <li>"Why is there no Python SDK for this?"</li>
+                <li>"Email infra is not my competitive advantage &mdash; I need to outsource it."</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><circle cx="6" cy="7" r="1" fill="currentColor"/><circle cx="10" cy="7" r="1" fill="currentColor"/><path d="M6 10c.5.8 1.5 1 2 1s1.5-.2 2-1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Thinks
+              </h5>
+              <ul>
+                <li>"If I spend 2 months on email infra, a competitor ships the agent first."</li>
+                <li>"The AI agent market is moving so fast &mdash; I need to ship now."</li>
+                <li>"Persistent storage is table stakes for agentic workflows."</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h2l2-4 2 8 2-4h2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Does
+              </h5>
+              <ul>
+                <li>Prototypes integrations in Jupyter notebooks before committing</li>
+                <li>Checks if providers offer MCP/tool-use integration</li>
+                <li>Benchmarks API latency for real-time agent response flows</li>
+              </ul>
+            </div>
+            <div class="empathy-quadrant">
+              <h5>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3C5.5 3 3 5 3 8s2.5 5 5 5 5-2 5-5-2.5-5-5-5z" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r=".7" fill="currentColor"/></svg>
+                Feels
+              </h5>
+              <ul>
+                <li>Impatient with infrastructure that slows down agent development</li>
+                <li>Excited by the potential of AI-native email tooling</li>
+                <li>Confident that the right API can accelerate shipping by 10x</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ 3. KEY FINDINGS ============ -->
+    <section class="section">
+      <div class="section-label">Section 03</div>
+      <h2 class="section-title">Research Synthesis &mdash; Key Findings</h2>
+      <p class="section-subtitle">Six critical findings from competitive analysis, developer community research, and pain point synthesis that directly inform our product strategy.</p>
+
+      <div class="findings-grid">
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-1);">1</div>
+          <h4>The "Two-Vendor Problem"</h4>
+          <p>Most developers use separate providers for outbound and inbound email. This creates:</p>
+          <ul>
+            <li>Double the vendor management, billing, documentation</li>
+            <li>No thread linking between sent and received emails</li>
+            <li>Inconsistent payload formats across providers</li>
+            <li>Fragmented monitoring (2 dashboards)</li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-2);">2</div>
+          <h4>MIME Parsing Is the #1 Developer Pain Point</h4>
+          <p>Developers consistently cite MIME parsing as the most frustrating part of inbound email:</p>
+          <ul>
+            <li>Diverse email clients produce wildly different MIME structures</li>
+            <li>Attachment encoding issues (base64 vs URL-encoded vs raw)</li>
+            <li>Inline images (CID references) are especially problematic</li>
+            <li>"Given the diversity of email apps, human languages, and formatting possibilities, it is impossible to guarantee 100% success rate"</li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-3);">3</div>
+          <h4>Stateless Webhooks Are Not Enough</h4>
+          <p>Most providers (SendGrid, Postmark, Mailgun) treat inbound as fire-and-forget webhooks:</p>
+          <ul>
+            <li>No persistent storage &mdash; if your webhook is down, emails are lost (after retry window)</li>
+            <li>No inbox viewer &mdash; can't review what was received</li>
+            <li>No threading &mdash; must build conversation tracking yourself</li>
+            <li>No search &mdash; can't query past emails</li>
+          </ul>
+          <p style="margin-top: 10px; font-style: italic; font-size: 13px;">Only Resend (2025) and AgentMail (2026) offer persistent inbound storage.</p>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-4);">4</div>
+          <h4>Setup Friction Blocks Adoption</h4>
+          <p>MX record configuration is the biggest barrier to inbound email adoption:</p>
+          <ul>
+            <li>DNS propagation takes 15&ndash;72 hours &mdash; developers can't test immediately</li>
+            <li>No provider offers instant testing without DNS setup (except Postmark's unique inbound address)</li>
+            <li>Error messages for DNS misconfiguration are poor</li>
+            <li>Provider-specific DNS guides are rare &mdash; developers Google "how to add MX record in Cloudflare"</li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-5);">5</div>
+          <h4>Non-Technical Users Need Visual Rule Builders</h4>
+          <p>Support team leads need to manage routing rules without engineering help:</p>
+          <ul>
+            <li>Mailgun's regex-based routes are powerful but intimidating for non-developers</li>
+            <li>Most providers don't offer a visual rule builder</li>
+            <li>Pattern matching UI needs to be as simple as Gmail filters</li>
+            <li>Drag-and-drop priority ordering is expected</li>
+          </ul>
+        </div>
+
+        <div class="finding-card">
+          <div class="finding-badge" style="background: var(--color-finding-6);">6</div>
+          <h4>AI Agents Are a New, Growing User Segment</h4>
+          <p>The AI agent builder persona represents a fast-growing category:</p>
+          <ul>
+            <li>AgentMail raised $6M (March 2026) specifically for AI agent email infrastructure</li>
+            <li>Inbound.new launched MCP server integration for AI assistants</li>
+            <li>AI agents need persistent inboxes, not stateless webhooks</li>
+            <li>Structured data extraction from email content is a key need</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 4. COMPETITIVE UX ============ -->
+    <section class="section">
+      <div class="section-label">Section 04</div>
+      <h2 class="section-title">Competitive UX Analysis</h2>
+      <p class="section-subtitle">Dashboard experience comparison across 6 providers, identifying design opportunities for EaaS.</p>
+
+      <div class="competitive-grid">
+        <div class="comp-card">
+          <h4>SendGrid</h4>
+          <p>Stats-only, no inbox. Setup requires separate DNS management. Dated UI. Functional but uninspiring developer experience.</p>
+        </div>
+        <div class="comp-card">
+          <h4>Postmark</h4>
+          <p>Best documentation UX. Activity feed with retry. Clean but functional, not modern. Gold standard for onboarding guides.</p>
+        </div>
+        <div class="comp-card">
+          <h4>Mailgun</h4>
+          <p>Best routing flexibility (regex). UI is functional but complex. Receiving tab buried in navigation. Power without polish.</p>
+        </div>
+        <div class="comp-card">
+          <h4>AWS SES</h4>
+          <p>No UI for inbound. Console-based rule configuration. Maximum flexibility, worst UX. Enterprise-only adoption path.</p>
+        </div>
+        <div class="comp-card">
+          <h4>Resend</h4>
+          <p>Best dashboard (2025). Inbox viewer, modern design, Linear-style interface. Gold standard for developer experience and visual design.</p>
+        </div>
+        <div class="comp-card">
+          <h4>AgentMail</h4>
+          <p>API-first with dashboard. AI-native features. Too new for full UX assessment, but targeting the emerging agent builder segment.</p>
+        </div>
+      </div>
+
+      <div class="comp-highlight">
+        Combine <strong>Resend's modern dashboard aesthetic</strong> with <strong>Mailgun's routing power</strong> and <strong>Postmark's documentation quality</strong>. Add persistent inbox and thread view &mdash; features no provider fully delivers. This is the design opportunity for EaaS.
+      </div>
+    </section>
+
+    <!-- ============ 5. DESIGN IMPLICATIONS ============ -->
+    <section class="section">
+      <div class="section-label">Section 05</div>
+      <h2 class="section-title">Design Implications</h2>
+      <p class="section-subtitle">Translating research findings into concrete design priorities for the EaaS inbound email feature.</p>
+
+      <table class="impl-table">
+        <thead>
+          <tr>
+            <th style="width: 5%;">#</th>
+            <th style="width: 30%;">Finding</th>
+            <th style="width: 45%;">Design Implication</th>
+            <th style="width: 20%;">Priority</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>Two-vendor problem</td>
+            <td>Unified send + receive dashboard with thread view</td>
+            <td><span class="priority-badge priority-p0">P0</span></td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>MIME parsing pain</td>
+            <td>Invisible to user &mdash; just show parsed content, offer raw view toggle</td>
+            <td><span class="priority-badge priority-p0">P0</span></td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>Stateless webhooks</td>
+            <td>Persistent inbox with 90-day default retention</td>
+            <td><span class="priority-badge priority-p0">P0</span></td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>Setup friction</td>
+            <td>5-step wizard with auto-verification and instant test address</td>
+            <td><span class="priority-badge priority-p0">P0</span></td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td>Non-technical users</td>
+            <td>Visual rule builder (not regex-only), drag-and-drop priority</td>
+            <td><span class="priority-badge priority-p1">P1</span></td>
+          </tr>
+          <tr>
+            <td><strong>6</strong></td>
+            <td>AI agents</td>
+            <td>API-first design, persistent storage, structured data in responses</td>
+            <td><span class="priority-badge priority-p1">P1</span></td>
+          </tr>
+          <tr>
+            <td><strong>7</strong></td>
+            <td>Poor documentation</td>
+            <td>Interactive API docs with code examples in 4 languages</td>
+            <td><span class="priority-badge priority-p1">P1</span></td>
+          </tr>
+          <tr>
+            <td><strong>8</strong></td>
+            <td>No conversation threads</td>
+            <td>Thread view linking sent + received with chronological timeline</td>
+            <td><span class="priority-badge priority-p0">P0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="doc-footer">
+  <div class="container">
+    <p><strong>EaaS Inbound Email</strong> &mdash; User Personas &amp; Research Synthesis</p>
+    <p style="margin-top: 4px;">UX Research Team &bull; April 1, 2026 &bull; Confidential</p>
+  </div>
+</footer>
+
+</body>
+</html>

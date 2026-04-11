@@ -1,5 +1,6 @@
 using EaaS.Api.Features.Domains;
 using EaaS.Api.Tests.Helpers;
+using EaaS.Domain.Exceptions;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using FluentAssertions;
@@ -13,13 +14,21 @@ public sealed class AddDomainHandlerTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
     private readonly IDomainIdentityService _emailDeliveryService;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
     private readonly AddDomainHandler _sut;
 
     public AddDomainHandlerTests()
     {
         _dbContext = DbContextFactory.Create();
         _emailDeliveryService = Substitute.For<IDomainIdentityService>();
-        _sut = new AddDomainHandler(_dbContext, _emailDeliveryService);
+        _subscriptionLimitService = Substitute.For<ISubscriptionLimitService>();
+
+        // Default: allow adding domains
+        _subscriptionLimitService.CanAddDomainAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger<EaaS.Api.Features.Domains.AddDomainHandler>>();
+        _sut = new AddDomainHandler(_dbContext, _emailDeliveryService, _subscriptionLimitService, logger);
     }
 
     [Fact]
@@ -74,6 +83,22 @@ public sealed class AddDomainHandlerTests : IDisposable
 
         savedDomain.Should().NotBeNull();
         savedDomain!.DnsRecords.Should().HaveCount(4);
+    }
+
+    [Fact]
+    public async Task Should_ThrowQuotaExceeded_WhenCanAddDomainIsFalse()
+    {
+        _subscriptionLimitService.CanAddDomainAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var command = TestDataBuilders.AddDomain()
+            .WithDomainName("newdomain.com")
+            .Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<QuotaExceededException>()
+            .WithMessage("*Maximum domains reached*");
     }
 
     public void Dispose()

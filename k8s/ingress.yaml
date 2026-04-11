@@ -1,0 +1,62 @@
+# Nginx Ingress for EaaS
+# Routes API and webhook traffic to their respective services
+# TLS terminated at the ingress via cert-manager
+# Rate limited to 100 req/s per IP to protect against abuse
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eaas-ingress
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-ingress
+    app.kubernetes.io/part-of: eaas
+  annotations:
+    # TLS via cert-manager with Let's Encrypt
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Nginx ingress controller settings
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Rate limiting: 100 requests per second per client IP
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+    nginx.ingress.kubernetes.io/limit-connections: "50"
+    # 35MB body size for emails with attachments
+    nginx.ingress.kubernetes.io/proxy-body-size: "35m"
+    # CORS headers for dashboard/client integrations
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.eaas.dev"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, X-Api-Key, X-Request-Id"
+    nginx.ingress.kubernetes.io/cors-max-age: "3600"
+    # Timeouts tuned for email operations
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.eaas.dev
+        - webhooks.eaas.dev
+      secretName: eaas-tls
+  rules:
+    - host: api.eaas.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eaas-api
+                port:
+                  name: http
+    - host: webhooks.eaas.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eaas-webhook-processor
+                port:
+                  name: http

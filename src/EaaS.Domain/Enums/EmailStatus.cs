@@ -8,5 +8,6 @@ public enum EmailStatus
     Delivered,
     Bounced,
     Complained,
-    Failed
+    Failed,
+    Scheduled
 }

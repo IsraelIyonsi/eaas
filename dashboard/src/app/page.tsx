@@ -1,7 +1,11 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { extractItems } from "@/lib/utils/api-response";
+
+import { useEmails, useEmailEvents } from "@/lib/hooks/use-emails";
+import { useAnalyticsSummary, useAnalyticsTimeline } from "@/lib/hooks/use-analytics";
+import { useHealth } from "@/lib/hooks/use-health";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/overview/stat-card";
 import { HealthStatus } from "@/components/overview/health-status";
 import { SendVolumeChart } from "@/components/analytics/charts";
@@ -15,7 +19,6 @@ import {
   MousePointerClick,
   AlertTriangle,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import type { Email } from "@/types";
@@ -23,48 +26,25 @@ import type { Email } from "@/types";
 export default function OverviewPage() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["analytics", "summary"],
-    queryFn: () => api.getAnalyticsSummary(),
-  });
-
-  const { data: timeline, isLoading: timelineLoading } = useQuery({
-    queryKey: ["analytics", "timeline"],
-    queryFn: () => api.getAnalyticsTimeline("day"),
-  });
-
-  const { data: emails, isLoading: emailsLoading } = useQuery({
-    queryKey: ["emails", "recent"],
-    queryFn: () => api.getEmails({ page: 1, page_size: 10 }),
-  });
-
-  const { data: health } = useQuery({
-    queryKey: ["health"],
-    queryFn: () => api.getHealth(),
-    refetchInterval: 30000,
-  });
-
-  const { data: events } = useQuery({
-    queryKey: ["email-events", selectedEmail?.id],
-    queryFn: () =>
-      selectedEmail ? api.getEmailEvents(selectedEmail) : Promise.resolve([]),
-    enabled: !!selectedEmail,
-  });
+  const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary();
+  const { data: timeline, isLoading: timelineLoading } = useAnalyticsTimeline({ granularity: 'day' });
+  const { data: emails, isLoading: emailsLoading } = useEmails({ page: 1, page_size: 10 });
+  const { data: health } = useHealth();
+  const { data: events } = useEmailEvents(selectedEmail?.id);
 
   if (summaryLoading) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-xl font-bold text-white">Overview</h1>
-          <p className="text-sm text-white/50">
-            System health and email sending activity at a glance.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <div className="space-y-5">
+        <PageHeader
+          title="Overview"
+          description="System health and email sending activity at a glance."
+        />
+        {/* Hi-fi: 3 columns, 16px gap */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton
               key={i}
-              className="h-[120px] rounded-lg bg-white/5"
+              className="h-[120px] rounded-lg bg-muted"
             />
           ))}
         </div>
@@ -73,60 +53,48 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-xl font-bold text-white">Overview</h1>
-        <p className="text-sm text-white/50">
-          System health and email sending activity at a glance.
-        </p>
-      </div>
+      <PageHeader
+        title="Overview"
+        description="System health and email sending activity at a glance."
+      />
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      {/* Stat Cards — hi-fi: grid 3 columns, 16px gap (2 rows of 3) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Sent Today"
           value={summary?.total_sent.toLocaleString() ?? "0"}
           icon={Send}
-          trend="up"
-          trendValue="+12.5%"
-          color="#7C4DFF"
+          color="var(--primary)"
           tooltip="Total emails accepted by the API and enqueued for delivery in the selected period."
         />
         <StatCard
           title="Delivery Rate"
           value={`${summary?.delivery_rate.toFixed(1) ?? "0"}%`}
           icon={CheckCircle2}
-          trend="up"
-          trendValue="+0.3%"
-          color="#00E676"
+          color="var(--chart-2)"
           tooltip="Percentage of sent emails confirmed delivered by the recipient's mail server."
         />
         <StatCard
           title="Bounce Rate"
           value={`${summary?.bounce_rate.toFixed(2) ?? "0"}%`}
           icon={XCircle}
-          trend="down"
-          trendValue="-0.1%"
-          color="#FF5252"
+          color="var(--destructive)"
           tooltip="Percentage of sent emails permanently rejected. Keep below 2% to protect sender reputation."
         />
         <StatCard
           title="Open Rate"
           value={`${summary?.open_rate.toFixed(1) ?? "0"}%`}
           icon={Eye}
-          trend="up"
-          trendValue="+2.1%"
-          color="#7C4DFF"
+          color="var(--primary)"
           tooltip="Percentage of delivered emails where the tracking pixel was loaded. Undercounts due to image blocking."
         />
         <StatCard
           title="Click Rate"
           value={`${summary?.click_rate.toFixed(1) ?? "0"}%`}
           icon={MousePointerClick}
-          trend="up"
-          trendValue="+1.4%"
-          color="#00E5FF"
+          color="var(--chart-1)"
           tooltip="Percentage of delivered emails where at least one tracked link was clicked."
         />
         <StatCard
@@ -134,18 +102,16 @@ export default function OverviewPage() {
           value={summary?.complained ?? 0}
           subtitle={`${summary?.complaint_rate.toFixed(2) ?? "0"}% rate`}
           icon={AlertTriangle}
-          trend="flat"
-          trendValue="0.0%"
-          color="#FFD740"
+          color="var(--chart-3)"
           tooltip="Percentage of delivered emails marked as spam by recipients. SES suspends at 0.1%."
         />
       </div>
 
-      {/* Charts + Health Row */}
+      {/* Charts + Health Row — hi-fi: 2/3 chart, 1/3 health */}
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {timelineLoading ? (
-            <Skeleton className="h-[340px] rounded-lg bg-white/5" />
+            <Skeleton className="h-[340px] rounded-lg bg-muted" />
           ) : (
             <SendVolumeChart data={timeline?.points ?? []} />
           )}
@@ -153,22 +119,22 @@ export default function OverviewPage() {
         <div>{health && <HealthStatus health={health} />}</div>
       </div>
 
-      {/* Recent Emails */}
-      <Card className="border-white/10 bg-[#1E1E2E] shadow-none">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-white">
+      {/* Recent Emails — hi-fi: card wrapper with border, shadow-sm */}
+      <div className="data-table-wrap">
+        <div className="border-b border-border px-[14px] py-[10px]">
+          <h3 className="text-sm font-semibold text-foreground">
             Recent Emails
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
+          </h3>
+        </div>
+        <div>
           {emailsLoading ? (
             <div className="p-6">
-              <Skeleton className="h-[200px] bg-white/5" />
+              <Skeleton className="h-[200px] bg-muted" />
             </div>
           ) : (
             <EmailTable
-              emails={emails?.items ?? []}
-              total={emails?.total ?? 0}
+              emails={extractItems(emails)}
+              total={emails?.totalCount ?? 0}
               page={1}
               pageSize={10}
               totalPages={1}
@@ -177,8 +143,8 @@ export default function OverviewPage() {
               compact
             />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Email Detail Sheet */}
       <EmailDetailSheet

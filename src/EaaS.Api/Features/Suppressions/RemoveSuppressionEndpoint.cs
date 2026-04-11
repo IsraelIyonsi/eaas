@@ -21,7 +21,6 @@ public static class RemoveSuppressionEndpoint
         .WithName("RemoveSuppression")
         .WithSummary("Remove an email address from the suppression list")
         .WithDescription("Removes a suppression entry from the database and Redis cache.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }

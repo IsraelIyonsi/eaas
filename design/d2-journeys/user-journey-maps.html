@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Journey Maps — Inbound Email Feature | EaaS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --border-light: #f0f0f0;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --green: #059669;
+    --green-bg: #ecfdf5;
+    --green-border: #a7f3d0;
+    --yellow: #d97706;
+    --yellow-bg: #fffbeb;
+    --yellow-border: #fde68a;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --red-border: #fecaca;
+    --blue: #2563eb;
+    --blue-bg: #eff6ff;
+    --blue-border: #bfdbfe;
+    --purple: #7c3aed;
+    --purple-bg: #f5f3ff;
+    --purple-border: #ddd6fe;
+    --orange: #ea580c;
+    --orange-bg: #fff7ed;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- HEADER ---- */
+  .doc-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+    color: white;
+    padding: 64px 48px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .doc-header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .doc-header::after {
+    content: '';
+    position: absolute;
+    bottom: -120px; left: 30%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(129,140,248,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .header-badge .dot {
+    width: 6px; height: 6px;
+    background: #a5b4fc;
+    border-radius: 50%;
+  }
+  .doc-header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .doc-header .subtitle {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.7);
+    position: relative;
+    z-index: 1;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 28px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-meta span {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+  }
+  .header-meta strong {
+    color: rgba(255,255,255,0.9);
+    font-weight: 600;
+  }
+
+  /* ---- MAIN CONTENT ---- */
+  .content {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 48px 48px 80px;
+  }
+
+  /* ---- SECTION TITLES ---- */
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--accent);
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 32px;
+    margin-top: 56px;
+  }
+  .section-title:first-child { margin-top: 0; }
+  .section-title h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+
+  /* ---- JOURNEY MAP CARD ---- */
+  .journey-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 48px;
+    overflow: hidden;
+  }
+  .journey-header {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .persona-avatar {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+  }
+  .persona-avatar.alex { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
+  .persona-avatar.sarah { background: linear-gradient(135deg, #059669, #0d9488); }
+  .persona-avatar.marcus { background: linear-gradient(135deg, #ea580c, #dc2626); }
+  .persona-info h3 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .persona-info .journey-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* ---- TIMELINE / SWIMLANE ---- */
+  .journey-timeline-wrapper {
+    overflow-x: auto;
+    padding: 0 0 16px;
+  }
+  .journey-timeline {
+    display: grid;
+    min-width: 1200px;
+    padding: 0;
+  }
+  /* Dynamic column template set per journey via inline style */
+
+  /* Stage headers row */
+  .stage-headers {
+    display: contents;
+  }
+  .stage-header {
+    padding: 20px 16px;
+    text-align: center;
+    border-bottom: 3px solid var(--accent);
+    position: relative;
+  }
+  .stage-number {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .stage-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  /* connector dot between stages */
+  .stage-header::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 11px; height: 11px;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    z-index: 2;
+  }
+
+  /* Swimlane rows */
+  .swimlane-row {
+    display: contents;
+  }
+  .swimlane-label {
+    padding: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-light);
+    border-right: 2px solid;
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+    z-index: 1;
+    min-width: 130px;
+  }
+  .swimlane-label .lane-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .swimlane-label.actions { border-right-color: var(--blue); color: var(--blue); }
+  .swimlane-label.touchpoints { border-right-color: var(--purple); color: var(--purple); }
+  .swimlane-label.thoughts { border-right-color: #6366f1; color: #6366f1; }
+  .swimlane-label.emotions { border-right-color: var(--yellow); color: var(--yellow); }
+  .swimlane-label.pain-points { border-right-color: var(--red); color: var(--red); }
+  .swimlane-label.opportunities { border-right-color: var(--green); color: var(--green); }
+
+  .swimlane-cell {
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-light);
+    border-right: 1px solid var(--border-light);
+  }
+  .swimlane-cell:last-child { border-right: none; }
+
+  /* Row-specific cell backgrounds */
+  .row-actions .swimlane-cell { background: #fafbff; }
+  .row-touchpoints .swimlane-cell { background: var(--purple-bg); opacity: 0.9; }
+  .row-thoughts .swimlane-cell {
+    background: #fafafe;
+    font-style: italic;
+    color: #4b5563;
+  }
+  .row-thoughts .swimlane-cell::before { content: '\201C'; font-weight: 700; color: #a5b4fc; }
+  .row-thoughts .swimlane-cell::after { content: '\201D'; font-weight: 700; color: #a5b4fc; }
+  .row-emotions .swimlane-cell { background: var(--yellow-bg); }
+  .row-pain-points .swimlane-cell {
+    background: var(--red-bg);
+    border-left: 3px solid var(--red-border);
+  }
+  .row-opportunities .swimlane-cell {
+    background: var(--green-bg);
+    border-left: 3px solid var(--green-border);
+  }
+
+  /* Emotion badges */
+  .emotion-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .emotion-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    font-style: normal;
+    white-space: nowrap;
+  }
+  .emotion-badge.positive { background: #d1fae5; color: #065f46; }
+  .emotion-badge.neutral { background: #fef3c7; color: #92400e; }
+  .emotion-badge.negative { background: #fee2e2; color: #991b1b; }
+  .emotion-arrow {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Touchpoint pills */
+  .tp-pill {
+    display: inline-block;
+    background: rgba(124,58,237,0.08);
+    color: #5b21b6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin: 2px 2px 2px 0;
+    white-space: nowrap;
+  }
+
+  /* ---- EMOTION CURVE ---- */
+  .emotion-curve-section {
+    margin-top: 56px;
+  }
+  .emotion-curves-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  @media (max-width: 1200px) {
+    .emotion-curves-grid { grid-template-columns: 1fr; }
+  }
+  .curve-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+  }
+  .curve-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .curve-persona-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .curve-persona-dot.alex { background: #4f46e5; }
+  .curve-persona-dot.sarah { background: #059669; }
+  .curve-persona-dot.marcus { background: #ea580c; }
+
+  .curve-chart {
+    position: relative;
+    height: 200px;
+    margin: 0 8px;
+  }
+  .curve-y-axis {
+    position: absolute;
+    left: -8px;
+    top: 0;
+    bottom: 30px;
+    width: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .curve-y-label {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transform: translateX(-100%) translateX(-8px);
+    white-space: nowrap;
+  }
+  .curve-y-label.high { color: var(--green); }
+  .curve-y-label.mid { color: var(--yellow); }
+  .curve-y-label.low { color: var(--red); }
+
+  .curve-grid-lines {
+    position: absolute;
+    left: 0; right: 0;
+    top: 0;
+    bottom: 30px;
+  }
+  .curve-grid-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--border-light);
+  }
+  .curve-grid-line.top { top: 0; }
+  .curve-grid-line.mid { top: 50%; }
+  .curve-grid-line.bot { top: 100%; }
+  .curve-grid-line.mid { border-top: 1px dashed #e5e7eb; background: none; }
+
+  .curve-svg {
+    position: absolute;
+    left: 0; right: 0;
+    top: 0;
+    bottom: 30px;
+    width: 100%;
+    height: calc(100% - 30px);
+  }
+  .curve-labels {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 28px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .curve-stage-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    flex: 1;
+    letter-spacing: -0.2px;
+  }
+
+  /* ---- INSIGHTS SECTION ---- */
+  .insights-section {
+    margin-top: 56px;
+  }
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  @media (max-width: 1000px) {
+    .insights-grid { grid-template-columns: 1fr; }
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .insight-card.pain::before { background: linear-gradient(90deg, #dc2626, #f87171); }
+  .insight-card.delight::before { background: linear-gradient(90deg, #059669, #34d399); }
+  .insight-card.decisions::before { background: linear-gradient(90deg, #4f46e5, #818cf8); }
+  .insight-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .insight-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .insight-icon.pain { background: var(--red-bg); }
+  .insight-icon.delight { background: var(--green-bg); }
+  .insight-icon.decisions { background: var(--accent-light); }
+  .insight-list {
+    list-style: none;
+  }
+  .insight-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .insight-list li:last-child { border-bottom: none; }
+  .insight-list .num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .insight-list.pain .num { background: var(--red-bg); color: var(--red); }
+  .insight-list.delight .num { background: var(--green-bg); color: var(--green); }
+  .insight-list.decisions .num { background: var(--accent-light); color: var(--accent); }
+
+  /* Full-width decisions card */
+  .insight-card.decisions-full {
+    grid-column: 1 / -1;
+  }
+  .decisions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    list-style: none;
+  }
+  .decisions-list li {
+    padding: 14px 16px;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: #3730a3;
+    line-height: 1.5;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border: 1px solid rgba(79,70,229,0.1);
+  }
+  .decisions-list .bullet {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.2;
+    flex-shrink: 0;
+  }
+
+  /* ---- SCROLLBAR ---- */
+  .journey-timeline-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+  .journey-timeline-wrapper::-webkit-scrollbar-track {
+    background: var(--border-light);
+    border-radius: 4px;
+  }
+  .journey-timeline-wrapper::-webkit-scrollbar-thumb {
+    background: #c7c7cc;
+    border-radius: 4px;
+  }
+  .journey-timeline-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #999;
+  }
+
+  /* ---- FOOTER ---- */
+  .doc-footer {
+    text-align: center;
+    padding: 32px 48px;
+    font-size: 12px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+  }
+
+  /* Scroll hint */
+  .scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="doc-header">
+  <div class="header-badge"><span class="dot"></span> UX Research Deliverable</div>
+  <h1>User Journey Maps</h1>
+  <p class="subtitle">Inbound Email Feature &mdash; EaaS Platform</p>
+  <div class="header-meta">
+    <span><strong>Date:</strong> April 1, 2026</span>
+    <span><strong>Prepared by:</strong> UX Research Team</span>
+    <span><strong>Version:</strong> 1.0</span>
+    <span><strong>Personas:</strong> 3 journey maps</span>
+  </div>
+</header>
+
+<main class="content">
+
+<!-- ================================================ -->
+<!-- JOURNEY MAP 1: Alex Chen -->
+<!-- ================================================ -->
+<div class="section-title">
+  <span class="section-num">1</span>
+  <h2>Journey Maps</h2>
+</div>
+
+<div class="journey-card">
+  <div class="journey-header">
+    <div class="persona-avatar alex">AC</div>
+    <div class="persona-info">
+      <h3>Alex Chen &mdash; SaaS Developer</h3>
+      <div class="journey-subtitle">"Adding Reply-by-Email to My App"</div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Scroll horizontally to see all stages
+  </div>
+  <div class="journey-timeline-wrapper">
+    <div class="journey-timeline" style="display:grid; grid-template-columns: 130px repeat(7, minmax(160px, 1fr));">
+
+      <!-- Stage Headers -->
+      <div style="border-bottom:3px solid var(--accent);"></div>
+      <div class="stage-header"><div class="stage-number">Stage 1</div><div class="stage-name">Discovery</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 2</div><div class="stage-name">Evaluation</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 3</div><div class="stage-name">Setup</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 4</div><div class="stage-name">Integration</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 5</div><div class="stage-name">Testing</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 6</div><div class="stage-name">Production</div></div>
+      <div class="stage-header"><div class="stage-number">Stage 7</div><div class="stage-name">Monitoring</div></div>
+
+      <!-- Actions Row -->
+      <div class="swimlane-label actions"><span class="lane-icon">&#9654;</span> Actions</div>
+      <div class="swimlane-cell" style="background:#fafbff">Searches "email API with inbound", reads comparison blogs, checks HN threads</div>
+      <div class="swimlane-cell" style="background:#fafbff">Signs up for free tier, reads API docs, checks webhook payload format, evaluates SDK quality</div>
+      <div class="swimlane-cell" style="background:#fafbff">Creates domain, copies MX records to Cloudflare, waits for DNS propagation, runs verification</div>
+      <div class="swimlane-cell" style="background:#fafbff">Creates inbound rule (webhook action), writes webhook handler, implements HMAC verification, handles JSON payload</div>
+      <div class="swimlane-cell" style="background:#fafbff">Sends test email to configured domain, checks dashboard for receipt, inspects webhook delivery log, tests attachment handling</div>
+      <div class="swimlane-cell" style="background:#fafbff">Enables inbound on production domain, configures retry settings, sets up monitoring alerts</div>
+      <div class="swimlane-cell" style="background:#fafbff">Checks dashboard daily, reviews failed webhooks, monitors processing latency, tracks thread linking accuracy</div>
+
+      <!-- Touchpoints Row -->
+      <div class="swimlane-label touchpoints"><span class="lane-icon">&#9673;</span> Touchpoints</div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Google</span><span class="tp-pill">HN</span><span class="tp-pill">Reddit</span><span class="tp-pill">Competitor docs</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">EaaS website</span><span class="tp-pill">API docs</span><span class="tp-pill">Swagger</span><span class="tp-pill">Quickstart guide</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Dashboard wizard</span><span class="tp-pill">DNS provider</span><span class="tp-pill">Verification polling</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Code editor</span><span class="tp-pill">API docs</span><span class="tp-pill">Webhook guide</span><span class="tp-pill">SDK</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Dashboard email list</span><span class="tp-pill">Webhook delivery logs</span><span class="tp-pill">Test email</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Production app</span><span class="tp-pill">Monitoring dashboard</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Analytics dashboard</span><span class="tp-pill">Alert notifications</span></div>
+
+      <!-- Thoughts Row -->
+      <div class="swimlane-label thoughts"><span class="lane-icon">&#128172;</span> Thoughts</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">I need one API for send AND receive &mdash; tired of 2 vendors</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The docs look clean. JSON webhooks, not multipart &mdash; nice. Let me check the payload schema.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">MX records again... at least there's a copy button. Waiting for DNS is annoying.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The webhook payload is clean. HMAC signing is straightforward. In-Reply-To matching works!</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Test email showed up in 8 seconds. Thread linking worked on first try. Attachments parsed correctly.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Everything's working. Delivery rate is 99.8%. Processing time under 5 seconds.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Volume is growing. Need to add a second webhook URL for the billing team.</div>
+
+      <!-- Emotions Row -->
+      <div class="swimlane-label emotions"><span class="lane-icon">&#9829;</span> Emotions</div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Hopeful</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge negative">Frustrated</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Impressed</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge neutral">Cautious</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Confident</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge negative">Impatient</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge neutral">Focused</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Satisfied</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Relieved</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Excited</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Confident</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Proud</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Calm</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Proactive</span></div></div>
+
+      <!-- Pain Points Row -->
+      <div class="swimlane-label pain-points"><span class="lane-icon">&#9888;</span> Pain Points</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Hard to compare providers, outdated comparison articles</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Pricing page unclear on inbound limits</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">DNS propagation wait (15-72 hours), can't test immediately</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Attachment size limits not obvious, edge cases in MIME parsing</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">No way to simulate production-like email volume</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Webhook timeout concerns at scale</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Limited analytics granularity</div>
+
+      <!-- Opportunities Row -->
+      <div class="swimlane-label opportunities"><span class="lane-icon">&#9733;</span> Opportunities</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">SEO for "email API inbound", comparison page on site</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Interactive pricing calculator, clear inbound limits</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Instant test address (no DNS needed), real-time DNS checker</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Better error messages, attachment limit warnings, code snippets</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Load testing tool, sample email generator</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Auto-scaling webhook delivery, SLA dashboard</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Custom analytics, webhook replay, export data</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================ -->
+<!-- JOURNEY MAP 2: Sarah Martinez -->
+<!-- ================================================ -->
+
+<div class="journey-card">
+  <div class="journey-header">
+    <div class="persona-avatar sarah">SM</div>
+    <div class="persona-info">
+      <h3>Sarah Martinez &mdash; Support Team Lead</h3>
+      <div class="journey-subtitle">"Setting Up Email Routing for My Team"</div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Scroll horizontally to see all stages
+  </div>
+  <div class="journey-timeline-wrapper">
+    <div class="journey-timeline" style="display:grid; grid-template-columns: 130px repeat(6, minmax(180px, 1fr));">
+
+      <!-- Stage Headers -->
+      <div style="border-bottom:3px solid var(--green);"></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 1</div><div class="stage-name">Problem Recognition</div></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 2</div><div class="stage-name">Request to Engineering</div></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 3</div><div class="stage-name">Onboarding</div></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 4</div><div class="stage-name">Rule Configuration</div></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 5</div><div class="stage-name">Daily Monitoring</div></div>
+      <div class="stage-header" style="border-bottom-color:#059669"><div class="stage-number" style="color:#059669">Stage 6</div><div class="stage-name">Issue Resolution</div></div>
+
+      <!-- Actions -->
+      <div class="swimlane-label actions"><span class="lane-icon">&#9654;</span> Actions</div>
+      <div class="swimlane-cell" style="background:#fafbff">Notices 8 missed support emails this week, escalates to CTO</div>
+      <div class="swimlane-cell" style="background:#fafbff">Asks engineering to evaluate email routing solutions, attends demo</div>
+      <div class="swimlane-cell" style="background:#fafbff">Engineering sets up domain + MX records, Sarah gets dashboard access</div>
+      <div class="swimlane-cell" style="background:#fafbff">Creates 3 rules: support@ &#8594; Zendesk, billing@ &#8594; accounting email, returns@ &#8594; store action</div>
+      <div class="swimlane-cell" style="background:#fafbff">Checks email list daily, reviews volumes, spots failed deliveries</div>
+      <div class="swimlane-cell" style="background:#fafbff">Investigates failed webhook, contacts engineering for help, uses retry button</div>
+
+      <!-- Touchpoints -->
+      <div class="swimlane-label touchpoints"><span class="lane-icon">&#9673;</span> Touchpoints</div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Shared Gmail</span><span class="tp-pill">Slack escalation</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Meeting w/ engineering</span><span class="tp-pill">EaaS marketing site</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Dashboard (first login)</span><span class="tp-pill">Setup wizard</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Rules management</span><span class="tp-pill">Rule form</span><span class="tp-pill">Priority ordering</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Email list view</span><span class="tp-pill">Analytics dashboard</span><span class="tp-pill">Notifications</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Webhook delivery log</span><span class="tp-pill">Retry button</span><span class="tp-pill">Support docs</span></div>
+
+      <!-- Thoughts -->
+      <div class="swimlane-label thoughts"><span class="lane-icon">&#128172;</span> Thoughts</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">We're losing customers because emails fall through the cracks</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">This looks professional. I hope I can use it without bugging engineering every time.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The dashboard looks modern. I can see the email list already &mdash; that's what I need.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The rule builder is simple enough. Match support@ &#8594; send to webhook. I can do this!</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">200 emails yesterday, 3 failed webhooks. Let me check what happened.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The retry button worked! I don't need to ask engineering.</div>
+
+      <!-- Emotions -->
+      <div class="swimlane-label emotions"><span class="lane-icon">&#9829;</span> Emotions</div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge negative">Frustrated</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge negative">Worried</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Hopeful</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge neutral">Dependent</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Relieved</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge neutral">Overwhelmed</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Empowered</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Confident</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge neutral">Vigilant</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Satisfied</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge negative">Concerned</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Relieved</span></div></div>
+
+      <!-- Pain Points -->
+      <div class="swimlane-label pain-points"><span class="lane-icon">&#9888;</span> Pain Points</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">No visibility into email volume, shared inbox chaos</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Engineering bottleneck for any email changes</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">DNS/MX concepts are confusing, needs hand-holding</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Regex patterns are intimidating, wants simple matching</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">No alerts for sudden drops in email volume</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Webhook error messages are too technical</div>
+
+      <!-- Opportunities -->
+      <div class="swimlane-label opportunities"><span class="lane-icon">&#9733;</span> Opportunities</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">"Get started" email to non-technical users</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Self-service setup for non-DNS parts</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Simplified wizard for non-technical users</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Visual rule builder with dropdowns (no regex), templates for common patterns</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Anomaly alerts (volume drops, spike in failures)</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Plain-English error messages, guided troubleshooting</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================ -->
+<!-- JOURNEY MAP 3: Marcus Thompson -->
+<!-- ================================================ -->
+
+<div class="journey-card">
+  <div class="journey-header">
+    <div class="persona-avatar marcus">MT</div>
+    <div class="persona-info">
+      <h3>Marcus Thompson &mdash; AI Agent Builder</h3>
+      <div class="journey-subtitle">"Giving My AI Agent Email Capabilities"</div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Scroll horizontally to see all stages
+  </div>
+  <div class="journey-timeline-wrapper">
+    <div class="journey-timeline" style="display:grid; grid-template-columns: 130px repeat(6, minmax(180px, 1fr));">
+
+      <!-- Stage Headers -->
+      <div style="border-bottom:3px solid var(--orange);"></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 1</div><div class="stage-name">Architecture Planning</div></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 2</div><div class="stage-name">Evaluation</div></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 3</div><div class="stage-name">Integration</div></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 4</div><div class="stage-name">Agent Development</div></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 5</div><div class="stage-name">Testing</div></div>
+      <div class="stage-header" style="border-bottom-color:#ea580c"><div class="stage-number" style="color:#ea580c">Stage 6</div><div class="stage-name">Production</div></div>
+
+      <!-- Actions -->
+      <div class="swimlane-label actions"><span class="lane-icon">&#9654;</span> Actions</div>
+      <div class="swimlane-cell" style="background:#fafbff">Designs AI agent architecture, identifies email as key channel, evaluates build vs buy</div>
+      <div class="swimlane-cell" style="background:#fafbff">Tests EaaS API with curl, checks persistent storage, evaluates search capabilities, reviews Python SDK</div>
+      <div class="swimlane-cell" style="background:#fafbff">Sets up domain, creates catch-all rule (store action), configures webhook for real-time notifications</div>
+      <div class="swimlane-cell" style="background:#fafbff">Builds agent: webhook receives email &#8594; LLM extracts intent + data &#8594; queries API for email history &#8594; drafts response &#8594; sends reply via EaaS</div>
+      <div class="swimlane-cell" style="background:#fafbff">Sends 50 test emails with varied formats, checks extraction accuracy, tests threading, validates reply formatting</div>
+      <div class="swimlane-cell" style="background:#fafbff">Deploys agent, monitors processing times, tracks reply accuracy, scales to 500 emails/day</div>
+
+      <!-- Touchpoints -->
+      <div class="swimlane-label touchpoints"><span class="lane-icon">&#9673;</span> Touchpoints</div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Architecture docs</span><span class="tp-pill">Team whiteboard</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">API docs</span><span class="tp-pill">curl / Postman</span><span class="tp-pill">Python SDK</span><span class="tp-pill">Dashboard</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Dashboard setup</span><span class="tp-pill">DNS config</span><span class="tp-pill">Rules API</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Code editor</span><span class="tp-pill">EaaS API</span><span class="tp-pill">Webhook handler</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Test email suite</span><span class="tp-pill">Dashboard monitoring</span><span class="tp-pill">API logs</span></div>
+      <div class="swimlane-cell" style="background:rgba(245,243,255,0.7)"><span class="tp-pill">Production monitoring</span><span class="tp-pill">Analytics dashboard</span><span class="tp-pill">Alerts</span></div>
+
+      <!-- Thoughts -->
+      <div class="swimlane-label thoughts"><span class="lane-icon">&#128172;</span> Thoughts</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Building SMTP receiving from scratch would take 2 months. I need a managed solution with persistent storage.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Persistent inbox &mdash; perfect. My agent can search past emails. The REST API is clean. Python SDK would be nice.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Setup was fast. Catch-all rule means every email gets stored. Webhook gives me real-time notifications.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">The agent reads the email via API, extracts the order number, checks our DB, and drafts a reply. Threading works via In-Reply-To.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">95% extraction accuracy. Threading works perfectly. Some HTML emails have messy parsed text &mdash; need to handle that.</div>
+      <div class="swimlane-cell" style="background:#fafafe; font-style:italic; color:#4b5563">Agent handles 500 emails/day. Average response time: 12 seconds. Customer satisfaction up 40%.</div>
+
+      <!-- Emotions -->
+      <div class="swimlane-label emotions"><span class="lane-icon">&#9829;</span> Emotions</div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge neutral">Analytical</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Decisive</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Impressed</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Optimistic</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Efficient</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Satisfied</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Creative</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge neutral">Focused</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge neutral">Critical</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Pleased</span></div></div>
+      <div class="swimlane-cell" style="background:#fffbeb"><div class="emotion-flow"><span class="emotion-badge positive">Proud</span><span class="emotion-arrow">&#8594;</span><span class="emotion-badge positive">Ambitious</span></div></div>
+
+      <!-- Pain Points -->
+      <div class="swimlane-label pain-points"><span class="lane-icon">&#9888;</span> Pain Points</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">No email API has native AI/MCP integration</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">No Python SDK yet, must use raw REST</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Catch-all rule isn't obvious in the UI</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Full-text search across email body would help agent find context</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">HTML-to-text conversion quality varies</div>
+      <div class="swimlane-cell" style="background:#fef2f2; border-left:3px solid #fecaca">Need bulk operations API for agent batch processing</div>
+
+      <!-- Opportunities -->
+      <div class="swimlane-label opportunities"><span class="lane-icon">&#9733;</span> Opportunities</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">MCP server integration (future), AI-ready API design</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Python SDK, AI use case documentation</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">"AI Agent" setup template with catch-all + store defaults</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Full-text search, structured data extraction API</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Sample email corpus for testing, quality metrics</div>
+      <div class="swimlane-cell" style="background:#ecfdf5; border-left:3px solid #a7f3d0">Batch API endpoints, agent-specific analytics</div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================================================ -->
+<!-- CROSS-PERSONA INSIGHTS -->
+<!-- ================================================ -->
+<div class="section-title" style="margin-top:64px;">
+  <span class="section-num">2</span>
+  <h2>Cross-Persona Insights</h2>
+</div>
+
+<div class="insights-grid">
+
+  <!-- Common Pain Points -->
+  <div class="insight-card pain">
+    <h3><span class="insight-icon pain">&#9888;</span> Common Pain Points</h3>
+    <ol class="insight-list pain">
+      <li><span class="num">1</span>DNS/MX setup friction &mdash; all personas affected, even through engineering proxy</li>
+      <li><span class="num">2</span>No instant testing without full DNS configuration</li>
+      <li><span class="num">3</span>Limited analytics and monitoring capabilities</li>
+      <li><span class="num">4</span>Thread tracking requires understanding RFC headers</li>
+    </ol>
+  </div>
+
+  <!-- Common Delight Moments -->
+  <div class="insight-card delight">
+    <h3><span class="insight-icon delight">&#10024;</span> Common Delight Moments</h3>
+    <ol class="insight-list delight">
+      <li><span class="num">1</span>First email appearing in the dashboard &mdash; "It works!"</li>
+      <li><span class="num">2</span>Thread linking automatically connecting sent and received emails</li>
+      <li><span class="num">3</span>Webhook retry from dashboard &mdash; self-service recovery</li>
+      <li><span class="num">4</span>Clean JSON payload compared to competitors' multipart/form-data</li>
+    </ol>
+  </div>
+
+  <!-- Key Design Decisions -->
+  <div class="insight-card decisions decisions-full">
+    <h3><span class="insight-icon decisions">&#9670;</span> Key Design Decisions from Journey Maps</h3>
+    <ul class="decisions-list">
+      <li><span class="bullet">&#8594;</span>Instant test address (no DNS required) is critical for developer onboarding</li>
+      <li><span class="bullet">&#8594;</span>Visual rule builder (not regex) is essential for non-technical users</li>
+      <li><span class="bullet">&#8594;</span>Dashboard must show real-time email arrivals (emotional delight moment)</li>
+      <li><span class="bullet">&#8594;</span>Webhook delivery logs with plain-English error messages reduce support burden</li>
+      <li><span class="bullet">&#8594;</span>Thread view is a key differentiator &mdash; show it prominently</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ================================================ -->
+<!-- EMOTION CURVES -->
+<!-- ================================================ -->
+<div class="section-title emotion-curve-section">
+  <span class="section-num">3</span>
+  <h2>Emotion Curves</h2>
+</div>
+
+<div class="emotion-curves-grid">
+
+  <!-- Alex Chen Emotion Curve -->
+  <div class="curve-card">
+    <h4><span class="curve-persona-dot alex"></span> Alex Chen &mdash; SaaS Developer</h4>
+    <div class="curve-chart">
+      <div class="curve-grid-lines">
+        <div class="curve-grid-line top"></div>
+        <div class="curve-grid-line mid"></div>
+        <div class="curve-grid-line bot"></div>
+      </div>
+      <svg class="curve-svg" viewBox="0 0 600 170" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Gradient fill under curve -->
+        <defs>
+          <linearGradient id="alexGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <!-- Area fill -->
+        <path d="M43,85 L129,130 L214,55 L300,45 L386,20 L471,15 L557,25 L557,170 L43,170 Z" fill="url(#alexGrad)"/>
+        <!-- Curve line -->
+        <polyline points="43,85 129,130 214,55 300,45 386,20 471,15 557,25"
+          fill="none" stroke="#4f46e5" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Data points -->
+        <circle cx="43" cy="85" r="6" fill="#4f46e5" stroke="white" stroke-width="2"/>
+        <circle cx="129" cy="130" r="6" fill="#dc2626" stroke="white" stroke-width="2"/>
+        <circle cx="214" cy="55" r="6" fill="#d97706" stroke="white" stroke-width="2"/>
+        <circle cx="300" cy="45" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="386" cy="20" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="471" cy="15" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="557" cy="25" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <!-- Labels -->
+        <text x="43" y="75" text-anchor="middle" font-size="9" font-weight="600" fill="#6b7280" font-family="Inter">Hopeful</text>
+        <text x="129" y="148" text-anchor="middle" font-size="9" font-weight="600" fill="#dc2626" font-family="Inter">Frustrated</text>
+        <text x="214" y="45" text-anchor="middle" font-size="9" font-weight="600" fill="#d97706" font-family="Inter">Impatient</text>
+        <text x="300" y="35" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Satisfied</text>
+        <text x="386" y="12" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Excited!</text>
+        <text x="471" y="8" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Proud</text>
+        <text x="557" y="17" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Proactive</text>
+      </svg>
+      <div class="curve-labels">
+        <span class="curve-stage-label">Discovery</span>
+        <span class="curve-stage-label">Evaluation</span>
+        <span class="curve-stage-label">Setup</span>
+        <span class="curve-stage-label">Integration</span>
+        <span class="curve-stage-label">Testing</span>
+        <span class="curve-stage-label">Production</span>
+        <span class="curve-stage-label">Monitoring</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sarah Martinez Emotion Curve -->
+  <div class="curve-card">
+    <h4><span class="curve-persona-dot sarah"></span> Sarah Martinez &mdash; Support Lead</h4>
+    <div class="curve-chart">
+      <div class="curve-grid-lines">
+        <div class="curve-grid-line top"></div>
+        <div class="curve-grid-line mid"></div>
+        <div class="curve-grid-line bot"></div>
+      </div>
+      <svg class="curve-svg" viewBox="0 0 600 170" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sarahGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#059669" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#059669" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,145 L160,90 L270,80 L380,30 L490,35 L555,25 L555,170 L50,170 Z" fill="url(#sarahGrad)"/>
+        <polyline points="50,145 160,90 270,80 380,30 490,35 555,25"
+          fill="none" stroke="#059669" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="50" cy="145" r="6" fill="#dc2626" stroke="white" stroke-width="2"/>
+        <circle cx="160" cy="90" r="6" fill="#d97706" stroke="white" stroke-width="2"/>
+        <circle cx="270" cy="80" r="6" fill="#d97706" stroke="white" stroke-width="2"/>
+        <circle cx="380" cy="30" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="490" cy="35" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="555" cy="25" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <text x="50" y="160" text-anchor="middle" font-size="9" font-weight="600" fill="#dc2626" font-family="Inter">Worried</text>
+        <text x="160" y="80" text-anchor="middle" font-size="9" font-weight="600" fill="#d97706" font-family="Inter">Dependent</text>
+        <text x="270" y="70" text-anchor="middle" font-size="9" font-weight="600" fill="#d97706" font-family="Inter">Overwhelmed</text>
+        <text x="380" y="22" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Confident</text>
+        <text x="490" y="27" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Satisfied</text>
+        <text x="555" y="17" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Relieved</text>
+      </svg>
+      <div class="curve-labels">
+        <span class="curve-stage-label">Problem</span>
+        <span class="curve-stage-label">Request Eng.</span>
+        <span class="curve-stage-label">Onboarding</span>
+        <span class="curve-stage-label">Config</span>
+        <span class="curve-stage-label">Monitoring</span>
+        <span class="curve-stage-label">Resolution</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marcus Thompson Emotion Curve -->
+  <div class="curve-card">
+    <h4><span class="curve-persona-dot marcus"></span> Marcus Thompson &mdash; AI Builder</h4>
+    <div class="curve-chart">
+      <div class="curve-grid-lines">
+        <div class="curve-grid-line top"></div>
+        <div class="curve-grid-line mid"></div>
+        <div class="curve-grid-line bot"></div>
+      </div>
+      <svg class="curve-svg" viewBox="0 0 600 170" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="marcusGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ea580c" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#ea580c" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <path d="M50,70 L160,35 L270,40 L380,50 L490,30 L555,10 L555,170 L50,170 Z" fill="url(#marcusGrad)"/>
+        <polyline points="50,70 160,35 270,40 380,50 490,30 555,10"
+          fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+        <circle cx="50" cy="70" r="6" fill="#d97706" stroke="white" stroke-width="2"/>
+        <circle cx="160" cy="35" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="270" cy="40" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="380" cy="50" r="6" fill="#d97706" stroke="white" stroke-width="2"/>
+        <circle cx="490" cy="30" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <circle cx="555" cy="10" r="6" fill="#059669" stroke="white" stroke-width="2"/>
+        <text x="50" y="60" text-anchor="middle" font-size="9" font-weight="600" fill="#d97706" font-family="Inter">Analytical</text>
+        <text x="160" y="27" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Optimistic</text>
+        <text x="270" y="32" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Satisfied</text>
+        <text x="380" y="42" text-anchor="middle" font-size="9" font-weight="600" fill="#d97706" font-family="Inter">Focused</text>
+        <text x="490" y="22" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Pleased</text>
+        <text x="555" y="5" text-anchor="middle" font-size="9" font-weight="600" fill="#059669" font-family="Inter">Ambitious</text>
+      </svg>
+      <div class="curve-labels">
+        <span class="curve-stage-label">Architecture</span>
+        <span class="curve-stage-label">Evaluation</span>
+        <span class="curve-stage-label">Integration</span>
+        <span class="curve-stage-label">Agent Dev</span>
+        <span class="curve-stage-label">Testing</span>
+        <span class="curve-stage-label">Production</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<footer class="doc-footer">
+  EaaS &mdash; User Journey Maps &mdash; Inbound Email Feature &bull; April 1, 2026 &bull; UX Research Team &bull; Confidential
+</footer>
+
+</body>
+</html>

@@ -9,6 +9,7 @@ public class SuppressionEntry
     public string EmailAddress { get; set; } = string.Empty;
     public SuppressionReason Reason { get; set; }
     public string? SourceMessageId { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime SuppressedAt { get; set; }
 
     // Navigation properties

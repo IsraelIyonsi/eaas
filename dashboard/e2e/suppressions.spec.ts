@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers/auth";
+import { setupEmptyMockApi } from "./helpers/mock-api";
 
 test.describe("Suppressions Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -17,6 +18,17 @@ test.describe("Suppressions Page", () => {
     const table = page.locator("table");
     const emptyState = page.getByText("No suppressed addresses");
     await expect(table.or(emptyState)).toBeVisible({ timeout: 10000 });
+  });
+
+  test("should show empty state when no suppressions", async ({ page }) => {
+    await setupEmptyMockApi(page);
+    await page.goto("/suppressions");
+
+    await expect(
+      page.getByRole("heading", { name: "Suppression List" })
+    ).toBeVisible({ timeout: 10000 });
+
+    await expect(page.getByText("No suppressed addresses")).toBeVisible({ timeout: 10000 });
   });
 
   test("should open add suppression dialog", async ({ page }) => {

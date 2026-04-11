@@ -1,0 +1,62 @@
+# Base kustomization for EaaS
+# Contains all resources needed for a complete deployment
+# Use overlays (dev/staging/production) to customize per environment
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eaas
+
+commonLabels:
+  app: eaas
+  app.kubernetes.io/part-of: eaas
+  app.kubernetes.io/managed-by: kustomize
+
+resources:
+  # Namespace
+  - namespace.yaml
+
+  # Application services
+  - api/deployment.yaml
+  - api/service.yaml
+  - api/hpa.yaml
+  - worker/deployment.yaml
+  - worker/hpa.yaml
+  - webhook-processor/deployment.yaml
+  - webhook-processor/service.yaml
+  - webhook-processor/hpa.yaml
+
+  # Ingress
+  - ingress.yaml
+
+  # Configuration
+  - config/configmap.yaml
+  - config/secrets.yaml
+
+  # Database
+  - postgres/statefulset.yaml
+  - postgres/service.yaml
+  - postgres/configmap.yaml
+  - pgbouncer/deployment.yaml
+  - pgbouncer/service.yaml
+  - pgbouncer/configmap.yaml
+
+  # Message queue
+  - rabbitmq/statefulset.yaml
+  - rabbitmq/service.yaml
+  - rabbitmq/configmap.yaml
+
+  # Cache
+  - redis/statefulset.yaml
+  - redis/service.yaml
+  - redis/configmap.yaml
+
+  # Monitoring
+  - monitoring/prometheus-configmap.yaml
+  - monitoring/grafana-deployment.yaml
+
+  # Network policies
+  - network-policies.yaml
+
+  # Jobs
+  - jobs/migration-job.yaml
+  - jobs/partition-cronjob.yaml

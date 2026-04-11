@@ -1,5 +1,7 @@
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
+using EaaS.Domain.Exceptions;
+using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Utilities;
 using MediatR;
@@ -9,14 +11,20 @@ namespace EaaS.Api.Features.ApiKeys;
 public sealed class CreateApiKeyHandler : IRequestHandler<CreateApiKeyCommand, CreateApiKeyResult>
 {
     private readonly AppDbContext _dbContext;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
 
-    public CreateApiKeyHandler(AppDbContext dbContext)
+    public CreateApiKeyHandler(AppDbContext dbContext, ISubscriptionLimitService subscriptionLimitService)
     {
         _dbContext = dbContext;
+        _subscriptionLimitService = subscriptionLimitService;
     }
 
     public async Task<CreateApiKeyResult> Handle(CreateApiKeyCommand request, CancellationToken cancellationToken)
     {
+        var canCreate = await _subscriptionLimitService.CanCreateApiKeyAsync(request.TenantId, cancellationToken);
+        if (!canCreate)
+            throw new QuotaExceededException("Maximum API keys reached. Upgrade your plan.");
+
         var plaintextKey = GenerateApiKey();
         var keyHash = ComputeSha256Hash(plaintextKey);
         var prefix = plaintextKey[..8];

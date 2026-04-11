@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Information Architecture — Inbound Email Feature | EaaS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f9fc;
+    --surface: #ffffff;
+    --surface-alt: #f1f3f9;
+    --border: #e2e6ef;
+    --border-light: #eef1f8;
+    --text: #1a1d26;
+    --text-secondary: #5a6178;
+    --text-muted: #8890a6;
+    --accent: #3b6cf5;
+    --accent-light: #e8eeff;
+    --accent-dark: #2a52c9;
+    --new-bg: #eef4ff;
+    --new-border: #b8d0ff;
+    --new-badge: #3b6cf5;
+    --updated-bg: #fff8ee;
+    --updated-border: #ffd89e;
+    --updated-badge: #d4850a;
+    --existing: #6b7694;
+    --existing-bg: #f4f5f8;
+    --entity-tenant: #7c3aed;
+    --entity-domain: #059669;
+    --entity-outbound: #d97706;
+    --entity-inbound: #3b6cf5;
+    --entity-rule: #db2777;
+    --entity-webhook: #6366f1;
+    --entity-apikey: #0891b2;
+    --entity-attachment: #84cc16;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --p0: #ef4444;
+    --p1: #f59e0b;
+    --p2: #6b7694;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.03);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Header ─── */
+  .doc-header {
+    background: linear-gradient(135deg, #1a1d26 0%, #2d3148 50%, #1a1d26 100%);
+    color: #fff;
+    padding: 64px 0 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .doc-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 20% 80%, rgba(59,108,245,0.15), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 20%, rgba(124,58,237,0.1), transparent);
+  }
+  .doc-header .container { position: relative; z-index: 1; }
+  .doc-header .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59,108,245,0.2);
+    border: 1px solid rgba(59,108,245,0.3);
+    color: #a3bfff;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .doc-header h1 {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    line-height: 1.15;
+  }
+  .doc-header .subtitle {
+    font-size: 18px;
+    color: #a0a8c4;
+    font-weight: 400;
+  }
+  .doc-header .meta {
+    margin-top: 24px;
+    display: flex;
+    gap: 32px;
+    font-size: 13px;
+    color: #8890a6;
+  }
+  .doc-header .meta span { display: flex; align-items: center; gap: 6px; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+  /* ─── Sections ─── */
+  .section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .section:last-child { border-bottom: none; }
+  .section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .section h2 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  .section .section-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    max-width: 700px;
+  }
+
+  /* ─── Tree Diagram ─── */
+  .tree-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+  }
+  .tree { display: flex; flex-direction: column; align-items: flex-start; }
+
+  /* Root */
+  .tree-root {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #1a1d26, #2d3148);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 0;
+    position: relative;
+  }
+  .tree-root .icon { font-size: 20px; }
+
+  .tree-children {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    position: relative;
+    margin-left: 26px;
+  }
+
+  .tree-branch {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+    padding: 0;
+  }
+  .tree-branch::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .tree-branch:last-child::before {
+    bottom: calc(100% - 26px);
+  }
+  .tree-branch .connector {
+    width: 28px;
+    height: 26px;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .tree-branch .connector::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 26px;
+    width: 28px;
+    height: 2px;
+    background: var(--border);
+  }
+
+  .tree-node {
+    margin: 8px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .tree-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+  }
+  .tree-label:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateX(2px);
+  }
+  .tree-label.existing {
+    background: var(--existing-bg);
+    color: var(--existing);
+    border-color: var(--border);
+  }
+  .tree-label.new {
+    background: var(--new-bg);
+    color: var(--accent);
+    border-color: var(--new-border);
+    font-weight: 600;
+  }
+  .tree-label.updated {
+    background: var(--updated-bg);
+    color: var(--updated-badge);
+    border-color: var(--updated-border);
+    font-weight: 600;
+  }
+  .tree-label.renamed {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #bbf7d0;
+    font-weight: 600;
+  }
+
+  .badge-new, .badge-updated, .badge-renamed {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .badge-new { background: var(--new-badge); color: #fff; }
+  .badge-updated { background: var(--updated-badge); color: #fff; }
+  .badge-renamed { background: #15803d; color: #fff; }
+
+  .tree-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 16px;
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  /* ─── Sidebar Mockup ─── */
+  .sidebar-mockup {
+    background: #1a1d26;
+    border-radius: var(--radius);
+    width: 280px;
+    padding: 24px 0;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .sidebar-logo {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .sidebar-logo .dot {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    color: #8890a6;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .sidebar-item:hover { color: #c8cee0; background: rgba(255,255,255,0.03); }
+  .sidebar-item.active { color: #fff; background: rgba(59,108,245,0.12); }
+  .sidebar-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .sidebar-item .icon { width: 20px; text-align: center; font-size: 15px; }
+  .sidebar-sub {
+    padding-left: 52px;
+    font-size: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    color: #6b7694;
+  }
+  .sidebar-sub:hover { color: #a0a8c4; }
+  .sidebar-badge-new {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 100px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .sidebar-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #4a5068;
+    padding: 16px 20px 6px;
+  }
+
+  /* ─── Content Inventory Tables ─── */
+  .inventory-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .inventory-card-header {
+    background: var(--surface-alt);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .inventory-card-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .inventory-card-header .screen-badge {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
+  }
+
+  .inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .inv-table thead th {
+    background: var(--surface-alt);
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+  }
+  .inv-table tbody td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: top;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .inv-table tbody tr:last-child td { border-bottom: none; }
+  .inv-table tbody tr:hover { background: var(--surface-alt); }
+  .inv-table td:first-child { font-weight: 500; color: var(--text); }
+  .inv-table .type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #f1f3f9;
+    color: #5a6178;
+  }
+  .priority-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 28px;
+  }
+  .priority-badge.p0 { background: #fef2f2; color: var(--p0); }
+  .priority-badge.p1 { background: #fffbeb; color: var(--p1); }
+  .priority-badge.p2 { background: #f4f5f8; color: var(--p2); }
+
+  /* ─── Entity Relationship Diagram ─── */
+  .erd-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 48px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow-x: auto;
+  }
+  .erd-grid {
+    display: grid;
+    grid-template-columns: 280px 280px 280px;
+    grid-template-rows: auto;
+    gap: 40px 80px;
+    justify-content: center;
+    position: relative;
+    min-width: 960px;
+  }
+  .erd-entity {
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 2;
+  }
+  .erd-entity-header {
+    padding: 12px 16px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .erd-entity-body {
+    background: #fff;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+  }
+  .erd-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .erd-field .key {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #fef3c7;
+    color: #92400e;
+  }
+  .erd-field .fk {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  .erd-field .field-name { font-weight: 500; color: var(--text); }
+  .erd-field .field-type { color: var(--text-muted); font-size: 11px; }
+
+  .erd-relation-label {
+    position: absolute;
+    z-index: 3;
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* SVG lines for ERD */
+  .erd-svg-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ─── Decision Box ─── */
+  .decision-box {
+    background: linear-gradient(135deg, #eef4ff, #f8f4ff);
+    border: 1px solid #c7d8ff;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 32px;
+  }
+  .decision-box h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .decision-box p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ─── Breadcrumbs ─── */
+  .breadcrumb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .breadcrumb-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px;
+    width: fit-content;
+  }
+  .breadcrumb-row .crumb {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-radius: 100px;
+  }
+  .breadcrumb-row .crumb:last-child {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .breadcrumb-row .crumb-sep {
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 0 2px;
+  }
+
+  /* ─── Flow Diagram ─── */
+  .flow-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .flow-step.highlight {
+    background: var(--new-bg);
+    border-color: var(--new-border);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .flow-arrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 8px;
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+  .flow-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 20px;
+    margin-right: 12px;
+  }
+
+  /* ─── Legend ─── */
+  .legend {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+  .legend-swatch.existing { background: var(--existing-bg); border-color: var(--border); }
+  .legend-swatch.new { background: var(--new-bg); border-color: var(--new-border); }
+  .legend-swatch.updated { background: var(--updated-bg); border-color: var(--updated-border); }
+  .legend-swatch.renamed { background: #f0fdf4; border-color: #bbf7d0; }
+
+  /* ─── Two-column layout ─── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: start; }
+
+  /* ─── Navigation sidebar + breadcrumbs side by side ─── */
+  .nav-layout { display: grid; grid-template-columns: 280px 1fr; gap: 40px; align-items: start; }
+
+  /* ─── Accordion (for inventory) ─── */
+  details.inv-accordion {
+    margin-bottom: 16px;
+  }
+  details.inv-accordion summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s ease;
+  }
+  details.inv-accordion summary:hover { background: var(--surface-alt); }
+  details.inv-accordion summary::before {
+    content: '\25B6';
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+  details.inv-accordion[open] summary::before { transform: rotate(90deg); }
+  details.inv-accordion[open] summary {
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    border-bottom-color: transparent;
+  }
+  details.inv-accordion .inv-accordion-body {
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    overflow: hidden;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .two-col, .three-col, .nav-layout { grid-template-columns: 1fr; }
+    .erd-grid { grid-template-columns: 1fr; min-width: auto; }
+    .container { padding: 0 16px; }
+    .doc-header h1 { font-size: 28px; }
+    .tree-container { padding: 20px; }
+  }
+
+  /* ─── Print ─── */
+  @media print {
+    body { background: #fff; }
+    .doc-header { background: #1a1d26 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ─── Table of Contents ─── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 32px;
+    margin: -28px 0 0;
+    position: relative;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+  }
+  .toc h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .toc-list {
+    list-style: none;
+    display: flex;
+    gap: 8px 32px;
+    flex-wrap: wrap;
+  }
+  .toc-list a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.15s ease;
+  }
+  .toc-list a:hover { color: var(--accent); }
+  .toc-list .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="doc-header">
+  <div class="container">
+    <div class="badge">UX Design Deliverable</div>
+    <h1>Information Architecture</h1>
+    <p class="subtitle">Inbound Email Feature &mdash; EaaS Platform</p>
+    <div class="meta">
+      <span>April 1, 2026</span>
+      <span>Prepared by: UX Design Team</span>
+      <span>Version 1.0</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ TOC ═══════════════ -->
+<div class="container">
+  <nav class="toc">
+    <h3>Contents</h3>
+    <ul class="toc-list">
+      <li><a href="#section-1"><span class="num">1</span> Current Dashboard Navigation</a></li>
+      <li><a href="#section-2"><span class="num">2</span> Proposed Navigation (With Inbound)</a></li>
+      <li><a href="#section-3"><span class="num">3</span> Content Inventory</a></li>
+      <li><a href="#section-4"><span class="num">4</span> Entity Relationship Map</a></li>
+      <li><a href="#section-5"><span class="num">5</span> Navigation Patterns</a></li>
+    </ul>
+  </nav>
+</div>
+
+<!-- ═══════════════ SECTION 1: CURRENT NAV ═══════════════ -->
+<div class="section" id="section-1">
+  <div class="container">
+    <div class="section-number">1</div>
+    <h2>Current Dashboard Navigation</h2>
+    <p class="section-desc">The existing EaaS dashboard structure before the introduction of inbound email capabilities. All pages are outbound-focused.</p>
+
+    <div class="tree-container">
+      <div class="tree">
+        <div class="tree-root"><span class="icon">&#9878;</span> EaaS Dashboard</div>
+        <div class="tree-children">
+
+          <!-- Overview -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#9632; Overview <span style="color:var(--text-muted);font-size:11px;margin-left:4px">(home / stats)</span></span>
+            </div>
+          </div>
+
+          <!-- Emails -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#9993; Emails</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Email List (sent emails)</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Email Detail</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Templates -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128196; Templates</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Template List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Template</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Edit Template</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domains -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#127760; Domains</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Domain List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Add Domain</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Domain Detail (DNS records)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Keys -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128273; API Keys</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Key List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Key</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Webhooks -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128279; Webhooks</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Webhook List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Webhook</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Webhook Detail (delivery logs)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suppressions -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128683; Suppressions</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Suppression List</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128200; Analytics</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Email Analytics</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#9881; Settings</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Account Settings</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 2: PROPOSED NAV ═══════════════ -->
+<div class="section" id="section-2">
+  <div class="container">
+    <div class="section-number">2</div>
+    <h2>Proposed Dashboard Navigation</h2>
+    <p class="section-desc">The updated navigation structure with inbound email features integrated. New pages are highlighted in blue, updated pages in amber, and renamed pages in green.</p>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch existing"></div> Existing (unchanged)</div>
+      <div class="legend-item"><div class="legend-swatch new"></div> New page</div>
+      <div class="legend-item"><div class="legend-swatch updated"></div> Updated</div>
+      <div class="legend-item"><div class="legend-swatch renamed"></div> Renamed</div>
+    </div>
+
+    <div class="tree-container">
+      <div class="tree">
+        <div class="tree-root"><span class="icon">&#9878;</span> EaaS Dashboard</div>
+        <div class="tree-children">
+
+          <!-- Overview -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label updated">&#9632; Overview <span class="badge-updated">UPDATED</span></span>
+              <span class="tree-detail">Add inbound metrics to dashboard home</span>
+            </div>
+          </div>
+
+          <!-- Emails -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#9993; Emails</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label renamed">Sent (outbound email list) <span class="badge-renamed">RENAMED</span></span>
+                    <span class="tree-detail">Renamed from "Email List" for clarity</span>
+                  </div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Sent Detail</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label new">Received (inbound email list) <span class="badge-new">NEW</span></span>
+                  </div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label new">Received Detail <span class="badge-new">NEW</span></span>
+                  </div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label new">Thread View <span class="badge-new">NEW</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Templates -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128196; Templates</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Template List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Template</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Edit Template</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Domains -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#127760; Domains</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Domain List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Add Domain</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Domain Detail (DNS records)</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label new">Inbound Setup (MX records, enable/disable) <span class="badge-new">NEW</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inbound Rules -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label new" style="font-size:14px;">&#9881; Inbound Rules <span class="badge-new">NEW</span></span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Rule List <span class="badge-new">NEW</span></span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Create Rule <span class="badge-new">NEW</span></span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Edit Rule <span class="badge-new">NEW</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- API Keys -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128273; API Keys</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Key List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Key</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Webhooks -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128279; Webhooks</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Webhook List</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Create Webhook</span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Webhook Detail (delivery logs)</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suppressions -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128683; Suppressions</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Suppression List</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#128200; Analytics</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label renamed">Outbound Analytics <span class="badge-renamed">RENAMED</span></span>
+                  </div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node">
+                    <span class="tree-label new">Inbound Analytics <span class="badge-new">NEW</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label new" style="font-size:14px;">&#128276; Notifications <span class="badge-new">NEW</span></span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Notification Preferences <span class="badge-new">NEW</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Developer Docs -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label new" style="font-size:14px;">&#128214; Developer Docs <span class="badge-new">NEW</span></span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">API Reference &mdash; Inbound <span class="badge-new">NEW</span></span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Webhook Integration Guide <span class="badge-new">NEW</span></span></div>
+                </div>
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label new">Setup Guide <span class="badge-new">NEW</span></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="tree-branch"><div class="connector"></div>
+            <div class="tree-node">
+              <span class="tree-label existing">&#9881; Settings</span>
+              <div class="tree-children" style="margin-left:20px;">
+                <div class="tree-branch"><div class="connector"></div>
+                  <div class="tree-node"><span class="tree-label existing">Account Settings</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="decision-box">
+      <h4>&#128161; Navigation Design Decision</h4>
+      <p>Inbound emails live under the existing <strong>"Emails"</strong> section (as a "Received" tab alongside "Sent") rather than a separate top-level "Inbound" section. This keeps the mental model simple: <strong>Emails = everything about email</strong> (sent + received). Inbound Rules get their own top-level section because they are a <em>configuration concern</em>, not an email viewing concern.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 3: CONTENT INVENTORY ═══════════════ -->
+<div class="section" id="section-3">
+  <div class="container">
+    <div class="section-number">3</div>
+    <h2>Content Inventory</h2>
+    <p class="section-desc">Detailed content inventory for each new screen, documenting every UI element with its type, content source, and priority level.</p>
+
+    <!-- Received (Inbound Email List) -->
+    <details class="inv-accordion" open>
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Received (Inbound Email List)
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Page title</td><td><span class="type-badge">Heading</span></td><td>"Received Emails"</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Email count</td><td><span class="type-badge">Metric</span></td><td>"1,247 emails"</td><td>API: GET /inbound/emails (total)</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Search bar</td><td><span class="type-badge">Input</span></td><td>Search by sender, recipient, subject</td><td>Client-side + API</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Filter: Date range</td><td><span class="type-badge">Date picker</span></td><td>From/to date</td><td>Query param</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Filter: Status</td><td><span class="type-badge">Dropdown</span></td><td>Received, Processed, Failed, Forwarded</td><td>Query param</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Filter: Has attachments</td><td><span class="type-badge">Toggle</span></td><td>Yes/No</td><td>Query param</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Email table</td><td><span class="type-badge">Data table</span></td><td>Columns: Status, From, To, Subject, Received, Attachments, Webhook Status</td><td>API: GET /inbound/emails</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Pagination</td><td><span class="type-badge">Navigation</span></td><td>Page X of Y, items per page</td><td>API pagination</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Empty state</td><td><span class="type-badge">Illustration</span></td><td>"No inbound emails yet. Set up your domain to start receiving." + CTA</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Loading state</td><td><span class="type-badge">Skeleton</span></td><td>Table skeleton with shimmer animation</td><td>Client</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Error state</td><td><span class="type-badge">Alert</span></td><td>"Failed to load emails. Retry."</td><td>Error handler</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Bulk actions</td><td><span class="type-badge">Action bar</span></td><td>Retry webhook, Delete selected</td><td>API calls</td><td><span class="priority-badge p2">P2</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Received Email Detail -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Received Email Detail
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Back button</td><td><span class="type-badge">Navigation</span></td><td>"&larr; Back to Received Emails"</td><td>Router</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Email header</td><td><span class="type-badge">Card</span></td><td>From (name + email), To, CC, Subject, Received timestamp</td><td>API: GET /inbound/emails/{id}</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Body tabs</td><td><span class="type-badge">Tab group</span></td><td>HTML Preview, Plain Text, Raw Headers, JSON</td><td>API response fields</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>HTML preview</td><td><span class="type-badge">Iframe</span></td><td>Rendered HTML body (sandboxed)</td><td>htmlBody field</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Plain text</td><td><span class="type-badge">Pre block</span></td><td>Text body</td><td>textBody field</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Raw headers</td><td><span class="type-badge">Accordion</span></td><td>All parsed headers key-value</td><td>headers field</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Attachments list</td><td><span class="type-badge">Card list</span></td><td>Filename, type, size, download button</td><td>API: attachments array</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Security verdicts</td><td><span class="type-badge">Badge group</span></td><td>SPF, DKIM, DMARC, Spam, Virus (pass/fail badges)</td><td>Verdict fields</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Thread link</td><td><span class="type-badge">Link card</span></td><td>"Reply to: [original email subject]" &rarr; outbound email detail</td><td>outboundEmailId</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Webhook delivery</td><td><span class="type-badge">Log table</span></td><td>Attempts: timestamp, status code, response time</td><td>Delivery log API</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Actions</td><td><span class="type-badge">Button group</span></td><td>Download Raw MIME, Delete, Retry Webhook</td><td>API calls</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Loading state</td><td><span class="type-badge">Skeleton</span></td><td>Content skeleton</td><td>Client</td><td><span class="priority-badge p0">P0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Thread View -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Thread View
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Thread header</td><td><span class="type-badge">Card</span></td><td>Subject line, participant count, email count</td><td>Aggregated</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Timeline</td><td><span class="type-badge">Vertical list</span></td><td>Chronological list of sent + received emails</td><td>API: outbound + inbound linked</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Email card (sent)</td><td><span class="type-badge">Card</span></td><td>Direction badge "Sent", from, to, timestamp, body preview, status</td><td>Outbound email data</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Email card (received)</td><td><span class="type-badge">Card</span></td><td>Direction badge "Received", from, to, timestamp, body preview, verdicts</td><td>Inbound email data</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Expand/collapse</td><td><span class="type-badge">Toggle</span></td><td>Show/hide full email body inline</td><td>Client toggle</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Empty state</td><td><span class="type-badge">Message</span></td><td>"No replies yet"</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Inbound Rules List -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Inbound Rules List
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Page title</td><td><span class="type-badge">Heading</span></td><td>"Inbound Rules"</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Create button</td><td><span class="type-badge">CTA</span></td><td>"+ Create Rule"</td><td>Navigation</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Rules table/cards</td><td><span class="type-badge">List</span></td><td>Name, Domain, Pattern, Action, Status (active/inactive), Priority</td><td>API: GET /inbound/rules</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Toggle active</td><td><span class="type-badge">Switch</span></td><td>Enable/disable rule inline</td><td>API: PUT /inbound/rules/{id}</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Edit/Delete actions</td><td><span class="type-badge">Buttons</span></td><td>Per-rule actions</td><td>Navigation + API</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Priority indicator</td><td><span class="type-badge">Badge/number</span></td><td>Priority order (lower = higher)</td><td>priority field</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Empty state</td><td><span class="type-badge">Illustration</span></td><td>"No rules configured. Create your first rule to start routing emails."</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Create/Edit Rule -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Create / Edit Rule
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Form title</td><td><span class="type-badge">Heading</span></td><td>"Create Rule" / "Edit Rule"</td><td>Route param</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Name field</td><td><span class="type-badge">Input</span></td><td>Rule name (max 100 chars)</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Domain selector</td><td><span class="type-badge">Dropdown</span></td><td>Verified domains with inbound enabled</td><td>API: GET /domains (filtered)</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Match pattern</td><td><span class="type-badge">Input</span></td><td>Pattern like "support@", "*@", "billing@" with helper text</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Action selector</td><td><span class="type-badge">Radio/dropdown</span></td><td>Webhook, Forward, Store</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Webhook URL</td><td><span class="type-badge">Input (cond.)</span></td><td>URL input, shown when action = webhook</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Forward to</td><td><span class="type-badge">Email input (cond.)</span></td><td>Email address, shown when action = forward</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Priority</td><td><span class="type-badge">Number input</span></td><td>0-100, "Lower number = higher priority"</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Active toggle</td><td><span class="type-badge">Switch</span></td><td>Enable/disable on creation</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Test rule</td><td><span class="type-badge">Button</span></td><td>"Test with sample email" &mdash; simulate a match</td><td>API call</td><td><span class="priority-badge p2">P2</span></td></tr>
+            <tr><td>Save/Cancel</td><td><span class="type-badge">Buttons</span></td><td>Submit form or navigate back</td><td>Form action</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Validation errors</td><td><span class="type-badge">Inline errors</span></td><td>Per-field validation messages</td><td>FluentValidation</td><td><span class="priority-badge p0">P0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Inbound Setup Wizard -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Inbound Setup Wizard
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Progress indicator</td><td><span class="type-badge">Stepper</span></td><td>5 steps with labels</td><td>Client state</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Step 1: Select Domain</td><td><span class="type-badge">Dropdown + input</span></td><td>Choose existing verified domain or add new</td><td>API: GET /domains</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Step 2: MX Records</td><td><span class="type-badge">Info card</span></td><td>MX record values with copy buttons, provider-specific guides</td><td>Static + dynamic</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>DNS status</td><td><span class="type-badge">Badge per record</span></td><td>Pending / Verified (auto-polling every 30s)</td><td>API: verification check</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Step 3: Webhook URL</td><td><span class="type-badge">Input</span></td><td>Default webhook endpoint for this domain</td><td>User input</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Step 4: Test</td><td><span class="type-badge">Button + result</span></td><td>"Send test email to [test@domain.com]" &rarr; show result</td><td>API call</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Step 5: Complete</td><td><span class="type-badge">Success card</span></td><td>"Inbound email is active! View your received emails."</td><td>Static</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Save &amp; Resume</td><td><span class="type-badge">Auto-save</span></td><td>Save progress on each step, resume on return</td><td>Local storage + API</td><td><span class="priority-badge p1">P1</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Inbound Analytics -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Inbound Analytics
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Time range selector</td><td><span class="type-badge">Button group</span></td><td>24h, 7d, 30d, Custom</td><td>Query param</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Metric cards (4)</td><td><span class="type-badge">Stat cards</span></td><td>Total Received, Processed, Failed, Avg Processing Time</td><td>API: analytics endpoint</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Volume chart</td><td><span class="type-badge">Area chart</span></td><td>Emails received over time (hourly/daily)</td><td>API: time-series data</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Status breakdown</td><td><span class="type-badge">Donut chart</span></td><td>Received/Processed/Failed/Forwarded distribution</td><td>API: aggregated counts</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Top senders</td><td><span class="type-badge">Table</span></td><td>Email address, count, last received</td><td>API: aggregated</td><td><span class="priority-badge p1">P1</span></td></tr>
+            <tr><td>Failed emails</td><td><span class="type-badge">Table</span></td><td>Recent failures with error reason</td><td>API: filtered list</td><td><span class="priority-badge p1">P1</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- Notification Preferences -->
+    <details class="inv-accordion">
+      <summary>
+        <span class="screen-badge" style="background:var(--accent-light);color:var(--accent);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600;">NEW</span>
+        Notification Preferences
+      </summary>
+      <div class="inv-accordion-body">
+        <table class="inv-table">
+          <thead><tr><th>Element</th><th>Type</th><th>Content</th><th>Source</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>Domain selector</td><td><span class="type-badge">Tabs/dropdown</span></td><td>Per-domain notification settings</td><td>API: GET /domains</td><td><span class="priority-badge p0">P0</span></td></tr>
+            <tr><td>Alert: Volume spike</td><td><span class="type-badge">Toggle + threshold</span></td><td>Alert when received > X in Y minutes</td><td>User config</td><td><span class="priority-badge p2">P2</span></td></tr>
+            <tr><td>Alert: Processing failures</td><td><span class="type-badge">Toggle + threshold</span></td><td>Alert when failed > X in Y minutes</td><td>User config</td><td><span class="priority-badge p2">P2</span></td></tr>
+            <tr><td>Alert: Spam threshold</td><td><span class="type-badge">Toggle + threshold</span></td><td>Alert when spam score > X</td><td>User config</td><td><span class="priority-badge p2">P2</span></td></tr>
+            <tr><td>Notification channel</td><td><span class="type-badge">Radio</span></td><td>Webhook, Email</td><td>User config</td><td><span class="priority-badge p2">P2</span></td></tr>
+            <tr><td>Save</td><td><span class="type-badge">Button</span></td><td>Save preferences</td><td>API call</td><td><span class="priority-badge p0">P0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 4: ENTITY RELATIONSHIP MAP ═══════════════ -->
+<div class="section" id="section-4">
+  <div class="container">
+    <div class="section-number">4</div>
+    <h2>Taxonomy &mdash; Entity Relationship Map</h2>
+    <p class="section-desc">Visual relationship diagram showing how key entities relate, with cardinality indicators and key attributes per entity.</p>
+
+    <div class="erd-container">
+      <!-- SVG overlay for relationship lines -->
+      <svg class="erd-svg-overlay" width="100%" height="100%" style="position:absolute;inset:0;z-index:1;pointer-events:none;">
+        <!-- Tenant -> Domain -->
+        <line x1="180" y1="235" x2="180" y2="290" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Tenant -> Outbound -->
+        <line x1="490" y1="235" x2="490" y2="290" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Tenant -> Webhook -->
+        <line x1="800" y1="235" x2="800" y2="290" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Domain -> Rule -->
+        <line x1="180" y1="485" x2="180" y2="540" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Outbound -> Inbound (reply) -->
+        <line x1="490" y1="440" x2="490" y2="540" stroke="#3b6cf5" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Webhook -> Delivery Logs -->
+        <line x1="800" y1="420" x2="800" y2="540" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+        <!-- Inbound -> Attachment -->
+        <line x1="490" y1="760" x2="490" y2="810" stroke="#e2e6ef" stroke-width="2" stroke-dasharray="6,4"/>
+      </svg>
+
+      <div class="erd-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 24px 32px; min-width: 880px;">
+
+        <!-- Row 1: Tenant spans full width -->
+        <div style="grid-column: 1 / -1; display:flex; justify-content:center; margin-bottom:16px;">
+          <div class="erd-entity" style="width:360px;">
+            <div class="erd-entity-header" style="background:var(--entity-tenant);">
+              &#9878; Tenant
+            </div>
+            <div class="erd-entity-body">
+              <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="field-name">name</span> <span class="field-type">string</span></div>
+              <div class="erd-field"><span class="field-name">plan</span> <span class="field-type">enum</span></div>
+              <div class="erd-field"><span class="field-name">created_at</span> <span class="field-type">timestamp</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cardinality labels row -->
+        <div style="grid-column: 1 / -1; display:flex; justify-content:space-around; margin:-8px 0 -8px;">
+          <div style="text-align:center;">
+            <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : *</span>
+          </div>
+          <div style="text-align:center;">
+            <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : *</span>
+          </div>
+          <div style="text-align:center;">
+            <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : *</span>
+          </div>
+        </div>
+
+        <!-- Row 2: Domain, Outbound, Webhook+API Key -->
+        <div class="erd-entity">
+          <div class="erd-entity-header" style="background:var(--entity-domain);">
+            &#127760; Sending Domain
+          </div>
+          <div class="erd-entity-body">
+            <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">tenant_id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="field-name">domain_name</span> <span class="field-type">string</span></div>
+            <div class="erd-field"><span class="field-name">is_verified</span> <span class="field-type">bool</span></div>
+            <div class="erd-field"><span class="field-name">inbound_enabled</span> <span class="field-type">bool</span></div>
+            <div class="erd-field"><span class="field-name">mx_records</span> <span class="field-type">json</span></div>
+          </div>
+        </div>
+
+        <div class="erd-entity">
+          <div class="erd-entity-header" style="background:var(--entity-outbound);">
+            &#9993; Outbound Email
+          </div>
+          <div class="erd-entity-body">
+            <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">tenant_id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="field-name">from, to, subject</span> <span class="field-type">string</span></div>
+            <div class="erd-field"><span class="field-name">status</span> <span class="field-type">enum</span></div>
+            <div class="erd-field"><span class="field-name">message_id</span> <span class="field-type">string</span></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="erd-entity">
+            <div class="erd-entity-header" style="background:var(--entity-webhook);">
+              &#128279; Webhook
+            </div>
+            <div class="erd-entity-body">
+              <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="fk">FK</span> <span class="field-name">tenant_id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="field-name">url</span> <span class="field-type">string</span></div>
+              <div class="erd-field"><span class="field-name">events[]</span> <span class="field-type">enum[]</span></div>
+            </div>
+          </div>
+          <div class="erd-entity">
+            <div class="erd-entity-header" style="background:var(--entity-apikey);">
+              &#128273; API Key
+            </div>
+            <div class="erd-entity-body">
+              <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="fk">FK</span> <span class="field-name">tenant_id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="field-name">key_hash</span> <span class="field-type">string</span></div>
+              <div class="erd-field"><span class="field-name">scopes[]</span> <span class="field-type">enum[]</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Cardinality labels -->
+        <div style="text-align:center;">
+          <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : *</span>
+        </div>
+        <div style="text-align:center;">
+          <span style="background:#fff;border:1px solid var(--accent);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--accent);">replies to (In-Reply-To)</span>
+        </div>
+        <div style="text-align:center;">
+          <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : * Delivery Logs</span>
+        </div>
+
+        <!-- Row 4: Rule, Inbound Email, Delivery Logs -->
+        <div class="erd-entity">
+          <div class="erd-entity-header" style="background:var(--entity-rule);">
+            &#9881; Inbound Rule
+          </div>
+          <div class="erd-entity-body">
+            <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">domain_id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="field-name">match_pattern</span> <span class="field-type">string</span></div>
+            <div class="erd-field"><span class="field-name">action</span> <span class="field-type">enum (webhook/forward/store)</span></div>
+            <div class="erd-field"><span class="field-name">priority</span> <span class="field-type">int</span></div>
+            <div class="erd-field"><span class="field-name">is_active</span> <span class="field-type">bool</span></div>
+          </div>
+        </div>
+
+        <div class="erd-entity">
+          <div class="erd-entity-header" style="background:var(--entity-inbound);">
+            &#128229; Inbound Email
+          </div>
+          <div class="erd-entity-body">
+            <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">tenant_id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="field-name">from, to, subject</span> <span class="field-type">string</span></div>
+            <div class="erd-field"><span class="field-name">html_body, text_body</span> <span class="field-type">text</span></div>
+            <div class="erd-field"><span class="field-name">verdicts</span> <span class="field-type">SPF/DKIM/DMARC/spam/virus</span></div>
+            <div class="erd-field"><span class="field-name">s3_key</span> <span class="field-type">string (raw MIME)</span></div>
+            <div class="erd-field"><span class="field-name">status</span> <span class="field-type">received &rarr; processed &rarr; forwarded</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">outbound_email_id</span> <span class="field-type">uuid (nullable)</span></div>
+          </div>
+        </div>
+
+        <div class="erd-entity">
+          <div class="erd-entity-header" style="background:#6366f1;">
+            &#128203; Webhook Delivery Log
+          </div>
+          <div class="erd-entity-body">
+            <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="fk">FK</span> <span class="field-name">webhook_id</span> <span class="field-type">uuid</span></div>
+            <div class="erd-field"><span class="field-name">event_type</span> <span class="field-type">string</span></div>
+            <div class="erd-field"><span class="field-name">status_code</span> <span class="field-type">int</span></div>
+            <div class="erd-field"><span class="field-name">response_time_ms</span> <span class="field-type">int</span></div>
+            <div class="erd-field"><span class="field-name">attempt</span> <span class="field-type">int</span></div>
+          </div>
+        </div>
+
+        <!-- Row 5: Attachment under Inbound -->
+        <div></div>
+        <div>
+          <div style="text-align:center;margin-bottom:8px;">
+            <span style="background:#fff;border:1px solid var(--border);padding:2px 10px;border-radius:100px;font-size:10px;font-weight:600;color:var(--text-muted);">1 : *</span>
+          </div>
+          <div class="erd-entity">
+            <div class="erd-entity-header" style="background:var(--entity-attachment);">
+              &#128206; Inbound Attachment
+            </div>
+            <div class="erd-entity-body">
+              <div class="erd-field"><span class="key">PK</span> <span class="field-name">id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="fk">FK</span> <span class="field-name">inbound_email_id</span> <span class="field-type">uuid</span></div>
+              <div class="erd-field"><span class="field-name">filename</span> <span class="field-type">string</span></div>
+              <div class="erd-field"><span class="field-name">content_type</span> <span class="field-type">string</span></div>
+              <div class="erd-field"><span class="field-name">size</span> <span class="field-type">long</span></div>
+              <div class="erd-field"><span class="field-name">s3_key</span> <span class="field-type">string</span></div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 5: NAVIGATION PATTERNS ═══════════════ -->
+<div class="section" id="section-5">
+  <div class="container">
+    <div class="section-number">5</div>
+    <h2>Navigation Patterns</h2>
+    <p class="section-desc">Primary navigation sidebar design, breadcrumb patterns, and key user flows through the inbound email feature.</p>
+
+    <div class="nav-layout">
+
+      <!-- Sidebar Mockup -->
+      <div>
+        <h3 style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;">Primary Navigation (Sidebar)</h3>
+        <div class="sidebar-mockup">
+          <div class="sidebar-logo">
+            <span class="dot">&#9993;</span> EaaS
+          </div>
+          <div class="sidebar-section-label">Main</div>
+          <div class="sidebar-item active">
+            <span class="icon">&#9632;</span> Overview
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#9993;</span> Emails
+          </div>
+          <div class="sidebar-sub">Sent</div>
+          <div class="sidebar-sub">Received <span class="sidebar-badge-new">NEW</span></div>
+          <div class="sidebar-item">
+            <span class="icon">&#9881;</span> Inbound Rules <span class="sidebar-badge-new">NEW</span>
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#127760;</span> Domains
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#128196;</span> Templates
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#128273;</span> API Keys
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#128279;</span> Webhooks
+          </div>
+          <div class="sidebar-item">
+            <span class="icon">&#128683;</span> Suppressions
+          </div>
+          <div class="sidebar-section-label">Insights</div>
+          <div class="sidebar-item">
+            <span class="icon">&#128200;</span> Analytics
+          </div>
+          <div class="sidebar-sub">Outbound</div>
+          <div class="sidebar-sub">Inbound <span class="sidebar-badge-new">NEW</span></div>
+          <div class="sidebar-item">
+            <span class="icon">&#128276;</span> Notifications <span class="sidebar-badge-new">NEW</span>
+          </div>
+          <div class="sidebar-section-label">Account</div>
+          <div class="sidebar-item">
+            <span class="icon">&#9881;</span> Settings
+          </div>
+          <div class="sidebar-item" style="color:#6b7694;">
+            <span class="icon">&#128214;</span> Documentation
+            <span style="margin-left:auto;font-size:11px;opacity:0.5;">&#8599;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column: Breadcrumbs + Flows -->
+      <div>
+        <h3 style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;">Breadcrumb Patterns</h3>
+        <div class="breadcrumb-list" style="margin-bottom:40px;">
+          <div class="breadcrumb-row">
+            <span class="crumb">Emails</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Received</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Email Detail</span>
+          </div>
+          <div class="breadcrumb-row">
+            <span class="crumb">Emails</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Received</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Thread View</span>
+          </div>
+          <div class="breadcrumb-row">
+            <span class="crumb">Inbound Rules</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Create Rule</span>
+          </div>
+          <div class="breadcrumb-row">
+            <span class="crumb">Domains</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Domain Detail</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Inbound Setup</span>
+          </div>
+          <div class="breadcrumb-row">
+            <span class="crumb">Analytics</span><span class="crumb-sep">&#8250;</span>
+            <span class="crumb">Inbound Analytics</span>
+          </div>
+        </div>
+
+        <h3 style="font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;">Key Navigation Flows</h3>
+        <div class="flow-container">
+          <div>
+            <div class="flow-label" style="margin-bottom:8px;">1. Email Browsing</div>
+            <div class="flow-row">
+              <div class="flow-step">Email List</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Email Detail</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Thread View</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step">Back to List</div>
+            </div>
+          </div>
+          <div>
+            <div class="flow-label" style="margin-bottom:8px;">2. Domain Setup</div>
+            <div class="flow-row">
+              <div class="flow-step">Domain List</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step">Domain Detail</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Enable Inbound</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Setup Wizard</div>
+            </div>
+          </div>
+          <div>
+            <div class="flow-label" style="margin-bottom:8px;">3. Rule Management</div>
+            <div class="flow-row">
+              <div class="flow-step highlight">Rules List</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Create Rule</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step">Save</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Back to List</div>
+            </div>
+          </div>
+          <div>
+            <div class="flow-label" style="margin-bottom:8px;">4. Analytics Drill-down</div>
+            <div class="flow-row">
+              <div class="flow-step">Analytics</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Inbound Tab</div>
+              <span class="flow-arrow">&rarr;</span>
+              <div class="flow-step highlight">Drill into Failed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer style="background:#1a1d26;color:#5a6178;padding:32px 0;text-align:center;font-size:12px;margin-top:40px;">
+  <div class="container">
+    <p style="color:#4a5068;">EaaS &mdash; Information Architecture v1.0 &mdash; April 1, 2026</p>
+    <p style="margin-top:4px;color:#3a3d48;">UX Design Team Deliverable &mdash; Confidential</p>
+  </div>
+</footer>
+
+</body>
+</html>

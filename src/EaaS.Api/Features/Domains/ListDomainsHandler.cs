@@ -18,7 +18,7 @@ public sealed class ListDomainsHandler : IRequestHandler<ListDomainsQuery, IRead
         var domains = await _dbContext.Domains
             .AsNoTracking()
             .Include(d => d.DnsRecords)
-            .Where(d => d.TenantId == request.TenantId)
+            .Where(d => d.TenantId == request.TenantId && d.DeletedAt == null)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
 
@@ -27,7 +27,7 @@ public sealed class ListDomainsHandler : IRequestHandler<ListDomainsQuery, IRead
             d.DomainName,
             d.Status.ToString(),
             d.DnsRecords.Select(r => new DnsRecordDto(
-                r.Id, r.RecordType, r.RecordName, r.RecordValue,
+                r.Id, r.RecordType.ToString().ToUpperInvariant(), r.RecordName, r.RecordValue,
                 r.Purpose.ToString().ToLowerInvariant(), r.IsVerified)).ToList(),
             d.CreatedAt,
             d.VerifiedAt,

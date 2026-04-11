@@ -1,0 +1,2080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Inbound Mail -- Lo-Fi Wireframes -- Developer Portal Screens</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --white: #ffffff;
+    --gray-50: #fafafa;
+    --gray-100: #f0f0f0;
+    --gray-200: #e0e0e0;
+    --gray-300: #cccccc;
+    --gray-400: #999999;
+    --gray-500: #777777;
+    --gray-600: #555555;
+    --gray-700: #333333;
+    --gray-800: #222222;
+    --gray-900: #111111;
+    --black: #000000;
+    --link-blue: #4a7ccc;
+    --method-get: #555;
+    --method-post: #333;
+    --method-put: #444;
+    --method-delete: #666;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--gray-800);
+    line-height: 1.6;
+    padding: 40px 20px;
+  }
+
+  /* --- Document Header --- */
+  .doc-header {
+    max-width: 1200px;
+    margin: 0 auto 60px;
+    text-align: center;
+    border-bottom: 2px solid var(--gray-300);
+    padding-bottom: 30px;
+  }
+  .doc-header h1 { font-size: 28px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+  .doc-header p { font-size: 14px; color: var(--gray-500); }
+  .doc-header .meta { font-size: 12px; color: var(--gray-400); margin-top: 10px; font-family: monospace; }
+
+  /* --- Screen Container --- */
+  .screen-section {
+    max-width: 1200px;
+    margin: 0 auto 80px;
+  }
+  .screen-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--gray-400);
+    margin-bottom: 6px;
+  }
+  .screen-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+  }
+  .screen-desc {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-bottom: 20px;
+  }
+
+  /* --- State Tabs --- */
+  .state-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--gray-300);
+  }
+  .state-tab {
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    position: relative;
+    top: 1px;
+  }
+  .state-tab:hover { color: var(--gray-700); }
+  .state-tab.active {
+    color: var(--gray-900);
+    background: var(--white);
+    border-color: var(--gray-300);
+    border-bottom-color: var(--white);
+  }
+
+  /* --- Wireframe Frame --- */
+  .wireframe-frame {
+    border: 1px solid var(--gray-300);
+    border-top: none;
+    background: var(--white);
+    padding: 0;
+    display: none;
+    overflow: hidden;
+  }
+  .wireframe-frame.active { display: block; }
+
+  /* --- Annotation --- */
+  .annotation {
+    display: inline-block;
+    background: var(--gray-100);
+    border: 1px dashed var(--gray-400);
+    padding: 3px 8px;
+    font-size: 10px;
+    color: var(--gray-600);
+    margin: 4px 0;
+    font-family: monospace;
+  }
+  .annotation-block {
+    background: var(--gray-100);
+    border: 1px dashed var(--gray-400);
+    padding: 10px 14px;
+    font-size: 11px;
+    color: var(--gray-600);
+    margin: 16px 0;
+    font-family: monospace;
+    line-height: 1.5;
+  }
+
+  /* === THREE-COLUMN LAYOUT (Stripe-style) === */
+  .api-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 420px;
+    min-height: 900px;
+  }
+  .api-layout .sidebar {
+    border-right: 1px solid var(--gray-200);
+    padding: 20px 0;
+    background: var(--gray-50);
+    position: relative;
+  }
+  .api-layout .content {
+    padding: 30px 32px;
+    border-right: 1px solid var(--gray-200);
+    overflow-y: auto;
+  }
+  .api-layout .code-panel {
+    background: var(--gray-900);
+    color: var(--gray-300);
+    padding: 30px 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    overflow-y: auto;
+  }
+
+  /* --- Two-Column Layout (Docs) --- */
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 800px;
+  }
+  .docs-layout .sidebar {
+    border-right: 1px solid var(--gray-200);
+    padding: 20px 0;
+    background: var(--gray-50);
+  }
+  .docs-layout .content {
+    padding: 30px 40px;
+    overflow-y: auto;
+  }
+
+  /* --- Top Bar --- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--white);
+    grid-column: 1 / -1;
+  }
+  .topbar-brand { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+  .topbar-search {
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--gray-400);
+    width: 240px;
+    background: var(--gray-50);
+  }
+
+  /* --- Sidebar Nav --- */
+  .nav-section { margin-bottom: 16px; }
+  .nav-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--gray-400);
+    padding: 0 16px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .nav-item {
+    display: block;
+    padding: 5px 16px 5px 24px;
+    font-size: 13px;
+    color: var(--gray-600);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: var(--gray-900); background: var(--gray-100); }
+  .nav-item.active { color: var(--gray-900); font-weight: 600; background: var(--gray-100); border-left: 2px solid var(--gray-700); padding-left: 22px; }
+  .nav-item.indent { padding-left: 36px; font-size: 12px; }
+  .nav-item.indent.active { padding-left: 34px; }
+  .nav-group-toggle { font-weight: 500; color: var(--gray-700); }
+
+  /* --- Content Styles --- */
+  .content h2 { font-size: 22px; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+  .content h3 { font-size: 16px; font-weight: 600; color: var(--gray-800); margin: 28px 0 10px; }
+  .content h4 { font-size: 14px; font-weight: 600; color: var(--gray-700); margin: 20px 0 8px; }
+  .content p { font-size: 13px; color: var(--gray-600); margin-bottom: 12px; }
+  .content .divider { border: none; border-top: 1px solid var(--gray-200); margin: 24px 0; }
+
+  .base-url {
+    font-family: monospace;
+    font-size: 12px;
+    background: var(--gray-100);
+    padding: 8px 12px;
+    border: 1px solid var(--gray-200);
+    margin-bottom: 8px;
+  }
+  .auth-note {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+  }
+
+  /* --- Endpoint Block --- */
+  .endpoint-block {
+    border: 1px solid var(--gray-200);
+    margin-bottom: 24px;
+    border-radius: 2px;
+  }
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+  }
+  .method-badge {
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 2px;
+    color: var(--white);
+    min-width: 52px;
+    text-align: center;
+  }
+  .method-badge.get { background: var(--gray-500); }
+  .method-badge.post { background: var(--gray-800); }
+  .method-badge.put { background: var(--gray-600); }
+  .method-badge.delete { background: var(--gray-400); }
+  .endpoint-path { font-family: monospace; font-size: 12px; color: var(--gray-700); }
+  .endpoint-name { font-size: 12px; color: var(--gray-500); margin-left: auto; }
+  .endpoint-body { padding: 16px; }
+  .endpoint-body p { font-size: 12px; color: var(--gray-600); margin-bottom: 10px; }
+
+  /* --- Parameters Table --- */
+  .params-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .params-table th {
+    text-align: left;
+    padding: 6px 10px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--gray-600);
+  }
+  .params-table td {
+    padding: 6px 10px;
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    font-family: monospace;
+    font-size: 11px;
+  }
+  .params-table td:last-child { font-family: 'Inter', sans-serif; }
+  .required { color: var(--gray-800); font-weight: 600; }
+  .required::after { content: ' *'; color: var(--gray-400); }
+
+  /* --- Code Panel Styles --- */
+  .code-panel .lang-switcher {
+    display: flex;
+    gap: 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--gray-700);
+  }
+  .code-panel .lang-tab {
+    padding: 6px 12px;
+    font-size: 11px;
+    color: var(--gray-500);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  .code-panel .lang-tab:hover { color: var(--gray-300); }
+  .code-panel .lang-tab.active { color: var(--white); border-bottom-color: var(--white); }
+
+  .code-block-dark {
+    background: var(--gray-800);
+    border: 1px solid var(--gray-700);
+    padding: 14px;
+    margin-bottom: 20px;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block-dark .copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    color: var(--gray-500);
+    border: 1px solid var(--gray-600);
+    padding: 2px 6px;
+    cursor: pointer;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  .code-block-dark .label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .code-endpoint-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-700);
+  }
+
+  /* --- Code Block (Light) --- */
+  .code-block-light {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    padding: 14px;
+    margin: 10px 0 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-block-light .copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 10px;
+    color: var(--gray-500);
+    border: 1px solid var(--gray-300);
+    padding: 2px 6px;
+    cursor: pointer;
+    background: var(--white);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* --- Light Lang Switcher --- */
+  .lang-switcher-light {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--gray-300);
+  }
+  .lang-tab-light {
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--gray-500);
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    top: 1px;
+  }
+  .lang-tab-light:hover { color: var(--gray-700); }
+  .lang-tab-light.active {
+    color: var(--gray-900);
+    background: var(--gray-100);
+    border-color: var(--gray-300);
+    border-bottom-color: var(--gray-100);
+    font-weight: 500;
+  }
+
+  /* --- Skeleton Loading --- */
+  .skeleton {
+    background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 2px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skeleton-line { height: 12px; margin-bottom: 10px; }
+  .skeleton-line.w-60 { width: 60%; }
+  .skeleton-line.w-80 { width: 80%; }
+  .skeleton-line.w-40 { width: 40%; }
+  .skeleton-line.w-100 { width: 100%; }
+  .skeleton-block { height: 120px; width: 100%; margin-bottom: 16px; }
+  .skeleton-title { height: 20px; width: 50%; margin-bottom: 16px; }
+  .skeleton-nav { height: 14px; width: 70%; margin-bottom: 12px; margin-left: 16px; }
+
+  /* --- 404 State --- */
+  .state-404 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 60px;
+  }
+  .state-404 .code-404 { font-size: 72px; font-weight: 700; color: var(--gray-300); font-family: monospace; }
+  .state-404 h3 { font-size: 18px; color: var(--gray-700); margin: 12px 0 8px; }
+  .state-404 p { font-size: 13px; color: var(--gray-500); max-width: 400px; }
+  .state-404 .link-placeholder {
+    margin-top: 16px;
+    color: var(--link-blue);
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* --- Mobile Note --- */
+  .mobile-note {
+    background: var(--gray-100);
+    border: 1px dashed var(--gray-400);
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--gray-600);
+  }
+  .mobile-note strong { color: var(--gray-700); }
+
+  /* --- Checklist --- */
+  .checklist { list-style: none; margin: 10px 0; }
+  .checklist li { font-size: 13px; color: var(--gray-600); padding: 4px 0; padding-left: 24px; position: relative; }
+  .checklist li::before { content: '\2610'; position: absolute; left: 0; color: var(--gray-400); font-size: 16px; }
+
+  /* --- Expandable --- */
+  .expandable { border: 1px solid var(--gray-200); margin-bottom: 6px; }
+  .expandable-header {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--gray-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray-50);
+  }
+  .expandable-header:hover { background: var(--gray-100); }
+  .expandable-arrow { font-size: 10px; color: var(--gray-400); transition: transform 0.2s; }
+  .expandable.open .expandable-arrow { transform: rotate(90deg); }
+  .expandable-body { padding: 12px 14px; border-top: 1px solid var(--gray-200); display: none; font-size: 12px; color: var(--gray-600); }
+  .expandable.open .expandable-body { display: block; }
+
+  /* --- Step blocks --- */
+  .step-block { margin-bottom: 24px; }
+  .step-number {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 2px solid var(--gray-400);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-right: 8px;
+  }
+  .step-title { font-size: 15px; font-weight: 600; color: var(--gray-800); display: inline; }
+
+  /* --- Retry Table --- */
+  .retry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 10px 0 16px;
+  }
+  .retry-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--gray-600);
+  }
+  .retry-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--gray-200);
+    color: var(--gray-700);
+  }
+
+  /* --- Placeholder Box --- */
+  .placeholder-box {
+    border: 2px dashed var(--gray-300);
+    background: var(--gray-50);
+    padding: 30px;
+    text-align: center;
+    margin: 16px 0;
+  }
+  .placeholder-box .x-mark { font-size: 40px; color: var(--gray-300); font-weight: 300; }
+  .placeholder-box p { font-size: 11px; color: var(--gray-400); margin-top: 8px; }
+
+  /* --- DNS Record Box --- */
+  .dns-record {
+    border: 1px solid var(--gray-300);
+    padding: 14px 16px;
+    background: var(--gray-50);
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 2;
+    position: relative;
+  }
+  .dns-record .copy-inline {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--link-blue);
+    cursor: pointer;
+    margin-left: 12px;
+  }
+
+  /* --- FAQ --- */
+  .faq-item { border-bottom: 1px solid var(--gray-200); }
+  .faq-q {
+    padding: 12px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .faq-a { padding: 0 0 12px 20px; font-size: 12px; color: var(--gray-500); display: none; }
+  .faq-item.open .faq-a { display: block; }
+
+  /* --- Scrollable endpoint list --- */
+  .endpoint-list { max-height: none; }
+
+  /* --- Sticky sidebar annotation --- */
+  .sidebar-sticky-note {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== DOCUMENT HEADER ==================== -->
+<div class="doc-header">
+  <h1>EaaS Inbound Mail -- Lo-Fi Wireframes</h1>
+  <p>Developer Portal Screens (Screens 8, 9, 10)</p>
+  <div class="meta">Deliverable: D5 Lo-Fi Wireframes &bull; UX Designer &bull; 2026-04-01 &bull; Grayscale / Wireframe</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCREEN 8: API Documentation -- Inbound Endpoints              -->
+<!-- ============================================================ -->
+<div class="screen-section">
+  <div class="screen-label">Screen 8</div>
+  <div class="screen-title">API Documentation -- Inbound Endpoints</div>
+  <div class="screen-desc">Stripe-style three-column layout: Left nav | Center content | Right code examples. All 10 inbound endpoints documented.</div>
+
+  <div class="annotation-block">
+    ANNOTATION: Three-column layout inspired by Stripe API docs. Left sidebar is sticky and scrolls independently.
+    Center column shows endpoint descriptions and parameter tables. Right column (dark) shows matching code examples.
+    Language switcher (cURL / Node.js / Python / C# / Go) controls all code blocks simultaneously.
+  </div>
+
+  <!-- State Tabs -->
+  <div class="state-tabs">
+    <div class="state-tab active" onclick="switchState('s8', 'default')">Default</div>
+    <div class="state-tab" onclick="switchState('s8', '404')">404 State</div>
+    <div class="state-tab" onclick="switchState('s8', 'loading')">Loading</div>
+    <div class="state-tab" onclick="switchState('s8', 'mobile')">Mobile Note</div>
+  </div>
+
+  <!-- DEFAULT STATE -->
+  <div class="wireframe-frame active" id="s8-default">
+    <div class="api-layout" style="grid-template-rows: auto 1fr;">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <span class="topbar-brand">EaaS API Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar" style="overflow-y: auto; max-height: 2600px;">
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <div class="nav-item">Overview</div>
+          <div class="nav-item">Authentication</div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Emails</div>
+          <div class="nav-item nav-group-toggle">&#9660; Send</div>
+          <div class="nav-item indent">Send Email</div>
+          <div class="nav-item indent">Batch Send</div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Inbound</div>
+          <div class="nav-item nav-group-toggle" style="font-weight:600; color: var(--gray-900);">&#9660; Rules</div>
+          <div class="nav-item indent active">Create Rule</div>
+          <div class="nav-item indent">List Rules</div>
+          <div class="nav-item indent">Get Rule</div>
+          <div class="nav-item indent">Update Rule</div>
+          <div class="nav-item indent">Delete Rule</div>
+          <div class="nav-item nav-group-toggle">&#9660; Emails</div>
+          <div class="nav-item indent">List Emails</div>
+          <div class="nav-item indent">Get Email</div>
+          <div class="nav-item indent">Download Raw</div>
+          <div class="nav-item indent">Download Attachment</div>
+          <div class="nav-item indent">Delete Email</div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Other</div>
+          <div class="nav-item">Templates</div>
+          <div class="nav-item">Domains</div>
+          <div class="nav-item">API Keys</div>
+          <div class="nav-item">Webhooks</div>
+        </div>
+        <div class="sidebar-sticky-note">
+          <div class="annotation">Sidebar: sticky, scrolls independently</div>
+        </div>
+      </div>
+
+      <!-- Center Content -->
+      <div class="content" style="overflow-y: auto; max-height: 2600px;">
+        <h2>Inbound Email API</h2>
+        <p>The Inbound Email API allows you to receive, parse, and manage incoming emails via routing rules.</p>
+
+        <div class="base-url">Base URL: <strong>https://api.eaas.dev/v1</strong></div>
+        <div class="auth-note">Authentication: Bearer token (API key) in Authorization header</div>
+
+        <hr class="divider">
+
+        <!-- ---- RULES SECTION ---- -->
+        <h3>Inbound Rules</h3>
+
+        <!-- EP1: Create Rule -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge post">POST</span>
+            <span class="endpoint-path">/api/v1/inbound/rules</span>
+            <span class="endpoint-name">Create Rule</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Create a new inbound routing rule for a verified domain.</p>
+            <h4>Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">name</td><td>string</td><td>Rule name (max 100 chars)</td></tr>
+              <tr><td class="required">domainId</td><td>uuid</td><td>Verified domain ID</td></tr>
+              <tr><td class="required">matchPattern</td><td>string</td><td>e.g. "support@", "*@"</td></tr>
+              <tr><td class="required">action</td><td>enum</td><td>webhook | forward | store</td></tr>
+              <tr><td>webhookUrl</td><td>string</td><td>Required if action is webhook</td></tr>
+              <tr><td>forwardTo</td><td>string</td><td>Required if action is forward</td></tr>
+              <tr><td>priority</td><td>int</td><td>Default: 0 (lower = higher priority)</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP2: List Rules -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/rules</span>
+            <span class="endpoint-name">List Rules</span>
+          </div>
+          <div class="endpoint-body">
+            <p>List all inbound routing rules. Supports pagination.</p>
+            <h4>Query Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td>domainId</td><td>uuid</td><td>Filter by domain</td></tr>
+              <tr><td>page</td><td>int</td><td>Page number (default: 1)</td></tr>
+              <tr><td>perPage</td><td>int</td><td>Items per page (default: 20, max: 100)</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP3: Get Rule -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/rules/{id}</span>
+            <span class="endpoint-name">Get Rule</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Retrieve a single inbound routing rule by ID.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Rule ID</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP4: Update Rule -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge put">PUT</span>
+            <span class="endpoint-path">/api/v1/inbound/rules/{id}</span>
+            <span class="endpoint-name">Update Rule</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Update an existing inbound routing rule. All fields are optional.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Rule ID</td></tr>
+            </table>
+            <h4>Body Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td>name</td><td>string</td><td>Rule name</td></tr>
+              <tr><td>matchPattern</td><td>string</td><td>Match pattern</td></tr>
+              <tr><td>action</td><td>enum</td><td>webhook | forward | store</td></tr>
+              <tr><td>webhookUrl</td><td>string</td><td>Webhook URL</td></tr>
+              <tr><td>forwardTo</td><td>string</td><td>Forward address</td></tr>
+              <tr><td>priority</td><td>int</td><td>Priority value</td></tr>
+              <tr><td>isActive</td><td>bool</td><td>Enable/disable rule</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP5: Delete Rule -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/api/v1/inbound/rules/{id}</span>
+            <span class="endpoint-name">Delete Rule</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Permanently delete an inbound routing rule.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Rule ID</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- ---- EMAILS SECTION ---- -->
+        <h3>Inbound Emails</h3>
+
+        <!-- EP6: List Emails -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/emails</span>
+            <span class="endpoint-name">List Emails</span>
+          </div>
+          <div class="endpoint-body">
+            <p>List received inbound emails. Supports filtering and pagination.</p>
+            <h4>Query Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td>ruleId</td><td>uuid</td><td>Filter by rule</td></tr>
+              <tr><td>from</td><td>string</td><td>Filter by sender</td></tr>
+              <tr><td>since</td><td>datetime</td><td>Emails after this date</td></tr>
+              <tr><td>until</td><td>datetime</td><td>Emails before this date</td></tr>
+              <tr><td>page</td><td>int</td><td>Page number</td></tr>
+              <tr><td>perPage</td><td>int</td><td>Items per page</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP7: Get Email -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/emails/{id}</span>
+            <span class="endpoint-name">Get Email</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Retrieve full details of a single inbound email including parsed headers, body, and attachment metadata.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Inbound email ID</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP8: Download Raw MIME -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/emails/{id}/raw</span>
+            <span class="endpoint-name">Download Raw MIME</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Download the original raw MIME content of the email. Returns <code>message/rfc822</code> content type.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Inbound email ID</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP9: Download Attachment -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge get">GET</span>
+            <span class="endpoint-path">/api/v1/inbound/emails/{id}/attachments/{attId}</span>
+            <span class="endpoint-name">Download Attachment</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Download a specific attachment from an inbound email. Returns the file with its original content type.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Inbound email ID</td></tr>
+              <tr><td class="required">attId</td><td>uuid</td><td>Attachment ID</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- EP10: Delete Email -->
+        <div class="endpoint-block">
+          <div class="endpoint-header">
+            <span class="method-badge delete">DELETE</span>
+            <span class="endpoint-path">/api/v1/inbound/emails/{id}</span>
+            <span class="endpoint-name">Delete Email</span>
+          </div>
+          <div class="endpoint-body">
+            <p>Permanently delete an inbound email and its attachments from storage.</p>
+            <h4>Path Parameters</h4>
+            <table class="params-table">
+              <tr><th>Name</th><th>Type</th><th>Description</th></tr>
+              <tr><td class="required">id</td><td>uuid</td><td>Inbound email ID</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Code Panel -->
+      <div class="code-panel" style="overflow-y: auto; max-height: 2600px;">
+        <div class="lang-switcher">
+          <div class="lang-tab active">cURL</div>
+          <div class="lang-tab">Node.js</div>
+          <div class="lang-tab">Python</div>
+          <div class="lang-tab">C#</div>
+          <div class="lang-tab">Go</div>
+        </div>
+
+        <!-- Create Rule -->
+        <div class="code-endpoint-title">POST /api/v1/inbound/rules</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl -X POST \
+  https://api.eaas.dev/v1/inbound/rules \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Support Inbox",
+    "domainId": "d_uuid",
+    "matchPattern": "support@",
+    "action": "webhook",
+    "webhookUrl": "https://...",
+    "priority": 0
+  }'
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 201 Created</span>
+{
+  "success": true,
+  "data": {
+    "id": "r_uuid",
+    "name": "Support Inbox",
+    "domainId": "d_uuid",
+    "matchPattern": "support@",
+    "action": "webhook",
+    "webhookUrl": "https://...",
+    "priority": 0,
+    "isActive": true,
+    "createdAt": "2026-04-01T..."
+  }
+}
+        </div>
+
+        <!-- List Rules -->
+        <div class="code-endpoint-title">GET /api/v1/inbound/rules</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/rules \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200</span>
+{
+  "success": true,
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "perPage": 20,
+    "total": 3
+  }
+}
+        </div>
+
+        <!-- Get Rule -->
+        <div class="code-endpoint-title">GET /api/v1/inbound/rules/{id}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/rules/r_uuid \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200</span>
+{
+  "success": true,
+  "data": {
+    "id": "r_uuid",
+    "name": "Support Inbox",
+    ...
+  }
+}
+        </div>
+
+        <!-- Update Rule -->
+        <div class="code-endpoint-title">PUT /api/v1/inbound/rules/{id}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl -X PUT \
+  https://api.eaas.dev/v1/inbound/rules/r_uuid \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Name",
+    "isActive": false
+  }'
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200</span>
+{
+  "success": true,
+  "data": { "id": "r_uuid", ... }
+}
+        </div>
+
+        <!-- Delete Rule -->
+        <div class="code-endpoint-title">DELETE /api/v1/inbound/rules/{id}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl -X DELETE \
+  https://api.eaas.dev/v1/inbound/rules/r_uuid \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 204 No Content</span>
+(empty body)
+        </div>
+
+        <!-- List Emails -->
+        <div class="code-endpoint-title">GET /api/v1/inbound/emails</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl "https://api.eaas.dev/v1/inbound/emails\
+?ruleId=r_uuid&amp;page=1" \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200</span>
+{
+  "success": true,
+  "data": [
+    {
+      "id": "e_uuid",
+      "from": "sender@example.com",
+      "subject": "Re: Order #12345",
+      "receivedAt": "2026-04-01T..."
+    },
+    ...
+  ],
+  "pagination": { ... }
+}
+        </div>
+
+        <!-- Get Email -->
+        <div class="code-endpoint-title">GET /api/v1/inbound/emails/{id}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/emails/e_uuid \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200</span>
+{
+  "success": true,
+  "data": {
+    "id": "e_uuid",
+    "messageId": "&lt;rfc-msg-id&gt;",
+    "from": { "email": "...", "name": "..." },
+    "to": [...],
+    "subject": "...",
+    "textBody": "...",
+    "htmlBody": "...",
+    "attachments": [
+      { "id": "att_uuid", "filename": "...",
+        "contentType": "...", "size": 12345 }
+    ],
+    "verdicts": { "spam": false, "virus": false },
+    "receivedAt": "2026-04-01T..."
+  }
+}
+        </div>
+
+        <!-- Download Raw MIME -->
+        <div class="code-endpoint-title">GET /api/v1/inbound/emails/{id}/raw</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/emails/\
+e_uuid/raw \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -o email.eml
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200 (message/rfc822)</span>
+(binary MIME content -- save to .eml file)
+        </div>
+
+        <!-- Download Attachment -->
+        <div class="code-endpoint-title">GET /.../{id}/attachments/{attId}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/emails/\
+e_uuid/attachments/att_uuid \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -o attachment.pdf
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 200 (original content-type)</span>
+(binary file content)
+        </div>
+
+        <!-- Delete Email -->
+        <div class="code-endpoint-title">DELETE /api/v1/inbound/emails/{id}</div>
+        <div class="code-block-dark">
+          <span class="label">Request</span>
+          <span class="copy-btn">Copy</span>
+curl -X DELETE \
+  https://api.eaas.dev/v1/inbound/emails/e_uuid \
+  -H "Authorization: Bearer &lt;key&gt;"
+        </div>
+        <div class="code-block-dark">
+          <span class="label">Response 204 No Content</span>
+(empty body)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 404 STATE -->
+  <div class="wireframe-frame" id="s8-404">
+    <div class="api-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS API Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Getting Started</div>
+          <div class="nav-item">Overview</div>
+          <div class="nav-item">Authentication</div>
+        </div>
+      </div>
+      <div style="grid-column: 2 / 4;">
+        <div class="state-404">
+          <div class="code-404">404</div>
+          <h3>Page Not Found</h3>
+          <p>The documentation page you're looking for doesn't exist or may have been moved.</p>
+          <div class="link-placeholder">Back to API Overview</div>
+          <div class="link-placeholder">Search Documentation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="wireframe-frame" id="s8-loading">
+    <div class="api-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS API Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar" style="padding-top: 24px;">
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 50%;"></div>
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 60%;"></div>
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 55%;"></div>
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 65%;"></div>
+      </div>
+      <div style="padding: 30px 32px;">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+        <div class="skeleton skeleton-line w-60"></div>
+        <div style="height: 24px;"></div>
+        <div class="skeleton skeleton-block"></div>
+        <div class="skeleton skeleton-line w-100"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+        <div style="height: 16px;"></div>
+        <div class="skeleton skeleton-block"></div>
+        <div class="skeleton skeleton-line w-60"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+      </div>
+      <div style="background: var(--gray-900); padding: 30px 24px;">
+        <div class="skeleton" style="height: 14px; width: 40%; margin-bottom: 16px; opacity: 0.3;"></div>
+        <div class="skeleton" style="height: 100px; width: 100%; margin-bottom: 20px; opacity: 0.2;"></div>
+        <div class="skeleton" style="height: 14px; width: 30%; margin-bottom: 16px; opacity: 0.3;"></div>
+        <div class="skeleton" style="height: 80px; width: 100%; opacity: 0.2;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE NOTE -->
+  <div class="wireframe-frame" id="s8-mobile">
+    <div style="padding: 30px;">
+      <div class="mobile-note">
+        <strong>Mobile Responsive Behavior (Screen 8: API Docs)</strong><br><br>
+        &bull; <strong>&lt; 1024px:</strong> Three columns collapse to two -- code panel moves below content as a tabbed section<br>
+        &bull; <strong>&lt; 768px:</strong> Sidebar becomes a hamburger menu (top-left icon) with slide-out drawer<br>
+        &bull; <strong>&lt; 768px:</strong> Code blocks get horizontal scroll with visible scrollbar<br>
+        &bull; <strong>&lt; 768px:</strong> Parameter tables become card-style (stacked label: value)<br>
+        &bull; <strong>&lt; 480px:</strong> Language switcher becomes a dropdown select instead of tabs<br>
+        &bull; <strong>Always:</strong> Search bar remains accessible in top bar<br>
+        &bull; <strong>Always:</strong> "On this page" mini-nav hidden on mobile; replaced by "Jump to..." dropdown
+      </div>
+      <div style="margin-top: 20px; display: flex; gap: 20px;">
+        <div style="flex: 1;">
+          <div class="annotation">Mobile Layout (~375px)</div>
+          <div style="border: 2px dashed var(--gray-300); width: 200px; height: 380px; margin-top: 8px; padding: 10px; position: relative;">
+            <div style="background: var(--gray-200); height: 30px; margin-bottom: 8px; display: flex; align-items: center; padding: 0 8px;">
+              <span style="font-size: 14px; color: var(--gray-500);">&#9776;</span>
+              <span style="font-size: 10px; margin-left: 8px; color: var(--gray-700); font-weight: 600;">EaaS Docs</span>
+            </div>
+            <div style="background: var(--gray-100); height: 10px; width: 70%; margin-bottom: 6px;"></div>
+            <div style="background: var(--gray-100); height: 8px; width: 90%; margin-bottom: 4px;"></div>
+            <div style="background: var(--gray-100); height: 8px; width: 60%; margin-bottom: 12px;"></div>
+            <div style="background: var(--gray-200); height: 20px; width: 100%; margin-bottom: 4px; display: flex; align-items: center; padding: 0 6px;">
+              <span style="font-size: 7px; background: var(--gray-800); color: white; padding: 1px 4px;">POST</span>
+              <span style="font-size: 7px; margin-left: 4px; font-family: monospace;">/inbound/rules</span>
+            </div>
+            <div style="background: var(--gray-100); height: 8px; width: 80%; margin-bottom: 4px;"></div>
+            <div style="background: var(--gray-100); height: 8px; width: 50%; margin-bottom: 10px;"></div>
+            <div style="background: var(--gray-900); height: 60px; width: 100%; padding: 6px; overflow: hidden;">
+              <div style="background: var(--gray-700); height: 6px; width: 80%; margin-bottom: 3px;"></div>
+              <div style="background: var(--gray-700); height: 6px; width: 60%; margin-bottom: 3px;"></div>
+              <div style="background: var(--gray-700); height: 6px; width: 70%;"></div>
+            </div>
+            <div style="position: absolute; bottom: 6px; left: 6px; right: 6px; text-align: center;">
+              <span style="font-size: 7px; color: var(--gray-400);">Code block scrolls horizontally</span>
+            </div>
+          </div>
+        </div>
+        <div style="flex: 1;">
+          <div class="annotation">Tablet Layout (~768px)</div>
+          <div style="border: 2px dashed var(--gray-300); width: 340px; height: 380px; margin-top: 8px; padding: 10px; display: grid; grid-template-columns: 80px 1fr; gap: 8px;">
+            <div style="background: var(--gray-50); border-right: 1px solid var(--gray-200); padding: 6px;">
+              <div style="background: var(--gray-200); height: 8px; width: 80%; margin-bottom: 6px;"></div>
+              <div style="background: var(--gray-200); height: 8px; width: 60%; margin-bottom: 6px;"></div>
+              <div style="background: var(--gray-200); height: 8px; width: 70%; margin-bottom: 6px;"></div>
+              <div style="background: var(--gray-300); height: 8px; width: 80%; margin-bottom: 6px;"></div>
+              <div style="background: var(--gray-200); height: 8px; width: 50%; margin-bottom: 6px;"></div>
+            </div>
+            <div>
+              <div style="background: var(--gray-100); height: 12px; width: 60%; margin-bottom: 8px;"></div>
+              <div style="background: var(--gray-100); height: 8px; width: 90%; margin-bottom: 4px;"></div>
+              <div style="background: var(--gray-100); height: 8px; width: 70%; margin-bottom: 12px;"></div>
+              <div style="background: var(--gray-200); height: 20px; width: 100%; margin-bottom: 8px;"></div>
+              <div style="background: var(--gray-100); height: 8px; width: 80%; margin-bottom: 4px;"></div>
+              <div style="background: var(--gray-100); height: 8px; width: 60%; margin-bottom: 12px;"></div>
+              <div style="background: var(--gray-900); height: 80px; width: 100%;"></div>
+              <div style="margin-top: 4px; font-size: 7px; color: var(--gray-400); text-align: center;">Code panel below content (not side)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SCREEN 9: Webhook Integration Guide                           -->
+<!-- ============================================================ -->
+<div class="screen-section">
+  <div class="screen-label">Screen 9</div>
+  <div class="screen-title">Webhook Integration Guide</div>
+  <div class="screen-desc">Documentation guide page with payload schema, field reference, signature verification in 4 languages, retry policy, and best practices.</div>
+
+  <div class="annotation-block">
+    ANNOTATION: Two-column layout (sidebar + content). Long-form documentation with code examples inline.
+    "On this page" mini-nav links to each section. Language tabs for signature verification code.
+  </div>
+
+  <div class="state-tabs">
+    <div class="state-tab active" onclick="switchState('s9', 'default')">Default</div>
+    <div class="state-tab" onclick="switchState('s9', '404')">404 State</div>
+    <div class="state-tab" onclick="switchState('s9', 'loading')">Loading</div>
+    <div class="state-tab" onclick="switchState('s9', 'mobile')">Mobile Note</div>
+  </div>
+
+  <!-- DEFAULT STATE -->
+  <div class="wireframe-frame active" id="s9-default">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Guides</div>
+          <div class="nav-item">Quickstart</div>
+          <div class="nav-item">API Reference</div>
+          <div class="nav-item active">Webhook Integration</div>
+          <div class="nav-item">Inbound Setup</div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">On This Page</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Payload Schema</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Field Reference</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Signature Verification</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Idempotency</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Best Practices</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Testing (ngrok)</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Retry Policy</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Error Handling</div>
+        </div>
+        <div class="sidebar-sticky-note">
+          <div class="annotation">"On this page" mini-nav -- sticky</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2>Webhook Integration Guide</h2>
+        <p>When an inbound email matches a rule with action <code>"webhook"</code>, EaaS sends a POST request to your configured URL with the parsed email data.</p>
+
+        <hr class="divider">
+
+        <!-- Payload Schema -->
+        <h3 id="payload-schema">Payload Schema</h3>
+        <p>Every webhook delivery sends a JSON payload with the following structure:</p>
+        <div class="code-block-light">
+          <span class="copy-btn">Copy</span>
+{
+  "event": "email.received",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "messageId": "&lt;unique-rfc-message-id@example.com&gt;",
+    "from": {
+      "email": "sender@example.com",
+      "name": "John Doe"
+    },
+    "to": [
+      { "email": "support@yourdomain.com", "name": null }
+    ],
+    "cc": [],
+    "subject": "Re: Order #12345",
+    "textBody": "Plain text content of the email...",
+    "htmlBody": "&lt;p&gt;HTML content of the email...&lt;/p&gt;",
+    "attachments": [
+      {
+        "id": "att_uuid",
+        "filename": "invoice.pdf",
+        "contentType": "application/pdf",
+        "size": 24680
+      }
+    ],
+    "verdicts": {
+      "spam": false,
+      "virus": false,
+      "spf": "pass",
+      "dkim": "pass",
+      "dmarc": "pass"
+    },
+    "receivedAt": "2026-04-01T12:00:00Z",
+    "inReplyTo": "&lt;original-message-id@example.com&gt;",
+    "outboundEmailId": "out_uuid_if_reply"
+  },
+  "timestamp": "2026-04-01T12:00:01Z"
+}
+        </div>
+
+        <hr class="divider">
+
+        <!-- Field Reference -->
+        <h3 id="field-reference">Field Reference</h3>
+        <table class="params-table">
+          <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+          <tr><td>event</td><td>string</td><td>Always <code>"email.received"</code></td></tr>
+          <tr><td>data.id</td><td>uuid</td><td>Unique inbound email ID</td></tr>
+          <tr><td>data.messageId</td><td>string</td><td>RFC 5322 Message-ID header</td></tr>
+          <tr><td>data.from</td><td>object</td><td>Sender email and display name</td></tr>
+          <tr><td>data.to</td><td>array</td><td>Array of recipient objects</td></tr>
+          <tr><td>data.cc</td><td>array</td><td>Array of CC recipient objects</td></tr>
+          <tr><td>data.subject</td><td>string</td><td>Email subject line</td></tr>
+          <tr><td>data.textBody</td><td>string|null</td><td>Plain text body (if available)</td></tr>
+          <tr><td>data.htmlBody</td><td>string|null</td><td>HTML body (if available)</td></tr>
+          <tr><td>data.attachments</td><td>array</td><td>Attachment metadata (id, filename, type, size)</td></tr>
+          <tr><td>data.verdicts</td><td>object</td><td>Spam, virus, SPF, DKIM, DMARC verdicts</td></tr>
+          <tr><td>data.receivedAt</td><td>datetime</td><td>ISO 8601 timestamp of receipt</td></tr>
+          <tr><td>data.inReplyTo</td><td>string|null</td><td>Message-ID of original email (if reply)</td></tr>
+          <tr><td>data.outboundEmailId</td><td>uuid|null</td><td>EaaS outbound email ID (if reply to sent email)</td></tr>
+          <tr><td>timestamp</td><td>datetime</td><td>ISO 8601 timestamp of webhook dispatch</td></tr>
+        </table>
+
+        <hr class="divider">
+
+        <!-- Signature Verification -->
+        <h3 id="signature-verification">Signature Verification</h3>
+        <p>Every webhook includes an <code>X-EaaS-Signature</code> header containing an HMAC-SHA256 signature. Always verify this before processing.</p>
+
+        <div class="lang-switcher-light" style="margin-top: 16px;">
+          <div class="lang-tab-light active">Node.js</div>
+          <div class="lang-tab-light">Python</div>
+          <div class="lang-tab-light">C#</div>
+          <div class="lang-tab-light">Go</div>
+        </div>
+
+        <!-- Node.js -->
+        <div class="code-block-light" style="margin-top: 0; border-top: none;">
+          <span class="copy-btn">Copy</span>
+const crypto = require('crypto');
+
+function verifyWebhookSignature(body, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(body, 'utf8')
+    .digest('hex');
+
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+
+// Express.js middleware
+app.post('/webhook', express.raw({ type: '*/*' }), (req, res) => {
+  const sig = req.headers['x-eaas-signature'];
+  if (!verifyWebhookSignature(req.body, sig, WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  // Process webhook...
+  res.status(200).send('OK');
+});
+        </div>
+
+        <div class="annotation">Other language tabs show equivalent code in Python (hmac), C# (HMACSHA256), Go (crypto/hmac)</div>
+
+        <hr class="divider">
+
+        <!-- Idempotency -->
+        <h3 id="idempotency">Idempotency</h3>
+        <p>Webhooks may be delivered more than once. Use the <code>data.id</code> field as an idempotency key:</p>
+        <div class="code-block-light">
+          <span class="copy-btn">Copy</span>
+// Store processed IDs (use Redis/DB in production)
+const processed = new Set();
+
+app.post('/webhook', (req, res) => {
+  const { data } = req.body;
+  if (processed.has(data.id)) {
+    return res.status(200).send('Already processed');
+  }
+  processed.add(data.id);
+  // Process the email...
+  res.status(200).send('OK');
+});
+        </div>
+
+        <hr class="divider">
+
+        <!-- Best Practices -->
+        <h3 id="best-practices">Best Practices</h3>
+        <div style="border: 1px solid var(--gray-200); padding: 16px; background: var(--gray-50);">
+          <ul style="list-style: disc; padding-left: 20px; font-size: 13px; color: var(--gray-600); line-height: 2;">
+            <li><strong>Return 200 within 500ms</strong> -- Acknowledge quickly to prevent timeouts</li>
+            <li><strong>Enqueue to a message queue</strong> -- Process async (SQS, RabbitMQ, Redis)</li>
+            <li><strong>Never do business logic in the handler</strong> -- Only validate + enqueue</li>
+            <li><strong>Always verify the signature</strong> -- Reject unsigned/invalid payloads</li>
+            <li><strong>Log the raw payload</strong> -- For debugging and audit trails</li>
+            <li><strong>Handle attachments asynchronously</strong> -- Download via API after acknowledgment</li>
+          </ul>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Testing with ngrok -->
+        <h3 id="testing-ngrok">Testing with ngrok</h3>
+        <p>Use ngrok to expose your local server for webhook testing:</p>
+        <div class="code-block-light">
+          <span class="copy-btn">Copy</span>
+$ ngrok http 3000
+
+Session Status      online
+Forwarding          https://abc123.ngrok.io -> http://localhost:3000
+
+# Use the HTTPS URL as your webhook URL when creating a rule:
+curl -X POST https://api.eaas.dev/v1/inbound/rules \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -d '{
+    "name": "Test Rule",
+    "domainId": "d_uuid",
+    "matchPattern": "*@",
+    "action": "webhook",
+    "webhookUrl": "https://abc123.ngrok.io/webhook"
+  }'
+        </div>
+
+        <hr class="divider">
+
+        <!-- Retry Policy -->
+        <h3 id="retry-policy">Retry Policy</h3>
+        <p>If your endpoint returns a non-2xx status or times out, EaaS retries with exponential backoff:</p>
+        <table class="retry-table">
+          <tr><th>Attempt</th><th>Delay</th><th>Cumulative Time</th><th>Notes</th></tr>
+          <tr><td>1 (initial)</td><td>Immediate</td><td>0s</td><td>First delivery attempt</td></tr>
+          <tr><td>2</td><td>30 seconds</td><td>30s</td><td>First retry</td></tr>
+          <tr><td>3</td><td>2 minutes</td><td>~2.5 min</td><td></td></tr>
+          <tr><td>4</td><td>10 minutes</td><td>~12.5 min</td><td></td></tr>
+          <tr><td>5</td><td>30 minutes</td><td>~42.5 min</td><td></td></tr>
+          <tr><td>6</td><td>2 hours</td><td>~2.7 hrs</td><td></td></tr>
+          <tr><td>7</td><td>8 hours</td><td>~10.7 hrs</td><td>Final attempt</td></tr>
+        </table>
+        <p style="font-size: 12px; color: var(--gray-500);">After 7 failed attempts, the delivery is marked as failed. You can view failed deliveries in the dashboard and manually retry.</p>
+
+        <hr class="divider">
+
+        <!-- Error Handling -->
+        <h3 id="error-handling">Error Handling</h3>
+        <p>Your webhook endpoint should return appropriate HTTP status codes:</p>
+        <table class="params-table">
+          <tr><th>Status Code</th><th>Meaning</th><th>EaaS Behavior</th></tr>
+          <tr><td>200-299</td><td>Success</td><td>Delivery marked as successful</td></tr>
+          <tr><td>400</td><td>Bad Request</td><td>No retry -- payload rejected permanently</td></tr>
+          <tr><td>401/403</td><td>Auth Error</td><td>No retry -- check webhook secret config</td></tr>
+          <tr><td>404</td><td>Not Found</td><td>No retry -- check your endpoint URL</td></tr>
+          <tr><td>429</td><td>Rate Limited</td><td>Retry with backoff (respects Retry-After header)</td></tr>
+          <tr><td>500-599</td><td>Server Error</td><td>Retry per schedule above</td></tr>
+          <tr><td>Timeout</td><td>No response in 10s</td><td>Retry per schedule above</td></tr>
+        </table>
+
+        <div class="annotation-block" style="margin-top: 24px;">
+          ANNOTATION: Headers sent with each webhook delivery:<br>
+          &bull; Content-Type: application/json<br>
+          &bull; X-EaaS-Signature: hmac-sha256 hex digest<br>
+          &bull; X-EaaS-Event: email.received<br>
+          &bull; X-EaaS-Delivery-Id: unique delivery UUID<br>
+          &bull; X-EaaS-Timestamp: unix timestamp<br>
+          &bull; User-Agent: EaaS-Webhooks/1.0
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 404 STATE -->
+  <div class="wireframe-frame" id="s9-404">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Guides</div>
+          <div class="nav-item">Quickstart</div>
+          <div class="nav-item">API Reference</div>
+          <div class="nav-item">Webhook Integration</div>
+          <div class="nav-item">Inbound Setup</div>
+        </div>
+      </div>
+      <div>
+        <div class="state-404">
+          <div class="code-404">404</div>
+          <h3>Documentation Not Found</h3>
+          <p>This guide may have been moved or renamed. Try searching or browse the sidebar navigation.</p>
+          <div class="link-placeholder">Search Documentation</div>
+          <div class="link-placeholder">Back to Guides Index</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="wireframe-frame" id="s9-loading">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar" style="padding-top: 24px;">
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 50%;"></div>
+        <div class="skeleton skeleton-nav" style="width: 65%;"></div>
+        <div class="skeleton skeleton-nav" style="width: 55%;"></div>
+      </div>
+      <div style="padding: 30px 40px;">
+        <div class="skeleton skeleton-title" style="width: 60%;"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+        <div class="skeleton skeleton-line w-60"></div>
+        <div style="height: 20px;"></div>
+        <div class="skeleton skeleton-block" style="height: 200px;"></div>
+        <div style="height: 16px;"></div>
+        <div class="skeleton skeleton-line w-40"></div>
+        <div class="skeleton skeleton-block" style="height: 100px;"></div>
+        <div style="height: 16px;"></div>
+        <div class="skeleton skeleton-line w-40"></div>
+        <div class="skeleton skeleton-block" style="height: 150px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE NOTE -->
+  <div class="wireframe-frame" id="s9-mobile">
+    <div style="padding: 30px;">
+      <div class="mobile-note">
+        <strong>Mobile Responsive Behavior (Screen 9: Webhook Guide)</strong><br><br>
+        &bull; <strong>&lt; 768px:</strong> Sidebar collapses to hamburger menu with slide-out drawer<br>
+        &bull; <strong>&lt; 768px:</strong> "On this page" mini-nav becomes a sticky dropdown at top of content<br>
+        &bull; <strong>&lt; 768px:</strong> Code blocks get horizontal scroll; language tabs stack or become dropdown<br>
+        &bull; <strong>&lt; 768px:</strong> Tables become horizontally scrollable with shadow indicators<br>
+        &bull; <strong>&lt; 480px:</strong> Retry policy table switches to card layout (one row per card)<br>
+        &bull; <strong>Always:</strong> Copy buttons remain accessible on code blocks<br>
+        &bull; <strong>Always:</strong> Payload schema JSON block preserves formatting with monospace
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- SCREEN 10: Inbound Setup Guide                                -->
+<!-- ============================================================ -->
+<div class="screen-section">
+  <div class="screen-label">Screen 10</div>
+  <div class="screen-title">Inbound Email Setup Guide</div>
+  <div class="screen-desc">Step-by-step onboarding guide: architecture overview, prerequisites, 5 steps with code, provider DNS guides, troubleshooting, FAQ.</div>
+
+  <div class="annotation-block">
+    ANNOTATION: Two-column layout. Numbered step blocks guide the user linearly. Architecture diagram is a placeholder box.
+    Provider-specific DNS guides use expandable/accordion pattern. Troubleshooting and FAQ also use accordions.
+  </div>
+
+  <div class="state-tabs">
+    <div class="state-tab active" onclick="switchState('s10', 'default')">Default</div>
+    <div class="state-tab" onclick="switchState('s10', '404')">404 State</div>
+    <div class="state-tab" onclick="switchState('s10', 'loading')">Loading</div>
+    <div class="state-tab" onclick="switchState('s10', 'mobile')">Mobile Note</div>
+  </div>
+
+  <!-- DEFAULT STATE -->
+  <div class="wireframe-frame active" id="s10-default">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Guides</div>
+          <div class="nav-item">Quickstart</div>
+          <div class="nav-item">API Reference</div>
+          <div class="nav-item">Webhook Integration</div>
+          <div class="nav-item active">Inbound Setup</div>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">On This Page</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Architecture</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Prerequisites</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Step 1: Verify Domain</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Step 2: MX Records</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Step 3: Routing Rule</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Step 4: Webhook Handler</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Step 5: Test Email</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">Troubleshooting</div>
+          <div class="nav-item indent" style="font-size: 11px; color: var(--gray-400);">FAQ</div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2>Inbound Email Setup Guide</h2>
+        <p>Get your first inbound email in under 30 minutes. This guide walks you through domain verification, DNS configuration, routing rules, and webhook setup.</p>
+
+        <hr class="divider">
+
+        <!-- Architecture Overview -->
+        <h3>Architecture Overview</h3>
+        <div class="placeholder-box">
+          <div class="x-mark">X</div>
+          <p>Architecture Diagram Placeholder</p>
+          <div style="margin-top: 12px; font-family: monospace; font-size: 11px; color: var(--gray-500); line-height: 2;">
+            Sender &rarr; MX Record &rarr; AWS SES Inbound<br>
+            &darr;<br>
+            S3 (raw MIME) + SNS Notification<br>
+            &darr;<br>
+            EaaS Worker &rarr; Parse (MimeKit) &rarr; DB + S3<br>
+            &darr;<br>
+            Webhook / Forward / Store
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Prerequisites -->
+        <h3>Prerequisites</h3>
+        <ul class="checklist">
+          <li>EaaS account with an API key</li>
+          <li>A domain you own (DNS access required)</li>
+          <li>Domain verified in EaaS (see Step 1)</li>
+          <li>A public HTTPS endpoint for webhooks (or use ngrok for testing)</li>
+        </ul>
+
+        <hr class="divider">
+
+        <!-- Step 1 -->
+        <div class="step-block">
+          <h3><span class="step-number">1</span><span class="step-title">Verify Your Domain</span></h3>
+          <p>If your domain is not already verified in EaaS, add it via the API or dashboard:</p>
+          <div class="code-block-light">
+            <span class="copy-btn">Copy</span>
+curl -X POST https://api.eaas.dev/v1/domains \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "yourdomain.com"
+  }'
+
+# Response includes DNS records to add:
+# TXT record for domain verification
+# DKIM records for email authentication
+          </div>
+          <p>Follow the instructions in the response to add the required TXT and DKIM records at your DNS provider. Verification typically takes a few minutes.</p>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Step 2 -->
+        <div class="step-block">
+          <h3><span class="step-number">2</span><span class="step-title">Add MX Records</span></h3>
+          <p>Add the following MX record at your DNS provider to route incoming email through EaaS:</p>
+
+          <div class="dns-record">
+            <strong>Type:</strong> MX<br>
+            <strong>Host:</strong> @ (or your subdomain) <span class="copy-inline">[Copy]</span><br>
+            <strong>Value:</strong> inbound-smtp.eu-west-1.amazonaws.com <span class="copy-inline">[Copy]</span><br>
+            <strong>Priority:</strong> 10 <span class="copy-inline">[Copy]</span><br>
+            <strong>TTL:</strong> 3600
+          </div>
+
+          <p style="margin-top: 12px;"><strong>Provider-specific instructions:</strong></p>
+
+          <div class="expandable" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+              <span class="expandable-arrow">&#9654;</span> Cloudflare
+            </div>
+            <div class="expandable-body">
+              1. Go to DNS &rarr; Records in your Cloudflare dashboard<br>
+              2. Click "Add record"<br>
+              3. Type: MX, Name: @, Mail server: inbound-smtp.eu-west-1.amazonaws.com, Priority: 10<br>
+              4. Click "Save"<br>
+              <em>Note: If you have existing MX records (e.g., Google Workspace), consider using a subdomain like inbound.yourdomain.com instead.</em>
+            </div>
+          </div>
+          <div class="expandable" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+              <span class="expandable-arrow">&#9654;</span> AWS Route 53
+            </div>
+            <div class="expandable-body">
+              1. Go to Route 53 &rarr; Hosted Zones &rarr; your domain<br>
+              2. Click "Create Record"<br>
+              3. Record type: MX, Value: 10 inbound-smtp.eu-west-1.amazonaws.com<br>
+              4. Click "Create records"
+            </div>
+          </div>
+          <div class="expandable" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+              <span class="expandable-arrow">&#9654;</span> GoDaddy
+            </div>
+            <div class="expandable-body">
+              1. Go to My Products &rarr; DNS &rarr; Manage<br>
+              2. Under MX records, click "Add"<br>
+              3. Host: @, Points to: inbound-smtp.eu-west-1.amazonaws.com, Priority: 10<br>
+              4. Click "Save"
+            </div>
+          </div>
+          <div class="expandable" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+              <span class="expandable-arrow">&#9654;</span> Namecheap
+            </div>
+            <div class="expandable-body">
+              1. Go to Domain List &rarr; Manage &rarr; Advanced DNS<br>
+              2. Under Mail Settings, select "Custom MX"<br>
+              3. Add record: Host: @, Value: inbound-smtp.eu-west-1.amazonaws.com, Priority: 10<br>
+              4. Click the checkmark to save
+            </div>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Step 3 -->
+        <div class="step-block">
+          <h3><span class="step-number">3</span><span class="step-title">Create a Routing Rule</span></h3>
+          <p>Create an inbound routing rule to tell EaaS what to do with received emails:</p>
+          <div class="code-block-light">
+            <span class="copy-btn">Copy</span>
+curl -X POST https://api.eaas.dev/v1/inbound/rules \
+  -H "Authorization: Bearer &lt;key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "All Inbound",
+    "domainId": "your-domain-uuid",
+    "matchPattern": "*@",
+    "action": "webhook",
+    "webhookUrl": "https://your-server.com/webhook/inbound",
+    "priority": 0
+  }'
+          </div>
+          <p><strong>Action options:</strong></p>
+          <table class="params-table">
+            <tr><th>Action</th><th>Description</th><th>Required Field</th></tr>
+            <tr><td>webhook</td><td>POST parsed email to your URL</td><td>webhookUrl</td></tr>
+            <tr><td>forward</td><td>Forward raw email to another address</td><td>forwardTo</td></tr>
+            <tr><td>store</td><td>Store only (retrieve via API)</td><td>--</td></tr>
+          </table>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Step 4 -->
+        <div class="step-block">
+          <h3><span class="step-number">4</span><span class="step-title">Set Up Your Webhook Handler</span></h3>
+          <p>Create an endpoint to receive inbound email webhooks. Here is a minimal Express.js example:</p>
+          <div class="code-block-light">
+            <span class="copy-btn">Copy</span>
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+app.use(express.json());
+
+const WEBHOOK_SECRET = process.env.EAAS_WEBHOOK_SECRET;
+
+app.post('/webhook/inbound', (req, res) => {
+  // 1. Verify signature
+  const signature = req.headers['x-eaas-signature'];
+  const expected = crypto
+    .createHmac('sha256', WEBHOOK_SECRET)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+
+  if (signature !== expected) {
+    return res.status(401).send('Invalid signature');
+  }
+
+  // 2. Check idempotency
+  const emailId = req.body.data.id;
+  // TODO: Check if already processed
+
+  // 3. Enqueue for processing
+  console.log('Received email from:', req.body.data.from.email);
+  console.log('Subject:', req.body.data.subject);
+  // TODO: Enqueue to your message queue
+
+  // 4. Respond quickly
+  res.status(200).send('OK');
+});
+
+app.listen(3000, () => console.log('Webhook server on :3000'));
+          </div>
+          <p>See the <span style="color: var(--link-blue); text-decoration: underline; cursor: pointer;">Webhook Integration Guide</span> for signature verification in other languages and best practices.</p>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Step 5 -->
+        <div class="step-block">
+          <h3><span class="step-number">5</span><span class="step-title">Send a Test Email</span></h3>
+          <p>Send an email to your configured address (e.g., support@yourdomain.com) and verify:</p>
+          <ul class="checklist">
+            <li>Email appears in the EaaS dashboard under Inbound Emails</li>
+            <li>Your webhook endpoint receives the POST request</li>
+            <li>Signature verification passes</li>
+            <li>All fields (from, subject, body, attachments) are parsed correctly</li>
+          </ul>
+          <p style="margin-top: 12px;">You can also check the inbound email via the API:</p>
+          <div class="code-block-light">
+            <span class="copy-btn">Copy</span>
+curl https://api.eaas.dev/v1/inbound/emails \
+  -H "Authorization: Bearer &lt;key&gt;"
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Troubleshooting -->
+        <h3>Troubleshooting</h3>
+        <div class="expandable" onclick="this.classList.toggle('open')">
+          <div class="expandable-header">
+            <span class="expandable-arrow">&#9654;</span> Email not arriving?
+          </div>
+          <div class="expandable-body">
+            &bull; Verify MX records are correctly set (use <code>dig MX yourdomain.com</code> or mxtoolbox.com)<br>
+            &bull; DNS propagation can take up to 48 hours (usually minutes)<br>
+            &bull; Check that your domain is verified in EaaS (status: "verified")<br>
+            &bull; Ensure no conflicting MX records with higher priority
+          </div>
+        </div>
+        <div class="expandable" onclick="this.classList.toggle('open')">
+          <div class="expandable-header">
+            <span class="expandable-arrow">&#9654;</span> Webhook not firing?
+          </div>
+          <div class="expandable-body">
+            &bull; Check that your rule's matchPattern matches the recipient address<br>
+            &bull; Verify the rule is active (isActive: true)<br>
+            &bull; Check webhook delivery logs in the EaaS dashboard<br>
+            &bull; Ensure your endpoint is publicly accessible (use ngrok for local testing)
+          </div>
+        </div>
+        <div class="expandable" onclick="this.classList.toggle('open')">
+          <div class="expandable-header">
+            <span class="expandable-arrow">&#9654;</span> Signature verification failing?
+          </div>
+          <div class="expandable-body">
+            &bull; Ensure you're using the correct webhook secret (from dashboard settings)<br>
+            &bull; Verify you're hashing the raw request body, not a parsed/re-serialized version<br>
+            &bull; Check for encoding issues (use UTF-8 consistently)
+          </div>
+        </div>
+        <div class="expandable" onclick="this.classList.toggle('open')">
+          <div class="expandable-header">
+            <span class="expandable-arrow">&#9654;</span> Attachments missing?
+          </div>
+          <div class="expandable-body">
+            &bull; Webhook payload only includes attachment metadata, not content<br>
+            &bull; Download attachments via the API: GET /api/v1/inbound/emails/{id}/attachments/{attId}<br>
+            &bull; Check email size limits (max 30MB per email)
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- FAQ -->
+        <h3>FAQ</h3>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> Can I use a subdomain for inbound email?</div>
+          <div class="faq-a">Yes, and it's recommended if you already use your root domain for other email (e.g., Google Workspace). Add the MX record to <code>inbound.yourdomain.com</code> instead of <code>@</code>, and update your match patterns accordingly.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> What's the max email size?</div>
+          <div class="faq-a">EaaS accepts emails up to 30MB (including attachments). Emails exceeding this limit are bounced with a 552 error.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> How long are emails stored?</div>
+          <div class="faq-a">Inbound emails are stored for 30 days by default. You can configure retention per rule (7, 14, 30, 60, 90 days) or delete emails via the API at any time.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> Can I have multiple rules for the same domain?</div>
+          <div class="faq-a">Yes. Rules are evaluated in priority order (lower number = higher priority). The first matching rule handles the email. Use specific patterns (e.g., "support@") before catch-all patterns ("*@").</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> Do you support catch-all / wildcard addresses?</div>
+          <div class="faq-a">Yes. Use <code>*@</code> as the match pattern to catch all emails to the domain. You can also use partial wildcards like <code>support-*@</code>.</div>
+        </div>
+        <div class="faq-item" onclick="this.classList.toggle('open')">
+          <div class="faq-q"><span class="expandable-arrow">&#9654;</span> Can I forward and webhook the same email?</div>
+          <div class="faq-a">Not with a single rule. Create two rules with the same match pattern but different priorities: one for webhook and one for forward. Both will process the email.</div>
+        </div>
+
+        <div style="height: 40px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 404 STATE -->
+  <div class="wireframe-frame" id="s10-404">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar">
+        <div class="nav-section">
+          <div class="nav-section-title">Guides</div>
+          <div class="nav-item">Quickstart</div>
+          <div class="nav-item">API Reference</div>
+          <div class="nav-item">Webhook Integration</div>
+          <div class="nav-item">Inbound Setup</div>
+        </div>
+      </div>
+      <div>
+        <div class="state-404">
+          <div class="code-404">404</div>
+          <h3>Guide Not Found</h3>
+          <p>This setup guide may have been moved or is no longer available. Try one of the links below.</p>
+          <div class="link-placeholder">Inbound Setup Guide</div>
+          <div class="link-placeholder">API Reference</div>
+          <div class="link-placeholder">Contact Support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="wireframe-frame" id="s10-loading">
+    <div class="docs-layout" style="grid-template-rows: auto 1fr;">
+      <div class="topbar">
+        <span class="topbar-brand">EaaS Documentation</span>
+        <div class="topbar-search">Search docs... &#x1F50D;</div>
+      </div>
+      <div class="sidebar" style="padding-top: 24px;">
+        <div class="skeleton skeleton-nav"></div>
+        <div class="skeleton skeleton-nav" style="width: 50%;"></div>
+        <div class="skeleton skeleton-nav" style="width: 65%;"></div>
+        <div class="skeleton skeleton-nav" style="width: 55%;"></div>
+      </div>
+      <div style="padding: 30px 40px;">
+        <div class="skeleton skeleton-title" style="width: 55%;"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+        <div class="skeleton skeleton-line w-60"></div>
+        <div style="height: 20px;"></div>
+        <div class="skeleton skeleton-block" style="height: 160px;"></div>
+        <div style="height: 20px;"></div>
+        <div class="skeleton skeleton-line w-40"></div>
+        <div class="skeleton skeleton-line w-100"></div>
+        <div class="skeleton skeleton-line w-80"></div>
+        <div class="skeleton skeleton-line w-60"></div>
+        <div style="height: 20px;"></div>
+        <div class="skeleton skeleton-block" style="height: 120px;"></div>
+        <div style="height: 16px;"></div>
+        <div class="skeleton skeleton-block" style="height: 80px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE NOTE -->
+  <div class="wireframe-frame" id="s10-mobile">
+    <div style="padding: 30px;">
+      <div class="mobile-note">
+        <strong>Mobile Responsive Behavior (Screen 10: Setup Guide)</strong><br><br>
+        &bull; <strong>&lt; 768px:</strong> Sidebar collapses to hamburger menu<br>
+        &bull; <strong>&lt; 768px:</strong> "On this page" becomes a sticky "Jump to..." dropdown at content top<br>
+        &bull; <strong>&lt; 768px:</strong> Architecture placeholder diagram scrolls horizontally<br>
+        &bull; <strong>&lt; 768px:</strong> DNS record box becomes full-width with stacked fields<br>
+        &bull; <strong>&lt; 768px:</strong> Expandable sections (DNS providers, troubleshooting, FAQ) remain expandable -- native touch target<br>
+        &bull; <strong>&lt; 768px:</strong> Code blocks scroll horizontally with visible scrollbar<br>
+        &bull; <strong>&lt; 768px:</strong> Step numbers remain inline with titles<br>
+        &bull; <strong>&lt; 480px:</strong> Action options table becomes card layout<br>
+        &bull; <strong>Always:</strong> Copy buttons remain accessible on all code and DNS blocks<br>
+        &bull; <strong>Always:</strong> Step-by-step linear flow preserved at all breakpoints
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DESIGN NOTES ==================== -->
+<div class="screen-section" style="margin-bottom: 40px;">
+  <div class="screen-label">Design Notes</div>
+  <div class="screen-title">Wireframe Conventions</div>
+  <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="annotation-block">
+      <strong>Visual Language</strong><br>
+      &bull; Grayscale palette only (no color except blue for links)<br>
+      &bull; Dotted borders = placeholder / interactive areas<br>
+      &bull; Solid borders = defined content boundaries<br>
+      &bull; "X" boxes = image/diagram placeholders<br>
+      &bull; Monospace font = code, API paths, values<br>
+      &bull; Inter font = UI text, labels, descriptions
+    </div>
+    <div class="annotation-block">
+      <strong>Interaction Patterns</strong><br>
+      &bull; Language tabs: click to switch code examples<br>
+      &bull; Expandable sections: click header to toggle<br>
+      &bull; FAQ items: click question to reveal answer<br>
+      &bull; Copy buttons: click to copy code/values<br>
+      &bull; Sidebar nav: click to navigate, sticky scroll<br>
+      &bull; Search bar: opens full-text doc search overlay
+    </div>
+    <div class="annotation-block">
+      <strong>Layout Patterns</strong><br>
+      &bull; Screen 8: Stripe-style 3-column (nav | content | code)<br>
+      &bull; Screens 9-10: 2-column (nav | content) with inline code<br>
+      &bull; All screens: sticky sidebar, top bar with search<br>
+      &bull; "On this page" mini-nav for long doc pages<br>
+      &bull; Method badges: dark bg (POST), medium (GET/PUT), light (DELETE)
+    </div>
+    <div class="annotation-block">
+      <strong>Content Strategy</strong><br>
+      &bull; 10 endpoints fully documented with params + examples<br>
+      &bull; Webhook guide: schema + verification + retry policy<br>
+      &bull; Setup guide: 5-step linear flow with code at each step<br>
+      &bull; Provider-specific DNS: expandable to reduce initial load<br>
+      &bull; Troubleshooting + FAQ: address top support issues proactively
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchState(screen, state) {
+    // Hide all frames for this screen
+    document.querySelectorAll(`[id^="${screen}-"]`).forEach(el => {
+      el.classList.remove('active');
+    });
+    // Deactivate all tabs in the same group
+    const section = document.getElementById(`${screen}-${state}`).closest('.screen-section');
+    section.querySelectorAll('.state-tab').forEach(tab => tab.classList.remove('active'));
+
+    // Show selected frame
+    document.getElementById(`${screen}-${state}`).classList.add('active');
+
+    // Activate the clicked tab
+    const tabs = section.querySelectorAll('.state-tab');
+    const states = ['default', '404', 'loading', 'mobile'];
+    const idx = states.indexOf(state);
+    if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  }
+</script>
+
+</body>
+</html>

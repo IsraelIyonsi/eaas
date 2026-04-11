@@ -1,0 +1,2608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Customer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* === RESET & BASE === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#ffffff;--bg-surface:#f8fafc;--bg-elevated:#ffffff;--bg-sidebar:#0f172a;
+--text:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;--text-sidebar:#e2e8f0;
+--border:#e2e8f0;--border-light:#f1f5f9;
+--primary:#2563eb;--primary-hover:#1d4ed8;--primary-light:#dbeafe;--primary-text:#1e40af;
+--success:#22c55e;--success-light:#dcfce7;--success-text:#166534;
+--warning:#f59e0b;--warning-light:#fef3c7;--warning-text:#92400e;
+--error:#ef4444;--error-light:#fee2e2;--error-text:#991b1b;
+--info:#06b6d4;--info-light:#cffafe;
+--radius:6px;--radius-lg:8px;--radius-xl:12px;
+--shadow:0 1px 3px rgba(0,0,0,.1);--shadow-md:0 4px 6px -1px rgba(0,0,0,.1);--shadow-lg:0 10px 15px -3px rgba(0,0,0,.1);
+--sidebar-w:240px;--header-h:56px;
+--font-sans:'Inter',system-ui,sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+.dark{
+--bg:#0f172a;--bg-surface:#1e293b;--bg-elevated:#1e293b;--bg-sidebar:#020617;
+--text:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--text-sidebar:#e2e8f0;
+--border:#334155;--border-light:#1e293b;
+--primary-light:#1e3a5f;--primary-text:#93c5fd;
+--success-light:#052e16;--success-text:#86efac;
+--warning-light:#451a03;--warning-text:#fde68a;
+--error-light:#450a0a;--error-text:#fca5a5;
+--shadow:0 1px 3px rgba(0,0,0,.3);--shadow-md:0 4px 6px -1px rgba(0,0,0,.3);
+}
+html{font-size:14px}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;transition:background .2s,color .2s}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+code,pre{font-family:var(--font-mono)}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-weight:600;color:var(--text-secondary);font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border-light);font-size:.875rem}
+tr:hover td{background:var(--bg-surface)}
+/* === SCROLLBAR === */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+
+/* === SIDEBAR === */
+.sidebar{width:var(--sidebar-w);background:var(--bg-sidebar);color:var(--text-sidebar);height:100vh;position:fixed;left:0;top:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:16px 20px;font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sidebar-logo svg{width:28px;height:28px}
+.sidebar-nav{flex:1;padding:8px}
+.nav-section{margin-top:16px}
+.nav-section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.35);padding:4px 12px;margin-bottom:4px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius);color:var(--text-sidebar);opacity:.7;transition:all .15s;font-size:.875rem;cursor:pointer;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.08);opacity:1;text-decoration:none}
+.nav-item.active{background:rgba(37,99,235,.3);opacity:1;color:#93c5fd}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-item .badge{margin-left:auto;background:var(--primary);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;font-weight:600}
+.nav-item .badge-new{background:var(--success)}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:.75rem;color:rgba(255,255,255,.4)}
+
+/* === MAIN === */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.header{height:var(--header-h);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg);position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:12px}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:.875rem;color:var(--text-secondary)}
+.breadcrumb a{color:var(--text-secondary)}
+.breadcrumb a:hover{color:var(--text)}
+.breadcrumb .sep{color:var(--text-muted)}
+.breadcrumb .current{color:var(--text);font-weight:500}
+.header-right{display:flex;align-items:center;gap:12px}
+.btn-icon{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:all .15s}
+.btn-icon:hover{background:var(--bg-surface);color:var(--text)}
+.content{flex:1;padding:24px}
+.page-title{font-size:1.5rem;font-weight:700;margin-bottom:4px}
+.page-desc{color:var(--text-secondary);margin-bottom:20px;font-size:.875rem}
+
+/* === BUTTONS === */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-weight:500;font-size:.875rem;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--bg-surface);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border-light);border-color:var(--text-muted)}
+.btn-ghost{color:var(--text-secondary)}
+.btn-ghost:hover{background:var(--bg-surface);color:var(--text)}
+.btn-danger{background:var(--error);color:#fff}
+.btn-danger:hover{background:#dc2626}
+.btn-sm{padding:5px 10px;font-size:.8rem}
+.btn-xs{padding:3px 8px;font-size:.75rem}
+.btn svg{width:16px;height:16px}
+
+/* === CARDS === */
+.card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-weight:600;font-size:1rem}
+
+/* === METRIC CARDS === */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.metric-card{background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;transition:box-shadow .15s}
+.metric-card:hover{box-shadow:var(--shadow-md)}
+.metric-label{font-size:.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;font-weight:500;display:flex;align-items:center;gap:6px}
+.metric-value{font-size:1.75rem;font-weight:700;margin-top:4px}
+.metric-change{font-size:.75rem;margin-top:4px;display:flex;align-items:center;gap:2px}
+.metric-change.up{color:var(--success)}
+.metric-change.down{color:var(--error)}
+
+/* === BADGES === */
+.badge-status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:500}
+.badge-success{background:var(--success-light);color:var(--success-text)}
+.badge-warning{background:var(--warning-light);color:var(--warning-text)}
+.badge-error{background:var(--error-light);color:var(--error-text)}
+.badge-info{background:var(--primary-light);color:var(--primary-text)}
+.badge-gray{background:var(--bg-surface);color:var(--text-secondary)}
+.badge-new{background:var(--success);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;font-weight:700;margin-left:6px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot-success{background:var(--success)}.dot-warning{background:var(--warning)}.dot-error{background:var(--error)}.dot-info{background:var(--primary)}.dot-gray{background:var(--text-muted)}
+
+/* === FILTER BAR === */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.filter-bar select,.filter-bar input[type="text"],.filter-bar input[type="date"]{width:auto;min-width:140px;font-size:.8rem;padding:6px 10px}
+.search-input{position:relative}
+.search-input input{padding-left:32px}
+.search-input svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted)}
+
+/* === TABLE === */
+.data-table{overflow-x:auto}
+.data-table table{min-width:700px}
+.data-table td,.data-table th{white-space:nowrap}
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:.8rem;color:var(--text-secondary)}
+.pagination-btns{display:flex;gap:4px}
+.pagination-btns button{width:32px;height:32px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.8rem}
+.pagination-btns button:hover{background:var(--bg-surface)}
+.pagination-btns button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* === TABS === */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{padding:8px 16px;font-size:.875rem;color:var(--text-secondary);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;font-weight:500}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* === MODALS === */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:var(--bg-elevated);border-radius:var(--radius-xl);width:90%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.95);transition:transform .2s}
+.modal-overlay.show .modal{transform:scale(1)}
+.modal-header{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-size:1.125rem;font-weight:600}
+.modal-body{padding:16px 24px}
+.modal-footer{padding:0 24px 20px;display:flex;justify-content:flex-end;gap:8px}
+
+/* === SLIDE PANEL === */
+.slide-panel{position:fixed;top:0;right:-500px;width:480px;max-width:90vw;height:100vh;background:var(--bg-elevated);box-shadow:var(--shadow-lg);z-index:200;transition:right .3s;overflow-y:auto;border-left:1px solid var(--border)}
+.slide-panel.show{right:0}
+.slide-panel-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.slide-panel-body{padding:24px}
+.slide-panel-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.slide-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:199;opacity:0;pointer-events:none;transition:opacity .2s}
+.slide-backdrop.show{opacity:1;pointer-events:auto}
+
+/* === FORM === */
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.8rem;font-weight:500;margin-bottom:4px;color:var(--text)}
+.form-hint{font-size:.75rem;color:var(--text-muted);margin-top:2px}
+.form-error{font-size:.75rem;color:var(--error);margin-top:2px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.toggle{position:relative;width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;transition:background .2s}
+.toggle.active{background:var(--primary)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:transform .2s}
+.toggle.active::after{transform:translateX(18px)}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:.75rem;background:var(--bg-surface);border:1px solid var(--border)}
+.chip .remove{cursor:pointer;opacity:.5}
+.chip .remove:hover{opacity:1}
+
+/* === TIMELINE === */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:2px;background:var(--border)}
+.timeline-item{position:relative;padding-bottom:16px}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-dot{position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg);z-index:1}
+.timeline-item .time{font-size:.7rem;color:var(--text-muted)}
+.timeline-item .desc{font-size:.8rem;margin-top:2px}
+
+/* === STEPPER === */
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:32px;padding:0 20px}
+.step{display:flex;align-items:center;gap:8px;flex:1;position:relative}
+.step:not(:last-child)::after{content:'';flex:1;height:2px;background:var(--border);margin:0 12px}
+.step.completed:not(:last-child)::after{background:var(--primary)}
+.step-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:600;background:var(--bg-surface);color:var(--text-muted);border:2px solid var(--border);flex-shrink:0}
+.step.active .step-num{background:var(--primary);color:#fff;border-color:var(--primary)}
+.step.completed .step-num{background:var(--success);color:#fff;border-color:var(--success)}
+.step-label{font-size:.75rem;font-weight:500;color:var(--text-muted);white-space:nowrap}
+.step.active .step-label{color:var(--text)}
+.step.completed .step-label{color:var(--success-text)}
+
+/* === CODE BLOCK === */
+.code-block{background:#1e293b;color:#e2e8f0;border-radius:var(--radius);padding:16px;font-family:var(--font-mono);font-size:.8rem;overflow-x:auto;line-height:1.6;position:relative}
+.code-block .copy-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);color:#94a3b8;border-radius:4px;padding:4px 8px;font-size:.7rem;cursor:pointer}
+.code-block .copy-btn:hover{background:rgba(255,255,255,.2);color:#fff}
+.code-block .keyword{color:#c084fc}
+.code-block .string{color:#86efac}
+.code-block .comment{color:#64748b}
+.code-block .number{color:#fde68a}
+
+/* === EMPTY STATE === */
+.empty-state{text-align:center;padding:60px 20px}
+.empty-state svg{width:64px;height:64px;color:var(--text-muted);margin-bottom:16px}
+.empty-state h3{font-size:1.125rem;font-weight:600;margin-bottom:8px}
+.empty-state p{color:var(--text-secondary);margin-bottom:20px;font-size:.875rem}
+
+/* === SKELETON === */
+.skeleton{background:linear-gradient(90deg,var(--bg-surface) 25%,var(--border-light) 50%,var(--bg-surface) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-row{display:flex;gap:12px;padding:12px;align-items:center}
+.skeleton-circle{width:32px;height:32px;border-radius:50%}
+.skeleton-line{height:12px;border-radius:4px}
+.skeleton-line.w-20{width:20%}.skeleton-line.w-30{width:30%}.skeleton-line.w-50{width:50%}.skeleton-line.w-80{width:80%}
+
+/* === LAYOUT UTILS === */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.gap-6{gap:24px}
+.mt-2{margin-top:8px}.mt-4{margin-top:16px}.mt-6{margin-top:24px}.mb-2{margin-bottom:8px}.mb-4{margin-bottom:16px}
+.p-4{padding:16px}.px-4{padding-left:16px;padding-right:16px}.py-2{padding-top:8px;padding-bottom:8px}
+.text-sm{font-size:.875rem}.text-xs{font-size:.75rem}.text-lg{font-size:1.125rem}.text-xl{font-size:1.25rem}
+.font-medium{font-weight:500}.font-semibold{font-weight:600}.font-bold{font-weight:700}
+.text-muted{color:var(--text-secondary)}.text-primary{color:var(--primary)}
+.hidden{display:none!important}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--primary-light);color:var(--primary-text);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:600;flex-shrink:0}
+
+/* === CHART === */
+.chart-container{position:relative}
+.chart-container svg{width:100%;display:block}
+
+/* === BULK BAR === */
+.bulk-bar{background:var(--primary);color:#fff;padding:10px 20px;border-radius:var(--radius);display:flex;align-items:center;gap:16px;margin-bottom:12px;font-size:.875rem}
+.bulk-bar button{color:#fff;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:var(--radius);font-size:.8rem}
+.bulk-bar button:hover{background:rgba(255,255,255,.3)}
+
+/* === 3-COL API DOCS === */
+.api-docs-layout{display:grid;grid-template-columns:200px 1fr 1fr;gap:0;margin:-24px;min-height:calc(100vh - var(--header-h))}
+.api-nav{border-right:1px solid var(--border);padding:20px 16px;overflow-y:auto;background:var(--bg-surface)}
+.api-nav a{display:block;padding:6px 10px;font-size:.8rem;color:var(--text-secondary);border-radius:var(--radius);margin-bottom:2px}
+.api-nav a:hover{background:var(--bg);color:var(--text);text-decoration:none}
+.api-nav a.active{background:var(--primary-light);color:var(--primary-text)}
+.api-content{padding:24px;overflow-y:auto}
+.api-code{background:#1e293b;padding:24px;overflow-y:auto;color:#e2e8f0;font-family:var(--font-mono);font-size:.8rem}
+.api-endpoint{margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.api-method{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:700;font-family:var(--font-mono)}
+.api-method.get{background:#dcfce7;color:#166534}
+.api-method.post{background:#dbeafe;color:#1e40af}
+.api-method.put{background:#fef3c7;color:#92400e}
+.api-method.delete{background:#fee2e2;color:#991b1b}
+
+/* === THREAD === */
+.thread-line{position:relative;padding-left:40px}
+.thread-line::before{content:'';position:absolute;left:16px;top:0;bottom:0;width:2px;background:var(--border)}
+.thread-email{position:relative;margin-bottom:16px;cursor:pointer}
+.thread-email .direction-icon{position:absolute;left:-32px;top:16px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1}
+.direction-sent{background:var(--primary);color:#fff}
+.direction-received{background:var(--success);color:#fff}
+
+/* === DARK MODE TOGGLE === */
+.dark-toggle{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-secondary);transition:all .15s}
+.dark-toggle:hover{background:var(--bg-surface);color:var(--text)}
+
+/* === DOMAIN CARD === */
+.domain-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.domain-card:hover{box-shadow:var(--shadow)}
+
+/* === CONFIRMATION === */
+.confirm-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.confirm-icon.danger{background:var(--error-light);color:var(--error)}
+.confirm-icon.warning{background:var(--warning-light);color:var(--warning)}
+
+/* === SPARKLINE === */
+.sparkline{display:inline-block;vertical-align:middle}
+
+/* === RESPONSIVE === */
+@media(max-width:1024px){
+  .grid-2{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr 1fr}
+  .api-docs-layout{grid-template-columns:1fr}
+  .api-nav,.api-code{display:none}
+}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .stepper{flex-wrap:wrap}
+}
+
+/* Quick actions */
+.quick-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Rule card */
+.rule-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;background:var(--bg-elevated);margin-bottom:12px}
+.rule-card:hover{box-shadow:var(--shadow)}
+
+/* Webhook card */
+.webhook-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;background:var(--bg-elevated);margin-bottom:12px}
+
+/* Template card */
+.tpl-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;background:var(--bg-elevated);transition:box-shadow .15s}
+.tpl-card:hover{box-shadow:var(--shadow-md)}
+
+/* Copy button */
+.copy-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:.7rem;color:var(--text-secondary);background:var(--bg-surface);cursor:pointer;border:1px solid var(--border)}
+.copy-btn:hover{background:var(--border-light);color:var(--text)}
+
+/* Alert card */
+.alert-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;background:var(--bg-elevated);display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+
+/* Danger zone */
+.danger-zone{border:1px solid var(--error);border-radius:var(--radius-lg);padding:20px;background:var(--error-light);margin-top:24px}
+
+/* Checkbox */
+.checkbox-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.875rem}
+.checkbox-wrap input[type="checkbox"]{width:16px;height:16px;accent-color:var(--primary)}
+
+/* Events checkboxes */
+.events-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#2563eb"/><path d="M7 9h14M7 14h10M7 19h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+    EaaS
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Dashboard</div>
+      <a class="nav-item active" data-route="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Email</div>
+      <a class="nav-item" data-route="sent">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
+        Sent Emails
+      </a>
+      <a class="nav-item" data-route="received">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-16m8-8l-8 8 8 8"/></svg>
+        Received<span class="badge badge-new">NEW</span>
+      </a>
+      <a class="nav-item" data-route="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Templates
+      </a>
+      <a class="nav-item" data-route="suppressions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Suppressions
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Inbound</div>
+      <a class="nav-item" data-route="inbound-rules">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 9 8 12 2 12"/></svg>
+        Rules
+      </a>
+      <a class="nav-item" data-route="inbound-setup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Setup Wizard
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Configuration</div>
+      <a class="nav-item" data-route="domains">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Domains
+      </a>
+      <a class="nav-item" data-route="api-keys">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Keys
+      </a>
+      <a class="nav-item" data-route="webhooks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        Webhooks
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Analytics</div>
+      <a class="nav-item" data-route="outbound-analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Outbound
+      </a>
+      <a class="nav-item" data-route="inbound-analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>
+        Inbound
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Settings</div>
+      <a class="nav-item" data-route="notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a class="nav-item" data-route="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">Docs</div>
+      <a class="nav-item" data-route="api-docs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        API Reference
+      </a>
+      <a class="nav-item" data-route="webhook-guide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Webhook Guide
+      </a>
+      <a class="nav-item" data-route="setup-guide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Inbound Guide
+      </a>
+    </div>
+  </div>
+  <div class="sidebar-footer">EaaS v1.0.0 &middot; API Status: <span style="color:#22c55e">Operational</span></div>
+</nav>
+
+<!-- MAIN AREA -->
+<div class="main">
+  <header class="header">
+    <div class="header-left">
+      <div class="breadcrumb" id="breadcrumb">
+        <a href="#overview">Dashboard</a>
+        <span class="sep">/</span>
+        <span class="current" id="breadcrumb-current">Overview</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-input" style="width:220px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search emails, domains...">
+      </div>
+      <button class="btn-icon" title="Notifications">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      </button>
+      <div class="dark-toggle" id="darkToggle" title="Toggle dark mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </div>
+      <div class="avatar" style="width:32px;height:32px">II</div>
+    </div>
+  </header>
+
+  <div class="content" id="app">
+    <!-- Pages rendered here by JS -->
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- Generic Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- Slide Panel -->
+<div class="slide-backdrop" id="slideBackdrop"></div>
+<div class="slide-panel" id="slidePanel"></div>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+// ===== STATE =====
+const state = {
+  darkMode: false,
+  currentRoute: 'overview',
+  selectedRows: new Set(),
+  showBulk: false,
+  activeTab: {},
+  wizardStep: 1
+};
+
+// ===== ICONS (reusable SVG strings) =====
+const ICO = {
+  send: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>',
+  mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+  check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+  x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+  plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  edit: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  trash: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+  eye: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  download: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  clip: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>',
+  arrow: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>',
+  refresh: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>',
+  ext: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  warn: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  globe: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+  key: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 017.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+};
+
+// ===== DARK MODE =====
+document.getElementById('darkToggle').addEventListener('click', () => {
+  state.darkMode = !state.darkMode;
+  document.documentElement.classList.toggle('dark', state.darkMode);
+  const icon = document.getElementById('themeIcon');
+  icon.innerHTML = state.darkMode
+    ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+    : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+});
+
+// ===== ROUTING =====
+function navigate(route) {
+  state.currentRoute = route;
+  window.location.hash = route;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.route === route.split('-detail')[0].split('/')[0]);
+  });
+  const names = {
+    overview:'Overview', sent:'Sent Emails', 'sent-detail':'Email Detail', received:'Received Emails',
+    'received-detail':'Email Detail', thread:'Thread View', templates:'Templates', 'template-editor':'Template Editor',
+    suppressions:'Suppressions', 'inbound-rules':'Inbound Rules', 'inbound-setup':'Setup Wizard',
+    domains:'Domains', 'domain-detail':'Domain Detail', 'api-keys':'API Keys', webhooks:'Webhooks',
+    'outbound-analytics':'Outbound Analytics', 'inbound-analytics':'Inbound Analytics',
+    notifications:'Notification Preferences', settings:'Settings', 'api-docs':'API Reference',
+    'webhook-guide':'Webhook Guide', 'setup-guide':'Inbound Setup Guide'
+  };
+  document.getElementById('breadcrumb-current').textContent = names[route] || route;
+  renderPage(route);
+}
+
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', e => {
+    e.preventDefault();
+    navigate(el.dataset.route);
+  });
+});
+
+window.addEventListener('hashchange', () => {
+  const h = location.hash.slice(1) || 'overview';
+  if (h !== state.currentRoute) navigate(h);
+});
+
+// ===== MODAL =====
+function showModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function hideModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) hideModal(); });
+
+// ===== SLIDE PANEL =====
+function showPanel(html) {
+  document.getElementById('slidePanel').innerHTML = html;
+  document.getElementById('slidePanel').classList.add('show');
+  document.getElementById('slideBackdrop').classList.add('show');
+}
+function hidePanel() {
+  document.getElementById('slidePanel').classList.remove('show');
+  document.getElementById('slideBackdrop').classList.remove('show');
+}
+document.getElementById('slideBackdrop').addEventListener('click', hidePanel);
+
+// ===== TABS HELPER =====
+function initTabs(containerId) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      c.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const target = t.dataset.tab;
+      c.querySelectorAll('.tab-content').forEach(tc => tc.classList.toggle('hidden', tc.id !== target));
+    });
+  });
+}
+
+function initToggles(container) {
+  (container || document).querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('active'));
+  });
+}
+
+// ===== SPARKLINE SVG =====
+function sparkline(data, color='#2563eb', w=80, h=24) {
+  const max = Math.max(...data), min = Math.min(...data);
+  const range = max - min || 1;
+  const pts = data.map((v, i) => `${(i/(data.length-1))*w},${h - ((v-min)/range)*h}`).join(' ');
+  return `<svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+// ===== PAGE RENDERERS =====
+function renderPage(route) {
+  const app = document.getElementById('app');
+  const renderer = pages[route];
+  if (renderer) {
+    app.innerHTML = renderer();
+    // Post-render init
+    initToggles(app);
+    document.querySelectorAll('[data-tabs]').forEach(c => initTabs(c.id));
+    bindPageEvents(route);
+  } else {
+    app.innerHTML = `<div class="empty-state"><h3>Page not found</h3><p>Route: ${route}</p></div>`;
+  }
+}
+
+function bindPageEvents(route) {
+  // Table checkboxes
+  document.querySelectorAll('.row-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) state.selectedRows.add(cb.value);
+      else state.selectedRows.delete(cb.value);
+      const bulk = document.getElementById('bulkBar');
+      if (bulk) bulk.classList.toggle('hidden', state.selectedRows.size === 0);
+      const cnt = document.getElementById('bulkCount');
+      if (cnt) cnt.textContent = state.selectedRows.size;
+    });
+  });
+  // Select all
+  const selAll = document.getElementById('selectAll');
+  if (selAll) {
+    selAll.addEventListener('change', () => {
+      document.querySelectorAll('.row-check').forEach(cb => {
+        cb.checked = selAll.checked;
+        if (selAll.checked) state.selectedRows.add(cb.value);
+        else state.selectedRows.delete(cb.value);
+      });
+      const bulk = document.getElementById('bulkBar');
+      if (bulk) bulk.classList.toggle('hidden', state.selectedRows.size === 0);
+      const cnt = document.getElementById('bulkCount');
+      if (cnt) cnt.textContent = state.selectedRows.size;
+    });
+  }
+}
+
+// ===== ALL PAGES =====
+const pages = {};
+
+// ---------- 1. OVERVIEW ----------
+pages['overview'] = () => `
+<h1 class="page-title">Overview</h1>
+<p class="page-desc">Your email sending and receiving at a glance</p>
+
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">${ICO.send} Sent</div>
+    <div class="metric-value">24,891</div>
+    <div class="metric-change up">+12.3% vs last week</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label"><span class="dot dot-success"></span> Delivered</div>
+    <div class="metric-value">24,156</div>
+    <div class="metric-change up">+11.8%</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label"><span class="dot dot-error"></span> Bounced</div>
+    <div class="metric-value">412</div>
+    <div class="metric-change down">+2.1%</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label"><span class="dot dot-info"></span> Opened</div>
+    <div class="metric-value">12,344</div>
+    <div class="metric-change up">+8.4%</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">${ICO.ext} Clicked</div>
+    <div class="metric-value">3,891</div>
+    <div class="metric-change up">+5.2%</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">${ICO.mail} Inbound Received <span class="badge-new">NEW</span></div>
+    <div class="metric-value">1,247</div>
+    <div class="metric-change up">+34.1%</div>
+  </div>
+</div>
+
+<div class="grid-2 mb-4">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Email Volume (7 days)</span></div>
+    <div class="chart-container">
+      <svg viewBox="0 0 500 200" style="height:200px">
+        <defs><linearGradient id="gSent" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".2"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient>
+        <linearGradient id="gRecv" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22c55e" stop-opacity=".2"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0"/></linearGradient></defs>
+        <!-- Grid -->
+        <line x1="50" y1="20" x2="50" y2="180" stroke="var(--border)" stroke-width=".5"/>
+        <line x1="50" y1="180" x2="480" y2="180" stroke="var(--border)" stroke-width=".5"/>
+        <line x1="50" y1="100" x2="480" y2="100" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4"/>
+        <line x1="50" y1="60" x2="480" y2="60" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4"/>
+        <line x1="50" y1="140" x2="480" y2="140" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4"/>
+        <!-- Sent line -->
+        <path d="M50,120 L121,90 L192,100 L263,60 L334,80 L405,40 L476,50" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50,120 L121,90 L192,100 L263,60 L334,80 L405,40 L476,50 L476,180 L50,180Z" fill="url(#gSent)"/>
+        <!-- Received line -->
+        <path d="M50,160 L121,150 L192,145 L263,130 L334,135 L405,120 L476,110" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M50,160 L121,150 L192,145 L263,130 L334,135 L405,120 L476,110 L476,180 L50,180Z" fill="url(#gRecv)"/>
+        <!-- Labels -->
+        <text x="50" y="195" fill="var(--text-muted)" font-size="10">Mon</text>
+        <text x="121" y="195" fill="var(--text-muted)" font-size="10">Tue</text>
+        <text x="192" y="195" fill="var(--text-muted)" font-size="10">Wed</text>
+        <text x="263" y="195" fill="var(--text-muted)" font-size="10">Thu</text>
+        <text x="334" y="195" fill="var(--text-muted)" font-size="10">Fri</text>
+        <text x="405" y="195" fill="var(--text-muted)" font-size="10">Sat</text>
+        <text x="476" y="195" fill="var(--text-muted)" font-size="10">Sun</text>
+        <!-- Y labels -->
+        <text x="10" y="64" fill="var(--text-muted)" font-size="9">5k</text>
+        <text x="10" y="104" fill="var(--text-muted)" font-size="9">3k</text>
+        <text x="10" y="144" fill="var(--text-muted)" font-size="9">1k</text>
+        <!-- Legend -->
+        <circle cx="380" cy="12" r="4" fill="#2563eb"/><text x="388" y="16" fill="var(--text-secondary)" font-size="10">Sent</text>
+        <circle cx="425" cy="12" r="4" fill="#22c55e"/><text x="433" y="16" fill="var(--text-secondary)" font-size="10">Received</text>
+      </svg>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Delivery Performance</span></div>
+    <div class="chart-container">
+      <svg viewBox="0 0 500 200" style="height:200px">
+        <!-- Bars -->
+        ${[{l:'Mon',d:95,b:3,f:2},{l:'Tue',d:97,b:2,f:1},{l:'Wed',d:96,b:2.5,f:1.5},{l:'Thu',d:98,b:1,f:1},{l:'Fri',d:94,b:4,f:2},{l:'Sat',d:99,b:0.5,f:0.5},{l:'Sun',d:97,b:2,f:1}].map((v,i) => {
+          const x = 60 + i*62, bw = 30, h = 160;
+          return `<rect x="${x}" y="${180 - v.d/100*h}" width="${bw}" height="${v.d/100*h}" rx="2" fill="#2563eb" opacity=".8"/>
+            <rect x="${x}" y="${180 - (v.d+v.b)/100*h}" width="${bw}" height="${v.b/100*h}" rx="0" fill="#f59e0b" opacity=".8"/>
+            <text x="${x+15}" y="195" fill="var(--text-muted)" font-size="10" text-anchor="middle">${v.l}</text>`;
+        }).join('')}
+        <text x="10" y="30" fill="var(--text-muted)" font-size="9">100%</text>
+        <text x="10" y="104" fill="var(--text-muted)" font-size="9">50%</text>
+        <line x1="50" y1="180" x2="480" y2="180" stroke="var(--border)" stroke-width=".5"/>
+        <!-- Legend -->
+        <rect x="350" y="6" width="10" height="10" rx="2" fill="#2563eb" opacity=".8"/><text x="364" y="15" fill="var(--text-secondary)" font-size="10">Delivered</text>
+        <rect x="420" y="6" width="10" height="10" rx="2" fill="#f59e0b" opacity=".8"/><text x="434" y="15" fill="var(--text-secondary)" font-size="10">Bounced</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2 mb-4">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Recent Activity</span></div>
+    <div class="timeline">
+      ${[
+        {color:'var(--success)',desc:'<strong>Delivered</strong> to john@acme.com &mdash; "Welcome aboard!"',time:'2 min ago'},
+        {color:'var(--primary)',desc:'<strong>Opened</strong> by sarah@techco.io &mdash; "Invoice #1234"',time:'5 min ago'},
+        {color:'var(--success)',desc:'<strong>Received</strong> from support@vendor.com &mdash; "RE: Order update"',time:'8 min ago'},
+        {color:'var(--error)',desc:'<strong>Bounced</strong> &mdash; mike@invalid.xyz (hard bounce)',time:'12 min ago'},
+        {color:'var(--primary)',desc:'<strong>Clicked</strong> by anna@startup.io &mdash; "Verify your email" CTA link',time:'15 min ago'},
+        {color:'var(--info)',desc:'<strong>Sent</strong> to 150 recipients &mdash; "March Newsletter"',time:'22 min ago'},
+        {color:'var(--success)',desc:'<strong>Received</strong> from alerts@github.com &mdash; "[eaas] New issue opened"',time:'30 min ago'},
+        {color:'var(--warning)',desc:'<strong>Complained</strong> &mdash; user@example.com marked as spam',time:'45 min ago'},
+        {color:'var(--success)',desc:'<strong>Delivered</strong> to team@client.com &mdash; "Project Update Q1"',time:'1 hour ago'},
+        {color:'var(--primary)',desc:'<strong>Opened</strong> by ceo@bigcorp.com &mdash; "Partnership Proposal"',time:'2 hours ago'},
+      ].map(i => `
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background:${i.color}"></div>
+          <div class="desc">${i.desc}</div>
+          <div class="time">${i.time}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+  <div>
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Domain Health</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)">
+          <div><strong>acme.com</strong></div>
+          <div style="display:flex;gap:6px">
+            <span class="badge-status badge-success">${ICO.check} SPF</span>
+            <span class="badge-status badge-success">${ICO.check} DKIM</span>
+            <span class="badge-status badge-success">${ICO.check} DMARC</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-light)">
+          <div><strong>notify.acme.com</strong></div>
+          <div style="display:flex;gap:6px">
+            <span class="badge-status badge-success">${ICO.check} SPF</span>
+            <span class="badge-status badge-success">${ICO.check} DKIM</span>
+            <span class="badge-status badge-warning">Pending DMARC</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+          <div><strong>mail.startup.io</strong></div>
+          <div style="display:flex;gap:6px">
+            <span class="badge-status badge-error">${ICO.x} SPF</span>
+            <span class="badge-status badge-error">${ICO.x} DKIM</span>
+            <span class="badge-status badge-error">${ICO.x} DMARC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Quick Actions</span></div>
+      <div class="quick-actions">
+        <button class="btn btn-primary" onclick="showModal(composeEmailModal())">${ICO.send} Send Email</button>
+        <button class="btn btn-secondary" onclick="navigate('template-editor')">${ICO.plus} Create Template</button>
+        <button class="btn btn-secondary" onclick="showModal(addDomainModal())">${ICO.globe} Add Domain</button>
+        <button class="btn btn-secondary" onclick="navigate('api-keys')">${ICO.key} View API Keys</button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+// ---------- 2. SENT EMAILS ----------
+pages['sent'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div>
+    <h1 class="page-title">Sent Emails</h1>
+    <p class="page-desc" style="margin-bottom:0">Track all outbound email activity</p>
+  </div>
+  <button class="btn btn-primary" onclick="showModal(composeEmailModal())">${ICO.send} Send Email</button>
+</div>
+
+<div class="filter-bar">
+  <select><option>All Statuses</option><option>Queued</option><option>Sending</option><option>Sent</option><option>Delivered</option><option>Bounced</option><option>Complained</option><option>Failed</option></select>
+  <select><option>All Domains</option><option>acme.com</option><option>notify.acme.com</option><option>mail.startup.io</option></select>
+  <select><option>All Templates</option><option>Welcome</option><option>Invoice</option><option>Newsletter</option></select>
+  <input type="date" style="width:auto">
+  <input type="date" style="width:auto">
+  <div class="search-input">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search by recipient, subject...">
+  </div>
+</div>
+
+<div id="bulkBar" class="bulk-bar hidden">
+  <span><strong id="bulkCount">0</strong> selected</span>
+  <button>Resend</button>
+  <button>Delete</button>
+  <button>Export</button>
+  <button onclick="state.selectedRows.clear();renderPage('sent')">Clear</button>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="data-table">
+    <table>
+      <thead><tr>
+        <th style="width:40px"><input type="checkbox" id="selectAll" style="width:16px"></th>
+        <th>Status</th><th>To</th><th>Subject</th><th>Template</th><th>Sent</th><th>Opens</th><th>Clicks</th><th></th>
+      </tr></thead>
+      <tbody>
+      ${[
+        {s:'Delivered',c:'success',to:'john@acme.com',subj:'Welcome to Acme',tpl:'Welcome',time:'Mar 31, 2:14 PM',opens:3,clicks:1},
+        {s:'Delivered',c:'success',to:'sarah@techco.io',subj:'Invoice #1234',tpl:'Invoice',time:'Mar 31, 1:48 PM',opens:1,clicks:0},
+        {s:'Bounced',c:'error',to:'mike@invalid.xyz',subj:'Your account details',tpl:'Account',time:'Mar 31, 1:30 PM',opens:0,clicks:0},
+        {s:'Delivered',c:'success',to:'anna@startup.io',subj:'Verify your email address',tpl:'Verification',time:'Mar 31, 12:55 PM',opens:2,clicks:1},
+        {s:'Queued',c:'gray',to:'team@bigcorp.com',subj:'March Newsletter',tpl:'Newsletter',time:'Mar 31, 12:30 PM',opens:0,clicks:0},
+        {s:'Sent',c:'info',to:'dev@client.com',subj:'API Key Rotation Notice',tpl:'Alert',time:'Mar 31, 11:20 AM',opens:0,clicks:0},
+        {s:'Delivered',c:'success',to:'ceo@partner.co',subj:'Partnership Proposal',tpl:'-',time:'Mar 31, 10:45 AM',opens:5,clicks:2},
+        {s:'Failed',c:'error',to:'bounce@trap.net',subj:'Test delivery',tpl:'-',time:'Mar 31, 10:00 AM',opens:0,clicks:0},
+        {s:'Complained',c:'warning',to:'user@example.com',subj:'Weekly digest',tpl:'Digest',time:'Mar 31, 9:30 AM',opens:1,clicks:0},
+        {s:'Delivered',c:'success',to:'support@vendor.com',subj:'Order confirmation #5678',tpl:'Order',time:'Mar 31, 9:00 AM',opens:2,clicks:1},
+      ].map((r,i) => `<tr style="cursor:pointer" onclick="navigate('sent-detail')">
+        <td onclick="event.stopPropagation()"><input type="checkbox" class="row-check" value="${i}" style="width:16px"></td>
+        <td><span class="badge-status badge-${r.c}"><span class="dot dot-${r.c}"></span> ${r.s}</span></td>
+        <td>${r.to}</td><td class="truncate">${r.subj}</td><td><span class="text-muted">${r.tpl}</span></td>
+        <td class="text-muted">${r.time}</td><td>${r.opens}</td><td>${r.clicks}</td>
+        <td>${ICO.arrow}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination" style="padding:12px 16px">
+    <span>Showing 1-10 of 24,891 emails</span>
+    <div class="pagination-btns">
+      <button>&laquo;</button><button class="active">1</button><button>2</button><button>3</button><button>...</button><button>2,489</button><button>&raquo;</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state preview -->
+<div class="card mt-4" style="padding:0;overflow:hidden">
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border)"><span class="text-xs text-muted">Loading State Preview</span></div>
+  ${Array(3).fill(0).map(() => `<div class="skeleton-row"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-line w-20" style="height:10px"></div><div class="skeleton skeleton-line w-30" style="height:10px"></div><div class="skeleton skeleton-line w-50" style="height:10px"></div></div>`).join('')}
+</div>
+`;
+
+// ---------- 3. SENT EMAIL DETAIL ----------
+pages['sent-detail'] = () => `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('sent')">&larr; Back to Sent</button>
+</div>
+
+<div class="grid-2 gap-6">
+  <div>
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Email Details</span><span class="badge-status badge-success">${ICO.check} Delivered</span></div>
+      <table style="font-size:.875rem">
+        <tr><td style="width:100px;color:var(--text-secondary);border:0;font-weight:500">From</td><td style="border:0">noreply@acme.com</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">To</td><td style="border:0">john@acme.com</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">CC</td><td style="border:0">manager@acme.com</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Subject</td><td style="border:0"><strong>Welcome to Acme</strong></td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Template</td><td style="border:0"><a href="#templates">Welcome</a> (v3)</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Tags</td><td style="border:0"><span class="chip">onboarding</span> <span class="chip">welcome</span></td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Message ID</td><td style="border:0"><code style="font-size:.75rem">&lt;msg_abc123@acme.com&gt;</code></td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Queued</td><td style="border:0">Mar 31, 2026, 2:14:01 PM UTC</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Delivered</td><td style="border:0">Mar 31, 2026, 2:14:03 PM UTC</td></tr>
+      </table>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Tracking</span></div>
+      <div class="grid-2 gap-4 mb-4">
+        <div style="text-align:center;padding:12px;background:var(--bg-surface);border-radius:var(--radius)">
+          <div style="font-size:1.5rem;font-weight:700">3</div>
+          <div class="text-xs text-muted">Opens</div>
+          <div class="text-xs text-muted">First: Mar 31, 3:01 PM</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:var(--bg-surface);border-radius:var(--radius)">
+          <div style="font-size:1.5rem;font-weight:700">1</div>
+          <div class="text-xs text-muted">Clicks</div>
+          <div class="text-xs text-muted">First: Mar 31, 3:05 PM</div>
+        </div>
+      </div>
+      <div class="text-sm font-medium mb-2">Click Details</div>
+      <table><thead><tr><th>URL</th><th>Count</th><th>Last Click</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#">https://app.acme.com/onboard</a></td><td>1</td><td>Mar 31, 3:05 PM</td></tr>
+      </tbody></table>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary">${ICO.refresh} Resend</button>
+      <button class="btn btn-secondary">${ICO.eye} View Raw</button>
+      <button class="btn btn-danger" onclick="showModal(deleteConfirmModal('email','This will permanently delete this email record.'))">${ICO.trash} Delete</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="card mb-4" id="bodyTabs" data-tabs>
+      <div class="tabs">
+        <div class="tab active" data-tab="htmlPreview">HTML Preview</div>
+        <div class="tab" data-tab="plainText">Plain Text</div>
+        <div class="tab" data-tab="rawHeaders">Raw Headers</div>
+      </div>
+      <div class="tab-content" id="htmlPreview">
+        <div style="border:1px solid var(--border);border-radius:var(--radius);padding:20px;background:#fff;color:#333;font-size:.875rem">
+          <div style="text-align:center;padding:20px 0;border-bottom:1px solid #e5e7eb">
+            <div style="font-size:1.5rem;font-weight:700;color:#2563eb">ACME</div>
+          </div>
+          <div style="padding:20px 0">
+            <h2 style="margin-bottom:8px">Welcome aboard, John!</h2>
+            <p style="color:#6b7280;line-height:1.6">We're thrilled to have you join Acme. Your account is all set up and ready to go.</p>
+            <div style="text-align:center;margin:20px 0">
+              <span style="display:inline-block;background:#2563eb;color:#fff;padding:10px 24px;border-radius:6px;font-weight:600">Get Started</span>
+            </div>
+            <p style="color:#9ca3af;font-size:.75rem">If you didn't create this account, please ignore this email.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content hidden" id="plainText">
+        <pre style="font-size:.8rem;background:var(--bg-surface);padding:16px;border-radius:var(--radius);white-space:pre-wrap">Welcome aboard, John!
+
+We're thrilled to have you join Acme. Your account is all set up and ready to go.
+
+Get Started: https://app.acme.com/onboard
+
+If you didn't create this account, please ignore this email.
+
+-- Acme Team</pre>
+      </div>
+      <div class="tab-content hidden" id="rawHeaders">
+        <pre class="code-block" style="font-size:.75rem">From: noreply@acme.com
+To: john@acme.com
+CC: manager@acme.com
+Subject: Welcome to Acme
+Date: Mon, 31 Mar 2026 14:14:01 +0000
+Message-ID: &lt;msg_abc123@acme.com&gt;
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="----=_Part_123"
+X-EaaS-MessageId: msg_abc123
+X-EaaS-Tags: onboarding, welcome
+DKIM-Signature: v=1; a=rsa-sha256; d=acme.com; s=eaas;</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Event Timeline</span></div>
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-dot" style="background:var(--text-muted)"></div><div class="desc"><strong>Queued</strong></div><div class="time">Mar 31, 2:14:01 PM</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background:var(--primary)"></div><div class="desc"><strong>Sending</strong> via AWS SES</div><div class="time">Mar 31, 2:14:02 PM</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background:var(--success)"></div><div class="desc"><strong>Delivered</strong> &mdash; 250 OK</div><div class="time">Mar 31, 2:14:03 PM</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background:var(--info)"></div><div class="desc"><strong>Opened</strong> (1st) &mdash; Chrome, macOS</div><div class="time">Mar 31, 3:01 PM</div></div>
+        <div class="timeline-item"><div class="timeline-dot" style="background:var(--info)"></div><div class="desc"><strong>Clicked</strong> &mdash; https://app.acme.com/onboard</div><div class="time">Mar 31, 3:05 PM</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+// ---------- 4. RECEIVED EMAILS ----------
+pages['received'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div>
+    <h1 class="page-title">Received Emails</h1>
+    <p class="page-desc" style="margin-bottom:0">All inbound emails processed by EaaS</p>
+  </div>
+  <button class="btn btn-secondary" onclick="navigate('inbound-setup')">${ICO.globe} Setup Inbound</button>
+</div>
+
+<div class="filter-bar">
+  <select><option>All Statuses</option><option>Received</option><option>Processing</option><option>Processed</option><option>Forwarded</option><option>Failed</option></select>
+  <label class="checkbox-wrap"><input type="checkbox" style="width:16px"> Has Attachments</label>
+  <input type="date" style="width:auto">
+  <input type="date" style="width:auto">
+  <div class="search-input">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search by sender, recipient, subject...">
+  </div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="data-table">
+    <table>
+      <thead><tr>
+        <th>Status</th><th>From</th><th>To</th><th>Subject</th><th>Received</th><th>Attach.</th><th>Webhook</th><th></th>
+      </tr></thead>
+      <tbody>
+      ${[
+        {s:'Processed',c:'success',from:'Support Team',email:'support@vendor.com',to:'help@acme.com',subj:'RE: Order update',time:'Mar 31, 2:30 PM',att:0,wh:'Delivered'},
+        {s:'Processed',c:'success',from:'GitHub',email:'alerts@github.com',to:'dev@acme.com',subj:'[eaas] New issue opened #142',time:'Mar 31, 2:15 PM',att:0,wh:'Delivered'},
+        {s:'Forwarded',c:'info',from:'Jane Smith',email:'jane@partner.co',to:'sales@acme.com',subj:'Partnership inquiry',time:'Mar 31, 1:45 PM',att:2,wh:'Delivered'},
+        {s:'Failed',c:'error',from:'Spammer',email:'spam@evil.com',to:'info@acme.com',subj:'You won $1M!!!',time:'Mar 31, 1:00 PM',att:1,wh:'Failed'},
+        {s:'Processing',c:'warning',from:'Stripe',email:'receipts@stripe.com',to:'billing@acme.com',subj:'Payment received',time:'Mar 31, 12:50 PM',att:1,wh:'Pending'},
+        {s:'Processed',c:'success',from:'AWS',email:'no-reply@aws.com',to:'ops@acme.com',subj:'CloudWatch Alert: CPU > 80%',time:'Mar 31, 12:30 PM',att:0,wh:'Delivered'},
+        {s:'Processed',c:'success',from:'David Lee',email:'david@client.io',to:'support@acme.com',subj:'Need help with integration',time:'Mar 31, 11:00 AM',att:3,wh:'Delivered'},
+        {s:'Processed',c:'success',from:'Linear',email:'notifications@linear.app',to:'dev@acme.com',subj:'Issue EAS-47 updated',time:'Mar 31, 10:30 AM',att:0,wh:'Delivered'},
+        {s:'Processed',c:'success',from:'Maria Garcia',email:'maria@bigcorp.com',to:'hello@acme.com',subj:'RFP Response',time:'Mar 31, 9:15 AM',att:5,wh:'Delivered'},
+        {s:'Processed',c:'success',from:'Vercel',email:'system@vercel.com',to:'dev@acme.com',subj:'Deployment successful',time:'Mar 31, 8:00 AM',att:0,wh:'Delivered'},
+      ].map((r,i) => `<tr style="cursor:pointer" onclick="navigate('received-detail')">
+        <td><span class="badge-status badge-${r.c}">${r.s}</span></td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">${r.from[0]}</div><div><div class="text-sm font-medium">${r.from}</div><div class="text-xs text-muted">${r.email}</div></div></div></td>
+        <td class="text-muted">${r.to}</td>
+        <td class="truncate">${r.subj}</td>
+        <td class="text-muted text-xs">${r.time}</td>
+        <td>${r.att > 0 ? ICO.clip + ' ' + r.att : ''}</td>
+        <td><span class="badge-status badge-${r.wh==='Delivered'?'success':r.wh==='Failed'?'error':'warning'}">${r.wh}</span></td>
+        <td>${ICO.arrow}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination" style="padding:12px 16px">
+    <span>Showing 1-10 of 1,247 emails</span>
+    <div class="pagination-btns">
+      <button>&laquo;</button><button class="active">1</button><button>2</button><button>3</button><button>...</button><button>125</button><button>&raquo;</button>
+    </div>
+  </div>
+</div>
+
+<!-- Empty state -->
+<div class="card mt-4">
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-16m8-8l-8 8 8 8"/></svg>
+    <h3>No inbound emails yet</h3>
+    <p>Set up your domain to start receiving emails through EaaS.</p>
+    <button class="btn btn-primary" onclick="navigate('inbound-setup')">${ICO.plus} Set Up Inbound</button>
+  </div>
+</div>
+`;
+
+// ---------- 5. RECEIVED EMAIL DETAIL ----------
+pages['received-detail'] = () => `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('received')">&larr; Back to Received</button>
+  <button class="btn btn-ghost btn-sm" onclick="navigate('thread')">View Thread &rarr;</button>
+</div>
+
+<div class="grid-2 gap-6">
+  <div>
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Email Header</span><span class="badge-status badge-success">Processed</span></div>
+      <table style="font-size:.875rem">
+        <tr><td style="width:100px;color:var(--text-secondary);border:0;font-weight:500">From</td><td style="border:0"><div style="display:flex;align-items:center;gap:8px"><div class="avatar">S</div>Support Team &lt;support@vendor.com&gt;</div></td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">To</td><td style="border:0">help@acme.com</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">CC</td><td style="border:0">cc@acme.com</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Subject</td><td style="border:0"><strong>RE: Order update</strong></td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Received</td><td style="border:0">Mar 31, 2026, 2:30:14 PM UTC</td></tr>
+        <tr><td style="color:var(--text-secondary);border:0;font-weight:500">Reply To</td><td style="border:0"><a href="#sent-detail">Original: "Order update" (sent Mar 30)</a></td></tr>
+      </table>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Security Verdicts</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="badge-status badge-success">${ICO.check} SPF: Pass</span>
+        <span class="badge-status badge-success">${ICO.check} DKIM: Pass</span>
+        <span class="badge-status badge-success">${ICO.check} DMARC: Pass</span>
+        <span class="badge-status badge-success">${ICO.check} Spam: Pass</span>
+        <span class="badge-status badge-success">${ICO.check} Virus: Clean</span>
+      </div>
+      <div class="mt-4 text-xs text-muted">Failed verdict examples:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+        <span class="badge-status badge-error">${ICO.x} SPF: Fail</span>
+        <span class="badge-status badge-warning">DKIM: None</span>
+        <span class="badge-status badge-error">${ICO.x} DMARC: Fail</span>
+        <span class="badge-status badge-error">${ICO.x} Spam: Flagged (score: 8.2)</span>
+        <span class="badge-status badge-error">${ICO.x} Virus: Detected</span>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header"><span class="card-title">Attachments</span><span class="text-xs text-muted">2 files</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-surface);border-radius:var(--radius)">
+          <div style="display:flex;align-items:center;gap:8px">${ICO.clip}<div><div class="text-sm font-medium">order-details.pdf</div><div class="text-xs text-muted">application/pdf &middot; 245 KB</div></div></div>
+          <div style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary">${ICO.eye} Preview</button><button class="btn btn-xs btn-secondary">${ICO.download} Download</button></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-surface);border-radius:var(--radius)">
+          <div style="display:flex;align-items:center;gap:8px">${ICO.clip}<div><div class="text-sm font-medium">shipping-label.png</div><div class="text-xs text-muted">image/png &middot; 89 KB</div></div></div>
+          <div style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary">${ICO.eye} Preview</button><button class="btn btn-xs btn-secondary">${ICO.download} Download</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary">${ICO.download} Download Raw MIME</button>
+      <button class="btn btn-secondary">${ICO.refresh} Retry Webhook</button>
+      <button class="btn btn-danger" onclick="showModal(deleteConfirmModal('email','This will permanently delete this received email.'))">${ICO.trash} Delete</button>
+    </div>
+  </div>
+
+  <div>
+    <div class="card mb-4" id="recvBodyTabs" data-tabs>
+      <div class="tabs">
+        <div class="tab active" data-tab="recvHtml">HTML Preview</div>
+        <div class="tab" data-tab="recvPlain">Plain Text</div>
+        <div class="tab" data-tab="recvHeaders">Headers</div>
+        <div class="tab" data-tab="recvJson">JSON</div>
+      </div>
+      <div class="tab-content" id="recvHtml">
+        <div style="border:1px solid var(--border);border-radius:var(--radius);padding:20px;background:#fff;color:#333;font-size:.875rem">
+          <p>Hi Team,</p>
+          <p>Thank you for your order. Here are the updated shipping details:</p>
+          <ul><li>Tracking #: 1Z999AA10123456784</li><li>ETA: April 3, 2026</li><li>Carrier: UPS Ground</li></ul>
+          <p>Please find the shipping label attached.</p>
+          <p>Best regards,<br>Vendor Support Team</p>
+        </div>
+      </div>
+      <div class="tab-content hidden" id="recvPlain">
+        <pre style="font-size:.8rem;background:var(--bg-surface);padding:16px;border-radius:var(--radius);white-space:pre-wrap">Hi Team,
+
+Thank you for your order. Here are the updated shipping details:
+- Tracking #: 1Z999AA10123456784
+- ETA: April 3, 2026
+- Carrier: UPS Ground
+
+Please find the shipping label attached.
+
+Best regards,
+Vendor Support Team</pre>
+      </div>
+      <div class="tab-content hidden" id="recvHeaders">
+        <div style="font-size:.8rem">
+          ${['Return-Path: <support@vendor.com>','Received: from mail.vendor.com (mail.vendor.com [203.0.113.1])','DKIM-Signature: v=1; a=rsa-sha256; d=vendor.com','From: Support Team <support@vendor.com>','To: help@acme.com','Subject: RE: Order update','Date: Mon, 31 Mar 2026 14:30:14 +0000','Message-ID: <resp_xyz789@vendor.com>','In-Reply-To: <msg_order456@acme.com>','Content-Type: multipart/mixed; boundary="----=_Part_456"'].map(h => {
+            const [k,...v] = h.split(': ');
+            return `<div style="display:flex;padding:6px 0;border-bottom:1px solid var(--border-light)"><div style="width:140px;flex-shrink:0;font-weight:500;color:var(--text-secondary)">${k}</div><div style="word-break:break-all"><code style="font-size:.75rem">${v.join(': ')}</code></div></div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="tab-content hidden" id="recvJson">
+        <pre class="code-block" style="font-size:.75rem">{
+  <span class="keyword">"messageId"</span>: <span class="string">"inb_xyz789"</span>,
+  <span class="keyword">"from"</span>: {
+    <span class="keyword">"name"</span>: <span class="string">"Support Team"</span>,
+    <span class="keyword">"address"</span>: <span class="string">"support@vendor.com"</span>
+  },
+  <span class="keyword">"to"</span>: [<span class="string">"help@acme.com"</span>],
+  <span class="keyword">"subject"</span>: <span class="string">"RE: Order update"</span>,
+  <span class="keyword">"receivedAt"</span>: <span class="string">"2026-03-31T14:30:14Z"</span>,
+  <span class="keyword">"spf"</span>: <span class="string">"pass"</span>,
+  <span class="keyword">"dkim"</span>: <span class="string">"pass"</span>,
+  <span class="keyword">"dmarc"</span>: <span class="string">"pass"</span>,
+  <span class="keyword">"attachments"</span>: [
+    { <span class="keyword">"filename"</span>: <span class="string">"order-details.pdf"</span>, <span class="keyword">"size"</span>: <span class="number">250880</span> },
+    { <span class="keyword">"filename"</span>: <span class="string">"shipping-label.png"</span>, <span class="keyword">"size"</span>: <span class="number">91136</span> }
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Webhook Delivery Log</span></div>
+      <table><thead><tr><th>#</th><th>Status</th><th>Response</th><th>Timestamp</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="badge-status badge-success">200 OK</span></td><td>134ms</td><td>Mar 31, 2:30:15 PM</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div>
+`;
+
+// ---------- 6. THREAD VIEW ----------
+pages['thread'] = () => `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('received')">&larr; Back</button>
+</div>
+<div class="card mb-4" style="display:flex;align-items:center;gap:16px">
+  <div><h2 style="font-size:1.125rem">RE: Order update</h2><div class="text-sm text-muted">3 participants &middot; 4 emails</div></div>
+</div>
+
+<div class="thread-line">
+  ${[
+    {dir:'sent',color:'direction-sent',icon:'&uarr;',from:'you@acme.com',to:'support@vendor.com',time:'Mar 29, 10:00 AM',subj:'Order update',body:'Hi, could you provide an update on order #5678? We need the tracking details ASAP.',status:'Delivered',att:0},
+    {dir:'received',color:'direction-received',icon:'&darr;',from:'support@vendor.com',to:'help@acme.com',time:'Mar 29, 2:15 PM',subj:'RE: Order update',body:'Thanks for reaching out. Your order is being prepared and will ship tomorrow. We will send tracking info once available.',status:'Processed',att:0},
+    {dir:'sent',color:'direction-sent',icon:'&uarr;',from:'you@acme.com',to:'support@vendor.com',time:'Mar 30, 9:00 AM',subj:'RE: Order update',body:'Thanks! Please also include the shipping label as an attachment.',status:'Delivered',att:0},
+    {dir:'received',color:'direction-received',icon:'&darr;',from:'support@vendor.com',to:'help@acme.com',time:'Mar 31, 2:30 PM',subj:'RE: Order update',body:'Hi Team, here are the updated shipping details. Tracking #: 1Z999AA10123456784, ETA: April 3. Please find the shipping label attached.',status:'Processed',att:2},
+  ].map((e,i) => `
+    <div class="thread-email card mb-4" onclick="navigate('${e.dir==='sent'?'sent-detail':'received-detail'}')">
+      <div class="direction-icon ${e.color}" style="font-size:.7rem;font-weight:700">${e.icon}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span class="badge-status ${e.dir==='sent'?'badge-info':'badge-success'}">${e.dir==='sent'?'Sent':'Received'}</span>
+          <span class="text-sm font-medium" style="margin-left:8px">${e.from}</span>
+          <span class="text-xs text-muted"> &rarr; ${e.to}</span>
+        </div>
+        <span class="text-xs text-muted">${e.time}</span>
+      </div>
+      <p class="text-sm" style="line-height:1.5">${e.body}</p>
+      ${e.att > 0 ? `<div class="mt-2 text-xs text-muted">${ICO.clip} ${e.att} attachment${e.att>1?'s':''}</div>` : ''}
+      <div class="mt-2"><span class="badge-status badge-${e.dir==='sent'?'info':'success'}">${e.status}</span></div>
+    </div>
+  `).join('')}
+</div>
+`;
+
+// ---------- 7. INBOUND RULES ----------
+pages['inbound-rules'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">Inbound Rules</h1><p class="page-desc" style="margin-bottom:0">Configure how incoming emails are processed</p></div>
+  <button class="btn btn-primary" onclick="showPanel(createRulePanel())">${ICO.plus} Create Rule</button>
+</div>
+
+${[
+  {pri:1,name:'Webhook Forward',domain:'acme.com',pattern:'*@help.acme.com',action:'Webhook',url:'https://api.acme.com/webhooks/email',active:true},
+  {pri:2,name:'Email Forward to Support',domain:'acme.com',pattern:'support@acme.com',action:'Forward',url:'team@helpdesk.com',active:true},
+  {pri:3,name:'Store Dev Notifications',domain:'acme.com',pattern:'dev@acme.com',action:'Store',url:'',active:true},
+  {pri:99,name:'Catch-All',domain:'acme.com',pattern:'*@acme.com',action:'Store',url:'',active:false},
+].map(r => `
+  <div class="rule-card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="badge-status badge-gray">Priority ${r.pri}</span>
+        <strong>${r.name}</strong>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="toggle ${r.active?'active':''}" title="Active"></div>
+        <button class="btn btn-ghost btn-xs" onclick="showPanel(editRulePanel())">${ICO.edit}</button>
+        <button class="btn btn-ghost btn-xs" onclick="showModal(deleteConfirmModal('rule','This will permanently delete this rule.'))">${ICO.trash}</button>
+      </div>
+    </div>
+    <div class="text-sm text-muted mt-2">
+      ${r.domain} &middot; <code>${r.pattern}</code> &rarr; <span class="badge-status badge-info">${r.action}</span>
+      ${r.url ? ` &middot; <code class="text-xs">${r.url}</code>` : ''}
+    </div>
+  </div>
+`).join('')}
+
+<div class="card mt-6">
+  <div class="empty-state">
+    <h3>No rules configured</h3>
+    <p>Create your first inbound rule to start processing received emails.</p>
+    <button class="btn btn-primary" onclick="showPanel(createRulePanel())">${ICO.plus} Create Rule</button>
+  </div>
+</div>
+`;
+
+// ---------- 9. DOMAINS ----------
+pages['domains'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">Domains</h1><p class="page-desc" style="margin-bottom:0">Manage your verified sending domains</p></div>
+  <button class="btn btn-primary" onclick="showModal(addDomainModal())">${ICO.plus} Add Domain</button>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+  ${[
+    {name:'acme.com',status:'Verified',sc:'success',spf:true,dkim:true,dmarc:true,inbound:'Active'},
+    {name:'notify.acme.com',status:'Pending',sc:'warning',spf:true,dkim:true,dmarc:false,inbound:'Not configured'},
+    {name:'mail.startup.io',status:'Failed',sc:'error',spf:false,dkim:false,dmarc:false,inbound:'Not configured'},
+  ].map(d => `
+    <div class="domain-card" style="cursor:pointer" onclick="navigate('domain-detail')">
+      <div style="display:flex;align-items:center;gap:16px;flex:1">
+        <div>${ICO.globe}</div>
+        <div>
+          <div class="font-semibold">${d.name}</div>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <span class="badge-status badge-${d.spf?'success':'error'}">${d.spf?ICO.check:ICO.x} SPF</span>
+            <span class="badge-status badge-${d.dkim?'success':'error'}">${d.dkim?ICO.check:ICO.x} DKIM</span>
+            <span class="badge-status badge-${d.dmarc?'success':'error'}">${d.dmarc?ICO.check:ICO.x} DMARC</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="badge-status badge-${d.sc}">${d.status}</span>
+        <span class="text-xs text-muted">Inbound: ${d.inbound}</span>
+        ${ICO.arrow}
+      </div>
+    </div>
+  `).join('')}
+</div>
+`;
+
+// ---------- 10. DOMAIN DETAIL ----------
+pages['domain-detail'] = () => `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('domains')">&larr; Back to Domains</button>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+  <h1 class="page-title" style="margin-bottom:0">acme.com</h1>
+  <span class="badge-status badge-success">${ICO.check} Verified</span>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><span class="card-title">DNS Records</span><button class="btn btn-sm btn-primary">${ICO.refresh} Verify Records</button></div>
+  <div class="data-table">
+    <table>
+      <thead><tr><th>Type</th><th>Name</th><th>Value</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><code>TXT</code></td><td><code>acme.com</code></td><td class="truncate" style="max-width:250px"><code>v=spf1 include:amazonses.com ~all</code></td><td>SPF</td><td><span class="badge-status badge-success">${ICO.check} Verified</span></td><td><button class="copy-btn" onclick="event.stopPropagation()">${ICO.copy} Copy</button></td></tr>
+        <tr><td><code>CNAME</code></td><td><code>eaas._domainkey.acme.com</code></td><td class="truncate" style="max-width:250px"><code>eaas.dkim.amazonses.com</code></td><td>DKIM</td><td><span class="badge-status badge-success">${ICO.check} Verified</span></td><td><button class="copy-btn" onclick="event.stopPropagation()">${ICO.copy} Copy</button></td></tr>
+        <tr><td><code>TXT</code></td><td><code>_dmarc.acme.com</code></td><td class="truncate" style="max-width:250px"><code>v=DMARC1; p=quarantine; rua=mailto:dmarc@acme.com</code></td><td>DMARC</td><td><span class="badge-status badge-success">${ICO.check} Verified</span></td><td><button class="copy-btn" onclick="event.stopPropagation()">${ICO.copy} Copy</button></td></tr>
+        <tr><td><code>MX</code></td><td><code>acme.com</code></td><td class="truncate" style="max-width:250px"><code>10 inbound-smtp.us-east-1.amazonaws.com</code></td><td>Inbound</td><td><span class="badge-status badge-success">${ICO.check} Verified</span></td><td><button class="copy-btn" onclick="event.stopPropagation()">${ICO.copy} Copy</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><span class="card-title">Inbound Email</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div>
+      <div class="text-sm">Inbound email receiving is <strong style="color:var(--success)">enabled</strong> for this domain.</div>
+      <div class="text-xs text-muted mt-2">MX records are correctly configured and verified.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="toggle active"></div>
+      <button class="btn btn-sm btn-secondary" onclick="navigate('inbound-setup')">Configure</button>
+    </div>
+  </div>
+</div>
+
+<div class="danger-zone">
+  <h3 style="color:var(--error);margin-bottom:8px">Danger Zone</h3>
+  <p class="text-sm mb-4">Removing this domain will stop all email sending and receiving for acme.com. This action cannot be undone.</p>
+  <button class="btn btn-danger" onclick="showModal(deleteConfirmModal('domain','Removing this domain will stop ALL email sending and receiving. This cannot be undone.'))">Remove Domain</button>
+</div>
+`;
+
+// ---------- 12. INBOUND SETUP WIZARD ----------
+pages['inbound-setup'] = () => {
+  const step = state.wizardStep;
+  return `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('domains')">&larr; Back to Domains</button>
+</div>
+<h1 class="page-title">Inbound Email Setup</h1>
+<p class="page-desc">Configure your domain to receive emails through EaaS</p>
+
+<div class="stepper">
+  ${['Select Domain','MX Records','Configure Webhook','Send Test','Complete'].map((s,i) => `
+    <div class="step ${i+1<step?'completed':''} ${i+1===step?'active':''}">
+      <div class="step-num">${i+1<step?ICO.check:i+1}</div>
+      <div class="step-label">${s}</div>
+    </div>
+  `).join('')}
+</div>
+
+<div class="card">
+  ${step===1 ? `
+    <h3 class="mb-4">Select Domain</h3>
+    <div class="form-group">
+      <label class="form-label">Choose a verified domain</label>
+      <select><option>acme.com</option><option>notify.acme.com</option></select>
+      <div class="form-hint">Only verified domains can be configured for inbound email.</div>
+    </div>
+  ` : step===2 ? `
+    <h3 class="mb-4">Configure MX Records</h3>
+    <p class="text-sm text-muted mb-4">Add the following MX record to your domain's DNS settings:</p>
+    <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="text-xs text-muted mb-2">MX Record</div>
+        <code style="font-size:.875rem">10 inbound-smtp.us-east-1.amazonaws.com</code>
+      </div>
+      <button class="copy-btn">${ICO.copy} Copy</button>
+    </div>
+
+    <div class="tabs" style="margin-bottom:12px">
+      <div class="tab active">Cloudflare</div>
+      <div class="tab">Route 53</div>
+      <div class="tab">GoDaddy</div>
+      <div class="tab">Namecheap</div>
+    </div>
+    <div class="text-sm" style="line-height:1.6">
+      <ol style="padding-left:20px">
+        <li>Log in to your Cloudflare dashboard</li>
+        <li>Select your domain (acme.com)</li>
+        <li>Go to DNS &rarr; Records</li>
+        <li>Click "Add record"</li>
+        <li>Set Type: <strong>MX</strong>, Name: <strong>@</strong>, Priority: <strong>10</strong></li>
+        <li>Set Target: <strong>inbound-smtp.us-east-1.amazonaws.com</strong></li>
+        <li>Click Save</li>
+      </ol>
+    </div>
+    <div class="mt-4" style="display:flex;align-items:center;gap:8px">
+      <button class="btn btn-secondary">${ICO.refresh} Auto-Verify</button>
+      <span class="text-xs text-muted">DNS propagation may take up to 48 hours</span>
+    </div>
+  ` : step===3 ? `
+    <h3 class="mb-4">Configure Webhook</h3>
+    <div class="form-group">
+      <label class="form-label">Webhook URL</label>
+      <input type="text" placeholder="https://your-api.com/webhooks/inbound-email" value="https://api.acme.com/webhooks/email">
+      <div class="form-hint">We'll POST the parsed email payload to this URL.</div>
+    </div>
+    <button class="btn btn-secondary mb-4">${ICO.send} Test Webhook</button>
+    <div class="badge-status badge-success" style="padding:8px 12px">${ICO.check} 200 OK (134ms) &mdash; Webhook is reachable</div>
+  ` : step===4 ? `
+    <h3 class="mb-4">Send Test Email</h3>
+    <p class="text-sm text-muted mb-4">Send a test email to verify everything is working end-to-end.</p>
+    <div style="background:var(--bg-surface);padding:16px;border-radius:var(--radius);margin-bottom:16px">
+      <div class="text-xs text-muted mb-2">Send a test email to:</div>
+      <code style="font-size:.875rem">test@acme.com</code>
+    </div>
+    <button class="btn btn-primary mb-4">${ICO.send} Send Test Email</button>
+    <div class="badge-status badge-success" style="padding:8px 12px">${ICO.check} Test email received and webhook delivered successfully!</div>
+  ` : `
+    <div style="text-align:center;padding:40px">
+      <div style="font-size:3rem;margin-bottom:16px">&#127881;</div>
+      <h2 style="margin-bottom:8px;color:var(--success)">Setup Complete!</h2>
+      <p class="text-muted mb-4">Your domain acme.com is now configured to receive emails through EaaS.</p>
+      <div style="display:flex;justify-content:center;gap:8px">
+        <button class="btn btn-primary" onclick="navigate('received')">View Received Emails</button>
+        <button class="btn btn-secondary" onclick="navigate('inbound-rules')">Configure Rules</button>
+      </div>
+    </div>
+  `}
+</div>
+
+<div style="display:flex;justify-content:space-between;margin-top:16px">
+  <button class="btn btn-secondary" ${step===1?'disabled style="opacity:.5"':''} onclick="state.wizardStep=Math.max(1,state.wizardStep-1);renderPage('inbound-setup')">&larr; Back</button>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost">Save & Resume Later</button>
+    ${step<5 ? `<button class="btn btn-primary" onclick="state.wizardStep=Math.min(5,state.wizardStep+1);renderPage('inbound-setup')">Next &rarr;</button>` : ''}
+  </div>
+</div>
+`;
+};
+
+// ---------- 13. TEMPLATES ----------
+pages['templates'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">Templates</h1><p class="page-desc" style="margin-bottom:0">Manage your email templates</p></div>
+  <button class="btn btn-primary" onclick="navigate('template-editor')">${ICO.plus} Create Template</button>
+</div>
+
+<div class="grid-2">
+  ${[
+    {name:'Welcome Email',ver:'v3',subj:'Welcome to {{company_name}}!',vars:['company_name','user_name','onboard_url'],updated:'Mar 31, 2026'},
+    {name:'Invoice',ver:'v2',subj:'Invoice #{{invoice_number}} from {{company}}',vars:['invoice_number','company','amount','due_date'],updated:'Mar 30, 2026'},
+    {name:'Password Reset',ver:'v1',subj:'Reset your password',vars:['user_name','reset_url','expiry_hours'],updated:'Mar 28, 2026'},
+    {name:'Newsletter',ver:'v5',subj:'{{month}} Newsletter - {{company}}',vars:['month','company','content_blocks'],updated:'Mar 27, 2026'},
+    {name:'Order Confirmation',ver:'v2',subj:'Order #{{order_id}} confirmed',vars:['order_id','items','total','shipping_address'],updated:'Mar 25, 2026'},
+    {name:'Verification Code',ver:'v1',subj:'Your verification code: {{code}}',vars:['code','expiry_minutes'],updated:'Mar 20, 2026'},
+  ].map(t => `
+    <div class="tpl-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+        <div>
+          <div class="font-semibold">${t.name}</div>
+          <span class="badge-status badge-gray">${t.ver}</span>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-ghost btn-xs" onclick="showModal(templatePreviewModal('${t.name}'))">${ICO.eye}</button>
+          <button class="btn btn-ghost btn-xs" onclick="navigate('template-editor')">${ICO.edit}</button>
+          <button class="btn btn-ghost btn-xs" onclick="showModal(deleteConfirmModal('template','This will delete the template and all its versions.'))">${ICO.trash}</button>
+        </div>
+      </div>
+      <div class="text-sm text-muted mb-2">Subject: <code class="text-xs">${t.subj}</code></div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+        ${t.vars.map(v => `<span class="chip">\{\{${v}\}\}</span>`).join('')}
+      </div>
+      <div class="text-xs text-muted">Updated ${t.updated}</div>
+    </div>
+  `).join('')}
+</div>
+
+<div class="card mt-6">
+  <div class="empty-state">
+    <h3>No templates yet</h3>
+    <p>Create your first email template to standardize your communications.</p>
+    <button class="btn btn-primary" onclick="navigate('template-editor')">${ICO.plus} Create Template</button>
+  </div>
+</div>
+`;
+
+// ---------- 14. TEMPLATE EDITOR ----------
+pages['template-editor'] = () => `
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <button class="btn btn-ghost btn-sm" onclick="navigate('templates')">&larr; Back to Templates</button>
+  <span class="badge-status badge-gray">v3</span>
+</div>
+
+<div class="form-group"><label class="form-label">Template Name</label><input type="text" value="Welcome Email"></div>
+<div class="form-group"><label class="form-label">Subject Template</label><input type="text" value="Welcome to {{company_name}}!"><div class="form-hint">Use \{\{variable\}\} for dynamic content</div></div>
+
+<div class="grid-2 gap-4 mb-4">
+  <div class="form-group">
+    <label class="form-label">HTML Body</label>
+    <div class="code-block" style="min-height:250px;font-size:.8rem" contenteditable="true">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body style="font-family: Arial, sans-serif;"&gt;
+  &lt;div style="max-width: 600px; margin: 0 auto;"&gt;
+    &lt;h1&gt;Welcome, <span class="keyword">\{\{user_name\}\}</span>!&lt;/h1&gt;
+    &lt;p&gt;We're thrilled to have you at
+      <span class="keyword">\{\{company_name\}\}</span>.&lt;/p&gt;
+    &lt;a href="<span class="keyword">\{\{onboard_url\}\}</span>"
+       style="background: #2563eb; color: white;
+       padding: 12px 24px; border-radius: 6px;
+       text-decoration: none;"&gt;
+      Get Started
+    &lt;/a&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Plain Text Body</label>
+    <textarea style="min-height:250px;font-family:var(--font-mono);font-size:.8rem">Welcome, {{user_name}}!
+
+We're thrilled to have you at {{company_name}}.
+
+Get Started: {{onboard_url}}
+
+-- The {{company_name}} Team</textarea>
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Variables Schema (JSON)</label>
+  <pre class="code-block" contenteditable="true" style="font-size:.8rem">{
+  <span class="keyword">"company_name"</span>: { <span class="keyword">"type"</span>: <span class="string">"string"</span>, <span class="keyword">"required"</span>: <span class="number">true</span> },
+  <span class="keyword">"user_name"</span>: { <span class="keyword">"type"</span>: <span class="string">"string"</span>, <span class="keyword">"required"</span>: <span class="number">true</span> },
+  <span class="keyword">"onboard_url"</span>: { <span class="keyword">"type"</span>: <span class="string">"string"</span>, <span class="keyword">"format"</span>: <span class="string">"uri"</span>, <span class="keyword">"required"</span>: <span class="number">true</span> }
+}</pre>
+</div>
+
+<div style="display:flex;gap:8px">
+  <button class="btn btn-primary">Save Template</button>
+  <button class="btn btn-secondary" onclick="showModal(templatePreviewModal('Welcome Email'))">${ICO.eye} Preview</button>
+  <button class="btn btn-ghost" onclick="navigate('templates')">Cancel</button>
+</div>
+`;
+
+// ---------- 16. API KEYS ----------
+pages['api-keys'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">API Keys</h1><p class="page-desc" style="margin-bottom:0">Manage your API authentication keys</p></div>
+  <button class="btn btn-primary" onclick="showModal(createApiKeyModal())">${ICO.plus} Create API Key</button>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="data-table">
+    <table>
+      <thead><tr><th>Name</th><th>Prefix</th><th>Status</th><th>Allowed Domains</th><th>Last Used</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="font-medium">Production</td><td><code>eaas_prod_a1b2...</code></td>
+          <td><span class="badge-status badge-success">Active</span></td>
+          <td>acme.com, notify.acme.com</td><td>2 minutes ago</td><td>Jan 15, 2026</td>
+          <td><button class="btn btn-xs btn-secondary" onclick="showModal(rotateKeyModal())">${ICO.refresh} Rotate</button> <button class="btn btn-xs btn-danger" onclick="showModal(revokeKeyModal())">${ICO.x} Revoke</button></td>
+        </tr>
+        <tr>
+          <td class="font-medium">Staging</td><td><code>eaas_stg_c3d4...</code></td>
+          <td><span class="badge-status badge-success">Active</span></td>
+          <td>All domains</td><td>1 hour ago</td><td>Feb 1, 2026</td>
+          <td><button class="btn btn-xs btn-secondary" onclick="showModal(rotateKeyModal())">${ICO.refresh} Rotate</button> <button class="btn btn-xs btn-danger" onclick="showModal(revokeKeyModal())">${ICO.x} Revoke</button></td>
+        </tr>
+        <tr>
+          <td class="font-medium">CI/CD Pipeline</td><td><code>eaas_ci_e5f6...</code></td>
+          <td><span class="badge-status badge-warning">Rotating <span class="text-xs">(23h 14m left)</span></span></td>
+          <td>notify.acme.com</td><td>3 hours ago</td><td>Mar 1, 2026</td>
+          <td><button class="btn btn-xs btn-secondary" disabled>${ICO.refresh} Rotating</button> <button class="btn btn-xs btn-danger" onclick="showModal(revokeKeyModal())">${ICO.x} Revoke</button></td>
+        </tr>
+        <tr>
+          <td class="font-medium" style="opacity:.6">Legacy App</td><td><code style="opacity:.6">eaas_leg_g7h8...</code></td>
+          <td><span class="badge-status badge-error">Revoked</span></td>
+          <td style="opacity:.6">acme.com</td><td style="opacity:.6">Mar 15, 2026</td><td style="opacity:.6">Dec 1, 2025</td>
+          <td><span class="text-xs text-muted">No actions</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+// ---------- 20. WEBHOOKS ----------
+pages['webhooks'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">Webhooks</h1><p class="page-desc" style="margin-bottom:0">Receive real-time notifications for email events</p></div>
+  <button class="btn btn-primary" onclick="showPanel(createWebhookPanel())">${ICO.plus} Create Webhook</button>
+</div>
+
+${[
+  {url:'https://api.acme.com/webhooks/email',events:['email.delivered','email.bounced','email.opened','email.clicked','inbound.received'],secret:'whsec_a1b2...c3d4',rate:'99.8%',last:'2 min ago',active:true},
+  {url:'https://slack.com/api/hooks/T123/B456',events:['email.bounced','email.complained'],secret:'whsec_e5f6...g7h8',rate:'100%',last:'1 hour ago',active:true},
+  {url:'https://old-system.internal/notify',events:['email.delivered'],secret:'whsec_i9j0...k1l2',rate:'87.3%',last:'3 days ago',active:false},
+].map(w => `
+  <div class="webhook-card">
+    <div style="display:flex;justify-content:space-between;align-items:start">
+      <div>
+        <div class="font-medium text-sm" style="word-break:break-all"><code>${w.url}</code></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">
+          ${w.events.map(e => `<span class="badge-status badge-info">${e}</span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="toggle ${w.active?'active':''}"></div>
+        <button class="btn btn-ghost btn-xs" onclick="showPanel(editWebhookPanel())">${ICO.edit}</button>
+        <button class="btn btn-ghost btn-xs" onclick="showModal(deleteConfirmModal('webhook','This will stop all webhook deliveries to this URL.'))">${ICO.trash}</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;font-size:.8rem;color:var(--text-secondary)">
+      <span>Secret: <code>whsec_****</code> <button class="btn btn-xs btn-ghost">${ICO.eye}</button></span>
+      <span>Success: <strong style="color:${parseFloat(w.rate)>95?'var(--success)':'var(--warning)'}">${w.rate}</strong></span>
+      <span>Last delivery: ${w.last}</span>
+    </div>
+
+    <!-- Delivery logs inline -->
+    <details style="margin-top:12px">
+      <summary style="cursor:pointer;font-size:.8rem;color:var(--primary);font-weight:500">View Delivery Logs</summary>
+      <div class="data-table mt-2">
+        <table>
+          <thead><tr><th>Timestamp</th><th>Event</th><th>Status</th><th>Response</th><th>Size</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="text-xs">Mar 31, 2:30 PM</td><td><span class="badge-status badge-info">inbound.received</span></td><td><span class="badge-status badge-success">200</span></td><td>134ms</td><td>2.4 KB</td><td></td></tr>
+            <tr><td class="text-xs">Mar 31, 2:14 PM</td><td><span class="badge-status badge-info">email.delivered</span></td><td><span class="badge-status badge-success">200</span></td><td>89ms</td><td>1.1 KB</td><td></td></tr>
+            <tr><td class="text-xs">Mar 31, 1:30 PM</td><td><span class="badge-status badge-info">email.bounced</span></td><td><span class="badge-status badge-error">503</span></td><td>5012ms</td><td>1.3 KB</td><td><button class="btn btn-xs btn-secondary">${ICO.refresh} Retry</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" style="padding:8px 0"><span class="text-xs text-muted">Showing 1-3 of 1,247</span></div>
+    </details>
+  </div>
+`).join('')}
+
+<!-- Test webhook result banners -->
+<div class="mt-4">
+  <div class="text-xs text-muted mb-2">Test Webhook Results:</div>
+  <div class="badge-status badge-success" style="padding:8px 12px;display:block;margin-bottom:8px">${ICO.check} 200 OK (134ms) &mdash; Webhook is healthy</div>
+  <div class="badge-status badge-error" style="padding:8px 12px;display:block">${ICO.x} 503 Service Unavailable &mdash; Webhook endpoint is down</div>
+</div>
+`;
+
+// ---------- 24. SUPPRESSIONS ----------
+pages['suppressions'] = () => `
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div><h1 class="page-title">Suppressions</h1><p class="page-desc" style="margin-bottom:0">Emails that will not receive any messages</p></div>
+  <button class="btn btn-primary" onclick="showModal(addSuppressionModal())">${ICO.plus} Add Suppression</button>
+</div>
+
+<div class="filter-bar">
+  <select><option>All Reasons</option><option>Hard Bounce</option><option>Soft Bounce</option><option>Complaint</option><option>Manual</option></select>
+  <div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search by email..."></div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <div class="data-table">
+    <table>
+      <thead><tr><th>Email</th><th>Reason</th><th>Source</th><th>Date</th><th>Action</th></tr></thead>
+      <tbody>
+      ${[
+        {email:'bounce@invalid.xyz',reason:'Hard Bounce',rc:'error',source:'Automatic',date:'Mar 31, 2026'},
+        {email:'mike@badmail.com',reason:'Hard Bounce',rc:'error',source:'Automatic',date:'Mar 30, 2026'},
+        {email:'temp@soft.fail',reason:'Soft Bounce',rc:'warning',source:'Automatic (3x)',date:'Mar 29, 2026'},
+        {email:'user@example.com',reason:'Complaint',rc:'warning',source:'Feedback Loop',date:'Mar 28, 2026'},
+        {email:'spam@reporter.org',reason:'Complaint',rc:'warning',source:'Feedback Loop',date:'Mar 27, 2026'},
+        {email:'ex-employee@acme.com',reason:'Manual',rc:'gray',source:'Admin',date:'Mar 26, 2026'},
+        {email:'old@legacy.net',reason:'Hard Bounce',rc:'error',source:'Automatic',date:'Mar 25, 2026'},
+        {email:'noreply@donotmail.com',reason:'Manual',rc:'gray',source:'Import',date:'Mar 24, 2026'},
+        {email:'bounced@test.co',reason:'Soft Bounce',rc:'warning',source:'Automatic (2x)',date:'Mar 23, 2026'},
+        {email:'complainer@web.com',reason:'Complaint',rc:'warning',source:'Feedback Loop',date:'Mar 22, 2026'},
+      ].map(r => `<tr>
+        <td><code>${r.email}</code></td>
+        <td><span class="badge-status badge-${r.rc}">${r.reason}</span></td>
+        <td class="text-muted">${r.source}</td><td class="text-muted">${r.date}</td>
+        <td><button class="btn btn-xs btn-ghost" onclick="showModal(removeSuppressionModal('${r.email}'))">Remove</button></td>
+      </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination" style="padding:12px 16px">
+    <span>Showing 1-10 of 89 suppressions</span>
+    <div class="pagination-btns"><button>&laquo;</button><button class="active">1</button><button>2</button><button>3</button><button>&raquo;</button></div>
+  </div>
+</div>
+`;
+
+// ---------- 27. OUTBOUND ANALYTICS ----------
+pages['outbound-analytics'] = () => `
+<h1 class="page-title">Outbound Analytics</h1>
+<p class="page-desc">Analyze your email sending performance</p>
+
+<div class="filter-bar mb-4">
+  <button class="btn btn-sm btn-secondary">24h</button>
+  <button class="btn btn-sm btn-primary">7d</button>
+  <button class="btn btn-sm btn-secondary">30d</button>
+  <button class="btn btn-sm btn-secondary">Custom</button>
+</div>
+
+<div class="metrics-grid">
+  <div class="metric-card"><div class="metric-label">Sent</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">24,891</span>${sparkline([3200,3400,3100,3800,3600,4000,3757])}</div><div class="metric-change up">+12.3%</div></div>
+  <div class="metric-card"><div class="metric-label">Delivery Rate</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">97.0%</span>${sparkline([96.2,96.8,97.1,96.5,97.3,97.8,97.0],'#22c55e')}</div><div class="metric-change up">+0.5%</div></div>
+  <div class="metric-card"><div class="metric-label">Open Rate</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">49.6%</span>${sparkline([48,50,47,51,49,52,50])}</div><div class="metric-change up">+2.1%</div></div>
+  <div class="metric-card"><div class="metric-label">Click Rate</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">15.6%</span>${sparkline([14,15,13,16,15,17,16])}</div><div class="metric-change up">+1.2%</div></div>
+  <div class="metric-card"><div class="metric-label">Bounce Rate</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">1.7%</span>${sparkline([2.1,1.8,2.0,1.5,1.9,1.2,1.7],'#ef4444')}</div><div class="metric-change up" style="color:var(--success)">-0.4%</div></div>
+  <div class="metric-card"><div class="metric-label">Complaint Rate</div><div style="display:flex;align-items:center;gap:8px"><span class="metric-value">0.02%</span>${sparkline([0.03,0.02,0.04,0.01,0.03,0.02,0.02],'#f59e0b')}</div><div class="metric-change up" style="color:var(--success)">-0.01%</div></div>
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Email Funnel</span></div>
+    <svg viewBox="0 0 400 220" style="width:100%;height:220px">
+      <rect x="20" y="10" width="360" height="35" rx="4" fill="#2563eb" opacity=".9"/>
+      <text x="200" y="32" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">Sent: 24,891 (100%)</text>
+      <rect x="40" y="55" width="320" height="35" rx="4" fill="#22c55e" opacity=".9"/>
+      <text x="200" y="77" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">Delivered: 24,156 (97.0%)</text>
+      <rect x="80" y="100" width="240" height="35" rx="4" fill="#06b6d4" opacity=".9"/>
+      <text x="200" y="122" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">Opened: 12,344 (49.6%)</text>
+      <rect x="130" y="145" width="140" height="35" rx="4" fill="#8b5cf6" opacity=".9"/>
+      <text x="200" y="167" fill="#fff" font-size="12" text-anchor="middle" font-weight="600">Clicked: 3,891 (15.6%)</text>
+      <!-- Funnel lines -->
+      <line x1="20" y1="45" x2="40" y2="55" stroke="var(--border)" stroke-width="1"/>
+      <line x1="380" y1="45" x2="360" y2="55" stroke="var(--border)" stroke-width="1"/>
+      <line x1="40" y1="90" x2="80" y2="100" stroke="var(--border)" stroke-width="1"/>
+      <line x1="360" y1="90" x2="320" y2="100" stroke="var(--border)" stroke-width="1"/>
+      <line x1="80" y1="135" x2="130" y2="145" stroke="var(--border)" stroke-width="1"/>
+      <line x1="320" y1="135" x2="270" y2="145" stroke="var(--border)" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Volume Over Time</span></div>
+    <svg viewBox="0 0 400 200" style="width:100%;height:200px">
+      <defs><linearGradient id="gVol" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2563eb" stop-opacity=".15"/><stop offset="100%" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+      <line x1="40" y1="170" x2="380" y2="170" stroke="var(--border)" stroke-width=".5"/>
+      <line x1="40" y1="100" x2="380" y2="100" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4"/>
+      <path d="M40,130 L88,110 L136,120 L184,80 L232,90 L280,60 L328,70 L376,50" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M40,130 L88,110 L136,120 L184,80 L232,90 L280,60 L328,70 L376,50 L376,170 L40,170Z" fill="url(#gVol)"/>
+      ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i) => `<text x="${40+i*48+24}" y="185" fill="var(--text-muted)" font-size="9" text-anchor="middle">${d}</text>`).join('')}
+    </svg>
+  </div>
+</div>
+
+<div class="grid-2 gap-4">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Top Templates</span></div>
+    <table><thead><tr><th>Template</th><th>Sent</th><th>Open Rate</th><th>Click Rate</th></tr></thead><tbody>
+      <tr><td>Welcome Email</td><td>8,234</td><td>62.4%</td><td>24.1%</td></tr>
+      <tr><td>Invoice</td><td>5,891</td><td>71.2%</td><td>12.8%</td></tr>
+      <tr><td>Newsletter</td><td>4,500</td><td>38.9%</td><td>8.3%</td></tr>
+      <tr><td>Verification Code</td><td>3,891</td><td>89.1%</td><td>45.2%</td></tr>
+      <tr><td>Order Confirmation</td><td>2,375</td><td>55.7%</td><td>18.9%</td></tr>
+    </tbody></table>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Domain Performance</span></div>
+    <table><thead><tr><th>Domain</th><th>Sent</th><th>Delivery</th><th>Bounce</th></tr></thead><tbody>
+      <tr><td>acme.com</td><td>18,234</td><td>97.8%</td><td>1.2%</td></tr>
+      <tr><td>notify.acme.com</td><td>5,891</td><td>96.1%</td><td>2.4%</td></tr>
+      <tr><td>mail.startup.io</td><td>766</td><td>93.2%</td><td>4.1%</td></tr>
+    </tbody></table>
+  </div>
+</div>
+`;
+
+// ---------- 28. INBOUND ANALYTICS ----------
+pages['inbound-analytics'] = () => `
+<h1 class="page-title">Inbound Analytics</h1>
+<p class="page-desc">Analyze your inbound email processing</p>
+
+<div class="filter-bar mb-4">
+  <button class="btn btn-sm btn-secondary">24h</button>
+  <button class="btn btn-sm btn-primary">7d</button>
+  <button class="btn btn-sm btn-secondary">30d</button>
+  <button class="btn btn-sm btn-secondary">Custom</button>
+</div>
+
+<div class="metrics-grid" style="grid-template-columns:repeat(4,1fr)">
+  <div class="metric-card"><div class="metric-label">Received</div><div class="metric-value">1,247</div><div class="metric-change up">+34.1%</div></div>
+  <div class="metric-card"><div class="metric-label">Processed</div><div class="metric-value">1,198</div><div class="metric-change up">+32.8%</div></div>
+  <div class="metric-card"><div class="metric-label">Failed</div><div class="metric-value">49</div><div class="metric-change down">+5.2%</div></div>
+  <div class="metric-card"><div class="metric-label">Avg Processing</div><div class="metric-value">1.2s</div><div class="metric-change up" style="color:var(--success)">-0.3s</div></div>
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Volume</span></div>
+    <svg viewBox="0 0 400 180" style="width:100%;height:180px">
+      <defs><linearGradient id="gInb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22c55e" stop-opacity=".15"/><stop offset="100%" stop-color="#22c55e" stop-opacity="0"/></linearGradient></defs>
+      <line x1="40" y1="150" x2="380" y2="150" stroke="var(--border)" stroke-width=".5"/>
+      <path d="M40,120 L88,100 L136,110 L184,80 L232,90 L280,70 L328,60 L376,55" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M40,120 L88,100 L136,110 L184,80 L232,90 L280,70 L328,60 L376,55 L376,150 L40,150Z" fill="url(#gInb)"/>
+      ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i) => `<text x="${40+i*48+24}" y="165" fill="var(--text-muted)" font-size="9" text-anchor="middle">${d}</text>`).join('')}
+    </svg>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Status Breakdown</span></div>
+    <svg viewBox="0 0 300 180" style="width:100%;height:180px">
+      <!-- Donut chart -->
+      <circle cx="100" cy="90" r="60" fill="none" stroke="#22c55e" stroke-width="20" stroke-dasharray="330 377" stroke-dashoffset="0" transform="rotate(-90 100 90)"/>
+      <circle cx="100" cy="90" r="60" fill="none" stroke="#2563eb" stroke-width="20" stroke-dasharray="30 377" stroke-dashoffset="-330" transform="rotate(-90 100 90)"/>
+      <circle cx="100" cy="90" r="60" fill="none" stroke="#ef4444" stroke-width="20" stroke-dasharray="17 377" stroke-dashoffset="-360" transform="rotate(-90 100 90)"/>
+      <text x="100" y="85" text-anchor="middle" fill="var(--text)" font-size="18" font-weight="700">96.1%</text>
+      <text x="100" y="100" text-anchor="middle" fill="var(--text-muted)" font-size="10">Success</text>
+      <!-- Legend -->
+      <circle cx="200" cy="50" r="5" fill="#22c55e"/><text x="210" y="54" fill="var(--text-secondary)" font-size="11">Processed (1,198)</text>
+      <circle cx="200" cy="75" r="5" fill="#2563eb"/><text x="210" y="79" fill="var(--text-secondary)" font-size="11">Forwarded (30)</text>
+      <circle cx="200" cy="100" r="5" fill="#ef4444"/><text x="210" y="104" fill="var(--text-secondary)" font-size="11">Failed (49)</text>
+    </svg>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-title">Top Senders</span></div>
+  <table><thead><tr><th>Sender</th><th>Emails</th><th>Avg Size</th><th>With Attachments</th><th>Success Rate</th></tr></thead>
+  <tbody>
+    <tr><td>alerts@github.com</td><td>312</td><td>4.2 KB</td><td>0%</td><td>100%</td></tr>
+    <tr><td>notifications@linear.app</td><td>189</td><td>3.8 KB</td><td>0%</td><td>99.5%</td></tr>
+    <tr><td>support@vendor.com</td><td>156</td><td>12.4 KB</td><td>42%</td><td>98.7%</td></tr>
+    <tr><td>no-reply@stripe.com</td><td>134</td><td>6.1 KB</td><td>15%</td><td>100%</td></tr>
+    <tr><td>system@vercel.com</td><td>98</td><td>2.9 KB</td><td>0%</td><td>100%</td></tr>
+  </tbody></table>
+</div>
+`;
+
+// ---------- 29. NOTIFICATIONS ----------
+pages['notifications'] = () => `
+<h1 class="page-title">Notification Preferences</h1>
+<p class="page-desc">Configure alerts for your email infrastructure</p>
+
+<div class="tabs mb-4">
+  <div class="tab active">acme.com</div>
+  <div class="tab">notify.acme.com</div>
+  <div class="tab">mail.startup.io</div>
+  <div class="tab">Global</div>
+</div>
+
+<div class="alert-card">
+  <div style="flex:1">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="font-semibold">Volume Spike Alert</div>
+      <div class="toggle active"></div>
+    </div>
+    <p class="text-sm text-muted mt-2">Alert when email volume exceeds a threshold in a given time window.</p>
+    <div class="form-row mt-4" style="max-width:400px">
+      <div class="form-group"><label class="form-label">Threshold</label><input type="number" value="5000" style="width:100%"></div>
+      <div class="form-group"><label class="form-label">Time Window</label><select><option>1 hour</option><option>6 hours</option><option selected>24 hours</option></select></div>
+    </div>
+  </div>
+</div>
+
+<div class="alert-card">
+  <div style="flex:1">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="font-semibold">Processing Failure Alert</div>
+      <div class="toggle active"></div>
+    </div>
+    <p class="text-sm text-muted mt-2">Alert when inbound processing failures exceed a threshold.</p>
+    <div class="form-row mt-4" style="max-width:400px">
+      <div class="form-group"><label class="form-label">Failure Count</label><input type="number" value="10" style="width:100%"></div>
+      <div class="form-group"><label class="form-label">Time Window</label><select><option selected>1 hour</option><option>6 hours</option></select></div>
+    </div>
+  </div>
+</div>
+
+<div class="alert-card">
+  <div style="flex:1">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="font-semibold">Spam Threshold Alert</div>
+      <div class="toggle"></div>
+    </div>
+    <p class="text-sm text-muted mt-2">Alert when spam complaint rate exceeds a percentage threshold.</p>
+    <div class="form-row mt-4" style="max-width:400px">
+      <div class="form-group"><label class="form-label">Complaint Rate %</label><input type="number" value="0.1" step="0.01" style="width:100%"></div>
+      <div class="form-group"><label class="form-label">Evaluation Period</label><select><option>24 hours</option><option selected>7 days</option></select></div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-title mb-4">Notification Channel</div>
+  <div style="display:flex;gap:16px;margin-bottom:16px">
+    <label class="checkbox-wrap"><input type="radio" name="channel" checked style="width:16px"> Webhook</label>
+    <label class="checkbox-wrap"><input type="radio" name="channel" style="width:16px"> Email</label>
+  </div>
+  <div class="form-group" style="max-width:500px">
+    <label class="form-label">Webhook URL</label>
+    <input type="text" value="https://api.acme.com/webhooks/alerts">
+  </div>
+  <button class="btn btn-secondary mb-4">${ICO.send} Test Alert</button>
+  <div class="badge-status badge-success" style="padding:6px 10px">${ICO.check} Alert delivered successfully</div>
+</div>
+
+<div class="mt-4"><button class="btn btn-primary">Save Preferences</button></div>
+`;
+
+// ---------- 30. SETTINGS ----------
+pages['settings'] = () => `
+<h1 class="page-title">Settings</h1>
+<p class="page-desc">Manage your account and preferences</p>
+
+<div class="tabs mb-4" id="settingsTabs" data-tabs>
+  <div class="tab active" data-tab="settingsGeneral">General</div>
+  <div class="tab" data-tab="settingsTeam">Team</div>
+  <div class="tab" data-tab="settingsBilling">Billing</div>
+  <div class="tab" data-tab="settingsApi">API</div>
+</div>
+
+<div class="tab-content" id="settingsGeneral">
+  <div class="card mb-4">
+    <div class="card-title mb-4">Company Information</div>
+    <div class="form-row" style="max-width:600px">
+      <div class="form-group"><label class="form-label">Company Name</label><input type="text" value="Acme Inc"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" value="admin@acme.com"></div>
+    </div>
+    <div class="form-group" style="max-width:290px"><label class="form-label">Timezone</label><select><option>UTC</option><option selected>(UTC+01:00) Lagos</option><option>(UTC-05:00) Eastern</option><option>(UTC-08:00) Pacific</option></select></div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-title mb-4">Sending Defaults</div>
+    <div class="form-row" style="max-width:600px">
+      <div class="form-group"><label class="form-label">Default From Name</label><input type="text" value="Acme"></div>
+      <div class="form-group"><label class="form-label">Default Reply-To</label><input type="email" value="reply@acme.com"></div>
+    </div>
+    <div style="display:flex;gap:24px;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:8px"><div class="toggle active"></div><span class="text-sm">Track Opens</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="toggle active"></div><span class="text-sm">Track Clicks</span></div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-title mb-4">Rate Limits</div>
+    <div style="display:flex;gap:24px">
+      <div style="text-align:center;padding:16px 24px;background:var(--bg-surface);border-radius:var(--radius)"><div class="text-xl font-bold">50</div><div class="text-xs text-muted">emails/second</div></div>
+      <div style="text-align:center;padding:16px 24px;background:var(--bg-surface);border-radius:var(--radius)"><div class="text-xl font-bold">100,000</div><div class="text-xs text-muted">emails/day</div></div>
+    </div>
+    <div class="text-xs text-muted mt-2">Contact support to increase limits.</div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-title mb-4">Data Retention</div>
+    <div class="form-row" style="max-width:600px">
+      <div class="form-group"><label class="form-label">Email Event Logs</label><select><option>30 days</option><option selected>90 days</option><option>180 days</option><option>1 year</option></select></div>
+      <div class="form-group"><label class="form-label">Inbound Email Storage</label><select><option>7 days</option><option selected>30 days</option><option>90 days</option></select></div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary">Save Changes</button>
+
+  <div class="danger-zone">
+    <h3 style="color:var(--error);margin-bottom:8px">Delete Account</h3>
+    <p class="text-sm mb-4">Permanently delete your EaaS account and all associated data. This action is irreversible.</p>
+    <button class="btn btn-danger" onclick="showModal(deleteAccountModal())">Delete Account</button>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="settingsTeam">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Team Members</span><button class="btn btn-sm btn-primary">${ICO.plus} Invite Member</button></div>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last Active</th><th></th></tr></thead>
+    <tbody>
+      <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">II</div><strong>Israel Iyonsi</strong></div></td><td>israel@acme.com</td><td><span class="badge-status badge-info">Owner</span></td><td>Now</td><td></td></tr>
+      <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">JD</div>Jane Doe</div></td><td>jane@acme.com</td><td><span class="badge-status badge-gray">Admin</span></td><td>2h ago</td><td><button class="btn btn-xs btn-ghost">${ICO.edit}</button></td></tr>
+      <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">BW</div>Bob Wilson</div></td><td>bob@acme.com</td><td><span class="badge-status badge-gray">Developer</span></td><td>1d ago</td><td><button class="btn btn-xs btn-ghost">${ICO.edit}</button></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="settingsBilling">
+  <div class="card mb-4">
+    <div class="card-title mb-4">Current Plan</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--primary-light);border-radius:var(--radius)">
+      <div><div class="font-bold text-lg">Pro Plan</div><div class="text-sm text-muted">$49/month &middot; 100,000 emails/month</div></div>
+      <button class="btn btn-secondary">Upgrade Plan</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title mb-4">Usage This Month</div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="text-sm">Outbound: 24,891 / 100,000</span><span class="text-sm font-medium">24.9%</span></div>
+      <div style="height:8px;background:var(--bg-surface);border-radius:4px;overflow:hidden"><div style="width:24.9%;height:100%;background:var(--primary);border-radius:4px"></div></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="text-sm">Inbound: 1,247 / 10,000</span><span class="text-sm font-medium">12.5%</span></div>
+      <div style="height:8px;background:var(--bg-surface);border-radius:4px;overflow:hidden"><div style="width:12.5%;height:100%;background:var(--success);border-radius:4px"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content hidden" id="settingsApi">
+  <div class="card">
+    <div class="card-title mb-4">API Configuration</div>
+    <div class="form-group" style="max-width:400px"><label class="form-label">API Base URL</label><div style="display:flex;gap:4px"><input type="text" value="https://api.eaas.dev/v1" readonly><button class="copy-btn">${ICO.copy}</button></div></div>
+    <div class="form-group" style="max-width:400px"><label class="form-label">Webhook Signing Secret</label><div style="display:flex;gap:4px"><input type="password" value="whsec_abcdefgh12345678"><button class="copy-btn">${ICO.copy}</button></div></div>
+    <div class="mt-4"><a href="#api-docs" onclick="navigate('api-docs');return false" class="btn btn-secondary">View API Docs</a></div>
+  </div>
+</div>
+`;
+
+// ---------- 31. API DOCS ----------
+pages['api-docs'] = () => `
+<div class="api-docs-layout">
+  <div class="api-nav">
+    <div class="text-xs font-semibold text-muted mb-2" style="padding:0 10px">GETTING STARTED</div>
+    <a href="#" class="active">Authentication</a>
+    <a href="#">Rate Limits</a>
+    <a href="#">Errors</a>
+    <div class="text-xs font-semibold text-muted mb-2 mt-4" style="padding:0 10px">OUTBOUND</div>
+    <a href="#">Send Email</a>
+    <a href="#">Get Email</a>
+    <a href="#">List Emails</a>
+    <div class="text-xs font-semibold text-muted mb-2 mt-4" style="padding:0 10px">INBOUND</div>
+    <a href="#">List Received</a>
+    <a href="#">Get Received</a>
+    <div class="text-xs font-semibold text-muted mb-2 mt-4" style="padding:0 10px">TEMPLATES</div>
+    <a href="#">Create Template</a>
+    <a href="#">List Templates</a>
+    <div class="text-xs font-semibold text-muted mb-2 mt-4" style="padding:0 10px">DOMAINS</div>
+    <a href="#">Add Domain</a>
+    <a href="#">Verify Domain</a>
+    <div class="text-xs font-semibold text-muted mb-2 mt-4" style="padding:0 10px">WEBHOOKS</div>
+    <a href="#">Webhook Events</a>
+    <a href="#">Payload Schema</a>
+  </div>
+
+  <div class="api-content">
+    <h2 style="margin-bottom:16px">Authentication</h2>
+    <p class="text-sm mb-4">Authenticate your API requests by including your API key in the <code>Authorization</code> header.</p>
+    <div class="code-block mb-4">Authorization: Bearer eaas_prod_a1b2c3d4...</div>
+
+    <div class="api-endpoint">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="api-method post">POST</span>
+        <code style="font-size:.9rem">/v1/emails</code>
+      </div>
+      <h3 style="margin-bottom:8px">Send Email</h3>
+      <p class="text-sm text-muted mb-4">Send a transactional email to one or more recipients.</p>
+      <h4 class="text-sm font-semibold mb-2">Request Body</h4>
+      <table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>from</code></td><td>string</td><td>Yes</td><td>Sender email address</td></tr>
+        <tr><td><code>to</code></td><td>string[]</td><td>Yes</td><td>Recipient email addresses</td></tr>
+        <tr><td><code>subject</code></td><td>string</td><td>Yes</td><td>Email subject line</td></tr>
+        <tr><td><code>html</code></td><td>string</td><td>No*</td><td>HTML body</td></tr>
+        <tr><td><code>text</code></td><td>string</td><td>No*</td><td>Plain text body</td></tr>
+        <tr><td><code>template_id</code></td><td>string</td><td>No</td><td>Template ID to use</td></tr>
+        <tr><td><code>variables</code></td><td>object</td><td>No</td><td>Template variables</td></tr>
+        <tr><td><code>tags</code></td><td>string[]</td><td>No</td><td>Tags for filtering</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="api-endpoint">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="api-method get">GET</span>
+        <code style="font-size:.9rem">/v1/emails/{id}</code>
+      </div>
+      <h3 style="margin-bottom:8px">Get Email</h3>
+      <p class="text-sm text-muted mb-4">Retrieve details of a sent email including delivery status and tracking data.</p>
+    </div>
+
+    <div class="api-endpoint">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="api-method get">GET</span>
+        <code style="font-size:.9rem">/v1/emails</code>
+      </div>
+      <h3 style="margin-bottom:8px">List Emails</h3>
+      <p class="text-sm text-muted mb-4">List sent emails with filtering and pagination.</p>
+      <h4 class="text-sm font-semibold mb-2">Query Parameters</h4>
+      <table><thead><tr><th>Param</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>status</code></td><td>string</td><td>Filter by status</td></tr>
+        <tr><td><code>domain</code></td><td>string</td><td>Filter by sending domain</td></tr>
+        <tr><td><code>from</code></td><td>datetime</td><td>Start date</td></tr>
+        <tr><td><code>to</code></td><td>datetime</td><td>End date</td></tr>
+        <tr><td><code>page</code></td><td>integer</td><td>Page number (default: 1)</td></tr>
+        <tr><td><code>limit</code></td><td>integer</td><td>Items per page (default: 20, max: 100)</td></tr>
+      </tbody></table>
+    </div>
+
+    <div class="api-endpoint">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="api-method get">GET</span>
+        <code style="font-size:.9rem">/v1/inbound/{id}</code>
+      </div>
+      <h3 style="margin-bottom:8px">Get Received Email</h3>
+      <p class="text-sm text-muted mb-4">Retrieve a received inbound email with parsed content and security verdicts.</p>
+    </div>
+
+    <div class="api-endpoint" style="border-bottom:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="api-method post">POST</span>
+        <code style="font-size:.9rem">/v1/templates</code>
+      </div>
+      <h3 style="margin-bottom:8px">Create Template</h3>
+      <p class="text-sm text-muted mb-4">Create a new email template with HTML body and variable schema.</p>
+    </div>
+
+    <h2 style="margin-top:32px;margin-bottom:16px">Webhook Payload Schema</h2>
+    <pre class="code-block" style="font-size:.75rem">{
+  <span class="keyword">"id"</span>: <span class="string">"evt_abc123"</span>,
+  <span class="keyword">"type"</span>: <span class="string">"email.delivered"</span>,
+  <span class="keyword">"timestamp"</span>: <span class="string">"2026-03-31T14:14:03Z"</span>,
+  <span class="keyword">"data"</span>: {
+    <span class="keyword">"messageId"</span>: <span class="string">"msg_abc123"</span>,
+    <span class="keyword">"from"</span>: <span class="string">"noreply@acme.com"</span>,
+    <span class="keyword">"to"</span>: [<span class="string">"john@acme.com"</span>],
+    <span class="keyword">"subject"</span>: <span class="string">"Welcome to Acme"</span>,
+    <span class="keyword">"status"</span>: <span class="string">"delivered"</span>,
+    <span class="keyword">"deliveredAt"</span>: <span class="string">"2026-03-31T14:14:03Z"</span>,
+    <span class="keyword">"tags"</span>: [<span class="string">"onboarding"</span>]
+  }
+}</pre>
+  </div>
+
+  <div class="api-code">
+    <div class="tabs" style="border-bottom-color:rgba(255,255,255,.1);margin-bottom:16px">
+      <div class="tab active" style="color:#93c5fd">cURL</div>
+      <div class="tab" style="color:#94a3b8">Node.js</div>
+      <div class="tab" style="color:#94a3b8">Python</div>
+      <div class="tab" style="color:#94a3b8">C#</div>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="color:#94a3b8;font-size:.7rem;margin-bottom:8px"># Send Email</div>
+      <pre style="white-space:pre-wrap;line-height:1.6"><span style="color:#c084fc">curl</span> -X POST https://api.eaas.dev/v1/emails \\
+  -H <span style="color:#86efac">"Authorization: Bearer eaas_prod_a1b2..."</span> \\
+  -H <span style="color:#86efac">"Content-Type: application/json"</span> \\
+  -d <span style="color:#86efac">'{
+  "from": "noreply@acme.com",
+  "to": ["john@acme.com"],
+  "subject": "Welcome to Acme",
+  "template_id": "tpl_welcome_v3",
+  "variables": {
+    "user_name": "John",
+    "company_name": "Acme",
+    "onboard_url": "https://app.acme.com/onboard"
+  },
+  "tags": ["onboarding", "welcome"]
+}'</span></pre>
+    </div>
+    <div style="margin-bottom:24px">
+      <div style="color:#94a3b8;font-size:.7rem;margin-bottom:8px"># Response (201 Created)</div>
+      <pre style="white-space:pre-wrap;line-height:1.6">{
+  <span style="color:#c084fc">"id"</span>: <span style="color:#86efac">"msg_abc123"</span>,
+  <span style="color:#c084fc">"status"</span>: <span style="color:#86efac">"queued"</span>,
+  <span style="color:#c084fc">"createdAt"</span>: <span style="color:#86efac">"2026-03-31T14:14:01Z"</span>
+}</pre>
+    </div>
+    <div>
+      <div style="color:#94a3b8;font-size:.7rem;margin-bottom:8px"># Get Email</div>
+      <pre style="white-space:pre-wrap;line-height:1.6"><span style="color:#c084fc">curl</span> https://api.eaas.dev/v1/emails/msg_abc123 \\
+  -H <span style="color:#86efac">"Authorization: Bearer eaas_prod_a1b2..."</span></pre>
+    </div>
+  </div>
+</div>
+`;
+
+// ---------- 32. WEBHOOK GUIDE ----------
+pages['webhook-guide'] = () => `
+<h1 class="page-title">Webhook Integration Guide</h1>
+<p class="page-desc">Learn how to receive and verify webhook events from EaaS</p>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Payload Schema</h3>
+  <pre class="code-block" style="font-size:.8rem">{
+  <span class="keyword">"id"</span>: <span class="string">"evt_abc123"</span>,
+  <span class="keyword">"type"</span>: <span class="string">"inbound.received"</span>,
+  <span class="keyword">"timestamp"</span>: <span class="string">"2026-03-31T14:30:14Z"</span>,
+  <span class="keyword">"data"</span>: {
+    <span class="keyword">"messageId"</span>: <span class="string">"inb_xyz789"</span>,
+    <span class="keyword">"from"</span>: { <span class="keyword">"name"</span>: <span class="string">"Support"</span>, <span class="keyword">"address"</span>: <span class="string">"support@vendor.com"</span> },
+    <span class="keyword">"to"</span>: [<span class="string">"help@acme.com"</span>],
+    <span class="keyword">"subject"</span>: <span class="string">"RE: Order update"</span>,
+    <span class="keyword">"receivedAt"</span>: <span class="string">"2026-03-31T14:30:14Z"</span>,
+    <span class="keyword">"spf"</span>: <span class="string">"pass"</span>,
+    <span class="keyword">"dkim"</span>: <span class="string">"pass"</span>,
+    <span class="keyword">"dmarc"</span>: <span class="string">"pass"</span>,
+    <span class="keyword">"html"</span>: <span class="string">"&lt;p&gt;Hi Team...&lt;/p&gt;"</span>,
+    <span class="keyword">"text"</span>: <span class="string">"Hi Team..."</span>,
+    <span class="keyword">"attachments"</span>: [
+      { <span class="keyword">"filename"</span>: <span class="string">"doc.pdf"</span>, <span class="keyword">"contentType"</span>: <span class="string">"application/pdf"</span>, <span class="keyword">"size"</span>: <span class="number">250880</span>, <span class="keyword">"url"</span>: <span class="string">"https://api.eaas.dev/v1/attachments/att_123"</span> }
+    ]
+  }
+}</pre>
+</div>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Field Reference</h3>
+  <table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td>string</td><td>Unique event ID (idempotency key)</td></tr>
+    <tr><td><code>type</code></td><td>string</td><td>Event type (email.delivered, inbound.received, etc.)</td></tr>
+    <tr><td><code>timestamp</code></td><td>ISO 8601</td><td>When the event occurred</td></tr>
+    <tr><td><code>data.messageId</code></td><td>string</td><td>EaaS message identifier</td></tr>
+    <tr><td><code>data.from</code></td><td>object</td><td>Sender name and address</td></tr>
+    <tr><td><code>data.to</code></td><td>string[]</td><td>Recipient addresses</td></tr>
+    <tr><td><code>data.spf/dkim/dmarc</code></td><td>string</td><td>Security verdict: pass, fail, none</td></tr>
+    <tr><td><code>data.attachments</code></td><td>array</td><td>File attachments with download URLs (valid 24h)</td></tr>
+  </tbody></table>
+</div>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Signature Verification (Node.js)</h3>
+  <pre class="code-block" style="font-size:.8rem"><span class="keyword">const</span> crypto = require(<span class="string">'crypto'</span>);
+
+<span class="keyword">function</span> verifyWebhookSignature(payload, signature, secret) {
+  <span class="keyword">const</span> expected = crypto
+    .createHmac(<span class="string">'sha256'</span>, secret)
+    .update(payload)
+    .digest(<span class="string">'hex'</span>);
+
+  <span class="keyword">const</span> trusted = Buffer.from(<span class="string">\`sha256=\${expected}\`</span>, <span class="string">'utf8'</span>);
+  <span class="keyword">const</span> untrusted = Buffer.from(signature, <span class="string">'utf8'</span>);
+
+  <span class="keyword">return</span> crypto.timingSafeEqual(trusted, untrusted);
+}
+
+<span class="comment">// Express middleware</span>
+app.post(<span class="string">'/webhooks/eaas'</span>, (req, res) => {
+  <span class="keyword">const</span> sig = req.headers[<span class="string">'x-eaas-signature'</span>];
+  <span class="keyword">if</span> (!verifyWebhookSignature(req.rawBody, sig, process.env.WEBHOOK_SECRET)) {
+    <span class="keyword">return</span> res.status(<span class="number">401</span>).send(<span class="string">'Invalid signature'</span>);
+  }
+  <span class="comment">// Process webhook...</span>
+  res.status(<span class="number">200</span>).send(<span class="string">'OK'</span>);
+});</pre>
+</div>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Best Practices</h3>
+  <ul style="padding-left:20px;line-height:2;font-size:.875rem">
+    <li>Always verify the <code>x-eaas-signature</code> header before processing</li>
+    <li>Return a <strong>2xx status code</strong> within 30 seconds to acknowledge receipt</li>
+    <li>Use the <code>id</code> field for idempotency &mdash; you may receive duplicate events</li>
+    <li>Process webhooks asynchronously (queue the payload, respond immediately)</li>
+    <li>Store raw payloads for debugging and replay</li>
+    <li>Monitor your webhook success rate in the dashboard</li>
+  </ul>
+</div>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Retry Policy</h3>
+  <table><thead><tr><th>Attempt</th><th>Delay</th><th>Total Elapsed</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Immediate</td><td>0s</td></tr>
+    <tr><td>2</td><td>30 seconds</td><td>30s</td></tr>
+    <tr><td>3</td><td>2 minutes</td><td>2m 30s</td></tr>
+    <tr><td>4</td><td>10 minutes</td><td>12m 30s</td></tr>
+    <tr><td>5</td><td>1 hour</td><td>1h 12m</td></tr>
+    <tr><td>6 (final)</td><td>4 hours</td><td>5h 12m</td></tr>
+  </tbody></table>
+  <p class="text-xs text-muted mt-2">After 6 failed attempts, the event is marked as failed. You can manually retry from the dashboard.</p>
+</div>
+
+<div class="card">
+  <h3 class="mb-4">Testing with ngrok</h3>
+  <pre class="code-block" style="font-size:.8rem"><span class="comment"># 1. Install ngrok</span>
+<span class="keyword">brew</span> install ngrok
+
+<span class="comment"># 2. Start your local server</span>
+<span class="keyword">node</span> server.js  <span class="comment"># listening on port 3000</span>
+
+<span class="comment"># 3. Create a tunnel</span>
+<span class="keyword">ngrok</span> http 3000
+
+<span class="comment"># 4. Copy the HTTPS URL (e.g., https://abc123.ngrok.io)</span>
+<span class="comment"># 5. Set it as your webhook URL in EaaS dashboard</span>
+<span class="comment"># 6. Send a test email to your inbound domain</span></pre>
+</div>
+`;
+
+// ---------- 33. SETUP GUIDE ----------
+pages['setup-guide'] = () => `
+<h1 class="page-title">Inbound Email Setup Guide</h1>
+<p class="page-desc">Complete guide to receiving emails through EaaS</p>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Architecture</h3>
+  <svg viewBox="0 0 700 140" style="width:100%;height:140px">
+    <!-- Boxes -->
+    <rect x="10" y="40" width="100" height="50" rx="6" fill="var(--bg-surface)" stroke="var(--border)"/>
+    <text x="60" y="62" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="600">Sender</text>
+    <text x="60" y="78" text-anchor="middle" fill="var(--text-muted)" font-size="8">External MTA</text>
+
+    <rect x="155" y="40" width="100" height="50" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="205" y="62" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">AWS SES</text>
+    <text x="205" y="78" text-anchor="middle" fill="#1e40af" font-size="8">Inbound SMTP</text>
+
+    <rect x="300" y="40" width="100" height="50" rx="6" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="350" y="62" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">S3 Bucket</text>
+    <text x="350" y="78" text-anchor="middle" fill="#1e40af" font-size="8">Raw Storage</text>
+
+    <rect x="445" y="40" width="100" height="50" rx="6" fill="#dcfce7" stroke="#22c55e"/>
+    <text x="495" y="62" text-anchor="middle" fill="#166534" font-size="10" font-weight="600">EaaS API</text>
+    <text x="495" y="78" text-anchor="middle" fill="#166534" font-size="8">Parse + Process</text>
+
+    <rect x="590" y="40" width="100" height="50" rx="6" fill="var(--bg-surface)" stroke="var(--border)"/>
+    <text x="640" y="62" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="600">Your App</text>
+    <text x="640" y="78" text-anchor="middle" fill="var(--text-muted)" font-size="8">Webhook</text>
+
+    <!-- Arrows -->
+    <line x1="110" y1="65" x2="155" y2="65" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+    <line x1="255" y1="65" x2="300" y2="65" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+    <line x1="400" y1="65" x2="445" y2="65" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+    <line x1="545" y1="65" x2="590" y2="65" stroke="var(--text-muted)" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+    <!-- Labels -->
+    <text x="132" y="58" text-anchor="middle" fill="var(--text-muted)" font-size="7">SMTP</text>
+    <text x="278" y="58" text-anchor="middle" fill="var(--text-muted)" font-size="7">Store</text>
+    <text x="422" y="58" text-anchor="middle" fill="var(--text-muted)" font-size="7">S3 Event</text>
+    <text x="568" y="58" text-anchor="middle" fill="var(--text-muted)" font-size="7">POST</text>
+
+    <defs><marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6Z" fill="var(--text-muted)"/></marker></defs>
+  </svg>
+</div>
+
+<div class="card mb-4">
+  <h3 class="mb-4">Prerequisites Checklist</h3>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <label class="checkbox-wrap"><input type="checkbox" checked style="width:16px"> Verified domain in EaaS</label>
+    <label class="checkbox-wrap"><input type="checkbox" checked style="width:16px"> Access to domain DNS settings</label>
+    <label class="checkbox-wrap"><input type="checkbox" checked style="width:16px"> Webhook endpoint ready to receive POST requests</label>
+    <label class="checkbox-wrap"><input type="checkbox" style="width:16px"> SSL/TLS certificate on webhook endpoint</label>
+    <label class="checkbox-wrap"><input type="checkbox" style="width:16px"> Webhook signature verification implemented</label>
+  </div>
+</div>
+
+${[
+  {n:1,title:'Add Your Domain',code:'# Already done if you have a verified domain\n# Navigate to Domains > Add Domain in the dashboard'},
+  {n:2,title:'Configure MX Records',code:'# Add MX record to your DNS\nType: MX\nName: @  (or subdomain)\nPriority: 10\nValue: inbound-smtp.us-east-1.amazonaws.com'},
+  {n:3,title:'Create Inbound Rule',code:'# Via API:\ncurl -X POST https://api.eaas.dev/v1/inbound-rules \\\n  -H "Authorization: Bearer eaas_prod_..." \\\n  -d \'{\n  "name": "Forward to webhook",\n  "domain": "acme.com",\n  "pattern": "*@acme.com",\n  "action": "webhook",\n  "webhookUrl": "https://api.acme.com/webhooks/email"\n}\''},
+  {n:4,title:'Implement Webhook Handler',code:'// Node.js / Express\napp.post("/webhooks/email", (req, res) => {\n  const { type, data } = req.body;\n  \n  if (type === "inbound.received") {\n    console.log("From:", data.from.address);\n    console.log("Subject:", data.subject);\n    console.log("Body:", data.text);\n    // Process attachments\n    for (const att of data.attachments) {\n      console.log("Attachment:", att.filename, att.size);\n    }\n  }\n  \n  res.status(200).send("OK");\n});'},
+  {n:5,title:'Verify & Test',code:'# Send a test email to your domain\n# Check the EaaS dashboard > Received Emails\n# Verify webhook delivery in Webhooks > Delivery Logs'},
+].map(s => `
+  <div class="card mb-4">
+    <h3 class="mb-2"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:.8rem;margin-right:8px">${s.n}</span>${s.title}</h3>
+    <pre class="code-block mt-4" style="font-size:.8rem">${s.code}</pre>
+  </div>
+`).join('')}
+
+<div class="card">
+  <h3 class="mb-4">Troubleshooting FAQ</h3>
+  ${[
+    {q:'Emails not being received?',a:'Check that MX records are correctly configured. DNS propagation can take up to 48 hours. Use dig MX yourdomain.com to verify.'},
+    {q:'Webhooks failing?',a:'Ensure your endpoint returns a 2xx status within 30 seconds. Check the Webhook Delivery Logs for error details.'},
+    {q:'SPF/DKIM/DMARC failing?',a:'These are sender-side settings. Failed verdicts on received emails indicate the sender has not configured their domain properly.'},
+    {q:'Attachments not showing?',a:'Attachment download URLs expire after 24 hours. Download and store them in your system upon webhook receipt.'},
+    {q:'Duplicate events?',a:'Use the event id field for idempotency. EaaS may deliver the same event multiple times for reliability.'},
+  ].map(f => `
+    <details style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);padding:12px">
+      <summary style="cursor:pointer;font-weight:600;font-size:.875rem">${f.q}</summary>
+      <p class="text-sm text-muted mt-2">${f.a}</p>
+    </details>
+  `).join('')}
+</div>
+`;
+
+// ===== MODAL TEMPLATES =====
+
+function composeEmailModal() {
+  return `
+    <div class="modal-header"><h3>Send Email</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">From</label><select><option>noreply@acme.com</option><option>hello@acme.com</option></select></div>
+      <div class="form-group"><label class="form-label">To</label><input type="email" placeholder="recipient@example.com"></div>
+      <div class="form-group"><label class="form-label">Subject</label><input type="text" placeholder="Email subject"></div>
+      <div class="form-group"><label class="form-label">Template (optional)</label><select><option value="">None - custom content</option><option>Welcome Email</option><option>Invoice</option></select></div>
+      <div class="form-group"><label class="form-label">HTML Body</label><textarea rows="5" placeholder="<p>Your email content...</p>"></textarea></div>
+      <div class="form-group"><label class="form-label">Tags</label><input type="text" placeholder="Comma-separated tags"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary">${ICO.send} Send</button></div>
+  `;
+}
+
+function addDomainModal() {
+  return `
+    <div class="modal-header"><h3>Add Domain</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Domain Name</label><input type="text" placeholder="example.com"><div class="form-hint">Enter the domain you want to send emails from.</div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary">${ICO.plus} Add Domain</button></div>
+  `;
+}
+
+function deleteConfirmModal(type, message) {
+  return `
+    <div class="modal-header"><h3>Delete ${type}?</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="confirm-icon danger">${ICO.warn}</div>
+      <p class="text-sm">${message}</p>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-danger" onclick="hideModal()">Delete</button></div>
+  `;
+}
+
+function deleteAccountModal() {
+  return `
+    <div class="modal-header"><h3>Delete Account</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="confirm-icon danger">${ICO.warn}</div>
+      <h3 style="color:var(--error);margin-bottom:8px">This action is irreversible</h3>
+      <p class="text-sm mb-4">All your data, domains, templates, and API keys will be permanently deleted.</p>
+      <div class="form-group"><label class="form-label">Type <strong>DELETE</strong> to confirm</label><input type="text" placeholder="DELETE"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-danger" onclick="hideModal()">Delete Account</button></div>
+  `;
+}
+
+function createApiKeyModal() {
+  return `
+    <div class="modal-header"><h3>Create API Key</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Key Name</label><input type="text" placeholder="e.g., Production, Staging"></div>
+      <div class="form-group">
+        <label class="form-label">Allowed Domains</label>
+        <div class="checkbox-wrap mb-2"><input type="checkbox" style="width:16px"> All domains</div>
+        <select multiple style="height:80px"><option>acme.com</option><option>notify.acme.com</option><option>mail.startup.io</option></select>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary" onclick="showModal(showKeyOnceModal())">${ICO.plus} Create</button></div>
+  `;
+}
+
+function showKeyOnceModal() {
+  return `
+    <div class="modal-header"><h3>API Key Created</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div style="background:var(--warning-light);color:var(--warning-text);padding:12px;border-radius:var(--radius);margin-bottom:16px;font-size:.875rem">
+        <strong>Warning:</strong> This key will only be shown once. Copy it now and store it securely.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your API Key</label>
+        <div style="display:flex;gap:4px">
+          <input type="text" value="eaas_prod_k9m2n4p6q8r0s1t3u5v7w9x1y3z5a7b9" readonly style="font-family:var(--font-mono);font-size:.8rem">
+          <button class="copy-btn" style="flex-shrink:0">${ICO.copy} Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="hideModal()">I've copied it</button></div>
+  `;
+}
+
+function rotateKeyModal() {
+  return `
+    <div class="modal-header"><h3>Rotate API Key</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div class="confirm-icon warning">${ICO.refresh}</div>
+      <div style="background:var(--warning-light);color:var(--warning-text);padding:12px;border-radius:var(--radius);margin-bottom:16px;font-size:.875rem">
+        A new key will be generated. The old key will continue working for a <strong>24-hour grace period</strong>.
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Key</label>
+        <div style="display:flex;gap:4px"><input type="text" value="eaas_prod_NEW_x1y2z3a4b5c6d7e8f9" readonly style="font-family:var(--font-mono);font-size:.8rem"><button class="copy-btn">${ICO.copy} Copy</button></div>
+      </div>
+      <div class="text-xs text-muted">Old key expires: Apr 1, 2026 2:00 PM (23h 45m remaining)</div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary" onclick="hideModal()">Confirm Rotation</button></div>
+  `;
+}
+
+function revokeKeyModal() {
+  return `
+    <div class="modal-header"><h3>Revoke API Key</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="confirm-icon danger">${ICO.warn}</div>
+      <p class="text-sm"><strong>This cannot be undone.</strong> Any applications using this key will immediately lose access.</p>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-danger" onclick="hideModal()">Revoke Key</button></div>
+  `;
+}
+
+function templatePreviewModal(name) {
+  return `
+    <div class="modal-header"><h3>Preview: ${name}</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body" style="padding:0">
+      <div style="display:flex">
+        <div style="flex:1;padding:20px;border-right:1px solid var(--border)">
+          <div style="border:1px solid var(--border);border-radius:var(--radius);padding:20px;background:#fff;color:#333;font-size:.8rem">
+            <div style="text-align:center;padding:16px 0;border-bottom:1px solid #e5e7eb"><div style="font-size:1.25rem;font-weight:700;color:#2563eb">ACME</div></div>
+            <div style="padding:16px 0"><h2 style="font-size:1.1rem;margin-bottom:8px">Welcome, John!</h2><p style="color:#6b7280;line-height:1.5">We're thrilled to have you at Acme.</p>
+            <div style="text-align:center;margin:16px 0"><span style="display:inline-block;background:#2563eb;color:#fff;padding:8px 20px;border-radius:6px;font-weight:600;font-size:.85rem">Get Started</span></div></div>
+          </div>
+        </div>
+        <div style="width:200px;padding:16px;font-size:.75rem">
+          <div class="font-semibold mb-2">Variables</div>
+          <div class="form-group"><label class="form-label">company_name</label><input type="text" value="Acme" style="font-size:.75rem;padding:4px 8px"></div>
+          <div class="form-group"><label class="form-label">user_name</label><input type="text" value="John" style="font-size:.75rem;padding:4px 8px"></div>
+          <div class="form-group"><label class="form-label">onboard_url</label><input type="text" value="https://app.acme.com" style="font-size:.75rem;padding:4px 8px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Close</button></div>
+  `;
+}
+
+function addSuppressionModal() {
+  return `
+    <div class="modal-header"><h3>Add Suppression</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" placeholder="user@example.com"></div>
+      <div class="form-group"><label class="form-label">Reason</label><select><option>Manual</option><option>Hard Bounce</option><option>Complaint</option></select></div>
+      <div class="form-group"><label class="form-label">Note (optional)</label><textarea rows="3" placeholder="Reason for suppression..."></textarea></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary" onclick="hideModal()">${ICO.plus} Add</button></div>
+  `;
+}
+
+function removeSuppressionModal(email) {
+  return `
+    <div class="modal-header"><h3>Remove Suppression</h3><button onclick="hideModal()">${ICO.close}</button></div>
+    <div class="modal-body" style="text-align:center">
+      <div class="confirm-icon warning">${ICO.warn}</div>
+      <p class="text-sm">Remove <strong>${email}</strong> from the suppression list?</p>
+      <p class="text-xs text-muted mt-2">This email will be eligible to receive messages again.</p>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="hideModal()">Cancel</button><button class="btn btn-primary" onclick="hideModal()">Remove</button></div>
+  `;
+}
+
+// ===== SLIDE PANEL TEMPLATES =====
+
+function createRulePanel() {
+  return ruleFormPanel('Create Rule', false);
+}
+function editRulePanel() {
+  return ruleFormPanel('Edit Rule', true);
+}
+
+function ruleFormPanel(title, isEdit) {
+  return `
+    <div class="slide-panel-header"><h3>${title}</h3><button onclick="hidePanel()">${ICO.close}</button></div>
+    <div class="slide-panel-body">
+      <div class="form-group"><label class="form-label">Rule Name</label><input type="text" value="${isEdit?'Webhook Forward':''}" placeholder="e.g., Forward support emails"></div>
+      <div class="form-group"><label class="form-label">Domain</label><select><option>acme.com</option><option>notify.acme.com</option></select></div>
+      <div class="form-group"><label class="form-label">Match Pattern</label><input type="text" value="${isEdit?'*@help.acme.com':''}" placeholder="*@domain.com or specific@domain.com"><div class="form-hint">Use * as wildcard. Pattern matches the recipient address.</div>${isEdit?'':'<div class="form-error hidden">Pattern is required</div>'}</div>
+      <div class="form-group">
+        <label class="form-label">Action</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label class="checkbox-wrap"><input type="radio" name="ruleAction" value="webhook" ${isEdit?'checked':''} style="width:16px" onchange="document.getElementById('webhookUrl').classList.remove('hidden');document.getElementById('forwardTo').classList.add('hidden')"> Webhook</label>
+          <label class="checkbox-wrap"><input type="radio" name="ruleAction" value="forward" style="width:16px" onchange="document.getElementById('forwardTo').classList.remove('hidden');document.getElementById('webhookUrl').classList.add('hidden')"> Forward</label>
+          <label class="checkbox-wrap"><input type="radio" name="ruleAction" value="store" style="width:16px" onchange="document.getElementById('webhookUrl').classList.add('hidden');document.getElementById('forwardTo').classList.add('hidden')"> Store Only</label>
+        </div>
+      </div>
+      <div class="form-group" id="webhookUrl"><label class="form-label">Webhook URL</label><input type="url" value="${isEdit?'https://api.acme.com/webhooks/email':''}" placeholder="https://..."><button class="btn btn-xs btn-secondary mt-2">${ICO.send} Test Webhook</button></div>
+      <div class="form-group hidden" id="forwardTo"><label class="form-label">Forward To</label><input type="email" placeholder="team@helpdesk.com"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Priority</label><input type="number" value="${isEdit?'1':'10'}" min="1" max="99"></div>
+        <div class="form-group"><label class="form-label">Status</label><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="toggle active"></div><span class="text-sm">Active</span></div></div>
+      </div>
+    </div>
+    <div class="slide-panel-footer"><button class="btn btn-ghost" onclick="hidePanel()">Cancel</button><button class="btn btn-primary" onclick="hidePanel()">Save Rule</button></div>
+  `;
+}
+
+function createWebhookPanel() { return webhookFormPanel('Create Webhook', false); }
+function editWebhookPanel() { return webhookFormPanel('Edit Webhook', true); }
+
+function webhookFormPanel(title, isEdit) {
+  return `
+    <div class="slide-panel-header"><h3>${title}</h3><button onclick="hidePanel()">${ICO.close}</button></div>
+    <div class="slide-panel-body">
+      <div class="form-group"><label class="form-label">Webhook URL</label><input type="url" value="${isEdit?'https://api.acme.com/webhooks/email':''}" placeholder="https://your-api.com/webhooks"></div>
+      <div class="form-group">
+        <label class="form-label">Events</label>
+        <div class="events-grid">
+          ${['email.queued','email.sent','email.delivered','email.bounced','email.opened','email.clicked','email.complained','inbound.received'].map(e => `
+            <label class="checkbox-wrap"><input type="checkbox" ${isEdit && ['email.delivered','email.bounced','email.opened','email.clicked','inbound.received'].includes(e)?'checked':''} style="width:16px"> <code class="text-xs">${e}</code></label>
+          `).join('')}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Signing Secret</label>
+        <div style="display:flex;gap:4px"><input type="text" value="${isEdit?'whsec_a1b2c3d4e5f6g7h8':'whsec_'+Math.random().toString(36).slice(2,18)}" readonly style="font-family:var(--font-mono);font-size:.8rem"><button class="btn btn-xs btn-secondary">${ICO.refresh}</button></div>
+        <div class="form-hint">Used to verify webhook payloads. Keep this secret.</div>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div class="toggle ${isEdit?'active':'active'}"></div><span class="text-sm">Active</span></div></div>
+    </div>
+    <div class="slide-panel-footer"><button class="btn btn-ghost" onclick="hidePanel()">Cancel</button><button class="btn btn-primary" onclick="hidePanel()">Save Webhook</button></div>
+  `;
+}
+
+
+// ===== INIT =====
+const initialRoute = location.hash.slice(1) || 'overview';
+navigate(initialRoute);
+
+// Keyboard shortcut: Escape closes modals/panels
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { hideModal(); hidePanel(); }
+});
+</script>
+</body>
+</html>

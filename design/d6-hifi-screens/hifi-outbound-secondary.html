@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Customer Dashboard — Hi-Fi Outbound Secondary Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-2: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #f8fafc;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --primary-text: #1e40af;
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --success-text: #166534;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-text: #991b1b;
+  --orange: #f97316;
+  --orange-light: #fff7ed;
+  --orange-text: #9a3412;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #e2e8f0;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.15);
+  --sidebar-active-text: #60a5fa;
+  --sidebar-section: #475569;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-2: #334155;
+  --bg-hover: #334155;
+  --border: #334155;
+  --border-strong: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #0f172a;
+  --primary-light: rgba(37, 99, 235, 0.2);
+  --primary-text: #93bbfd;
+  --success-light: rgba(34, 197, 94, 0.15);
+  --success-text: #86efac;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-text: #fcd34d;
+  --error-light: rgba(239, 68, 68, 0.15);
+  --error-text: #fca5a5;
+  --orange-light: rgba(249, 115, 22, 0.15);
+  --orange-text: #fdba74;
+  --sidebar-bg: #020617;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+}
+
+html { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); }
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; }
+h2 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.body-text { font-size: 14px; line-height: 20px; }
+.small-text { font-size: 12px; line-height: 16px; }
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; }
+
+/* ============================================
+   SCREEN NAVIGATION
+   ============================================ */
+.screen-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px; padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.screen-nav-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+.screen-nav button {
+  padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.screen-nav button:hover { border-color: var(--primary); color: var(--primary); }
+.screen-nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
+.theme-toggle {
+  margin-left: auto; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  font-family: inherit; font-weight: 500; transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.screen { display: none; margin-top: 44px; }
+.screen.active { display: flex; min-height: calc(100vh - 44px); }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--sidebar-bg);
+  display: flex; flex-direction: column; height: calc(100vh - 44px);
+  position: sticky; top: 44px; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; color: white;
+  font-weight: 700; font-size: 14px;
+}
+.sidebar-logo-text { color: #f1f5f9; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 1px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); font-size: 13px;
+  font-weight: 400; cursor: pointer; transition: all var(--transition);
+  text-decoration: none; position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); font-weight: 500; }
+.nav-item .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto; padding: 1px 6px; border-radius: 10px; font-size: 10px;
+  font-weight: 600; background: var(--primary); color: white; letter-spacing: 0.02em;
+}
+.nav-badge.new { background: var(--success); }
+.nav-sub { padding-left: 40px; }
+.nav-section { padding: 16px 12px 6px; font-size: 11px; font-weight: 600; color: var(--sidebar-section); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sidebar-footer .nav-item { font-size: 12px; }
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px;
+}
+.sidebar-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 11px; font-weight: 600;
+}
+.sidebar-user-info { flex: 1; }
+.sidebar-user-name { color: #e2e8f0; font-size: 13px; font-weight: 500; }
+.sidebar-user-email { color: var(--sidebar-text); font-size: 11px; }
+
+/* Main Content */
+.main-content { flex: 1; padding: 24px 32px; min-width: 0; overflow-x: auto; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+
+/* Page Header */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-title { display: flex; align-items: center; gap: 10px; }
+.page-title h1 { white-space: nowrap; }
+.count-badge {
+  padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;
+  background: var(--bg-surface-2); color: var(--text-secondary);
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.filter-item select, .filter-item input {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; transition: border-color var(--transition);
+}
+.filter-item select:focus, .filter-item input:focus { border-color: var(--primary); }
+.filter-item label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-right: 6px; }
+.clear-filters { font-size: 13px; color: var(--primary); cursor: pointer; margin-left: auto; text-decoration: none; font-weight: 500; }
+.clear-filters:hover { text-decoration: underline; }
+
+/* Data Table */
+.data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead { background: var(--bg-surface); }
+.data-table th {
+  padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px;
+  color: var(--text-secondary); border-bottom: 1px solid var(--border);
+  white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table tbody tr { transition: background var(--transition); }
+.data-table tbody tr:hover { background: var(--bg-hover); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Status Dot */
+.status { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.green { background: var(--success); }
+.status-dot.blue { background: var(--primary); }
+.status-dot.red { background: var(--error); }
+.status-dot.amber { background: var(--warning); }
+.status-dot.gray { background: var(--text-tertiary); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.badge-green { background: var(--success-light); color: var(--success-text); }
+.badge-red { background: var(--error-light); color: var(--error-text); }
+.badge-blue { background: var(--primary-light); color: var(--primary-text); }
+.badge-amber { background: var(--warning-light); color: var(--warning-text); }
+.badge-orange { background: var(--orange-light); color: var(--orange-text); }
+.badge-gray { background: var(--bg-surface-2); color: var(--text-secondary); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { background: var(--bg-surface); border-color: var(--border-strong); }
+.btn-destructive { background: var(--error); color: white; border-color: var(--error); }
+.btn-destructive:hover { background: #dc2626; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: none; padding: 6px 10px; }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-warning { background: var(--warning); color: white; border-color: var(--warning); }
+.btn-warning:hover { background: #d97706; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); gap: 0; margin-bottom: 24px; }
+.tab {
+  padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition);
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Card */
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 20px; }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; font-size: 13px; color: var(--text-secondary);
+}
+.pagination-buttons { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: all var(--transition);
+}
+.page-btn:hover { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Toggle Switch */
+.toggle-switch {
+  width: 36px; height: 20px; background: var(--border-strong); border-radius: 10px;
+  position: relative; transition: background var(--transition); cursor: pointer; flex-shrink: 0;
+}
+.toggle-switch::after {
+  content: ''; width: 16px; height: 16px; border-radius: 50%; background: white;
+  position: absolute; top: 2px; left: 2px; transition: transform var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch.on::after { transform: translateX(16px); }
+
+/* Form Fields */
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.form-helper { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+.form-input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; transition: border-color var(--transition);
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.form-select {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.form-select:focus { border-color: var(--primary); }
+textarea.form-input { resize: vertical; min-height: 80px; }
+
+/* Checkbox */
+.checkbox {
+  width: 16px; height: 16px; border: 1.5px solid var(--border-strong);
+  border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.checkbox:hover { border-color: var(--primary); }
+.checkbox.checked { background: var(--primary); border-color: var(--primary); }
+.checkbox.checked::after { content: ''; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-0.5px, -0.5px); }
+
+/* Chip Input */
+.chip-container {
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); min-height: 38px; align-items: center;
+  transition: border-color var(--transition);
+}
+.chip-container:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+  background: var(--primary-light); color: var(--primary-text); border-radius: 4px;
+  font-size: 12px; font-weight: 500;
+}
+.chip-remove { cursor: pointer; opacity: 0.7; font-size: 14px; line-height: 1; }
+.chip-remove:hover { opacity: 1; }
+.chip-input {
+  border: none; outline: none; background: transparent; font-size: 13px;
+  font-family: inherit; color: var(--text-primary); flex: 1; min-width: 100px;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+  border: 1px solid var(--border);
+}
+.modal-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-header h2 { font-size: 18px; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: var(--radius-sm); border: none;
+  background: transparent; color: var(--text-tertiary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  transition: all var(--transition);
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+
+/* Warning Banner */
+.warning-banner {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px;
+  background: var(--warning-light); border: 1px solid var(--warning);
+  border-radius: var(--radius-sm); margin-bottom: 16px;
+  color: var(--warning-text); font-size: 13px; font-weight: 500;
+}
+.warning-banner .warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* Key Display */
+.key-display {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text-primary);
+}
+.key-display .key-value { flex: 1; word-break: break-all; }
+
+/* Webhook Card */
+.webhook-card {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; margin-bottom: 12px; background: var(--bg);
+  transition: all var(--transition);
+}
+.webhook-card:hover { box-shadow: var(--shadow-md); }
+.webhook-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.webhook-card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.webhook-url { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.webhook-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.webhook-secret {
+  display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;
+}
+.webhook-stats { font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px; }
+.webhook-actions { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border); }
+
+/* Checkbox Label */
+.checkbox-label {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-primary);
+  cursor: pointer; padding: 4px 0;
+}
+
+/* Events Grid */
+.events-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+
+/* Test Result */
+.test-result {
+  padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  margin-top: 12px;
+}
+.test-result.success { background: var(--success-light); color: var(--success-text); }
+.test-result.error { background: var(--error-light); color: var(--error-text); }
+
+/* Metric Card */
+.metric-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.metric-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 16px 20px; box-shadow: var(--shadow-sm);
+}
+.metric-card-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.metric-card-value { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+.metric-card-row { display: flex; align-items: flex-end; justify-content: space-between; }
+.metric-card-trend { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 3px; }
+.trend-up-good { color: var(--success-text); }
+.trend-down-bad { color: var(--error-text); }
+.trend-up-bad { color: var(--error-text); }
+.trend-down-good { color: var(--success-text); }
+.trend-neutral { color: var(--text-tertiary); }
+.sparkline { margin-top: 8px; }
+
+/* Funnel Chart */
+.funnel-chart { margin-bottom: 24px; }
+.funnel-bar-wrap { margin-bottom: 8px; }
+.funnel-bar-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+.funnel-bar-name { font-weight: 500; color: var(--text-primary); }
+.funnel-bar-count { font-weight: 600; color: var(--text-primary); }
+.funnel-bar-track { height: 32px; background: var(--bg-surface-2); border-radius: var(--radius-sm); overflow: hidden; position: relative; }
+.funnel-bar-fill { height: 100%; border-radius: var(--radius-sm); transition: width 0.5s ease; }
+.funnel-conversion { font-size: 11px; color: var(--text-tertiary); text-align: right; margin-top: 2px; }
+
+/* Time Range Buttons */
+.time-range { display: flex; gap: 2px; background: var(--bg-surface-2); border-radius: var(--radius-sm); padding: 2px; }
+.time-range-btn {
+  padding: 4px 12px; border-radius: 4px; border: none; background: transparent;
+  font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+  font-family: inherit; transition: all var(--transition);
+}
+.time-range-btn:hover { color: var(--text-primary); }
+.time-range-btn.active { background: var(--bg); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+/* Bottom 3-Panel Row */
+.bottom-panels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Section */
+.section { margin-top: 24px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; box-shadow: var(--shadow-sm);
+}
+
+/* Settings Form */
+.settings-section {
+  padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--bg); margin-bottom: 20px;
+}
+.settings-section-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 16px;
+}
+.settings-row:last-child { margin-bottom: 0; }
+.settings-field { flex: 1; max-width: 400px; }
+.settings-field-full { flex: 1; }
+
+/* Progress Bar */
+.progress-bar {
+  height: 8px; background: var(--bg-surface-2); border-radius: 4px; overflow: hidden; margin-top: 8px;
+}
+.progress-fill {
+  height: 100%; border-radius: 4px; background: var(--primary); transition: width 0.3s ease;
+}
+
+/* Danger Zone */
+.danger-zone {
+  padding: 24px; border: 2px solid var(--error); border-radius: var(--radius-md);
+  background: var(--bg);
+}
+.danger-zone-title { font-size: 16px; font-weight: 600; color: var(--error); margin-bottom: 8px; }
+.danger-zone-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+
+/* Mini Table */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mini-table th { padding: 8px 12px; text-align: left; font-weight: 500; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+.mini-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.mini-table tbody tr:last-child td { border-bottom: none; }
+
+/* SVG Icon */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; }
+.icon-sm { width: 14px; height: 14px; }
+
+/* Grace Period */
+.grace-countdown {
+  display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+  background: var(--warning-light); border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--warning-text); font-weight: 500;
+}
+
+/* Rotate Flow */
+.rotate-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.rotate-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+
+/* Side Panel */
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; }
+.panel-overlay.show { display: block; }
+.side-panel {
+  position: fixed; top: 44px; right: -520px; width: 520px; height: calc(100vh - 44px);
+  background: var(--bg); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  z-index: 101; transition: right 250ms ease; display: flex; flex-direction: column;
+}
+.side-panel.show { right: 0; }
+.panel-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+.panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ============================================
+   DESIGN SPECS FOOTER
+   ============================================ */
+.design-specs {
+  margin-top: 44px; padding: 48px 32px; background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+}
+.specs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; max-width: 1200px; }
+.specs-section h3 { margin-bottom: 16px; color: var(--text-primary); }
+.specs-section table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.specs-section th, .specs-section td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.specs-section th { font-weight: 500; color: var(--text-secondary); font-size: 12px; }
+.color-swatch { display: inline-flex; align-items: center; gap: 8px; }
+.swatch { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--border); display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     SCREEN NAVIGATION BAR
+     ============================================ -->
+<nav class="screen-nav">
+  <span class="screen-nav-label">Screens:</span>
+  <button class="active" onclick="showScreen('screen6', this)">6. API Keys</button>
+  <button onclick="showScreen('screen7', this)">7. Webhooks</button>
+  <button onclick="showScreen('screen8', this)">8. Suppressions</button>
+  <button onclick="showScreen('screen9', this)">9. Analytics</button>
+  <button onclick="showScreen('screen10', this)">10. Settings</button>
+  <button onclick="showScreen('specs', this)">Design Specs</button>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <svg class="icon-sm" id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-sm" id="theme-icon-moon" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span id="theme-label">Dark</span>
+  </button>
+</nav>
+
+<!-- ============================================
+     SCREEN 6: API KEYS MANAGEMENT
+     ============================================ -->
+<div id="screen6" class="screen active">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">E</div>
+      <span class="sidebar-logo-text">EaaS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Sent
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Received
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Inbound Rules
+      </a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Domains
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Templates
+      </a>
+      <a class="nav-item active" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Keys
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Webhooks
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Suppressions
+      </a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Outbound
+      </a>
+      <a class="nav-item nav-sub" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Inbound
+      </a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Documentation
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">II</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Israel Iyonsi</div>
+        <div class="sidebar-user-email">israel@eaas.dev</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>API Keys</h1>
+        <span class="count-badge">4</span>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('createKeyModal')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create API Key
+      </button>
+    </div>
+
+    <!-- Keys Table -->
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Prefix</th>
+            <th>Status</th>
+            <th>Allowed Domains</th>
+            <th>Last Used</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:500">Production Key</td>
+            <td><code class="mono" style="font-size:12px; padding:2px 6px; background:var(--bg-surface-2); border-radius:4px;">eaas_sk_prod_...</code></td>
+            <td><span class="status"><span class="status-dot green"></span> Active</span></td>
+            <td>
+              <span class="chip" style="margin-right:4px">example.com</span>
+              <span class="chip">myapp.io</span>
+            </td>
+            <td style="color:var(--text-secondary)">2m ago</td>
+            <td style="color:var(--text-secondary)">Mar 27</td>
+            <td>
+              <button class="btn btn-secondary btn-sm" onclick="showModal('rotateKeyModal')">Rotate</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--error)">Revoke</button>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">Staging Key</td>
+            <td><code class="mono" style="font-size:12px; padding:2px 6px; background:var(--bg-surface-2); border-radius:4px;">eaas_sk_stag_...</code></td>
+            <td><span class="status"><span class="status-dot green"></span> Active</span></td>
+            <td><span class="badge badge-gray">* (all domains)</span></td>
+            <td style="color:var(--text-secondary)">1h ago</td>
+            <td style="color:var(--text-secondary)">Mar 27</td>
+            <td>
+              <button class="btn btn-secondary btn-sm">Rotate</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--error)">Revoke</button>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">Old Production</td>
+            <td><code class="mono" style="font-size:12px; padding:2px 6px; background:var(--bg-surface-2); border-radius:4px;">eaas_sk_old_...</code></td>
+            <td><span class="status"><span class="status-dot amber"></span> Rotating</span></td>
+            <td><span class="chip">example.com</span></td>
+            <td style="color:var(--text-secondary)">12h ago</td>
+            <td style="color:var(--text-secondary)">Mar 27</td>
+            <td><span class="badge badge-amber">Expires in 18h</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500; opacity:0.5">Deprecated</td>
+            <td><code class="mono" style="font-size:12px; padding:2px 6px; background:var(--bg-surface-2); border-radius:4px; opacity:0.5">eaas_sk_dep_...</code></td>
+            <td><span class="status"><span class="status-dot red"></span> Revoked</span></td>
+            <td style="opacity:0.5"><span class="chip">example.com</span></td>
+            <td style="color:var(--text-tertiary)">Mar 28</td>
+            <td style="color:var(--text-tertiary)">Mar 27</td>
+            <td><span style="color:var(--text-tertiary)">&mdash;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Create API Key Modal -->
+    <div id="createKeyModal" class="modal-overlay" onclick="if(event.target===this)hideModal('createKeyModal')">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Create API Key</h2>
+          <button class="modal-close" onclick="hideModal('createKeyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Key Name</label>
+            <input type="text" class="form-input" placeholder="e.g., Production Key" value="Newsletter Service">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Allowed Domains</label>
+            <div class="chip-container">
+              <span class="chip">example.com <span class="chip-remove" onclick="this.parentElement.remove()">&times;</span></span>
+              <span class="chip">myapp.io <span class="chip-remove" onclick="this.parentElement.remove()">&times;</span></span>
+              <input type="text" class="chip-input" placeholder="Add domain...">
+            </div>
+            <div class="form-helper">Press Enter to add a domain. Leave empty or check below for all domains.</div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <span class="checkbox" onclick="this.classList.toggle('checked')"></span>
+              All domains (no restriction)
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideModal('createKeyModal')">Cancel</button>
+          <button class="btn btn-primary" onclick="hideModal('createKeyModal');showModal('keyCreatedModal')">Create Key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Key Created Modal (Show Key Once) -->
+    <div id="keyCreatedModal" class="modal-overlay" onclick="if(event.target===this)hideModal('keyCreatedModal')">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>API Key Created</h2>
+          <button class="modal-close" onclick="hideModal('keyCreatedModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="warning-banner">
+            <span class="warning-icon">&#9888;</span>
+            <span>Copy your API key now. It won't be shown again.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your API Key</label>
+            <div class="key-display">
+              <span class="key-value mono">eaas_sk_prod_a7b2c3d4e5f6g8h9i0j1k2l3m4n5o6p7</span>
+              <button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText('eaas_sk_prod_a7b2c3d4e5f6g8h9i0j1k2l3m4n5o6p7')">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="hideModal('keyCreatedModal')">I've copied it, close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rotate Key Modal -->
+    <div id="rotateKeyModal" class="modal-overlay" onclick="if(event.target===this)hideModal('rotateKeyModal')">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-header">
+          <h2>Rotate API Key</h2>
+          <button class="modal-close" onclick="hideModal('rotateKeyModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="warning-banner">
+            <span class="warning-icon">&#9888;</span>
+            <span>Rotating this key will create a new key and give you 24 hours to migrate. The old key will stop working after the grace period.</span>
+          </div>
+
+          <div class="rotate-section" style="margin-top:0; padding-top:0; border-top:none">
+            <div class="rotate-label">New Key</div>
+            <div class="key-display" style="margin-bottom:12px">
+              <span class="key-value mono">eaas_sk_prod_x9y8z7w6v5u4t3s2r1q0p9o8n7m6</span>
+              <button class="btn btn-secondary btn-sm">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="rotate-section">
+            <div class="rotate-label">Grace Period</div>
+            <div class="grace-countdown">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Old key expires in 23h 59m 48s
+            </div>
+          </div>
+
+          <div class="rotate-section">
+            <div class="rotate-label">Old Key Status</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+              <span class="status"><span class="status-dot amber"></span> Rotating</span>
+              <span style="color:var(--text-tertiary)">&mdash;</span>
+              <code class="mono" style="font-size:12px;color:var(--text-tertiary)">eaas_sk_prod_...</code>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideModal('rotateKeyModal')">Cancel</button>
+          <button class="btn btn-warning" onclick="hideModal('rotateKeyModal')">Confirm Rotation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 7: WEBHOOKS MANAGEMENT
+     ============================================ -->
+<div id="screen7" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Sent</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Received</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Inbound Rules</a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Domains</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+      <a class="nav-item active" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhooks</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Outbound</a>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Webhooks</h1>
+        <span class="count-badge">3</span>
+      </div>
+      <button class="btn btn-primary" onclick="showPanel('webhookPanel')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Webhook
+      </button>
+    </div>
+
+    <!-- Webhook Cards -->
+    <div class="webhook-card">
+      <div class="webhook-card-header">
+        <span class="webhook-card-title">Delivery Events Webhook</span>
+        <span class="status"><span class="status-dot green"></span> Active</span>
+      </div>
+      <div class="webhook-url">https://myapp.com/webhooks/email</div>
+      <div class="webhook-meta">
+        <span class="badge badge-blue">delivered</span>
+        <span class="badge badge-red">bounced</span>
+        <span class="badge badge-orange">complained</span>
+        <span class="badge badge-red">failed</span>
+      </div>
+      <div class="webhook-secret">
+        Secret: <span>&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;hmac_7x</span>
+        <button class="btn btn-ghost btn-sm">Show</button>
+      </div>
+      <div class="webhook-stats">Last delivery: 2m ago &bull; Success rate: 99.2%</div>
+      <div class="webhook-actions">
+        <button class="btn btn-secondary btn-sm">Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="showTestResult('test1', true)">Test</button>
+        <button class="btn btn-secondary btn-sm" onclick="toggleWebhookLogs('logs1')">View Logs</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+      </div>
+      <div id="test1" class="test-result success" style="display:none">&#10003; Test webhook sent successfully. Response: 200 OK (134ms)</div>
+      <!-- Webhook Delivery Logs -->
+      <div id="logs1" style="display:none; margin-top:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text-primary)">Recent Deliveries</div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Timestamp</th><th>Event Type</th><th>Status Code</th><th>Response Time</th><th>Payload Size</th><th></th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 10:23 AM</td>
+                <td><span class="badge badge-blue">delivered</span></td>
+                <td><span class="badge badge-green">200 OK</span></td>
+                <td style="color:var(--text-secondary)">134ms</td>
+                <td style="color:var(--text-secondary)">1.2KB</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 10:20 AM</td>
+                <td><span class="badge badge-red">bounced</span></td>
+                <td><span class="badge badge-green">200 OK</span></td>
+                <td style="color:var(--text-secondary)">89ms</td>
+                <td style="color:var(--text-secondary)">0.8KB</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 9:15 AM</td>
+                <td><span class="badge badge-red">failed</span></td>
+                <td><span class="badge badge-red">500 Error</span></td>
+                <td style="color:var(--text-secondary)">2,134ms</td>
+                <td style="color:var(--text-secondary)">1.1KB</td>
+                <td><button class="btn btn-secondary btn-sm">Retry</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 9:10 AM</td>
+                <td><span class="badge badge-blue">delivered</span></td>
+                <td><span class="badge badge-green">200 OK</span></td>
+                <td style="color:var(--text-secondary)">112ms</td>
+                <td style="color:var(--text-secondary)">1.0KB</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 8:55 AM</td>
+                <td><span class="badge badge-blue">delivered</span></td>
+                <td><span class="badge badge-green">200 OK</span></td>
+                <td style="color:var(--text-secondary)">98ms</td>
+                <td style="color:var(--text-secondary)">0.9KB</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">Apr 1, 8:42 AM</td>
+                <td><span class="badge badge-orange">complained</span></td>
+                <td><span class="badge badge-green">200 OK</span></td>
+                <td style="color:var(--text-secondary)">145ms</td>
+                <td style="color:var(--text-secondary)">1.3KB</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>Showing 1-6 of 20 deliveries</span>
+          <div class="pagination-buttons">
+            <button class="page-btn" disabled>&laquo;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">4</button>
+            <button class="page-btn">&raquo;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="webhook-card">
+      <div class="webhook-card-header">
+        <span class="webhook-card-title">Engagement Tracking</span>
+        <span class="status"><span class="status-dot green"></span> Active</span>
+      </div>
+      <div class="webhook-url">https://myapp.com/webhooks/engagement</div>
+      <div class="webhook-meta">
+        <span class="badge badge-blue">opened</span>
+        <span class="badge badge-blue">clicked</span>
+      </div>
+      <div class="webhook-secret">
+        Secret: <span>&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;hmac_3y</span>
+        <button class="btn btn-ghost btn-sm">Show</button>
+      </div>
+      <div class="webhook-stats">Last delivery: 15m ago &bull; Success rate: 100%</div>
+      <div class="webhook-actions">
+        <button class="btn btn-secondary btn-sm">Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="showTestResult('test2', true)">Test</button>
+        <button class="btn btn-secondary btn-sm">View Logs</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+      </div>
+      <div id="test2" class="test-result success" style="display:none">&#10003; Test webhook sent successfully. Response: 200 OK (87ms)</div>
+    </div>
+
+    <div class="webhook-card" style="opacity:0.7">
+      <div class="webhook-card-header">
+        <span class="webhook-card-title">Analytics Pipeline</span>
+        <span class="status"><span class="status-dot gray"></span> Inactive</span>
+      </div>
+      <div class="webhook-url">https://analytics.internal.com/ingest</div>
+      <div class="webhook-meta">
+        <span class="badge badge-gray">sent</span>
+        <span class="badge badge-blue">delivered</span>
+        <span class="badge badge-red">bounced</span>
+        <span class="badge badge-blue">opened</span>
+        <span class="badge badge-blue">clicked</span>
+      </div>
+      <div class="webhook-secret">
+        Secret: <span>&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;hmac_9z</span>
+        <button class="btn btn-ghost btn-sm">Show</button>
+      </div>
+      <div class="webhook-stats">Last delivery: 3d ago &bull; Success rate: 87.5%</div>
+      <div class="webhook-actions">
+        <button class="btn btn-secondary btn-sm">Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="showTestResult('test3', false)">Test</button>
+        <button class="btn btn-secondary btn-sm">View Logs</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+      </div>
+      <div id="test3" class="test-result error" style="display:none">&#10007; Test failed. Response: 503 Service Unavailable (timeout after 10s)</div>
+    </div>
+
+    <!-- Create Webhook Side Panel -->
+    <div id="webhookOverlay" class="panel-overlay" onclick="hidePanel('webhookPanel')"></div>
+    <div id="webhookPanel" class="side-panel">
+      <div class="panel-header">
+        <h2>Create Webhook</h2>
+        <button class="modal-close" onclick="hidePanel('webhookPanel')">&times;</button>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label class="form-label">Webhook URL</label>
+          <input type="text" class="form-input" placeholder="https://your-app.com/webhooks/eaas" value="https://myapp.com/webhooks/events">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Events</label>
+          <div class="events-grid">
+            <label class="checkbox-label"><span class="checkbox" onclick="this.classList.toggle('checked')"></span> Queued</label>
+            <label class="checkbox-label"><span class="checkbox" onclick="this.classList.toggle('checked')"></span> Sent</label>
+            <label class="checkbox-label"><span class="checkbox checked" onclick="this.classList.toggle('checked')"></span> Delivered</label>
+            <label class="checkbox-label"><span class="checkbox checked" onclick="this.classList.toggle('checked')"></span> Bounced</label>
+            <label class="checkbox-label"><span class="checkbox checked" onclick="this.classList.toggle('checked')"></span> Complained</label>
+            <label class="checkbox-label"><span class="checkbox" onclick="this.classList.toggle('checked')"></span> Opened</label>
+            <label class="checkbox-label"><span class="checkbox" onclick="this.classList.toggle('checked')"></span> Clicked</label>
+            <label class="checkbox-label"><span class="checkbox checked" onclick="this.classList.toggle('checked')"></span> Failed</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Signing Secret</label>
+          <div style="display:flex;gap:8px">
+            <input type="text" class="form-input mono" value="whsec_a1b2c3d4e5f6g7h8i9j0k1l2m3" style="flex:1">
+            <button class="btn btn-secondary">Regenerate</button>
+          </div>
+          <div class="form-helper">Auto-generated. Use this secret to verify webhook signatures.</div>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-secondary" onclick="hidePanel('webhookPanel')">Cancel</button>
+        <button class="btn btn-primary" onclick="hidePanel('webhookPanel')">Create Webhook</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 8: SUPPRESSIONS LIST
+     ============================================ -->
+<div id="screen8" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Sent</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Received</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Inbound Rules</a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Domains</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhooks</a>
+      <a class="nav-item active" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Outbound</a>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Suppression List</h1>
+        <span class="count-badge">23</span>
+      </div>
+      <button class="btn btn-primary" onclick="showModal('addSuppressionModal')">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Suppression
+      </button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-item">
+        <label>Reason</label>
+        <select>
+          <option>All</option>
+          <option>Hard Bounce</option>
+          <option>Soft Bounce Limit</option>
+          <option>Complaint</option>
+          <option>Manual</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <input type="text" placeholder="Search email..." style="width:220px">
+      </div>
+      <a class="clear-filters" href="#">Clear</a>
+    </div>
+
+    <!-- Suppressions Table -->
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Email Address</th>
+            <th>Reason</th>
+            <th>Source</th>
+            <th>Suppressed At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:500">bad@invalid.com</td>
+            <td><span class="badge badge-red">Hard Bounce</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_7x8j2k</code></td>
+            <td style="color:var(--text-secondary)">Mar 30, 2:15 PM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)" onclick="showModal('removeSuppressionModal')">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">spam-reporter@isp.net</td>
+            <td><span class="badge badge-orange">Complaint</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_3a4b5c</code></td>
+            <td style="color:var(--text-secondary)">Mar 29, 11:30 AM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">old@defunct.org</td>
+            <td><span class="badge badge-red">Hard Bounce</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_9d8e7f</code></td>
+            <td style="color:var(--text-secondary)">Mar 28, 9:00 AM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">user@temp.email</td>
+            <td><span class="badge badge-amber">Soft Bounce Limit</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_2g3h4i</code></td>
+            <td style="color:var(--text-secondary)">Mar 27, 4:45 PM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">blocked@company.com</td>
+            <td><span class="badge badge-gray">Manual</span></td>
+            <td><span style="color:var(--text-tertiary)">&mdash;</span></td>
+            <td style="color:var(--text-secondary)">Mar 27, 10:00 AM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">noreply@deadserver.net</td>
+            <td><span class="badge badge-red">Hard Bounce</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_5k6l7m</code></td>
+            <td style="color:var(--text-secondary)">Mar 26, 3:20 PM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">bounce@expired-domain.io</td>
+            <td><span class="badge badge-amber">Soft Bounce Limit</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_8n9o0p</code></td>
+            <td style="color:var(--text-secondary)">Mar 25, 1:10 PM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">abuse@mailprovider.com</td>
+            <td><span class="badge badge-orange">Complaint</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_1q2r3s</code></td>
+            <td style="color:var(--text-secondary)">Mar 24, 8:45 AM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">test@blacklisted.co</td>
+            <td><span class="badge badge-gray">Manual</span></td>
+            <td><span style="color:var(--text-tertiary)">&mdash;</span></td>
+            <td style="color:var(--text-secondary)">Mar 23, 6:30 PM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+          <tr>
+            <td style="font-weight:500">info@shutdown-startup.com</td>
+            <td><span class="badge badge-red">Hard Bounce</span></td>
+            <td><code class="mono" style="font-size:12px;padding:2px 6px;background:var(--bg-surface-2);border-radius:4px">msg_4t5u6v</code></td>
+            <td style="color:var(--text-secondary)">Mar 22, 11:00 AM</td>
+            <td><button class="btn btn-ghost btn-sm" style="color:var(--error)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span>Showing 1-10 of 23 suppressions</span>
+      <div class="pagination-buttons">
+        <button class="page-btn" disabled>&laquo;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">&raquo;</button>
+      </div>
+    </div>
+
+    <!-- Add Suppression Modal -->
+    <div id="addSuppressionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addSuppressionModal')">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Add to Suppression List</h2>
+          <button class="modal-close" onclick="hideModal('addSuppressionModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" placeholder="user@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason</label>
+            <select class="form-select">
+              <option>Hard Bounce</option>
+              <option>Complaint</option>
+              <option selected>Manual</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note <span style="color:var(--text-tertiary);font-weight:400">(optional)</span></label>
+            <textarea class="form-input" placeholder="Reason for manual suppression..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideModal('addSuppressionModal')">Cancel</button>
+          <button class="btn btn-primary" onclick="hideModal('addSuppressionModal')">Add to Suppression List</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remove Confirmation Modal -->
+    <div id="removeSuppressionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('removeSuppressionModal')">
+      <div class="modal" style="max-width:440px">
+        <div class="modal-header">
+          <h2>Remove Suppression</h2>
+          <button class="modal-close" onclick="hideModal('removeSuppressionModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:14px;color:var(--text-secondary);line-height:1.6">
+            Are you sure you want to remove <strong style="color:var(--text-primary)">bad@invalid.com</strong> from the suppression list? This will allow sending to this address again.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideModal('removeSuppressionModal')">Cancel</button>
+          <button class="btn btn-destructive" onclick="hideModal('removeSuppressionModal')">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 9: OUTBOUND ANALYTICS
+     ============================================ -->
+<div id="screen9" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Sent</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Received</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Inbound Rules</a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Domains</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhooks</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub active" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Outbound</a>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Outbound Analytics</h1>
+      </div>
+      <div class="time-range">
+        <button class="time-range-btn">24h</button>
+        <button class="time-range-btn active">7d</button>
+        <button class="time-range-btn">30d</button>
+        <button class="time-range-btn">Custom</button>
+      </div>
+    </div>
+
+    <!-- 6 Metric Cards (3x2) -->
+    <div class="metric-cards">
+      <div class="metric-card">
+        <div class="metric-card-label">Total Sent</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">24,891</div>
+          <div class="metric-card-trend trend-up-good">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 6H7V10H5V6H2L6 2Z" fill="currentColor"/></svg>
+            +8.2%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,28 17,24 34,26 51,20 68,22 85,14 102,10 120,6" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,28 17,24 34,26 51,20 68,22 85,14 102,10 120,6 120,32 0,32" fill="var(--primary)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label">Delivery Rate</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">97.1%</div>
+          <div class="metric-card-trend trend-down-bad">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 10L2 6H5V2H7V6H10L6 10Z" fill="currentColor"/></svg>
+            -0.3%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,6 17,8 34,6 51,10 68,8 85,12 102,10 120,14" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,6 17,8 34,6 51,10 68,8 85,12 102,10 120,14 120,32 0,32" fill="var(--warning)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label">Open Rate</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">49.5%</div>
+          <div class="metric-card-trend trend-up-good">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 6H7V10H5V6H2L6 2Z" fill="currentColor"/></svg>
+            +2.1%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,22 17,20 34,18 51,16 68,14 85,12 102,8 120,6" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,22 17,20 34,18 51,16 68,14 85,12 102,8 120,6 120,32 0,32" fill="var(--success)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label">Click Rate</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">15.6%</div>
+          <div class="metric-card-trend trend-up-good">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 6H7V10H5V6H2L6 2Z" fill="currentColor"/></svg>
+            +0.8%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,20 17,22 34,18 51,16 68,18 85,14 102,12 120,10" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,20 17,22 34,18 51,16 68,18 85,14 102,12 120,10 120,32 0,32" fill="var(--primary)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label">Bounce Rate</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">1.7%</div>
+          <div class="metric-card-trend trend-up-bad">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 2L10 6H7V10H5V6H2L6 2Z" fill="currentColor"/></svg>
+            +0.2%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,26 17,24 34,22 51,24 68,20 85,18 102,16 120,14" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,26 17,24 34,22 51,24 68,20 85,18 102,16 120,14 120,32 0,32" fill="var(--error)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-card-label">Complaint Rate</div>
+        <div class="metric-card-row">
+          <div class="metric-card-value">0.12%</div>
+          <div class="metric-card-trend trend-down-good">
+            <svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 10L2 6H5V2H7V6H10L6 10Z" fill="currentColor"/></svg>
+            -0.03%
+          </div>
+        </div>
+        <div class="sparkline">
+          <svg width="100%" height="32" viewBox="0 0 120 32" preserveAspectRatio="none">
+            <polyline points="0,14 17,16 34,14 51,18 68,16 85,20 102,22 120,24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="0,14 17,16 34,14 51,18 68,16 85,20 102,22 120,24 120,32 0,32" fill="var(--success)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Funnel Chart -->
+    <div class="section-card" style="margin-bottom:24px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Email Funnel</div>
+      <div class="funnel-chart">
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar-label">
+            <span class="funnel-bar-name">Sent</span>
+            <span class="funnel-bar-count">24,891</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:100%;background:var(--primary)"></div>
+          </div>
+        </div>
+        <div class="funnel-conversion">97.0% delivered</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar-label">
+            <span class="funnel-bar-name">Delivered</span>
+            <span class="funnel-bar-count">24,156</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:97%;background:#3b82f6"></div>
+          </div>
+        </div>
+        <div class="funnel-conversion">51.1% opened</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar-label">
+            <span class="funnel-bar-name">Opened</span>
+            <span class="funnel-bar-count">12,344</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:49.6%;background:#60a5fa"></div>
+          </div>
+        </div>
+        <div class="funnel-conversion">31.5% clicked</div>
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar-label">
+            <span class="funnel-bar-name">Clicked</span>
+            <span class="funnel-bar-count">3,891</span>
+          </div>
+          <div class="funnel-bar-track">
+            <div class="funnel-bar-fill" style="width:15.6%;background:#93c5fd"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: 3 Panels -->
+    <div class="bottom-panels">
+      <!-- Volume Over Time -->
+      <div class="section-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px">Volume Over Time</div>
+        <svg width="100%" height="180" viewBox="0 0 320 180" preserveAspectRatio="none" style="overflow:visible">
+          <!-- Grid lines -->
+          <line x1="40" y1="10" x2="40" y2="150" stroke="var(--border)" stroke-width="1"/>
+          <line x1="40" y1="150" x2="310" y2="150" stroke="var(--border)" stroke-width="1"/>
+          <line x1="40" y1="50" x2="310" y2="50" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+          <line x1="40" y1="100" x2="310" y2="100" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="3"/>
+          <!-- Y-axis labels -->
+          <text x="35" y="15" fill="var(--text-tertiary)" font-size="10" text-anchor="end">5k</text>
+          <text x="35" y="55" fill="var(--text-tertiary)" font-size="10" text-anchor="end">3.5k</text>
+          <text x="35" y="105" fill="var(--text-tertiary)" font-size="10" text-anchor="end">2k</text>
+          <text x="35" y="155" fill="var(--text-tertiary)" font-size="10" text-anchor="end">0</text>
+          <!-- X-axis labels -->
+          <text x="55" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 26</text>
+          <text x="100" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 27</text>
+          <text x="145" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 28</text>
+          <text x="190" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 29</text>
+          <text x="235" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 30</text>
+          <text x="280" y="168" fill="var(--text-tertiary)" font-size="10" text-anchor="middle">Mar 31</text>
+          <!-- Sent line (blue) -->
+          <polyline points="55,50 100,40 145,55 190,35 235,30 280,20 310,25" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Delivered line (green) -->
+          <polyline points="55,55 100,45 145,60 190,40 235,35 280,25 310,30" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Bounced line (red) -->
+          <polyline points="55,140 100,142 145,138 190,141 235,136 280,135 310,133" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Legend -->
+          <circle cx="55" cy="178" r="4" fill="var(--primary)"/><text x="65" y="182" fill="var(--text-secondary)" font-size="10">Sent</text>
+          <circle cx="110" cy="178" r="4" fill="var(--success)"/><text x="120" y="182" fill="var(--text-secondary)" font-size="10">Delivered</text>
+          <circle cx="185" cy="178" r="4" fill="var(--error)"/><text x="195" y="182" fill="var(--text-secondary)" font-size="10">Bounced</text>
+        </svg>
+      </div>
+
+      <!-- Top Templates -->
+      <div class="section-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px">Top Templates</div>
+        <table class="mini-table">
+          <thead><tr><th>Template</th><th>Sends</th><th>Open</th><th>Click</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500">order-confirm</td>
+              <td style="color:var(--text-secondary)">3,456</td>
+              <td style="color:var(--text-secondary)">62%</td>
+              <td style="color:var(--text-secondary)">24%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">welcome-email</td>
+              <td style="color:var(--text-secondary)">2,891</td>
+              <td style="color:var(--text-secondary)">78%</td>
+              <td style="color:var(--text-secondary)">31%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">password-reset</td>
+              <td style="color:var(--text-secondary)">2,134</td>
+              <td style="color:var(--text-secondary)">45%</td>
+              <td style="color:var(--text-secondary)">89%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">invoice</td>
+              <td style="color:var(--text-secondary)">1,876</td>
+              <td style="color:var(--text-secondary)">38%</td>
+              <td style="color:var(--text-secondary)">12%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">shipping-update</td>
+              <td style="color:var(--text-secondary)">1,654</td>
+              <td style="color:var(--text-secondary)">51%</td>
+              <td style="color:var(--text-secondary)">18%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Domain Performance -->
+      <div class="section-card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px">Domain Performance</div>
+        <table class="mini-table">
+          <thead><tr><th>Domain</th><th>Sent</th><th>Delivery</th><th>Open</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500">example.com</td>
+              <td style="color:var(--text-secondary)">15,234</td>
+              <td><span class="badge badge-green">97.8%</span></td>
+              <td style="color:var(--text-secondary)">52%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">myapp.io</td>
+              <td style="color:var(--text-secondary)">8,432</td>
+              <td><span class="badge badge-green">96.1%</span></td>
+              <td style="color:var(--text-secondary)">45%</td>
+            </tr>
+            <tr>
+              <td style="font-weight:500">newsletter.co</td>
+              <td style="color:var(--text-secondary)">1,225</td>
+              <td><span class="badge badge-amber">94.2%</span></td>
+              <td style="color:var(--text-secondary)">61%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 10: ACCOUNT SETTINGS
+     ============================================ -->
+<div id="screen10" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Sent</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Received</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Inbound Rules</a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Domains</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhooks</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Outbound</a>
+      <a class="nav-item nav-sub" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</a>
+      <a class="nav-item active" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title"><h1>Settings</h1></div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="tabs" id="settingsTabs">
+      <div class="tab active" onclick="switchSettingsTab(this, 'generalTab')">General</div>
+      <div class="tab" onclick="switchSettingsTab(this, 'teamTab')">Team</div>
+      <div class="tab" onclick="switchSettingsTab(this, 'billingTab')">Billing</div>
+      <div class="tab" onclick="switchSettingsTab(this, 'apiTab')">API</div>
+    </div>
+
+    <!-- General Tab -->
+    <div id="generalTab" class="settings-tab-content">
+      <!-- Account Information -->
+      <div class="settings-section">
+        <div class="settings-section-title">Account Information</div>
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input type="text" class="form-input" value="MyApp Inc." style="max-width:400px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Email</label>
+          <input type="email" class="form-input" value="admin@myapp.com" style="max-width:400px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Timezone</label>
+          <select class="form-select" style="max-width:400px">
+            <option selected>UTC (Coordinated Universal Time)</option>
+            <option>America/New_York (Eastern)</option>
+            <option>America/Chicago (Central)</option>
+            <option>America/Denver (Mountain)</option>
+            <option>America/Los_Angeles (Pacific)</option>
+            <option>Europe/London (GMT)</option>
+            <option>Africa/Lagos (WAT)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary">Save Changes</button>
+      </div>
+
+      <!-- Sending Defaults -->
+      <div class="settings-section">
+        <div class="settings-section-title">Sending Defaults</div>
+        <div class="form-group">
+          <label class="form-label">Default From Name</label>
+          <input type="text" class="form-input" value="MyApp" style="max-width:400px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Reply-To</label>
+          <input type="email" class="form-input" value="support@myapp.com" style="max-width:400px">
+        </div>
+        <div class="form-group">
+          <div class="settings-row" style="max-width:400px">
+            <label class="form-label" style="margin-bottom:0">Track Opens by default</label>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="settings-row" style="max-width:400px">
+            <label class="form-label" style="margin-bottom:0">Track Clicks by default</label>
+            <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+        <button class="btn btn-primary">Save Defaults</button>
+      </div>
+
+      <!-- Rate Limits -->
+      <div class="settings-section">
+        <div class="settings-section-title">Rate Limits</div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">
+          Current plan rate limit: <strong style="color:var(--text-primary)">100 emails/second</strong>
+        </div>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">
+          Current usage: <strong style="color:var(--text-primary)">12 emails/second</strong> <span style="color:var(--text-tertiary)">(12%)</span>
+        </div>
+        <div class="progress-bar" style="max-width:400px">
+          <div class="progress-fill" style="width:12%"></div>
+        </div>
+      </div>
+
+      <!-- Data Retention -->
+      <div class="settings-section">
+        <div class="settings-section-title">Data Retention</div>
+        <div class="form-group">
+          <label class="form-label">Email logs retention</label>
+          <select class="form-select" style="max-width:240px">
+            <option>30 days</option>
+            <option>60 days</option>
+            <option selected>90 days</option>
+            <option>180 days</option>
+            <option>365 days</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Inbound email retention</label>
+          <select class="form-select" style="max-width:240px">
+            <option>30 days</option>
+            <option>60 days</option>
+            <option selected>90 days</option>
+            <option>180 days</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Webhook delivery logs</label>
+          <select class="form-select" style="max-width:240px">
+            <option selected>30 days</option>
+            <option>60 days</option>
+            <option>90 days</option>
+          </select>
+        </div>
+        <button class="btn btn-primary">Save Retention Settings</button>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="danger-zone">
+        <div class="danger-zone-title">Danger Zone</div>
+        <div class="danger-zone-desc">This action is irreversible. All data will be permanently deleted.</div>
+        <button class="btn btn-destructive">Delete Account</button>
+      </div>
+    </div>
+
+    <!-- Team Tab (hidden) -->
+    <div id="teamTab" class="settings-tab-content" style="display:none">
+      <div class="settings-section">
+        <div class="settings-section-title">Team Members</div>
+        <p style="font-size:13px;color:var(--text-secondary)">Team management settings will appear here.</p>
+      </div>
+    </div>
+    <div id="billingTab" class="settings-tab-content" style="display:none">
+      <div class="settings-section">
+        <div class="settings-section-title">Billing</div>
+        <p style="font-size:13px;color:var(--text-secondary)">Billing and subscription settings will appear here.</p>
+      </div>
+    </div>
+    <div id="apiTab" class="settings-tab-content" style="display:none">
+      <div class="settings-section">
+        <div class="settings-section-title">API Configuration</div>
+        <p style="font-size:13px;color:var(--text-secondary)">API configuration settings will appear here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     DESIGN SPECS
+     ============================================ -->
+<div id="specs" class="screen">
+  <div style="width:100%">
+    <div class="design-specs">
+      <h2 style="margin-bottom:24px">Design System Specifications</h2>
+      <div class="specs-grid">
+        <!-- Typography -->
+        <div class="specs-section">
+          <h3>Typography</h3>
+          <table>
+            <thead><tr><th>Element</th><th>Font</th><th>Size / Weight</th></tr></thead>
+            <tbody>
+              <tr><td>Headings</td><td>Inter</td><td>24/20/16px / 600-500</td></tr>
+              <tr><td>Body</td><td>Inter</td><td>14px / 400</td></tr>
+              <tr><td>Small</td><td>Inter</td><td>12px / 400</td></tr>
+              <tr><td>Code / Keys</td><td>JetBrains Mono</td><td>13px / 400</td></tr>
+              <tr><td>Labels</td><td>Inter</td><td>12px / 500, uppercase</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Colors -->
+        <div class="specs-section">
+          <h3>Colors</h3>
+          <table>
+            <thead><tr><th>Token</th><th>Light</th><th>Dark</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Background</td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#ffffff"></span>#ffffff</span></td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#0f172a"></span>#0f172a</span></td>
+              </tr>
+              <tr>
+                <td>Surface</td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#f8fafc"></span>#f8fafc</span></td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#1e293b"></span>#1e293b</span></td>
+              </tr>
+              <tr>
+                <td>Text Primary</td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#0f172a"></span>#0f172a</span></td>
+                <td><span class="color-swatch"><span class="swatch" style="background:#f8fafc"></span>#f8fafc</span></td>
+              </tr>
+              <tr>
+                <td>Primary</td>
+                <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#2563eb"></span>#2563eb</span></td>
+              </tr>
+              <tr>
+                <td>Success</td>
+                <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#22c55e"></span>#22c55e</span></td>
+              </tr>
+              <tr>
+                <td>Warning</td>
+                <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#f59e0b"></span>#f59e0b</span></td>
+              </tr>
+              <tr>
+                <td>Error</td>
+                <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#ef4444"></span>#ef4444</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Component Specs -->
+        <div class="specs-section">
+          <h3>Component Specs</h3>
+          <table>
+            <thead><tr><th>Property</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Border radius sm</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">6px</code></td></tr>
+              <tr><td>Border radius md</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">8px</code></td></tr>
+              <tr><td>Border radius lg</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">12px</code></td></tr>
+              <tr><td>Shadow sm</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">0 1px 2px rgba(0,0,0,0.05)</code></td></tr>
+              <tr><td>Shadow md</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">0 4px 6px rgba(0,0,0,0.07)</code></td></tr>
+              <tr><td>Transition</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">150ms ease</code></td></tr>
+              <tr><td>Sidebar width</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">240px</code></td></tr>
+              <tr><td>Side panel width</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">520px</code></td></tr>
+              <tr><td>Base font size</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">14px</code></td></tr>
+              <tr><td>Spacing base</td><td><code style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:1px 4px;background:var(--bg-surface-2);border-radius:3px">4px</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Screen Index -->
+        <div class="specs-section">
+          <h3>Screens in this Document</h3>
+          <table>
+            <thead><tr><th>#</th><th>Screen</th><th>Key Components</th></tr></thead>
+            <tbody>
+              <tr><td>6</td><td>API Keys Management</td><td>Table, Modals (Create, Show Key, Rotate)</td></tr>
+              <tr><td>7</td><td>Webhooks Management</td><td>Cards, Side Panel, Delivery Logs, Test</td></tr>
+              <tr><td>8</td><td>Suppression List</td><td>Filter Bar, Table, Add/Remove Modals</td></tr>
+              <tr><td>9</td><td>Outbound Analytics</td><td>Metric Cards, Funnel, SVG Charts, Tables</td></tr>
+              <tr><td>10</td><td>Account Settings</td><td>Tabs, Form Sections, Toggles, Danger Zone</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Screen Navigation
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
+  document.querySelectorAll('.screen-nav button:not(.theme-toggle)').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById(id);
+  screen.style.display = 'flex';
+  screen.classList.add('active');
+  const screenIds = ['screen6','screen7','screen8','screen9','screen10','specs'];
+  const buttons = document.querySelectorAll('.screen-nav button:not(.theme-toggle)');
+  const idx = screenIds.indexOf(id);
+  if (idx >= 0 && buttons[idx]) buttons[idx].classList.add('active');
+}
+
+// Theme Toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon-sun').style.display = isDark ? 'inline-block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'inline-block';
+  document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+}
+
+// Modal show/hide
+function showModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function hideModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// Side Panel show/hide
+function showPanel(id) {
+  document.getElementById(id).classList.add('show');
+  document.getElementById(id.replace('Panel','Overlay')).classList.add('show');
+}
+function hidePanel(id) {
+  document.getElementById(id).classList.remove('show');
+  document.getElementById(id.replace('Panel','Overlay')).classList.remove('show');
+}
+
+// Test webhook result toggle
+function showTestResult(id, success) {
+  const el = document.getElementById(id);
+  if (el.style.display === 'none' || el.style.display === '') {
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// Webhook logs toggle
+function toggleWebhookLogs(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// Settings tab switching
+function switchSettingsTab(tabEl, contentId) {
+  document.querySelectorAll('#settingsTabs .tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.querySelectorAll('.settings-tab-content').forEach(c => c.style.display = 'none');
+  document.getElementById(contentId).style.display = 'block';
+}
+
+// Toggle switches
+document.querySelectorAll('.toggle-switch').forEach(el => {
+  el.addEventListener('click', function() { this.classList.toggle('on'); });
+});
+
+// Time range buttons
+document.querySelectorAll('.time-range-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.parentElement.querySelectorAll('.time-range-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Initialize first screen
+showScreen('screen6');
+</script>
+</body>
+</html>

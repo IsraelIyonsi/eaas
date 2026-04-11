@@ -1,0 +1,46 @@
+/* Hi-Fi Design Tokens — translated from wireframe CSS */
+@layer components {
+  /* Metric Cards */
+  .metric-card {
+    @apply bg-background border border-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow;
+  }
+  .metric-label {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-[0.04em] mb-2 flex items-center gap-1.5;
+  }
+  .metric-value {
+    @apply text-[28px] font-bold text-foreground tracking-[-0.03em] leading-none;
+  }
+  .metric-change {
+    @apply text-xs font-medium mt-1.5 flex items-center gap-1;
+  }
+
+  /* Data Tables */
+  .data-table-wrap {
+    @apply border border-border rounded-lg overflow-hidden shadow-sm;
+  }
+
+  /* Status Dots */
+  .status-dot {
+    @apply w-[7px] h-[7px] rounded-full shrink-0;
+  }
+
+  /* Badges - exact hi-fi specs */
+  .hifi-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-xl text-[11px] font-medium whitespace-nowrap;
+  }
+
+  /* Filter Bar */
+  .hifi-filter-bar {
+    @apply flex items-center gap-[10px] mb-4 flex-wrap p-3 bg-muted/50 border border-border rounded-lg;
+  }
+
+  /* Page Header */
+  .hifi-page-header {
+    @apply flex items-center justify-between mb-5 flex-wrap gap-3;
+  }
+
+  /* Nav Section Header */
+  .nav-section-header {
+    @apply px-3 pt-4 pb-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-[0.06em];
+  }
+}

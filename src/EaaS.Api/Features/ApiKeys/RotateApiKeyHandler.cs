@@ -7,18 +7,21 @@ using EaaS.Shared.Constants;
 using EaaS.Shared.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.Api.Features.ApiKeys;
 
-public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, RotateApiKeyResult>
+public sealed partial class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, RotateApiKeyResult>
 {
     private readonly AppDbContext _dbContext;
     private readonly IApiKeyCache _apiKeyCache;
+    private readonly ILogger<RotateApiKeyHandler> _logger;
 
-    public RotateApiKeyHandler(AppDbContext dbContext, IApiKeyCache apiKeyCache)
+    public RotateApiKeyHandler(AppDbContext dbContext, IApiKeyCache apiKeyCache, ILogger<RotateApiKeyHandler> logger)
     {
         _dbContext = dbContext;
         _apiKeyCache = apiKeyCache;
+        _logger = logger;
     }
 
     public async Task<RotateApiKeyResult> Handle(RotateApiKeyCommand request, CancellationToken cancellationToken)
@@ -72,6 +75,8 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
             await _apiKeyCache.SetApiKeyCacheAsync(existingKey.KeyHash, oldCacheData, TimeSpan.FromHours(ApiKeyConstants.GracePeriodHours), cancellationToken);
         }
 
+        LogApiKeyRotated(_logger, request.Id, newApiKey.Id, request.TenantId, gracePeriodExpiry);
+
         return new RotateApiKeyResult(
             newApiKey.Id,
             plaintextKey,
@@ -83,4 +88,7 @@ public sealed class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCommand, R
     private static string GenerateApiKey() => ApiKeyGenerator.GenerateKey();
 
     private static string ComputeSha256Hash(string rawKey) => ApiKeyGenerator.ComputeSha256Hash(rawKey);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "API key rotated: OldKeyId={OldKeyId}, NewKeyId={NewKeyId}, TenantId={TenantId}, GraceExpiry={GraceExpiry}")]
+    private static partial void LogApiKeyRotated(ILogger logger, Guid oldKeyId, Guid newKeyId, Guid tenantId, DateTime graceExpiry);
 }

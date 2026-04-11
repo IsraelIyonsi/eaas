@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useAnalyticsSummary, useAnalyticsTimeline } from "@/lib/hooks/use-analytics";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/overview/stat-card";
 import {
   SendVolumeChart,
@@ -30,51 +30,42 @@ const dateRanges = [
 export default function AnalyticsPage() {
   const [selectedRange, setSelectedRange] = useState(30);
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["analytics", "summary", selectedRange],
-    queryFn: () => api.getAnalyticsSummary(),
-  });
-
-  const { data: timeline, isLoading: timelineLoading } = useQuery({
-    queryKey: ["analytics", "timeline", selectedRange],
-    queryFn: () => api.getAnalyticsTimeline("day"),
-  });
+  const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary();
+  const { data: timeline, isLoading: timelineLoading } = useAnalyticsTimeline({ granularity: 'day' });
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-white">Analytics</h1>
-          <p className="text-sm text-white/50">
-            Delivery performance, engagement tracking, and sending trends.
-          </p>
-        </div>
-        <div className="flex items-center rounded-lg border border-white/10 bg-[#1E1E2E] p-1">
-          {dateRanges.map((range) => (
-            <Button
-              key={range.days}
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedRange(range.days)}
-              className={cn(
-                "px-3 text-xs",
-                selectedRange === range.days
-                  ? "bg-[#7C4DFF] text-white hover:bg-[#7C4DFF]"
-                  : "text-white/50 hover:text-white",
-              )}
-            >
-              {range.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Analytics"
+        description="Delivery performance, engagement tracking, and sending trends."
+        action={
+          <div className="flex items-center rounded-lg border border-border bg-card p-1">
+            {dateRanges.map((range) => (
+              <Button
+                key={range.days}
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRange(range.days)}
+                className={cn(
+                  "px-3 text-xs",
+                  selectedRange === range.days
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {range.label}
+              </Button>
+            ))}
+          </div>
+        }
+      />
 
       {/* KPI Cards */}
       {summaryLoading ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-[120px] rounded-lg bg-white/5" />
+            <Skeleton key={i} className="h-[120px] rounded-lg bg-muted" />
           ))}
         </div>
       ) : (
@@ -83,54 +74,42 @@ export default function AnalyticsPage() {
             title="Total Sent"
             value={summary?.total_sent.toLocaleString() ?? "0"}
             icon={Send}
-            trend="up"
-            trendValue="+12.5%"
-            color="#7C4DFF"
+            color="var(--primary)"
           />
           <StatCard
             title="Delivered"
             value={summary?.delivered.toLocaleString() ?? "0"}
             subtitle={`${summary?.delivery_rate.toFixed(1)}%`}
             icon={CheckCircle2}
-            trend="up"
-            trendValue="+0.3%"
-            color="#00E676"
+            color="var(--chart-2)"
           />
           <StatCard
             title="Bounced"
             value={summary?.bounced ?? 0}
             subtitle={`${summary?.bounce_rate.toFixed(2)}%`}
             icon={XCircle}
-            trend="down"
-            trendValue="-0.1%"
-            color="#FF5252"
+            color="var(--destructive)"
           />
           <StatCard
             title="Opened"
             value={summary?.opened.toLocaleString() ?? "0"}
             subtitle={`${summary?.open_rate.toFixed(1)}%`}
             icon={Eye}
-            trend="up"
-            trendValue="+2.1%"
-            color="#7C4DFF"
+            color="var(--primary)"
           />
           <StatCard
             title="Clicked"
             value={summary?.clicked.toLocaleString() ?? "0"}
             subtitle={`${summary?.click_rate.toFixed(1)}%`}
             icon={MousePointerClick}
-            trend="up"
-            trendValue="+1.4%"
-            color="#00E5FF"
+            color="var(--chart-1)"
           />
           <StatCard
             title="Complaints"
             value={summary?.complained ?? 0}
             subtitle={`${summary?.complaint_rate.toFixed(2)}% rate`}
             icon={AlertTriangle}
-            trend="flat"
-            trendValue="0.0%"
-            color="#FFD740"
+            color="var(--chart-3)"
           />
         </div>
       )}
@@ -138,8 +117,8 @@ export default function AnalyticsPage() {
       {/* Charts */}
       {timelineLoading ? (
         <div className="grid gap-4 lg:grid-cols-2">
-          <Skeleton className="h-[340px] rounded-lg bg-white/5" />
-          <Skeleton className="h-[340px] rounded-lg bg-white/5" />
+          <Skeleton className="h-[340px] rounded-lg bg-muted" />
+          <Skeleton className="h-[340px] rounded-lg bg-muted" />
         </div>
       ) : (
         <>

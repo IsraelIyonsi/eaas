@@ -21,7 +21,6 @@ public static class RemoveDomainEndpoint
         .WithName("RemoveDomain")
         .WithSummary("Remove a sending domain (soft delete)")
         .WithDescription("Soft deletes a domain. Fails if there are pending emails using this domain.")
-        .WithOpenApi()
         .Produces<ApiResponse<object>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound)
         .Produces<ApiErrorResponse>(StatusCodes.Status409Conflict);

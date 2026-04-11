@@ -41,6 +41,9 @@ appsettings.Production.json
 
 ## Docker
 docker/nginx/ssl/
+docker-compose.prod.env
+infrastructure/nginx/ssl/*.pem
+infrastructure/nginx/ssl/*.key
 
 ## Test results
 coverage/
@@ -60,3 +63,4 @@ dashboard/.next/
 *.log
 *.tmp
 *.bak
+\ndashboard/.env.local

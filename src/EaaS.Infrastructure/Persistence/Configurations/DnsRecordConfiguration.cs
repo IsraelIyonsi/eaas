@@ -23,7 +23,6 @@ public sealed class DnsRecordConfiguration : IEntityTypeConfiguration<DnsRecord>
 
         builder.Property(r => r.RecordType)
             .HasColumnName("record_type")
-            .HasMaxLength(10)
             .IsRequired();
 
         builder.Property(r => r.RecordName)
@@ -49,6 +48,10 @@ public sealed class DnsRecordConfiguration : IEntityTypeConfiguration<DnsRecord>
         builder.Property(r => r.ActualValue)
             .HasColumnName("actual_value")
             .HasMaxLength(1024);
+
+        builder.Property(r => r.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("NOW()");
 
         builder.Property(r => r.UpdatedAt)
             .HasColumnName("updated_at")

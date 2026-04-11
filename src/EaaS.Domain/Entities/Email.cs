@@ -33,6 +33,7 @@ public class Email
     public DateTime? OpenedAt { get; set; }
     public string? TrackingId { get; set; }
     public DateTime? ClickedAt { get; set; }
+    public DateTime? ScheduledAt { get; set; }
 
     // Navigation properties
     public Tenant Tenant { get; set; } = null!;

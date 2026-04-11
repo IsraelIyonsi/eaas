@@ -27,6 +27,7 @@ import type { EmailStatus } from "@/types";
 const eventIconMap: Record<EmailStatus, { icon: LucideIcon; color: string }> = {
   queued: { icon: Clock, color: "text-gray-400" },
   sending: { icon: Send, color: "text-blue-400" },
+  sent: { icon: Send, color: "text-blue-400" },
   delivered: { icon: CheckCircle2, color: "text-emerald-400" },
   bounced: { icon: XCircle, color: "text-red-400" },
   complained: { icon: AlertTriangle, color: "text-amber-400" },
@@ -54,11 +55,11 @@ export function EmailDetailSheet({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full border-white/10 bg-[#1E1E2E] sm:max-w-lg overflow-y-auto"
+        className="w-full border-border bg-card sm:max-w-lg overflow-y-auto"
       >
         <div className="px-6 py-6">
         <SheetHeader className="pb-6">
-          <SheetTitle className="text-left text-lg font-bold text-white">
+          <SheetTitle className="text-left text-lg font-bold text-foreground">
             Email Detail
           </SheetTitle>
         </SheetHeader>
@@ -69,28 +70,28 @@ export function EmailDetailSheet({
             <EmailStatusBadge status={email.status} />
           </MetaRow>
           <MetaRow label="Message ID">
-            <code className="text-xs text-[#00E5FF]">{email.message_id}</code>
+            <code className="text-xs text-[var(--chart-1)]">{email.messageId}</code>
           </MetaRow>
           <MetaRow label="From">
-            <span className="text-sm text-white/80">{email.from}</span>
+            <span className="text-sm text-foreground">{email.from}</span>
           </MetaRow>
           <MetaRow label="To">
-            <span className="text-sm text-white/80">{email.to}</span>
+            <span className="text-sm text-foreground">{email.to}</span>
           </MetaRow>
           {email.cc && email.cc.length > 0 && (
             <MetaRow label="CC">
-              <span className="text-sm text-white/70">
+              <span className="text-sm text-foreground/80">
                 {email.cc.join(", ")}
               </span>
             </MetaRow>
           )}
           <MetaRow label="Subject">
-            <span className="text-sm font-medium text-white">{email.subject}</span>
+            <span className="text-sm font-medium text-foreground">{email.subject}</span>
           </MetaRow>
-          {email.template_name && (
+          {email.templateName && (
             <MetaRow label="Template">
-              <span className="text-sm text-[#7C4DFF]">
-                {email.template_name}
+              <span className="text-sm text-primary">
+                {email.templateName}
               </span>
             </MetaRow>
           )}
@@ -100,7 +101,7 @@ export function EmailDetailSheet({
                 {email.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-white/60"
+                    className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
                   >
                     {tag}
                   </span>
@@ -110,18 +111,18 @@ export function EmailDetailSheet({
           )}
         </div>
 
-        <Separator className="bg-white/10" />
+        <Separator className="bg-muted" />
 
         {/* Event Timeline */}
         <div className="py-6">
-          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
+          <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
             Event Timeline
           </h3>
-          <div className="relative ml-3 border-l-2 border-white/10 pl-6 space-y-6">
+          <div className="relative ml-3 border-l-2 border-border pl-6 space-y-6">
             {events.map((evt, i) => {
-              const config = eventIconMap[evt.event_type] ?? {
+              const config = eventIconMap[evt.eventType] ?? {
                 icon: CircleDot,
-                color: "text-white/40",
+                color: "text-muted-foreground/60",
               };
               const Icon = config.icon;
               return (
@@ -129,21 +130,21 @@ export function EmailDetailSheet({
                   {/* Timeline dot */}
                   <div
                     className={cn(
-                      "absolute -left-[calc(1.5rem+0.5625rem)] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1E1E2E] ring-2 ring-white/10",
+                      "absolute -left-[calc(1.5rem+0.5625rem)] flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-card ring-2 ring-white/10",
                       config.color,
                     )}
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium capitalize text-white/80">
-                      {evt.event_type.replace("_", " ")}
+                    <p className="text-sm font-medium capitalize text-foreground">
+                      {evt.eventType.replace("_", " ")}
                     </p>
-                    <p className="mt-0.5 text-xs text-white/40">
+                    <p className="mt-0.5 text-xs text-muted-foreground/60">
                       {format(parseISO(evt.timestamp), "MMM d, yyyy HH:mm:ss")}
                     </p>
                     {evt.details && (
-                      <p className="mt-1 text-xs text-white/30">
+                      <p className="mt-1 text-xs text-muted-foreground/40">
                         {evt.details}
                       </p>
                     )}
@@ -155,16 +156,16 @@ export function EmailDetailSheet({
         </div>
 
         {/* HTML Preview */}
-        {email.html_body && (
+        {email.htmlBody && (
           <>
-            <Separator className="bg-white/10" />
+            <Separator className="bg-muted" />
             <div className="py-6">
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">
+              <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                 Body Preview
               </h3>
-              <div className="rounded-lg border border-white/10 bg-white overflow-hidden">
+              <div className="rounded-lg border border-border bg-white overflow-hidden">
                 <iframe
-                  srcDoc={email.html_body}
+                  srcDoc={email.htmlBody}
                   title="Email preview"
                   className="h-[200px] w-full"
                   sandbox=""
@@ -188,7 +189,7 @@ function MetaRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="w-24 shrink-0 text-xs font-medium uppercase tracking-wider text-white/40">
+      <span className="w-24 shrink-0 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
         {label}
       </span>
       <div className="min-w-0">{children}</div>

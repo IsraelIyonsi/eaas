@@ -21,6 +21,7 @@ public sealed class SendEmailHandlerTests : IDisposable
     private readonly IIdempotencyStore _idempotencyStore;
     private readonly ISuppressionCache _suppressionCache;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
     private readonly SendEmailHandler _sut;
     private readonly Guid _tenantId = Guid.NewGuid();
 
@@ -31,13 +32,19 @@ public sealed class SendEmailHandlerTests : IDisposable
         _idempotencyStore = Substitute.For<IIdempotencyStore>();
         _suppressionCache = Substitute.For<ISuppressionCache>();
         _publishEndpoint = Substitute.For<IPublishEndpoint>();
+        _subscriptionLimitService = Substitute.For<ISubscriptionLimitService>();
 
         // Default: allow all rate limit checks
         _rateLimiter.CheckRateLimitAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
+        // Default: allow sending emails (within quota)
+        _subscriptionLimitService.CanSendEmailAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
         var suppressionChecker = new SuppressionChecker(_suppressionCache, _dbContext);
-        _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker);
+        var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger<EaaS.Api.Features.Emails.SendEmailHandler>>();
+        _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker, _subscriptionLimitService, logger);
 
         // Seed a verified domain
         _dbContext.Domains.Add(new SendingDomain
@@ -157,6 +164,40 @@ public sealed class SendEmailHandlerTests : IDisposable
             "new-key-456",
             Arg.Any<string>(),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_ThrowRateLimitExceeded_WhenRateLimitDenied()
+    {
+        _rateLimiter.CheckRateLimitAsync(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<TimeSpan>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<RateLimitExceededException>()
+            .WithMessage("*Rate limit exceeded*");
+    }
+
+    [Fact]
+    public async Task Should_ThrowQuotaExceeded_WhenSubscriptionLimitDenied()
+    {
+        _subscriptionLimitService.CanSendEmailAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<QuotaExceededException>()
+            .WithMessage("*email limit exceeded*");
     }
 
     public void Dispose()

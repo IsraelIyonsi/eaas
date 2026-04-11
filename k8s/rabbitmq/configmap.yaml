@@ -1,0 +1,48 @@
+# RabbitMQ cluster configuration
+# K8s peer discovery uses DNS to find other nodes in the StatefulSet
+# Quorum queues are the default for durability at the cost of slightly higher latency
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eaas-rabbitmq-config
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-rabbitmq
+    app.kubernetes.io/component: message-queue
+    app.kubernetes.io/part-of: eaas
+data:
+  rabbitmq.conf: |
+    ## Cluster formation via K8s DNS
+    cluster_formation.peer_discovery_backend = dns
+    cluster_formation.dns.hostname = eaas-rabbitmq-headless.eaas.svc.cluster.local
+    cluster_formation.node_cleanup.interval = 30
+    cluster_formation.node_cleanup.only_log_warning = true
+
+    ## Quorum queue defaults - all queues created as quorum for durability
+    ## Quorum queues replicate across all 3 nodes with Raft consensus
+    default_queue_type = quorum
+
+    ## Memory and disk thresholds
+    ## High watermark at 60% of container limit to leave room for GC
+    vm_memory_high_watermark.relative = 0.6
+    vm_memory_high_watermark_paging_ratio = 0.8
+    disk_free_limit.absolute = 2GB
+
+    ## Network tuning
+    tcp_listen_options.backlog = 128
+    tcp_listen_options.nodelay = true
+    tcp_listen_options.keepalive = true
+
+    ## Consumer prefetch - prevent single consumer from hoarding messages
+    consumer_timeout = 1800000
+    default_consumer_prefetch = 50
+
+    ## Logging
+    log.console = true
+    log.console.level = info
+
+    ## Prometheus metrics
+    prometheus.return_per_object_metrics = true
+
+  enabled_plugins: |
+    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_peer_discovery_dns].

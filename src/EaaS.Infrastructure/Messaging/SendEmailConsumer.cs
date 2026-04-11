@@ -3,6 +3,7 @@ using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Messaging.Contracts;
+using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Infrastructure.Services;
 using MassTransit;
@@ -49,6 +50,13 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         if (email is null)
         {
             LogEmailNotFound(_logger, message.EmailId);
+            return;
+        }
+
+        // Idempotency guard — skip if in a terminal state (already delivered, bounced, or complained)
+        if (email.Status is EmailStatus.Delivered or EmailStatus.Bounced or EmailStatus.Complained)
+        {
+            LogSkippingDuplicate(_logger, message.EmailId, email.Status);
             return;
         }
 
@@ -167,11 +175,13 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                 email.SentAt = DateTime.UtcNow;
                 await UpdateEmailStatus(email, EmailStatus.Sending, null, context.CancellationToken);
 
+                EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "success").Inc();
                 LogEmailSent(_logger, message.EmailId, result.MessageId!);
             }
             else
             {
                 await UpdateEmailStatus(email, EmailStatus.Failed, result.ErrorMessage, context.CancellationToken);
+                EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "failed").Inc();
                 LogEmailFailed(_logger, message.EmailId, result.ErrorMessage ?? "Unknown error");
 
                 throw new InvalidOperationException($"SES delivery failed: {result.ErrorMessage}");
@@ -248,16 +258,19 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             multipart.Add(new TextPart("plain") { Text = textBody });
         }
 
-        // Add attachments
+        // Add attachments — read into MemoryStreams to avoid leaking FileStream handles
         foreach (var attachment in attachments)
         {
             if (!File.Exists(attachment.TempPath))
                 continue;
 
+            var fileBytes = File.ReadAllBytes(attachment.TempPath);
+            var memStream = new MemoryStream(fileBytes);
+
             var contentType = ContentType.Parse(attachment.ContentType);
             var mimePart = new MimePart(contentType)
             {
-                Content = new MimeContent(File.OpenRead(attachment.TempPath)),
+                Content = new MimeContent(memStream),
                 ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
                 ContentTransferEncoding = ContentEncoding.Base64,
                 FileName = attachment.Filename
@@ -338,6 +351,9 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Email entity not found for EmailId={EmailId}")]
     private static partial void LogEmailNotFound(ILogger logger, Guid emailId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Skipping duplicate delivery for EmailId={EmailId}, current status={Status}")]
+    private static partial void LogSkippingDuplicate(ILogger logger, Guid emailId, EmailStatus status);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Tracking pixel injected for EmailId={EmailId}")]
     private static partial void LogTrackingPixelInjected(ILogger logger, Guid emailId);

@@ -16,7 +16,6 @@ public static class GetTemplateEndpoint
             return Results.Ok(ApiResponse.Ok(result));
         })
         .WithName("GetTemplate")
-        .WithOpenApi()
         .Produces<ApiResponse<TemplateResult>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
     }

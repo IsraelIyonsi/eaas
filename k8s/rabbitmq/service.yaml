@@ -1,0 +1,52 @@
+# Headless service for RabbitMQ peer discovery and StatefulSet DNS
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-rabbitmq-headless
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-rabbitmq
+    app.kubernetes.io/component: message-queue
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+    - name: clustering
+      port: 25672
+      targetPort: clustering
+    - name: epmd
+      port: 4369
+      targetPort: epmd
+  selector:
+    app.kubernetes.io/name: eaas-rabbitmq
+---
+# Regular ClusterIP service for application connections
+# Apps connect to this for AMQP; operators use it for management UI
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-rabbitmq
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-rabbitmq
+    app.kubernetes.io/component: message-queue
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: amqp
+      port: 5672
+      targetPort: amqp
+    - name: management
+      port: 15672
+      targetPort: management
+    - name: prometheus
+      port: 15692
+      targetPort: prometheus
+  selector:
+    app.kubernetes.io/name: eaas-rabbitmq

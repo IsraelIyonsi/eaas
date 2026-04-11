@@ -32,6 +32,10 @@ public sealed class SuppressionEntryConfiguration : IEntityTypeConfiguration<Sup
             .HasColumnName("source_message_id")
             .HasMaxLength(32);
 
+        builder.Property(s => s.CreatedAt)
+            .HasColumnName("created_at")
+            .HasDefaultValueSql("NOW()");
+
         builder.Property(s => s.SuppressedAt)
             .HasColumnName("suppressed_at")
             .HasDefaultValueSql("NOW()");

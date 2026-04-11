@@ -16,4 +16,5 @@ public class Template
 
     // Navigation properties
     public Tenant Tenant { get; set; } = null!;
+    public ICollection<TemplateVersion> Versions { get; set; } = new List<TemplateVersion>();
 }

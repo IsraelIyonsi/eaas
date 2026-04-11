@@ -11,40 +11,57 @@ using EaaS.Shared.Utilities;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.Api.Features.Emails;
 
-public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBatchResult>
+public sealed partial class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBatchResult>
 {
     private readonly AppDbContext _dbContext;
     private readonly IRateLimiter _rateLimiter;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
+    private readonly ILogger<SendBatchHandler> _logger;
 
     public SendBatchHandler(
         AppDbContext dbContext,
         IRateLimiter rateLimiter,
         IPublishEndpoint publishEndpoint,
-        SuppressionChecker suppressionChecker)
+        SuppressionChecker suppressionChecker,
+        ILogger<SendBatchHandler> logger)
     {
         _dbContext = dbContext;
         _rateLimiter = rateLimiter;
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
+        _logger = logger;
     }
+
+    private const int MaxBatchSize = 500;
 
     public async Task<SendBatchResult> Handle(SendBatchCommand request, CancellationToken cancellationToken)
     {
-        // Rate limit: single atomic check for the entire batch
+        // Rate limit: consume N slots for N emails in the batch, not just 1
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
-        var isAllowed = await _rateLimiter.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
-        if (!isAllowed)
-            throw new RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
+        var slotsToConsume = request.Emails.Count;
+        for (var slot = 0; slot < slotsToConsume; slot++)
+        {
+            var isAllowed = await _rateLimiter.CheckRateLimitAsync(rateLimitKey, RateLimitConstants.DefaultMaxRequestsPerMinute, RateLimitConstants.DefaultWindow, cancellationToken);
+            if (!isAllowed)
+                throw new RateLimitExceededException($"Rate limit exceeded. Maximum {RateLimitConstants.DefaultMaxRequestsPerMinute} sends per minute per API key.");
+        }
+
+        // Enforce maximum batch size to prevent abuse
+        if (request.Emails.Count > MaxBatchSize)
+            throw new ArgumentException($"Batch size {request.Emails.Count} exceeds the maximum allowed size of {MaxBatchSize}.");
 
         var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();
         var accepted = 0;
         var rejected = 0;
+
+        // Collect messages to publish AFTER successful SaveChanges
+        var pendingPublishMessages = new List<SendEmailMessage>();
 
         // Pre-load verified domains for this tenant
         var verifiedDomains = await _dbContext.Domains
@@ -116,8 +133,8 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     CreatedAt = DateTime.UtcNow
                 });
 
-                // Queue publish (will be sent after batch save)
-                await _publishEndpoint.Publish(new SendEmailMessage
+                // Stage the message for publishing after SaveChanges succeeds
+                pendingPublishMessages.Add(new SendEmailMessage
                 {
                     EmailId = email.Id,
                     TenantId = email.TenantId,
@@ -132,7 +149,7 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
                     Variables = email.Variables,
                     Tags = email.Tags,
                     Metadata = email.Metadata
-                }, cancellationToken);
+                });
 
                 results.Add(new BatchEmailResultItem(i, email.MessageId, "queued", null));
                 accepted++;
@@ -148,7 +165,17 @@ public sealed class SendBatchHandler : IRequestHandler<SendBatchCommand, SendBat
         if (accepted > 0)
             await _dbContext.SaveChangesAsync(cancellationToken);
 
+        // Publish messages only AFTER SaveChanges succeeds to prevent phantom messages
+        foreach (var message in pendingPublishMessages)
+        {
+            await _publishEndpoint.Publish(message, cancellationToken);
+        }
+
+        LogBatchCompleted(_logger, batchId, request.TenantId, request.Emails.Count, accepted, rejected);
+
         return new SendBatchResult(batchId, request.Emails.Count, accepted, rejected, results);
     }
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Batch completed: BatchId={BatchId}, TenantId={TenantId}, Total={Total}, Accepted={Accepted}, Rejected={Rejected}")]
+    private static partial void LogBatchCompleted(ILogger logger, string batchId, Guid tenantId, int total, int accepted, int rejected);
 }

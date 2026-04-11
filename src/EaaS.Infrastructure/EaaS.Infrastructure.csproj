@@ -7,6 +7,7 @@
     <PackageReference Include="MassTransit.RabbitMQ" />
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="AWSSDK.SimpleEmailV2" />
+    <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="Fluid.Core" />
     <PackageReference Include="DnsClient" />
     <PackageReference Include="AngleSharp" />
@@ -14,6 +15,7 @@
     <PackageReference Include="MimeKit" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="prometheus-net" />
   </ItemGroup>
 
   <ItemGroup>

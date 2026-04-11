@@ -1,0 +1,20 @@
+# ClusterIP service for internal routing to API pods
+# External traffic reaches this via the Ingress controller
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-api
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: eaas-api

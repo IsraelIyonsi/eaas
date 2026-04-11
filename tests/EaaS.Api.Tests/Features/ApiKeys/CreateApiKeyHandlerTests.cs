@@ -1,8 +1,11 @@
 using EaaS.Api.Features.ApiKeys;
 using EaaS.Api.Tests.Helpers;
+using EaaS.Domain.Exceptions;
+using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Xunit;
 
 namespace EaaS.Api.Tests.Features.ApiKeys;
@@ -10,12 +13,19 @@ namespace EaaS.Api.Tests.Features.ApiKeys;
 public sealed class CreateApiKeyHandlerTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
     private readonly CreateApiKeyHandler _sut;
 
     public CreateApiKeyHandlerTests()
     {
         _dbContext = DbContextFactory.Create();
-        _sut = new CreateApiKeyHandler(_dbContext);
+        _subscriptionLimitService = Substitute.For<ISubscriptionLimitService>();
+
+        // Default: allow creating API keys
+        _subscriptionLimitService.CanCreateApiKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(true);
+
+        _sut = new CreateApiKeyHandler(_dbContext, _subscriptionLimitService);
     }
 
     [Fact]
@@ -49,6 +59,20 @@ public sealed class CreateApiKeyHandlerTests : IDisposable
 
         // Verify the key is 50 chars total (10 prefix + 40 random)
         result.Key.Should().HaveLength(50);
+    }
+
+    [Fact]
+    public async Task Should_ThrowQuotaExceeded_WhenCanCreateApiKeyIsFalse()
+    {
+        _subscriptionLimitService.CanCreateApiKeyAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+
+        var command = TestDataBuilders.CreateApiKey().Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<QuotaExceededException>()
+            .WithMessage("*Maximum API keys reached*");
     }
 
     public void Dispose()

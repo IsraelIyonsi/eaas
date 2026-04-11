@@ -1,0 +1,8 @@
+# EaaS namespace - isolates all resources for the email platform
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eaas
+  labels:
+    app.kubernetes.io/part-of: eaas
+    app.kubernetes.io/managed-by: kustomize

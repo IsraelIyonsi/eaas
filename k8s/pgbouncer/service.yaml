@@ -1,0 +1,20 @@
+# PgBouncer ClusterIP service
+# Application services connect here on port 6432 instead of directly to PostgreSQL
+apiVersion: v1
+kind: Service
+metadata:
+  name: eaas-pgbouncer
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-pgbouncer
+    app.kubernetes.io/component: connection-pooler
+    app.kubernetes.io/part-of: eaas
+spec:
+  type: ClusterIP
+  ports:
+    - name: pgbouncer
+      port: 6432
+      targetPort: pgbouncer
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: eaas-pgbouncer

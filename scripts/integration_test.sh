@@ -1,5 +1,6 @@
 #!/bin/bash
-API_KEY="eaas_live_test_1b39a4eb645e0703da1fcdb48c470679a3edb87a"
+# For local dev/CI only — set EAAS_TEST_API_KEY env var for real keys
+API_KEY="${EAAS_TEST_API_KEY:-eaas_test_key_for_ci_only}"
 PASS=0
 FAIL=0
 TOTAL=0

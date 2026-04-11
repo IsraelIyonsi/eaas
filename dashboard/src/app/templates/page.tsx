@@ -1,8 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import {
+  useTemplates,
+  useCreateTemplate,
+  useUpdateTemplate,
+  useDeleteTemplate,
+} from "@/lib/hooks/use-templates";
+import { PageHeader } from "@/components/shared/page-header";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import {
   Table,
   TableBody,
@@ -31,19 +38,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, MoreVertical, Pencil, Eye, Trash2, Search } from "lucide-react";
+import { Plus, MoreVertical, Pencil, Eye, Trash2, Search, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { Template } from "@/types";
 
 const emptyTemplate = {
   name: "",
-  subject: "",
-  html_body: "",
-  text_body: "",
+  subjectTemplate: "",
+  htmlBody: "",
+  textBody: "",
 };
 
 export default function TemplatesPage() {
-  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -52,38 +58,10 @@ export default function TemplatesPage() {
   const [form, setForm] = useState(emptyTemplate);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["templates", search],
-    queryFn: () => api.getTemplates(search || undefined),
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (data: typeof emptyTemplate) => api.createTemplate(data),
-    onSuccess: (tpl) => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast.success(`Template "${tpl.name}" created successfully.`);
-      closeDialog();
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<typeof emptyTemplate> }) =>
-      api.updateTemplate(id, data),
-    onSuccess: (tpl) => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast.success(`Template "${tpl.name}" saved. Version ${tpl.version}.`);
-      closeDialog();
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.deleteTemplate(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["templates"] });
-      toast.success("Template deleted. It can be restored within 30 days.");
-      setDeleteConfirmId(null);
-    },
-  });
+  const { data, isLoading } = useTemplates({ search: search || undefined });
+  const createMutation = useCreateTemplate();
+  const updateMutation = useUpdateTemplate();
+  const deleteMutation = useDeleteTemplate();
 
   function openCreate() {
     setEditingTemplate(null);
@@ -95,9 +73,9 @@ export default function TemplatesPage() {
     setEditingTemplate(tpl);
     setForm({
       name: tpl.name,
-      subject: tpl.subject,
-      html_body: tpl.html_body,
-      text_body: tpl.text_body,
+      subjectTemplate: tpl.subjectTemplate,
+      htmlBody: tpl.htmlBody ?? "",
+      textBody: tpl.textBody ?? "",
     });
     setDialogOpen(true);
   }
@@ -110,74 +88,90 @@ export default function TemplatesPage() {
 
   function handleSave() {
     if (editingTemplate) {
-      updateMutation.mutate({ id: editingTemplate.id, data: form });
+      updateMutation.mutate(
+        { id: editingTemplate.id, data: form },
+        {
+          onSuccess: (tpl) => {
+            toast.success(`Template "${tpl.name}" saved. Version ${tpl.version}.`);
+            closeDialog();
+          },
+        },
+      );
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(form, {
+        onSuccess: (tpl) => {
+          toast.success(`Template "${tpl.name}" created successfully.`);
+          closeDialog();
+        },
+      });
     }
+  }
+
+  function handleDelete() {
+    if (!deleteConfirmId) return;
+    deleteMutation.mutate(deleteConfirmId, {
+      onSuccess: () => {
+        toast.success("Template deleted. It can be restored within 30 days.");
+        setDeleteConfirmId(null);
+      },
+    });
   }
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-white">Templates</h1>
-          <p className="text-sm text-white/50">
-            Manage email templates with Liquid syntax and variable schemas.
-          </p>
-        </div>
-        <Button
-          onClick={openCreate}
-          className="bg-[#7C4DFF] text-white hover:bg-[#6B3FE8]"
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          Create Template
-        </Button>
-      </div>
+      <PageHeader
+        title="Templates"
+        description="Manage email templates with Liquid syntax and variable schemas."
+        action={
+          <Button
+            onClick={openCreate}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="mr-1.5 h-4 w-4" />
+            Create Template
+          </Button>
+        }
+      />
 
       {/* Search */}
       <div className="relative max-w-xs">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/40" />
         <Input
           placeholder="Search templates..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border-white/10 bg-[#27293D] pl-9 text-white placeholder:text-white/30"
+          className="border-border bg-muted pl-9 text-foreground placeholder:text-muted-foreground/40"
         />
       </div>
 
       {/* Table */}
       {isLoading ? (
-        <Skeleton className="h-[300px] rounded-lg bg-white/5" />
+        <Skeleton className="h-[300px] rounded-lg bg-muted" />
       ) : data?.items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-white/10 bg-[#1E1E2E] py-16 text-center">
-          <p className="text-lg font-semibold text-white">No templates yet</p>
-          <p className="mt-2 max-w-sm text-sm text-white/50">
-            Templates let you reuse email layouts with dynamic variables. Create
-            your first template or use the API to send raw HTML.
-          </p>
-          <Button
-            onClick={openCreate}
-            className="mt-4 bg-[#7C4DFF] text-white hover:bg-[#6B3FE8]"
-          >
-            Create Template
-          </Button>
+        <div className="rounded-lg border border-border bg-card">
+          <EmptyState
+            icon={FileText}
+            title="No templates yet"
+            description="Templates let you reuse email layouts with dynamic variables. Create your first template or use the API to send raw HTML."
+            action={{ label: "Create Template", onClick: openCreate }}
+          />
         </div>
       ) : (
-        <div className="rounded-lg border border-white/10 bg-[#1E1E2E]">
+        <div className="rounded-lg border border-border bg-card">
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10 hover:bg-transparent">
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+              <TableRow className="border-border hover:bg-transparent">
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                   Name
                 </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                   Subject
                 </TableHead>
-                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-white/40 md:table-cell">
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 md:table-cell">
                   Version
                 </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
                   Updated
                 </TableHead>
                 <TableHead className="w-12" />
@@ -187,30 +181,30 @@ export default function TemplatesPage() {
               {data?.items.map((tpl) => (
                 <TableRow
                   key={tpl.id}
-                  className="border-white/5 transition-colors hover:bg-white/[0.06] even:bg-white/[0.02]"
+                  className="border-border transition-colors hover:bg-muted even:bg-muted/30"
                 >
-                  <TableCell className="font-medium text-white">
+                  <TableCell className="font-medium text-foreground">
                     {tpl.name}
                   </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-sm text-white/60">
-                    {tpl.subject}
+                  <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">
+                    {tpl.subjectTemplate}
                   </TableCell>
-                  <TableCell className="hidden text-sm text-white/40 md:table-cell">
+                  <TableCell className="hidden text-sm text-muted-foreground/60 md:table-cell">
                     v{tpl.version}
                   </TableCell>
-                  <TableCell className="text-xs text-white/40 whitespace-nowrap">
-                    {format(parseISO(tpl.updated_at), "MMM d, yyyy")}
+                  <TableCell className="text-xs text-muted-foreground/60 whitespace-nowrap">
+                    {format(parseISO(tpl.updatedAt), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/40 hover:text-white hover:bg-white/5"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-muted"
                       >
                         <MoreVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="border-white/10 bg-[#27293D]"
+                        className="border-border bg-muted"
                       >
                         <DropdownMenuItem onClick={() => openEdit(tpl)}>
                           <Pencil className="mr-2 h-3.5 w-3.5" />
@@ -244,67 +238,67 @@ export default function TemplatesPage() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-        <DialogContent className="max-w-2xl border-white/10 bg-[#1E1E2E]">
+        <DialogContent className="max-w-2xl border-border bg-card">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-foreground">
               {editingTemplate
                 ? `Edit Template: ${editingTemplate.name}`
                 : "Create Template"}
             </DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="edit" className="mt-4">
-            <TabsList className="bg-white/5">
+            <TabsList className="bg-muted">
               <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
             <TabsContent value="edit" className="mt-6 space-y-5">
               <div className="space-y-2">
-                <Label className="text-white/70">Template Name</Label>
+                <Label className="text-foreground/80">Template Name</Label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g., Invoice Notification"
-                  className="border-white/10 bg-[#27293D] text-white"
+                  className="border-border bg-muted text-foreground"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white/70">Subject Template</Label>
+                <Label className="text-foreground/80">Subject Template</Label>
                 <Input
-                  value={form.subject}
+                  value={form.subjectTemplate}
                   onChange={(e) =>
-                    setForm({ ...form, subject: e.target.value })
+                    setForm({ ...form, subjectTemplate: e.target.value })
                   }
                   placeholder="e.g., Invoice #{{invoice_number}}"
-                  className="border-white/10 bg-[#27293D] text-white font-[var(--font-jetbrains-mono)] text-sm"
+                  className="border-border bg-muted text-foreground font-[var(--font-jetbrains-mono)] text-sm"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white/70">HTML Body</Label>
+                <Label className="text-foreground/80">HTML Body</Label>
                 <Textarea
-                  value={form.html_body}
+                  value={form.htmlBody}
                   onChange={(e) =>
-                    setForm({ ...form, html_body: e.target.value })
+                    setForm({ ...form, htmlBody: e.target.value })
                   }
                   placeholder="<html><body>Your email here...</body></html>"
-                  className="min-h-[220px] border-white/10 bg-[#0F0F1A] font-[var(--font-jetbrains-mono)] text-sm text-[#00E5FF] leading-relaxed tracking-wide"
+                  className="min-h-[220px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-[var(--chart-1)] leading-relaxed tracking-wide"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white/70">Text Body</Label>
+                <Label className="text-foreground/80">Text Body</Label>
                 <Textarea
-                  value={form.text_body}
+                  value={form.textBody}
                   onChange={(e) =>
-                    setForm({ ...form, text_body: e.target.value })
+                    setForm({ ...form, textBody: e.target.value })
                   }
                   placeholder="Plain text version..."
-                  className="min-h-[120px] border-white/10 bg-[#0F0F1A] font-[var(--font-jetbrains-mono)] text-sm text-white/80 leading-relaxed"
+                  className="min-h-[120px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-foreground leading-relaxed"
                 />
               </div>
             </TabsContent>
             <TabsContent value="preview" className="mt-6">
-              <div className="rounded-lg border border-white/10 bg-white overflow-hidden">
+              <div className="rounded-lg border border-border bg-white overflow-hidden">
                 <iframe
-                  srcDoc={form.html_body || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}
+                  srcDoc={form.htmlBody || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}
                   title="Template preview"
                   className="h-[340px] w-full"
                   sandbox=""
@@ -313,13 +307,13 @@ export default function TemplatesPage() {
             </TabsContent>
           </Tabs>
           <DialogFooter className="mt-4">
-            <Button variant="ghost" onClick={closeDialog} className="text-white/60">
+            <Button variant="ghost" onClick={closeDialog} className="text-muted-foreground">
               Cancel
             </Button>
             <Button
               onClick={handleSave}
-              disabled={!form.name || !form.subject}
-              className="bg-[#7C4DFF] text-white hover:bg-[#6B3FE8]"
+              disabled={!form.name || !form.subjectTemplate}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {editingTemplate ? "Save Template" : "Create Template"}
             </Button>
@@ -329,15 +323,15 @@ export default function TemplatesPage() {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-2xl border-white/10 bg-[#1E1E2E]">
+        <DialogContent className="max-w-2xl border-border bg-card">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-foreground">
               Preview: {previewTemplate?.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4 rounded-lg border border-white/10 bg-white overflow-hidden">
+          <div className="mt-4 rounded-lg border border-border bg-white overflow-hidden">
             <iframe
-              srcDoc={previewTemplate?.html_body ?? ""}
+              srcDoc={previewTemplate?.htmlBody ?? ""}
               title="Template preview"
               className="h-[400px] w-full"
               sandbox=""
@@ -347,35 +341,16 @@ export default function TemplatesPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
+      <ConfirmDialog
         open={!!deleteConfirmId}
         onOpenChange={() => setDeleteConfirmId(null)}
-      >
-        <DialogContent className="max-w-sm border-white/10 bg-[#1E1E2E]">
-          <DialogHeader>
-            <DialogTitle className="text-white">Delete Template</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-white/60">
-            Are you sure you want to delete this template? It can be restored
-            within 30 days.
-          </p>
-          <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setDeleteConfirmId(null)}
-              className="text-white/60"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteConfirmId && deleteMutation.mutate(deleteConfirmId)}
-            >
-              Delete Template
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        title="Delete Template"
+        description="Are you sure you want to delete this template? It can be restored within 30 days."
+        confirmLabel="Delete Template"
+        variant="destructive"
+        loading={deleteMutation.isPending}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

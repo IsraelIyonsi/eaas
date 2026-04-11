@@ -13,7 +13,7 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
 
     private static readonly TimeSpan ApiKeyCacheTtl = CacheConstants.ApiKeyCacheTtl;
 
-    // Lua script for sliding window rate limiting
+    // Lua script for sliding window rate limiting (returns bool 0/1)
     private const string RateLimitLuaScript = @"
         local key = KEYS[1]
         local now = tonumber(ARGV[1])
@@ -36,6 +36,33 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
         end
     ";
 
+    // Lua script for sliding window rate limiting with detailed result (returns [allowed, remaining, resetAtMs])
+    private const string RateLimitWithInfoLuaScript = @"
+        local key = KEYS[1]
+        local now = tonumber(ARGV[1])
+        local window = tonumber(ARGV[2])
+        local max_requests = tonumber(ARGV[3])
+        local request_id = ARGV[4]
+
+        -- Remove expired entries
+        redis.call('ZREMRANGEBYSCORE', key, 0, now - window)
+
+        -- Count current entries
+        local count = redis.call('ZCARD', key)
+        local remaining = max_requests - count
+
+        if count < max_requests then
+            redis.call('ZADD', key, now, request_id)
+            redis.call('EXPIRE', key, math.ceil(window / 1000))
+            return {1, remaining - 1, now + window}
+        else
+            -- Find oldest entry to calculate reset time
+            local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
+            local reset_at = oldest[2] and (tonumber(oldest[2]) + window) or (now + window)
+            return {0, 0, reset_at}
+        end
+    ";
+
     public RedisCacheService(IConnectionMultiplexer redis, ILogger<RedisCacheService> logger)
     {
         _redis = redis;
@@ -53,7 +80,7 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
         catch (Exception ex)
         {
             LogSuppressionCheckFailed(_logger, ex, emailAddress);
-            return false;
+            return true; // Fail closed — treat as suppressed for safety
         }
     }
 
@@ -103,7 +130,35 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
         catch (Exception ex)
         {
             LogRateLimitCheckFailed(_logger, ex, key);
-            return true; // Fail open
+            return false; // Fail closed — deny request for safety
+        }
+    }
+
+    public async Task<RateLimitResult> CheckRateLimitWithInfoAsync(string key, int maxRequests, TimeSpan window, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var db = _redis.GetDatabase();
+            var rateLimitKey = CacheKeys.RateLimit(key);
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var requestId = Guid.NewGuid().ToString("N");
+
+            var result = await db.ScriptEvaluateAsync(
+                RateLimitWithInfoLuaScript,
+                new RedisKey[] { rateLimitKey },
+                new RedisValue[] { now, (long)window.TotalMilliseconds, maxRequests, requestId });
+
+            var values = (RedisValue[])result!;
+            var allowed = (int)values[0] == 1;
+            var remaining = (int)values[1];
+            var resetAtMs = (long)values[2];
+
+            return new RateLimitResult(allowed, remaining, resetAtMs);
+        }
+        catch (Exception ex)
+        {
+            LogRateLimitCheckFailed(_logger, ex, key);
+            return new RateLimitResult(false, 0, DateTimeOffset.UtcNow.AddSeconds(1).ToUnixTimeMilliseconds());
         }
     }
 
@@ -229,7 +284,7 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to check suppression cache for {Email}, falling back to database")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Suppression check failed for {Email}, treating as suppressed for safety")]
     private static partial void LogSuppressionCheckFailed(ILogger logger, Exception ex, string email);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to add {Email} to suppression cache")]
@@ -238,7 +293,7 @@ public sealed partial class RedisCacheService : ISuppressionCache, IRateLimiter,
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to remove {Email} from suppression cache")]
     private static partial void LogSuppressionRemoveFailed(ILogger logger, Exception ex, string email);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Rate limit check failed for key {Key}, allowing request")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Rate limit check failed for key {Key}, denying request for safety")]
     private static partial void LogRateLimitCheckFailed(ILogger logger, Exception ex, string key);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to get API key from cache")]

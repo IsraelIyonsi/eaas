@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EaaS Inbound Mail — Hi-Fi Dashboard Core Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Light mode tokens */
+  --bg: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-2: #f1f5f9;
+  --bg-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-inverse: #f8fafc;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --primary-text: #1e40af;
+  --success: #22c55e;
+  --success-light: #dcfce7;
+  --success-text: #166534;
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+  --error: #ef4444;
+  --error-light: #fee2e2;
+  --error-text: #991b1b;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #e2e8f0;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.15);
+  --sidebar-active-text: #60a5fa;
+  --sidebar-section: #475569;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-2: #334155;
+  --bg-hover: #334155;
+  --border: #334155;
+  --border-strong: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-inverse: #0f172a;
+  --primary-light: rgba(37, 99, 235, 0.2);
+  --primary-text: #93bbfd;
+  --success-light: rgba(34, 197, 94, 0.15);
+  --success-text: #86efac;
+  --warning-light: rgba(245, 158, 11, 0.15);
+  --warning-text: #fcd34d;
+  --error-light: rgba(239, 68, 68, 0.15);
+  --error-text: #fca5a5;
+  --sidebar-bg: #020617;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.3), 0 4px 6px -4px rgba(0,0,0,0.2);
+}
+
+html { font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text-primary); transition: background var(--transition), color var(--transition); }
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+h1 { font-size: 24px; line-height: 32px; font-weight: 600; letter-spacing: -0.025em; }
+h2 { font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.02em; }
+h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
+.body-text { font-size: 14px; line-height: 20px; font-weight: 400; }
+.small-text { font-size: 12px; line-height: 16px; font-weight: 400; }
+.mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 13px; }
+
+/* ============================================
+   SCREEN NAVIGATION
+   ============================================ */
+.screen-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: var(--bg-surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 4px; padding: 8px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.screen-nav-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-right: 8px; }
+.screen-nav button {
+  padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition); font-family: inherit;
+}
+.screen-nav button:hover { border-color: var(--primary); color: var(--primary); }
+.screen-nav button.active { background: var(--primary); color: white; border-color: var(--primary); }
+.theme-toggle {
+  margin-left: auto; padding: 6px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--bg); color: var(--text-secondary);
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  font-family: inherit; font-weight: 500; transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+.screen { display: none; margin-top: 44px; }
+.screen.active { display: flex; min-height: calc(100vh - 44px); }
+
+/* Sidebar */
+.sidebar {
+  width: 240px; min-width: 240px; background: var(--sidebar-bg);
+  display: flex; flex-direction: column; height: calc(100vh - 44px);
+  position: sticky; top: 44px; overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 20px 16px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.sidebar-logo-icon {
+  width: 32px; height: 32px; background: var(--primary); border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center; color: white;
+  font-weight: 700; font-size: 14px;
+}
+.sidebar-logo-text { color: #f1f5f9; font-size: 16px; font-weight: 600; letter-spacing: -0.02em; }
+
+.sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 1px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: var(--radius-sm); color: var(--sidebar-text); font-size: 13px;
+  font-weight: 400; cursor: pointer; transition: all var(--transition);
+  text-decoration: none; position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text-hover); }
+.nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); font-weight: 500; }
+.nav-item .nav-icon { width: 18px; height: 18px; opacity: 0.7; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-badge {
+  margin-left: auto; padding: 1px 6px; border-radius: 10px; font-size: 10px;
+  font-weight: 600; background: var(--primary); color: white; letter-spacing: 0.02em;
+}
+.nav-badge.new { background: var(--success); }
+.nav-sub { padding-left: 40px; }
+.nav-section { padding: 16px 12px 6px; font-size: 11px; font-weight: 600; color: var(--sidebar-section); text-transform: uppercase; letter-spacing: 0.06em; }
+
+.sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sidebar-footer .nav-item { font-size: 12px; }
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px;
+}
+.sidebar-avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: #3b82f6;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 11px; font-weight: 600;
+}
+.sidebar-user-info { flex: 1; }
+.sidebar-user-name { color: #e2e8f0; font-size: 13px; font-weight: 500; }
+.sidebar-user-email { color: var(--sidebar-text); font-size: 11px; }
+
+/* Main Content */
+.main-content { flex: 1; padding: 24px 32px; min-width: 0; overflow-x: auto; }
+
+/* ============================================
+   COMPONENTS
+   ============================================ */
+
+/* Breadcrumb */
+.breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+.breadcrumb span { font-size: 13px; color: var(--text-secondary); }
+.breadcrumb a { font-size: 13px; color: var(--text-secondary); text-decoration: none; }
+.breadcrumb a:hover { color: var(--primary); }
+.breadcrumb .sep { color: var(--text-tertiary); font-size: 12px; }
+
+/* Page Header */
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.page-title { display: flex; align-items: center; gap: 10px; }
+.page-title h1 { white-space: nowrap; }
+.count-badge {
+  padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500;
+  background: var(--bg-surface-2); color: var(--text-secondary);
+}
+
+/* Search Input */
+.search-input {
+  position: relative; display: flex; align-items: center;
+}
+.search-input input {
+  padding: 8px 12px 8px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  width: 280px; transition: border-color var(--transition); outline: none;
+}
+.search-input input::placeholder { color: var(--text-tertiary); }
+.search-input input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.search-input .search-icon { position: absolute; left: 10px; color: var(--text-tertiary); }
+
+/* Filter Bar */
+.filter-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+  padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.filter-item select, .filter-item input {
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; transition: border-color var(--transition);
+}
+.filter-item select:focus, .filter-item input:focus { border-color: var(--primary); }
+.filter-item label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-right: 6px; }
+.filter-toggle {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer;
+}
+.toggle-switch {
+  width: 36px; height: 20px; background: var(--border-strong); border-radius: 10px;
+  position: relative; transition: background var(--transition); cursor: pointer;
+}
+.toggle-switch::after {
+  content: ''; width: 16px; height: 16px; border-radius: 50%; background: white;
+  position: absolute; top: 2px; left: 2px; transition: transform var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.toggle-switch.on { background: var(--primary); }
+.toggle-switch.on::after { transform: translateX(16px); }
+.clear-filters { font-size: 13px; color: var(--primary); cursor: pointer; margin-left: auto; text-decoration: none; font-weight: 500; }
+.clear-filters:hover { text-decoration: underline; }
+
+/* Data Table */
+.data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table thead { background: var(--bg-surface); }
+.data-table th {
+  padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px;
+  color: var(--text-secondary); border-bottom: 1px solid var(--border);
+  white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.data-table tbody tr { transition: background var(--transition); }
+.data-table tbody tr:hover { background: var(--bg-hover); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* Checkbox */
+.checkbox {
+  width: 16px; height: 16px; border: 1.5px solid var(--border-strong);
+  border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; transition: all var(--transition); flex-shrink: 0;
+}
+.checkbox:hover { border-color: var(--primary); }
+.checkbox.checked { background: var(--primary); border-color: var(--primary); }
+.checkbox.checked::after { content: ''; width: 4px; height: 8px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-0.5px, -0.5px); }
+
+/* Status Dot */
+.status { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.status-dot.green { background: var(--success); }
+.status-dot.blue { background: var(--primary); }
+.status-dot.red { background: var(--error); }
+.status-dot.amber { background: var(--warning); }
+
+/* Badges */
+.badge {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.badge-green { background: var(--success-light); color: var(--success-text); }
+.badge-red { background: var(--error-light); color: var(--error-text); }
+.badge-blue { background: var(--primary-light); color: var(--primary-text); }
+.badge-amber { background: var(--warning-light); color: var(--warning-text); }
+.badge-gray { background: var(--bg-surface-2); color: var(--text-secondary); }
+
+/* From cell */
+.from-cell { display: flex; align-items: center; gap: 8px; }
+.avatar-sm {
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 11px;
+  font-weight: 600; flex-shrink: 0; color: white;
+}
+.from-name { font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+.from-email { font-size: 12px; color: var(--text-tertiary); white-space: nowrap; }
+
+/* Subject cell */
+.subject-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Attachment */
+.attachment-cell { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); }
+
+/* Pagination */
+.pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; font-size: 13px; color: var(--text-secondary);
+}
+.pagination-buttons { display: flex; gap: 4px; }
+.page-btn {
+  width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-secondary); font-size: 13px; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: all var(--transition);
+}
+.page-btn:hover { border-color: var(--primary); color: var(--primary); }
+.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Card */
+.card {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 20px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  font-family: inherit; cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-secondary { background: var(--bg); color: var(--text-primary); border-color: var(--border); }
+.btn-secondary:hover { background: var(--bg-surface); border-color: var(--border-strong); }
+.btn-destructive { background: var(--error); color: white; border-color: var(--error); }
+.btn-destructive:hover { background: #dc2626; }
+.btn-ghost { background: transparent; color: var(--text-secondary); border: none; padding: 6px 10px; }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* Tabs */
+.tabs { display: flex; border-bottom: 1px solid var(--border); gap: 0; }
+.tab {
+  padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; border-bottom: 2px solid transparent; transition: all var(--transition);
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Back link */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary);
+  font-size: 13px; cursor: pointer; text-decoration: none; margin-bottom: 16px;
+  transition: color var(--transition);
+}
+.back-link:hover { color: var(--primary); }
+
+/* Metadata grid */
+.meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.meta-item label { display: block; font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.meta-item .meta-value { font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 6px; }
+
+/* Security badges row */
+.security-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+
+/* Email body */
+.email-body-preview {
+  padding: 20px 24px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; line-height: 1.7;
+  color: var(--text-primary); white-space: pre-wrap; margin-top: 12px;
+}
+
+/* Attachment rows */
+.attachment-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 8px; transition: background var(--transition);
+}
+.attachment-row:hover { background: var(--bg-surface); }
+.attachment-info { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.attachment-size { color: var(--text-tertiary); font-size: 12px; }
+.attachment-actions { display: flex; gap: 6px; }
+
+/* Mini Table */
+.mini-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mini-table th { padding: 8px 12px; text-align: left; font-weight: 500; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+.mini-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+
+/* Thread Timeline */
+.thread-header { margin-bottom: 24px; }
+.thread-meta { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: ''; position: absolute; left: 11px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.timeline-item { position: relative; margin-bottom: 24px; }
+.timeline-dot {
+  position: absolute; left: -24px; top: 16px; width: 10px; height: 10px;
+  border-radius: 50%; border: 2px solid var(--border); background: var(--bg);
+}
+.timeline-dot.sent { border-color: var(--primary); background: var(--primary-light); }
+.timeline-dot.received { border-color: var(--success); background: var(--success-light); }
+.timeline-card {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 16px 20px; background: var(--bg); transition: all var(--transition);
+  cursor: pointer;
+}
+.timeline-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+.timeline-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+.timeline-card-meta { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; }
+.timeline-card-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.timeline-card-footer { display: flex; align-items: center; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--text-tertiary); }
+
+/* Rule Cards */
+.rules-grid { display: flex; flex-direction: column; gap: 12px; }
+.rule-card {
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  padding: 20px; background: var(--bg); transition: all var(--transition);
+}
+.rule-card:hover { box-shadow: var(--shadow-md); }
+.rule-card.inactive { opacity: 0.6; }
+.rule-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.rule-card-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.priority-badge {
+  padding: 2px 8px; border-radius: var(--radius-sm); font-size: 11px;
+  font-weight: 600; background: var(--bg-surface-2); color: var(--text-secondary);
+}
+.rule-detail { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; margin-bottom: 12px; }
+.rule-detail dt { color: var(--text-tertiary); font-weight: 500; }
+.rule-detail dd { color: var(--text-primary); }
+.rule-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+.rule-status { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+
+/* Side Panel (Create Rule) */
+.panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; }
+.panel-overlay.show { display: block; }
+.side-panel {
+  position: fixed; top: 44px; right: -480px; width: 480px; height: calc(100vh - 44px);
+  background: var(--bg); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg);
+  z-index: 101; transition: right 250ms ease; display: flex; flex-direction: column;
+}
+.side-panel.show { right: 0; }
+.panel-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+.panel-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Form Fields */
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.form-helper { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+.form-input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; transition: border-color var(--transition);
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.form-select {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: inherit; background: var(--bg); color: var(--text-primary);
+  outline: none; cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.form-select:focus { border-color: var(--primary); }
+.radio-group { display: flex; flex-direction: column; gap: 8px; }
+.radio-option {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all var(--transition);
+}
+.radio-option:hover { border-color: var(--primary); }
+.radio-option.selected { border-color: var(--primary); background: var(--primary-light); }
+.radio-dot {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.radio-option.selected .radio-dot { border-color: var(--primary); }
+.radio-option.selected .radio-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+.radio-label { font-size: 13px; font-weight: 500; }
+.conditional-field { margin-top: 12px; padding: 12px; background: var(--bg-surface); border-radius: var(--radius-sm); }
+
+/* Action buttons row */
+.action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+
+/* Thread link */
+.thread-link { color: var(--primary); font-size: 13px; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.thread-link:hover { text-decoration: underline; }
+
+/* Section spacing */
+.section { margin-top: 24px; }
+.section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+/* ============================================
+   SVG ICONS (inline)
+   ============================================ */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: middle; }
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 20px; height: 20px; }
+
+/* ============================================
+   DESIGN SPECS FOOTER
+   ============================================ */
+.design-specs {
+  margin-top: 44px; padding: 48px 32px; background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+}
+.specs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; max-width: 1200px; }
+.specs-section h3 { margin-bottom: 16px; color: var(--text-primary); }
+.specs-section table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.specs-section th, .specs-section td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.specs-section th { font-weight: 500; color: var(--text-secondary); font-size: 12px; }
+.color-swatch {
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.swatch {
+  width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--border);
+  display: inline-block; vertical-align: middle;
+}
+.component-spec { margin-bottom: 8px; font-size: 13px; }
+.component-spec code { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 1px 4px; background: var(--bg-surface-2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     SCREEN NAVIGATION BAR
+     ============================================ -->
+<nav class="screen-nav">
+  <span class="screen-nav-label">Screens:</span>
+  <button class="active" onclick="showScreen('screen1', this)">1. Email List</button>
+  <button onclick="showScreen('screen2', this)">2. Email Detail</button>
+  <button onclick="showScreen('screen3', this)">3. Thread View</button>
+  <button onclick="showScreen('screen4', this)">4. Inbound Rules</button>
+  <button onclick="showScreen('specs', this)">Design Specs</button>
+  <button class="theme-toggle" onclick="toggleTheme()">
+    <svg class="icon-sm" id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    <svg class="icon-sm" id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <span id="theme-label">Dark</span>
+  </button>
+</nav>
+
+<!-- ============================================
+     SCREEN 1: INBOUND EMAIL LIST
+     ============================================ -->
+<div id="screen1" class="screen active">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">E</div>
+      <span class="sidebar-logo-text">EaaS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Sent
+      </a>
+      <a class="nav-item active" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+        Received
+        <span class="nav-badge new">NEW</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Inbound Rules
+        <span class="nav-badge new">NEW</span>
+      </a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Domains
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Templates
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        API Keys
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Webhooks
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Suppressions
+      </a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Outbound
+      </a>
+      <a class="nav-item nav-sub" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Inbound
+      </a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Documentation
+      </a>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">II</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">Israel Iyonsi</div>
+        <div class="sidebar-user-email">israel@eaas.dev</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="#">Emails</a>
+      <span class="sep">/</span>
+      <span>Received</span>
+    </div>
+
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Received Emails</h1>
+        <span class="count-badge">1,247</span>
+      </div>
+      <div class="search-input">
+        <svg class="icon search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search by sender, subject, or content...">
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item">
+        <label>Date Range</label>
+        <input type="text" value="Last 7 days" style="width:140px; cursor:pointer;" readonly>
+      </div>
+      <div class="filter-item">
+        <label>Status</label>
+        <select>
+          <option>All Statuses</option>
+          <option>Received</option>
+          <option>Processed</option>
+          <option>Failed</option>
+          <option>Forwarded</option>
+        </select>
+      </div>
+      <div class="filter-toggle">
+        <div class="toggle-switch"></div>
+        <span>Has Attachments</span>
+      </div>
+      <a class="clear-filters" href="#">Clear Filters</a>
+    </div>
+
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:40px"><div class="checkbox"></div></th>
+            <th>Status</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Subject</th>
+            <th>Received</th>
+            <th>Attach.</th>
+            <th>Webhook</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Processed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#3b82f6">JD</div><div><div class="from-name">John Doe</div><div class="from-email">john@example.com</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">support@myapp.com</td>
+            <td><div class="subject-cell">Re: Order #12345 — Shipping Update</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">2m ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>2</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot blue"></span>Received</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#8b5cf6">AS</div><div><div class="from-name">Alice Smith</div><div class="from-email">alice@startup.io</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">billing@myapp.com</td>
+            <td><div class="subject-cell">Invoice #8901 — Payment Confirmation</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">15m ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>1</div></td>
+            <td><span class="badge badge-amber">Pending</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Processed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#ec4899">MW</div><div><div class="from-name">Maria Wang</div><div class="from-email">maria@bigcorp.com</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">support@myapp.com</td>
+            <td><div class="subject-cell">Urgent: Account access issue — locked out of dashboard</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">32m ago</td>
+            <td><div class="attachment-cell" style="color:var(--text-tertiary)">--</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot red"></span>Failed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#f59e0b">RK</div><div><div class="from-name">Robert Kim</div><div class="from-email">r.kim@techfirm.co</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">returns@myapp.com</td>
+            <td><div class="subject-cell">Return Request — Order #45678</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">1h ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>3</div></td>
+            <td><span class="badge badge-red">Failed</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot amber"></span>Forwarded</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#06b6d4">LP</div><div><div class="from-name">Lisa Park</div><div class="from-email">lisa@agency.dev</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">billing@myapp.com</td>
+            <td><div class="subject-cell">Monthly billing statement — March 2026</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">2h ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>1</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Processed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#10b981">TJ</div><div><div class="from-name">Tom Johnson</div><div class="from-email">tom@freelance.me</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">support@myapp.com</td>
+            <td><div class="subject-cell">Feature request: Dark mode for email templates</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">3h ago</td>
+            <td><div class="attachment-cell" style="color:var(--text-tertiary)">--</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot blue"></span>Received</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#6366f1">EN</div><div><div class="from-name">Emma Nelson</div><div class="from-email">emma@design.co</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">info@myapp.com</td>
+            <td><div class="subject-cell">Partnership inquiry — Design collaboration opportunity</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">5h ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>1</div></td>
+            <td><span class="badge badge-amber">Pending</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Processed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#ef4444">DC</div><div><div class="from-name">David Chen</div><div class="from-email">d.chen@enterprise.com</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">support@myapp.com</td>
+            <td><div class="subject-cell">API integration question — webhook signature verification</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">6h ago</td>
+            <td><div class="attachment-cell" style="color:var(--text-tertiary)">--</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot green"></span>Processed</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#f97316">SR</div><div><div class="from-name">Sarah Rivera</div><div class="from-email">sarah@saas.io</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">billing@myapp.com</td>
+            <td><div class="subject-cell">Re: Subscription upgrade — Enterprise plan pricing</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">8h ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>1</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+          <tr>
+            <td><div class="checkbox"></div></td>
+            <td><div class="status"><span class="status-dot amber"></span>Forwarded</div></td>
+            <td><div class="from-cell"><div class="avatar-sm" style="background:#84cc16">MG</div><div><div class="from-name">Mike Green</div><div class="from-email">mike@startup.dev</div></div></div></td>
+            <td class="small-text" style="color:var(--text-secondary)">returns@myapp.com</td>
+            <td><div class="subject-cell">Defective product — Need immediate replacement</div></td>
+            <td style="white-space:nowrap; color:var(--text-secondary)">12h ago</td>
+            <td><div class="attachment-cell"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>4</div></td>
+            <td><span class="badge badge-green">Delivered</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span>Showing 1-20 of 1,247</span>
+      <div class="pagination-buttons">
+        <button class="page-btn" disabled>&laquo;</button>
+        <button class="page-btn" disabled>&lsaquo;</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <button class="page-btn">&rsaquo;</button>
+        <button class="page-btn">&raquo;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 2: INBOUND EMAIL DETAIL
+     ============================================ -->
+<div id="screen2" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>Sent</a>
+      <a class="nav-item active" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Received<span class="nav-badge new">NEW</span></a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Inbound Rules<span class="nav-badge new">NEW</span></a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Domains</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>API Keys</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Webhooks</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#">Outbound</a>
+      <a class="nav-item nav-sub" href="#">Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#">Notifications</a>
+      <a class="nav-item" href="#">Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#">Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <a class="back-link" href="#" onclick="showScreen('screen1', document.querySelector('.screen-nav button'))">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Received Emails
+    </a>
+
+    <!-- Email Header Card -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-body">
+        <h1 style="margin-bottom:4px">Re: Order #12345 — Shipping Update</h1>
+        <div class="thread-link" style="margin-bottom:16px">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+          Reply to: Order #12345 Confirmation
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <label>From</label>
+            <div class="meta-value">
+              <div class="avatar-sm" style="background:#3b82f6; width:24px; height:24px; font-size:10px">JD</div>
+              <div><strong>John Doe</strong> <span style="color:var(--text-secondary)">&lt;john@example.com&gt;</span></div>
+            </div>
+          </div>
+          <div class="meta-item">
+            <label>To</label>
+            <div class="meta-value">support@myapp.com</div>
+          </div>
+          <div class="meta-item">
+            <label>CC</label>
+            <div class="meta-value">team@myapp.com</div>
+          </div>
+          <div class="meta-item">
+            <label>Received</label>
+            <div class="meta-value">Apr 1, 2026 at 10:23 AM <span style="color:var(--text-tertiary)">&bull; 2 hours ago</span></div>
+          </div>
+        </div>
+
+        <div class="security-row">
+          <span class="badge badge-green">SPF &#10003;</span>
+          <span class="badge badge-green">DKIM &#10003;</span>
+          <span class="badge badge-green">DMARC &#10003;</span>
+          <span class="badge badge-green">Spam: Pass</span>
+          <span class="badge badge-green">Virus: Pass</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Content Tabs -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="tabs">
+        <div class="tab active">HTML Preview</div>
+        <div class="tab">Plain Text</div>
+        <div class="tab">Headers</div>
+        <div class="tab">JSON</div>
+      </div>
+      <div class="card-body">
+        <div class="email-body-preview">Hi Support Team,
+
+I have a question about my order #12345. The tracking number shows it was delivered yesterday, but I haven't received the package.
+
+Could you please check on this? I've attached a screenshot of the tracking page.
+
+Thanks,
+John Doe</div>
+      </div>
+    </div>
+
+    <!-- Attachments Section -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <h3>Attachments (2)</h3>
+      </div>
+      <div class="card-body">
+        <div class="attachment-row">
+          <div class="attachment-info">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span>tracking-screenshot.png</span>
+            <span class="attachment-size">(245 KB)</span>
+          </div>
+          <div class="attachment-actions">
+            <button class="btn btn-ghost btn-sm">Preview</button>
+            <button class="btn btn-secondary btn-sm">Download</button>
+          </div>
+        </div>
+        <div class="attachment-row">
+          <div class="attachment-info">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span>order-receipt.pdf</span>
+            <span class="attachment-size">(67 KB)</span>
+          </div>
+          <div class="attachment-actions">
+            <button class="btn btn-secondary btn-sm">Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Webhook Delivery Log -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <h3>Webhook Delivery Log</h3>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Attempt</th>
+              <th>Status</th>
+              <th>Response Time</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#1</td>
+              <td><span class="badge badge-green">200 OK</span></td>
+              <td class="mono">134ms</td>
+              <td style="color:var(--text-secondary)">10:23:08 AM</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <button class="btn btn-secondary">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Raw MIME
+      </button>
+      <button class="btn btn-secondary">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Retry Webhook
+      </button>
+      <button class="btn btn-destructive">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Delete Email
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 3: THREAD VIEW
+     ============================================ -->
+<div id="screen3" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#">Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#">Sent</a>
+      <a class="nav-item active" href="#">Received<span class="nav-badge new">NEW</span></a>
+      <a class="nav-item" href="#">Inbound Rules<span class="nav-badge new">NEW</span></a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#">Domains</a>
+      <a class="nav-item" href="#">Templates</a>
+      <a class="nav-item" href="#">API Keys</a>
+      <a class="nav-item" href="#">Webhooks</a>
+      <a class="nav-item" href="#">Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#">Outbound</a>
+      <a class="nav-item nav-sub" href="#">Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#">Notifications</a>
+      <a class="nav-item" href="#">Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#">Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <a class="back-link" href="#" onclick="showScreen('screen1', document.querySelector('.screen-nav button'))">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Received Emails
+    </a>
+
+    <div class="thread-header">
+      <h1>Order #12345</h1>
+      <div class="thread-meta">3 emails &bull; 2 participants &bull; Started Apr 1, 10:00 AM</div>
+    </div>
+
+    <div class="timeline">
+      <!-- Email 1: Sent -->
+      <div class="timeline-item">
+        <div class="timeline-dot sent"></div>
+        <div class="timeline-card">
+          <div class="timeline-card-header">
+            <div style="display:flex; align-items:center; gap:8px">
+              <span class="badge badge-blue">&rarr; Sent</span>
+              <span class="small-text" style="color:var(--text-tertiary)">Apr 1, 10:00 AM</span>
+            </div>
+          </div>
+          <div class="timeline-card-meta">
+            To: john@example.com &bull; Subject: <strong>Order #12345 Confirmation</strong>
+          </div>
+          <div class="timeline-card-body">
+            Hi John, Your order #12345 has been confirmed and is being processed. We'll send you a tracking number once the package ships. Expected delivery: 3-5 business days...
+          </div>
+          <div class="timeline-card-footer">
+            <span class="badge badge-green" style="font-size:11px">Delivered &#10003;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email 2: Received -->
+      <div class="timeline-item">
+        <div class="timeline-dot received"></div>
+        <div class="timeline-card">
+          <div class="timeline-card-header">
+            <div style="display:flex; align-items:center; gap:8px">
+              <span class="badge badge-green">&larr; Received</span>
+              <span class="small-text" style="color:var(--text-tertiary)">Apr 1, 10:23 AM</span>
+            </div>
+          </div>
+          <div class="timeline-card-meta">
+            From: <strong>John Doe</strong> &lt;john@example.com&gt; &bull; Subject: <strong>Re: Order #12345</strong>
+          </div>
+          <div class="timeline-card-body">
+            Hi Support Team, I have a question about my order #12345. The tracking number shows it was delivered yesterday, but I haven't received the package. Could you please check on this?
+          </div>
+          <div class="timeline-card-footer">
+            <div class="attachment-cell">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              2 attachments
+            </div>
+            <span class="badge badge-green" style="font-size:11px">SPF &#10003;</span>
+            <span class="badge badge-green" style="font-size:11px">DKIM &#10003;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email 3: Sent -->
+      <div class="timeline-item">
+        <div class="timeline-dot sent"></div>
+        <div class="timeline-card">
+          <div class="timeline-card-header">
+            <div style="display:flex; align-items:center; gap:8px">
+              <span class="badge badge-blue">&rarr; Sent</span>
+              <span class="small-text" style="color:var(--text-tertiary)">Apr 1, 11:45 AM</span>
+            </div>
+          </div>
+          <div class="timeline-card-meta">
+            To: john@example.com &bull; Subject: <strong>Re: Re: Order #12345</strong>
+          </div>
+          <div class="timeline-card-body">
+            Hi John, Thank you for reaching out. We've checked the tracking information and it appears the package was marked as delivered at your local post office. We recommend checking with them directly. If you still can't locate it, we'll initiate a replacement...
+          </div>
+          <div class="timeline-card-footer">
+            <span class="badge badge-green" style="font-size:11px">Delivered &#10003;</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SCREEN 4: INBOUND RULES MANAGEMENT
+     ============================================ -->
+<div id="screen4" class="screen">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-icon">E</div><span class="sidebar-logo-text">EaaS</span></div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#">Overview</a>
+      <div class="nav-section">Email</div>
+      <a class="nav-item" href="#">Sent</a>
+      <a class="nav-item" href="#">Received<span class="nav-badge new">NEW</span></a>
+      <a class="nav-item active" href="#">Inbound Rules<span class="nav-badge new">NEW</span></a>
+      <div class="nav-section">Configuration</div>
+      <a class="nav-item" href="#">Domains</a>
+      <a class="nav-item" href="#">Templates</a>
+      <a class="nav-item" href="#">API Keys</a>
+      <a class="nav-item" href="#">Webhooks</a>
+      <a class="nav-item" href="#">Suppressions</a>
+      <div class="nav-section">Analytics</div>
+      <a class="nav-item nav-sub" href="#">Outbound</a>
+      <a class="nav-item nav-sub" href="#">Inbound</a>
+      <div class="nav-section">System</div>
+      <a class="nav-item" href="#">Notifications</a>
+      <a class="nav-item" href="#">Settings</a>
+    </nav>
+    <div class="sidebar-footer"><a class="nav-item" href="#">Documentation</a></div>
+    <div class="sidebar-user"><div class="sidebar-avatar">II</div><div class="sidebar-user-info"><div class="sidebar-user-name">Israel Iyonsi</div><div class="sidebar-user-email">israel@eaas.dev</div></div></div>
+  </aside>
+
+  <div class="main-content">
+    <div class="breadcrumb">
+      <a href="#">Configuration</a>
+      <span class="sep">/</span>
+      <span>Inbound Rules</span>
+    </div>
+
+    <div class="page-header">
+      <div>
+        <div class="page-title"><h1>Inbound Rules</h1></div>
+        <div class="small-text" style="color:var(--text-secondary); margin-top:4px">3 active rules &bull; 1 inactive</div>
+      </div>
+      <button class="btn btn-primary" onclick="togglePanel()">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Rule
+      </button>
+    </div>
+
+    <div class="rules-grid">
+      <!-- Rule 1 -->
+      <div class="rule-card">
+        <div class="rule-card-header">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span class="priority-badge">#0</span>
+            <span class="rule-card-title">Support Inbox</span>
+          </div>
+          <span class="badge badge-green">Active</span>
+        </div>
+        <div class="rule-detail">
+          <dt>Domain</dt><dd>example.com</dd>
+          <dt>Pattern</dt><dd class="mono">support@</dd>
+          <dt>Action</dt><dd><span class="badge badge-blue">Webhook</span></dd>
+          <dt>URL</dt><dd class="mono" style="font-size:12px; word-break:break-all">https://myapp.com/webhooks/support</dd>
+        </div>
+        <div class="rule-card-footer">
+          <div class="rule-status">
+            <div class="toggle-switch on"></div>
+            <span style="color:var(--text-secondary); font-size:13px">Active</span>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 2 -->
+      <div class="rule-card">
+        <div class="rule-card-header">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span class="priority-badge">#1</span>
+            <span class="rule-card-title">Billing Forward</span>
+          </div>
+          <span class="badge badge-green">Active</span>
+        </div>
+        <div class="rule-detail">
+          <dt>Domain</dt><dd>example.com</dd>
+          <dt>Pattern</dt><dd class="mono">billing@</dd>
+          <dt>Action</dt><dd><span class="badge badge-amber">Forward</span></dd>
+          <dt>Forward To</dt><dd class="mono" style="font-size:12px">accounting@company.com</dd>
+        </div>
+        <div class="rule-card-footer">
+          <div class="rule-status">
+            <div class="toggle-switch on"></div>
+            <span style="color:var(--text-secondary); font-size:13px">Active</span>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 3 -->
+      <div class="rule-card">
+        <div class="rule-card-header">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span class="priority-badge">#2</span>
+            <span class="rule-card-title">Returns Store</span>
+          </div>
+          <span class="badge badge-green">Active</span>
+        </div>
+        <div class="rule-detail">
+          <dt>Domain</dt><dd>example.com</dd>
+          <dt>Pattern</dt><dd class="mono">returns@</dd>
+          <dt>Action</dt><dd><span class="badge badge-gray">Store</span></dd>
+        </div>
+        <div class="rule-card-footer">
+          <div class="rule-status">
+            <div class="toggle-switch on"></div>
+            <span style="color:var(--text-secondary); font-size:13px">Active</span>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rule 4 (Inactive) -->
+      <div class="rule-card inactive">
+        <div class="rule-card-header">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span class="priority-badge">#5</span>
+            <span class="rule-card-title">Catch-All</span>
+          </div>
+          <span class="badge badge-gray">Inactive</span>
+        </div>
+        <div class="rule-detail">
+          <dt>Domain</dt><dd>example.com</dd>
+          <dt>Pattern</dt><dd class="mono">*@</dd>
+          <dt>Action</dt><dd><span class="badge badge-gray">Store</span></dd>
+        </div>
+        <div class="rule-card-footer">
+          <div class="rule-status">
+            <div class="toggle-switch"></div>
+            <span style="color:var(--text-secondary); font-size:13px">Inactive</span>
+          </div>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-ghost btn-sm">Edit</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--error)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Rule Side Panel -->
+  <div class="panel-overlay" id="panelOverlay" onclick="togglePanel()"></div>
+  <div class="side-panel" id="sidePanel">
+    <div class="panel-header">
+      <h2>Create Rule</h2>
+      <button class="btn btn-ghost" onclick="togglePanel()" style="font-size:18px; padding:4px 8px">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label class="form-label">Rule Name</label>
+        <input class="form-input" type="text" placeholder="e.g., Support Inbox">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Domain</label>
+        <select class="form-select">
+          <option>Select a domain...</option>
+          <option>example.com</option>
+          <option>myapp.com</option>
+          <option>company.dev</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Match Pattern</label>
+        <input class="form-input mono" type="text" placeholder="e.g., support@ or *@">
+        <div class="form-helper">Use * as a wildcard. Pattern matches the local part of the email address.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Action</label>
+        <div class="radio-group">
+          <div class="radio-option selected">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-label">Webhook</div>
+              <div class="small-text" style="color:var(--text-tertiary)">Forward parsed email data to a URL</div>
+            </div>
+          </div>
+          <div class="conditional-field">
+            <label class="form-label">Webhook URL</label>
+            <input class="form-input mono" type="text" placeholder="https://myapp.com/webhooks/inbound">
+          </div>
+          <div class="radio-option">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-label">Forward</div>
+              <div class="small-text" style="color:var(--text-tertiary)">Forward original email to another address</div>
+            </div>
+          </div>
+          <div class="radio-option">
+            <div class="radio-dot"></div>
+            <div>
+              <div class="radio-label">Store</div>
+              <div class="small-text" style="color:var(--text-tertiary)">Store email for retrieval via API</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <input class="form-input" type="number" value="0" min="0" max="100" style="width:100px">
+        <div class="form-helper">Lower numbers have higher priority. Rules are evaluated in priority order.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:4px">
+          <div class="toggle-switch on"></div>
+          <span style="font-size:13px; color:var(--text-secondary)">Active</span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-secondary" onclick="togglePanel()">Cancel</button>
+      <button class="btn btn-primary">Create Rule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     DESIGN SPECIFICATIONS
+     ============================================ -->
+<div id="specs" class="screen design-specs" style="display:none; flex-direction:column;">
+  <div style="max-width:1200px; margin:0 auto; width:100%">
+    <h1 style="margin-bottom:8px">Design Specifications</h1>
+    <p style="color:var(--text-secondary); margin-bottom:32px">EaaS Inbound Mail Dashboard — Component & Token Reference</p>
+
+    <div class="specs-grid">
+      <!-- Typography -->
+      <div class="specs-section">
+        <h3>Typography</h3>
+        <table>
+          <thead><tr><th>Element</th><th>Spec</th></tr></thead>
+          <tbody>
+            <tr><td>H1</td><td>Inter 24px/32px semibold, -0.025em</td></tr>
+            <tr><td>H2</td><td>Inter 20px/28px semibold, -0.02em</td></tr>
+            <tr><td>H3</td><td>Inter 16px/24px medium</td></tr>
+            <tr><td>Body</td><td>Inter 14px/20px regular</td></tr>
+            <tr><td>Small</td><td>Inter 12px/16px regular</td></tr>
+            <tr><td>Mono</td><td>JetBrains Mono 13px</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Spacing -->
+      <div class="specs-section">
+        <h3>Spacing</h3>
+        <table>
+          <thead><tr><th>Token</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Base unit</td><td>4px</td></tr>
+            <tr><td>Padding sm</td><td>12px</td></tr>
+            <tr><td>Padding md</td><td>16px</td></tr>
+            <tr><td>Padding lg</td><td>24px</td></tr>
+            <tr><td>Gap sm</td><td>8px</td></tr>
+            <tr><td>Gap md</td><td>12px</td></tr>
+            <tr><td>Gap lg</td><td>16px</td></tr>
+            <tr><td>Gap xl</td><td>24px</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Colors -->
+      <div class="specs-section">
+        <h3>Colors</h3>
+        <table>
+          <thead><tr><th>Token</th><th>Light</th><th>Dark</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Background</td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#ffffff"></span>#ffffff</span></td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#0f172a"></span>#0f172a</span></td>
+            </tr>
+            <tr>
+              <td>Surface</td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#f8fafc"></span>#f8fafc</span></td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#1e293b"></span>#1e293b</span></td>
+            </tr>
+            <tr>
+              <td>Border</td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#e2e8f0"></span>#e2e8f0</span></td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#334155"></span>#334155</span></td>
+            </tr>
+            <tr>
+              <td>Text Primary</td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#0f172a"></span>#0f172a</span></td>
+              <td><span class="color-swatch"><span class="swatch" style="background:#f8fafc"></span>#f8fafc</span></td>
+            </tr>
+            <tr>
+              <td>Text Secondary</td>
+              <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#64748b"></span>#64748b</span></td>
+            </tr>
+            <tr>
+              <td>Primary</td>
+              <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#2563eb"></span>#2563eb</span></td>
+            </tr>
+            <tr>
+              <td>Success</td>
+              <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#22c55e"></span>#22c55e</span></td>
+            </tr>
+            <tr>
+              <td>Warning</td>
+              <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#f59e0b"></span>#f59e0b</span></td>
+            </tr>
+            <tr>
+              <td>Error</td>
+              <td colspan="2"><span class="color-swatch"><span class="swatch" style="background:#ef4444"></span>#ef4444</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Component Specs -->
+      <div class="specs-section">
+        <h3>Component Specs</h3>
+        <table>
+          <thead><tr><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Border radius sm</td><td><code>6px</code></td></tr>
+            <tr><td>Border radius md</td><td><code>8px</code></td></tr>
+            <tr><td>Border radius lg</td><td><code>12px</code></td></tr>
+            <tr><td>Shadow sm</td><td><code>0 1px 2px rgba(0,0,0,0.05)</code></td></tr>
+            <tr><td>Shadow md</td><td><code>0 4px 6px rgba(0,0,0,0.07)</code></td></tr>
+            <tr><td>Transition</td><td><code>150ms ease</code></td></tr>
+            <tr><td>Sidebar width</td><td><code>240px</code></td></tr>
+            <tr><td>Side panel width</td><td><code>480px</code></td></tr>
+            <tr><td>Base font size</td><td><code>14px</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Screen Navigation
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
+  document.querySelectorAll('.screen-nav button:not(.theme-toggle)').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById(id);
+  screen.style.display = id === 'specs' ? 'flex' : 'flex';
+  screen.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Fix: set the correct nav button active
+  const buttons = document.querySelectorAll('.screen-nav button:not(.theme-toggle)');
+  buttons.forEach(b => b.classList.remove('active'));
+  const screenIds = ['screen1','screen2','screen3','screen4','specs'];
+  const idx = screenIds.indexOf(id);
+  if (idx >= 0 && buttons[idx]) buttons[idx].classList.add('active');
+}
+
+// Theme Toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('theme-icon-sun').style.display = isDark ? 'inline-block' : 'none';
+  document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'inline-block';
+  document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+}
+
+// Side Panel Toggle
+function togglePanel() {
+  document.getElementById('sidePanel').classList.toggle('show');
+  document.getElementById('panelOverlay').classList.toggle('show');
+}
+
+// Toggle switches
+document.querySelectorAll('.toggle-switch').forEach(el => {
+  el.addEventListener('click', function() { this.classList.toggle('on'); });
+});
+
+// Checkbox clicks
+document.querySelectorAll('.checkbox').forEach(el => {
+  el.addEventListener('click', function() { this.classList.toggle('checked'); });
+});
+
+// Tab clicks
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Radio option clicks
+document.querySelectorAll('.radio-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    this.closest('.radio-group').querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// Initialize first screen
+showScreen('screen1');
+</script>
+</body>
+</html>

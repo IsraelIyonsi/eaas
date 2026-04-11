@@ -16,7 +16,6 @@ public static class ListApiKeysEndpoint
             return Results.Ok(ApiResponse.Ok(result));
         })
         .WithName("ListApiKeys")
-        .WithOpenApi()
         .Produces<ApiResponse<IReadOnlyList<ApiKeySummary>>>(StatusCodes.Status200OK);
     }
 

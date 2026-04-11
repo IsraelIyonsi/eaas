@@ -1,0 +1,57 @@
+# Non-sensitive configuration shared across all EaaS services
+# Secrets are in secrets.yaml (or ideally External Secrets Operator in production)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eaas-config
+  namespace: eaas
+  labels:
+    app.kubernetes.io/name: eaas-config
+    app.kubernetes.io/part-of: eaas
+data:
+  # Database - routed through PgBouncer for connection pooling
+  ConnectionStrings__DefaultConnection: "Host=eaas-pgbouncer;Port=6432;Database=eaas;Username=eaas_app;Pooling=false"
+  Database__Host: "eaas-pgbouncer"
+  Database__Port: "6432"
+  Database__Name: "eaas"
+  Database__Username: "eaas_app"
+
+  # Redis Sentinel - clients connect to sentinel which redirects to current master
+  Redis__SentinelEndpoints: "eaas-redis-sentinel:26379"
+  Redis__MasterName: "eaas-master"
+  Redis__Database: "0"
+
+  # RabbitMQ
+  RabbitMQ__Host: "eaas-rabbitmq"
+  RabbitMQ__Port: "5672"
+  RabbitMQ__VirtualHost: "eaas"
+  RabbitMQ__Username: "eaas_app"
+
+  # AWS SES
+  Ses__Region: "us-east-1"
+  Ses__ConfigurationSet: "eaas-production"
+
+  # Inbound email processing
+  Inbound__S3Bucket: "eaas-inbound-mail"
+  Inbound__S3Prefix: "incoming/"
+
+  # Rate limiting - per-tenant defaults (overridable per customer)
+  RateLimit__DefaultPerSecond: "100"
+  RateLimit__DefaultPerMinute: "3000"
+  RateLimit__DefaultPerHour: "50000"
+  RateLimit__DefaultPerDay: "500000"
+
+  # Feature flags
+  Features__InboundEmail: "true"
+  Features__WebhookRetry: "true"
+  Features__BatchSending: "true"
+  Features__TemplateEngine: "true"
+
+  # Logging
+  Logging__LogLevel__Default: "Information"
+  Logging__LogLevel__Microsoft: "Warning"
+  Logging__LogLevel__System: "Warning"
+
+  # Observability
+  OpenTelemetry__Enabled: "true"
+  OpenTelemetry__ExporterEndpoint: "http://otel-collector.monitoring:4317"

@@ -1,0 +1,85 @@
+# Production overlay: full resources, all replicas, HPA at max capacity
+# Designed for 100M emails across 100 customers
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eaas
+
+resources:
+  - ../../
+  - pdb.yaml
+
+commonLabels:
+  environment: production
+
+# Production uses the base values directly - they are already tuned for production:
+#   API: 3 replicas, HPA 3-10, 256Mi/512Mi memory, 250m/1 CPU
+#   Worker: 3 replicas, HPA 3-8, 256Mi/512Mi memory, 250m/1 CPU
+#   WebhookProcessor: 2 replicas, HPA 2-5, 128Mi/256Mi memory, 125m/500m CPU
+#   PostgreSQL: 1 replica, 100Gi SSD, 2Gi/4Gi memory
+#   RabbitMQ: 3 replicas, 20Gi SSD, 1Gi/2Gi memory
+#   Redis: 3 replicas (1 master + 2 replicas), 10Gi SSD
+#   PgBouncer: 2 replicas
+
+patches:
+  # Production config: tighten logging, enable all features
+  - target:
+      kind: ConfigMap
+      name: eaas-config
+    patch: |
+      - op: replace
+        path: /data/Logging__LogLevel__Default
+        value: "Warning"
+      - op: replace
+        path: /data/Features__InboundEmail
+        value: "true"
+      - op: replace
+        path: /data/Features__WebhookRetry
+        value: "true"
+      - op: replace
+        path: /data/Features__BatchSending
+        value: "true"
+      - op: replace
+        path: /data/Features__TemplateEngine
+        value: "true"
+
+  # Production images should use specific tags, never :latest
+  - target:
+      kind: Deployment
+      name: eaas-api
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: "eaas/api:RELEASE_TAG"
+
+  - target:
+      kind: Deployment
+      name: eaas-worker
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: "eaas/worker:RELEASE_TAG"
+
+  - target:
+      kind: Deployment
+      name: eaas-webhook-processor
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: "eaas/webhook-processor:RELEASE_TAG"
+
+  - target:
+      kind: Job
+      name: eaas-db-migration
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: "eaas/migration:RELEASE_TAG"
+
+  # Pod Disruption Budgets are enforced in production via separate resources below
+
+# PodDisruptionBudgets ensure minimum availability during node drains and upgrades
+patchesStrategicMerge: []
+
+# Additional production-only resources
+generators: []

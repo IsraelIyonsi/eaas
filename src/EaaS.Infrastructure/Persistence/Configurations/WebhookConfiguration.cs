@@ -37,10 +37,6 @@ public sealed class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
 
         builder.Property(w => w.Status)
             .HasColumnName("status")
-            .HasMaxLength(20)
-            .HasConversion(
-                v => v.ToString().ToLowerInvariant(),
-                v => Enum.Parse<WebhookStatus>(v, true))
             .HasDefaultValue(WebhookStatus.Active);
 
         builder.Property(w => w.CreatedAt)

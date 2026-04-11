@@ -1,33 +1,23 @@
 "use client";
 
+import { extractItems } from "@/lib/utils/api-response";
+
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { useEmails, useEmailEvents } from "@/lib/hooks/use-emails";
+import { PageHeader } from "@/components/shared/page-header";
 import { EmailTable } from "@/components/emails/email-table";
 import { EmailDetailSheet } from "@/components/emails/email-detail";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { EmailStatusConfig } from "@/lib/constants/status";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, X } from "lucide-react";
-import type { Email, EmailStatus } from "@/types";
+import { FilterBar } from "@/components/shared/filter-bar";
+import type { Email } from "@/types";
 
-const statusOptions: { value: string; label: string }[] = [
+const statusOptions = [
   { value: "all", label: "All Statuses" },
-  { value: "queued", label: "Queued" },
-  { value: "sending", label: "Sending" },
-  { value: "delivered", label: "Delivered" },
-  { value: "bounced", label: "Bounced" },
-  { value: "complained", label: "Complained" },
-  { value: "failed", label: "Failed" },
-  { value: "opened", label: "Opened" },
-  { value: "clicked", label: "Clicked" },
+  ...Object.entries(EmailStatusConfig).map(([value, config]) => ({
+    value,
+    label: config.label,
+  })),
 ];
 
 export default function EmailsPage() {
@@ -36,24 +26,14 @@ export default function EmailsPage() {
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["emails", page, status, search],
-    queryFn: () =>
-      api.getEmails({
-        page,
-        page_size: 10,
-        status: status === "all" ? undefined : status,
-        search: search || undefined,
-      }),
-    placeholderData: (prev) => prev,
+  const { data, isLoading } = useEmails({
+    page,
+    page_size: 10,
+    status: status === "all" ? undefined : (status as Email["status"]),
+    search: search || undefined,
   });
 
-  const { data: events } = useQuery({
-    queryKey: ["email-events", selectedEmail?.id],
-    queryFn: () =>
-      selectedEmail ? api.getEmailEvents(selectedEmail) : Promise.resolve([]),
-    enabled: !!selectedEmail,
-  });
+  const { data: events } = useEmailEvents(selectedEmail?.id);
 
   function clearFilters() {
     setStatus("all");
@@ -61,76 +41,50 @@ export default function EmailsPage() {
     setPage(1);
   }
 
-  const hasFilters = status !== "all" || search !== "";
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-xl font-bold text-white">Email Logs</h1>
-        <p className="mt-1 text-sm text-white/50">
-          Search and filter all sent emails. Click any row to view full delivery
-          details.
-        </p>
-      </div>
+      <PageHeader
+        title="Email Logs"
+        description="Search and filter all sent emails. Click any row to view full delivery details."
+      />
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center gap-3 pb-2">
-        <Select
-          value={status}
-          onValueChange={(v) => {
-            setStatus(v ?? "all");
+      <FilterBar
+        search={{
+          value: search,
+          onChange: (v) => {
+            setSearch(v);
             setPage(1);
-          }}
-        >
-          <SelectTrigger className="w-[160px] border-white/10 bg-[#27293D] text-white">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent className="border-white/10 bg-[#27293D]">
-            {statusOptions.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
-          <Input
-            placeholder="Search by recipient, subject..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+          },
+          placeholder: "Search by recipient, subject...",
+        }}
+        filters={[
+          {
+            key: "status",
+            label: "Status",
+            type: "select",
+            options: statusOptions,
+            value: status,
+            onChange: (v) => {
+              setStatus((v as string) ?? "all");
               setPage(1);
-            }}
-            className="border-white/10 bg-[#27293D] pl-9 text-white placeholder:text-white/30"
-          />
-        </div>
-
-        {hasFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="text-white/40 hover:text-white"
-          >
-            <X className="mr-1 h-3 w-3" />
-            Clear Filters
-          </Button>
-        )}
-      </div>
+            },
+          },
+        ]}
+        onClear={clearFilters}
+      />
 
       {/* Table */}
       {isLoading ? (
-        <Skeleton className="h-[400px] rounded-lg bg-white/5" />
+        <Skeleton className="h-[400px] rounded-lg" />
       ) : (
         <EmailTable
-          emails={data?.items ?? []}
-          total={data?.total ?? 0}
+          emails={extractItems(data)}
+          total={data?.totalCount ?? 0}
           page={data?.page ?? 1}
-          pageSize={data?.page_size ?? 10}
-          totalPages={data?.total_pages ?? 1}
+          pageSize={data?.pageSize ?? 10}
+          totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? 20))}
           onPageChange={setPage}
           onRowClick={setSelectedEmail}
         />

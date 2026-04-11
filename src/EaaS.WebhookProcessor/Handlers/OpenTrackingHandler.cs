@@ -4,10 +4,11 @@ using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EaaS.WebhookProcessor.Handlers;
 
-public sealed class OpenTrackingHandler
+public sealed partial class OpenTrackingHandler
 {
     private static readonly byte[] TransparentGif =
     {
@@ -21,11 +22,13 @@ public sealed class OpenTrackingHandler
 
     private readonly ITrackingTokenService _tokenService;
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<OpenTrackingHandler> _logger;
 
-    public OpenTrackingHandler(ITrackingTokenService tokenService, AppDbContext dbContext)
+    public OpenTrackingHandler(ITrackingTokenService tokenService, AppDbContext dbContext, ILogger<OpenTrackingHandler> logger)
     {
         _tokenService = tokenService;
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<IResult> HandleAsync(string token, HttpContext httpContext, CancellationToken cancellationToken)
@@ -53,13 +56,17 @@ public sealed class OpenTrackingHandler
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
-            catch
+            catch (Exception ex)
             {
                 // Tracking failures should not break the pixel response
+                LogOpenTrackingFailed(_logger, data.EmailId, ex);
             }
         }
 
         httpContext.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
         return Results.File(TransparentGif, "image/gif");
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Open tracking event failed to persist for EmailId={EmailId}")]
+    private static partial void LogOpenTrackingFailed(ILogger logger, Guid emailId, Exception ex);
 }

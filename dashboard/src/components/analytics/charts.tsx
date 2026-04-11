@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TimelinePoint } from "@/types";
 import { format, parseISO } from "date-fns";
 
-// Custom tooltip matching dark theme
+// Custom tooltip matching theme
 function CustomTooltip({
   active,
   payload,
@@ -30,16 +30,16 @@ function CustomTooltip({
 }) {
   if (!active || !payload) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-[#1E1E2E] px-3 py-2 shadow-xl">
-      <p className="mb-1 text-xs text-white/50">{label}</p>
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-xl">
+      <p className="mb-1 text-xs text-muted-foreground">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2 text-xs">
           <span
             className="inline-block h-2 w-2 rounded-full"
             style={{ backgroundColor: p.color }}
           />
-          <span className="text-white/70">{p.name}:</span>
-          <span className="font-semibold text-white">
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-semibold text-foreground">
             {p.value.toLocaleString()}
           </span>
         </div>
@@ -59,9 +59,9 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
   }));
 
   return (
-    <Card className="border-white/10 bg-[#1E1E2E] shadow-none">
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-white">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Email Volume
         </CardTitle>
       </CardHeader>
@@ -71,8 +71,8 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
             <AreaChart data={formatted}>
               <defs>
                 <linearGradient id="sentGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#7C4DFF" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#7C4DFF" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient
                   id="deliveredGrad"
@@ -81,34 +81,35 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="5%" stopColor="#00E676" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#00E676" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke="var(--border)"
+                opacity={0.5}
               />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <RechartsTooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}
+                wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }}
               />
               <Area
                 type="monotone"
                 dataKey="sent"
                 name="Sent"
-                stroke="#7C4DFF"
+                stroke="#2563eb"
                 fill="url(#sentGrad)"
                 strokeWidth={2}
               />
@@ -116,7 +117,7 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="delivered"
                 name="Delivered"
-                stroke="#00E676"
+                stroke="#22c55e"
                 fill="url(#deliveredGrad)"
                 strokeWidth={2}
               />
@@ -135,9 +136,9 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
   }));
 
   return (
-    <Card className="border-white/10 bg-[#1E1E2E] shadow-none">
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-white">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Delivery vs Bounce
         </CardTitle>
       </CardHeader>
@@ -147,34 +148,35 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
             <BarChart data={formatted}>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke="var(--border)"
+                opacity={0.5}
               />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <RechartsTooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}
+                wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }}
               />
               <Bar
                 dataKey="delivered"
                 name="Delivered"
-                fill="#00E676"
+                fill="#22c55e"
                 radius={[3, 3, 0, 0]}
                 opacity={0.85}
               />
               <Bar
                 dataKey="bounced"
                 name="Bounced"
-                fill="#FF5252"
+                fill="#ef4444"
                 radius={[3, 3, 0, 0]}
                 opacity={0.85}
               />
@@ -193,9 +195,9 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
   }));
 
   return (
-    <Card className="border-white/10 bg-[#1E1E2E] shadow-none">
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold text-white">
+        <CardTitle className="text-sm font-semibold text-foreground">
           Engagement Trends
         </CardTitle>
       </CardHeader>
@@ -205,28 +207,29 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
             <LineChart data={formatted}>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke="var(--border)"
+                opacity={0.5}
               />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }}
-                axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
+                axisLine={{ stroke: "var(--border)" }}
                 tickLine={false}
               />
               <RechartsTooltip content={<CustomTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }}
+                wrapperStyle={{ fontSize: 12, color: "var(--muted-foreground)" }}
               />
               <Line
                 type="monotone"
                 dataKey="opened"
                 name="Opened"
-                stroke="#7C4DFF"
+                stroke="#2563eb"
                 strokeWidth={2}
                 dot={false}
               />
@@ -234,7 +237,7 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="clicked"
                 name="Clicked"
-                stroke="#00E5FF"
+                stroke="#8b5cf6"
                 strokeWidth={2}
                 dot={false}
               />
