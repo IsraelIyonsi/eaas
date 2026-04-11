@@ -1,0 +1,54 @@
+// ============================================================
+// EaaS Dashboard - Domain React Query Hooks
+// ============================================================
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { repositories } from '@/lib/api/index';
+import { QueryKeys } from '@/lib/constants/query-keys';
+import { STALE_TIME_MS } from '@/lib/constants/ui';
+
+export function useDomains() {
+  return useQuery({
+    queryKey: QueryKeys.domains.list(),
+    queryFn: () => repositories.domain.list(),
+    staleTime: STALE_TIME_MS,
+  });
+}
+
+export function useDomain(id: string | undefined) {
+  return useQuery({
+    queryKey: QueryKeys.domains.detail(id!),
+    queryFn: () => repositories.domain.getById(id!),
+    enabled: !!id,
+  });
+}
+
+export function useAddDomain() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (domain: string) => repositories.domain.add(domain),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.domains.all });
+    },
+  });
+}
+
+export function useVerifyDomain() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => repositories.domain.verify(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.domains.all });
+    },
+  });
+}
+
+export function useDeleteDomain() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => repositories.domain.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.domains.all });
+    },
+  });
+}

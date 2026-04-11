@@ -1,0 +1,45 @@
+// ============================================================
+// EaaS Dashboard - Page Routes
+// ============================================================
+
+export const Routes = {
+  OVERVIEW: '/',
+  EMAILS: '/emails',
+  EMAIL_DETAIL: (id: string) => `/emails/${id}`,
+  INBOUND_EMAILS: '/inbound/emails',
+  INBOUND_EMAIL_DETAIL: (id: string) => `/inbound/emails/${id}`,
+  INBOUND_THREAD: (id: string) => `/inbound/emails/${id}/thread`,
+  INBOUND_RULES: '/inbound/rules',
+  INBOUND_SETUP: (domainId: string) => `/domains/${domainId}/inbound-setup`,
+  TEMPLATES: '/templates',
+  TEMPLATE_EDITOR: (id: string) => `/templates/${id}`,
+  DOMAINS: '/domains',
+  DOMAIN_DETAIL: (id: string) => `/domains/${id}`,
+  API_KEYS: '/api-keys',
+  WEBHOOKS: '/webhooks',
+  SUPPRESSIONS: '/suppressions',
+  ANALYTICS_OUTBOUND: '/analytics',
+  ANALYTICS_INBOUND: '/analytics/inbound',
+  NOTIFICATIONS: '/notifications',
+  SETTINGS: '/settings',
+  DOCS: '/docs',
+  DOCS_SANDBOX: '/docs/sandbox',
+  LOGIN: '/login',
+  SIGNUP: '/signup',
+  PRIVACY: '/privacy',
+  TERMS: '/terms',
+  COOKIES: '/cookies',
+  DPA: '/dpa',
+  SUB_PROCESSORS: '/sub-processors',
+  ACCEPTABLE_USE: '/acceptable-use',
+
+  // Admin
+  ADMIN_OVERVIEW: '/admin',
+  ADMIN_TENANTS: '/admin/tenants',
+  ADMIN_TENANT_DETAIL: (id: string) => `/admin/tenants/${id}`,
+  ADMIN_USERS: '/admin/users',
+  ADMIN_HEALTH: '/admin/health',
+  ADMIN_ANALYTICS: '/admin/analytics',
+  ADMIN_AUDIT_LOGS: '/admin/audit-logs',
+  ADMIN_BILLING: '/admin/billing',
+} as const;
