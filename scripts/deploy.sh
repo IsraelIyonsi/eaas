@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 echo "[deploy] Starting deployment at $(date)"
 cd /opt/eaas
@@ -9,17 +9,25 @@ echo "[deploy] Pulling latest code..."
 git fetch origin dev
 git reset --hard origin/dev
 
-# Restore .env (never tracked in git)
+# Remove local dev override file — it must never run in production.
+# Docker Compose auto-merges docker-compose.override.yml if it exists,
+# which overwrites SESSION_SECRET and NODE_ENV with dev values.
+rm -f /opt/eaas/docker-compose.override.yml
+
+# Restore .env from secure backup (never tracked in git)
 if [ -f /root/.env.backup ]; then
   cp /root/.env.backup /opt/eaas/.env
 fi
 
-# Rebuild and restart containers
+# Rebuild and restart application containers only (infra stays up)
 echo "[deploy] Building Docker images..."
-docker compose build --no-cache api worker webhook-processor dashboard
+docker compose -f docker-compose.yml build --no-cache api worker webhook-processor dashboard
 
 echo "[deploy] Restarting services..."
-docker compose up -d --force-recreate api worker webhook-processor dashboard
+docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard
+
+echo "[deploy] Waiting for health checks..."
+sleep 20
+docker compose -f docker-compose.yml ps
 
 echo "[deploy] Deployment complete at $(date)"
-docker compose ps
