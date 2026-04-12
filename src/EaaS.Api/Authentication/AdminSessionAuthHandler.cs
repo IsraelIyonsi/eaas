@@ -130,7 +130,6 @@ public sealed partial class AdminSessionAuthHandler : AuthenticationHandler<Admi
     private async Task<AuthenticateResult> AuthenticateAdminUser(Guid userId)
     {
         var adminUser = await _dbContext.AdminUsers
-            .AsNoTracking()
             .Where(u => u.Id == userId)
             .Select(u => new { u.Id, u.Email, u.Role, u.IsActive })
             .FirstOrDefaultAsync();
