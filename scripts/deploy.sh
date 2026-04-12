@@ -16,10 +16,10 @@ if [ "${DEPLOY_PHASE:-1}" = "1" ]; then
   echo "[deploy] Starting deployment at $(date)"
   cd /opt/eaas
 
-  # Pull latest from master (production branch)
+  # Pull latest from prod (production branch)
   echo "[deploy] Pulling latest code..."
-  git fetch origin master
-  git reset --hard origin/master
+  git fetch origin prod
+  git reset --hard origin/prod
 
   # Re-execute the updated script (Phase 2) so migration/config changes take effect
   echo "[deploy] Re-executing updated deploy script..."
