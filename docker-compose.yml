@@ -183,7 +183,7 @@ services:
       - RabbitMq__Username=eaas_app
       - RabbitMq__Password=${RABBITMQ_PASSWORD}
       - RabbitMq__VirtualHost=eaas
-      - Tracking__BaseUrl=https://email.israeliyonsi.dev
+      - Tracking__BaseUrl=https://sendnex.xyz
     depends_on:
       postgres:
         condition: service_healthy
