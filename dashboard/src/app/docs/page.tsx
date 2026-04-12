@@ -3,7 +3,7 @@
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Book, Code, Webhook, Rocket, ExternalLink, FlaskConical } from "lucide-react";
+import { Book, Code, Webhook, Rocket, ArrowRight, FlaskConical } from "lucide-react";
 import Link from "next/link";
 import { Routes } from "@/lib/constants/routes";
 
@@ -12,7 +12,7 @@ const sections = [
     title: "API Reference",
     description: "Complete REST API documentation with request/response examples for all endpoints.",
     icon: Code,
-    href: Routes.API_KEYS,
+    href: Routes.DOCS_SANDBOX,
     badge: "10 endpoints",
     items: [
       "POST /api/v1/emails/send — Send email",
@@ -54,7 +54,7 @@ const sections = [
     title: "Getting Started",
     description: "Quick start guide to send your first email in under 5 minutes.",
     icon: Book,
-    href: Routes.DOMAINS,
+    href: Routes.DOCS_SANDBOX,
     badge: "5 min quickstart",
     items: [
       "Create an API key",
@@ -127,7 +127,7 @@ export default function DocsPage() {
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   View details
-                  <ExternalLink className="h-3 w-3" />
+                  <ArrowRight className="h-3 w-3" />
                 </Link>
               </CardContent>
             </Card>

@@ -156,6 +156,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f EaaS.Worker || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -205,7 +211,6 @@ services:
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
-      - NEXT_PUBLIC_API_URL=http://api:8080
       - EAAS_API_INTERNAL_URL=http://api:8080
       - EAAS_API_KEY=${EAAS_API_KEY}
       - SESSION_SECRET=${SESSION_SECRET}
@@ -355,6 +360,10 @@ services:
       - ./docker/nginx/ssl:/etc/letsencrypt
       - certbot_data:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
 volumes:
   postgres_data:

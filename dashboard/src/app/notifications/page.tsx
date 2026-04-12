@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useDomains } from "@/lib/hooks/use-domains";
 import { toast } from "sonner";
-import { Bell, TrendingUp, XCircle, ShieldAlert, Loader2 } from "lucide-react";
+import { Bell, TrendingUp, XCircle, ShieldAlert } from "lucide-react";
 
 const intervalOptions = [
   { value: "5", label: "5 minutes" },
@@ -46,19 +46,13 @@ export default function NotificationsPage() {
   // Notification channel
   const [channel, setChannel] = useState<"webhook" | "email">("webhook");
   const [webhookUrl, setWebhookUrl] = useState("");
-  const [saving, setSaving] = useState(false);
 
   function handleSave() {
-    setSaving(true);
-    // Simulated save
-    setTimeout(() => {
-      setSaving(false);
-      toast.success("Notification preferences saved");
-    }, 600);
+    toast.info("Notification preferences will be available in an upcoming update.");
   }
 
   function handleTest() {
-    toast.info("Test alert sent to your configured channel");
+    toast.info("Alert testing will be available in an upcoming update.");
   }
 
   return (
@@ -231,10 +225,8 @@ export default function NotificationsPage() {
       <div className="flex justify-end">
         <Button
           onClick={handleSave}
-          disabled={saving}
           className="bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {saving && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
           Save Preferences
         </Button>
       </div>

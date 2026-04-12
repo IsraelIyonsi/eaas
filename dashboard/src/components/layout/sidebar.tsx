@@ -19,6 +19,7 @@ import {
   Zap,
   BookOpen,
   Shield,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Routes } from "@/lib/constants/routes";
@@ -87,9 +88,10 @@ interface SidebarProps {
   onToggle: () => void;
   userName?: string;
   userEmail?: string;
+  userRole?: "superadmin" | "admin" | "readonly" | "tenant";
 }
 
-export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarProps) {
+export function Sidebar({ collapsed, onToggle, userName, userEmail, userRole }: SidebarProps) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -161,7 +163,7 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarPro
                       <>
                         <span className="flex-1 truncate">{item.label}</span>
                         {item.badge && (
-                          <span className="rounded-full bg-[#22c55e] px-[6px] py-[1px] text-[10px] font-semibold leading-tight text-white">
+                          <span className="rounded-full bg-blue-500 px-[6px] py-[1px] text-[10px] font-semibold leading-tight text-white">
                             {item.badge}
                           </span>
                         )}
@@ -175,8 +177,8 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarPro
         ))}
       </nav>
 
-      {/* Admin Panel Link */}
-      {!collapsed && (
+      {/* Admin Panel Link — only for admin/superadmin */}
+      {!collapsed && (userRole === "admin" || userRole === "superadmin") && (
         <div className="border-t border-white/[0.08] px-2 py-2">
           <Link
             href={Routes.ADMIN_OVERVIEW}
@@ -190,7 +192,7 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarPro
 
       {/* User */}
       {!collapsed && (
-        <div className="border-t border-white/[0.08] px-3 py-3">
+        <div className="border-t border-white/[0.08] px-3 py-3 space-y-2">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#3b82f6]">
               <span className="text-[11px] font-semibold text-white">
@@ -202,6 +204,16 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarPro
               <p className="truncate text-[11px] text-[#64748b]">{userEmail ?? "user@example.com"}</p>
             </div>
           </div>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Sign out</span>
+          </button>
         </div>
       )}
     </aside>

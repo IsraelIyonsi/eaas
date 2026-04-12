@@ -13,13 +13,29 @@ async function proxyRequest(
   { params }: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
   // Verify dashboard session
-  const session = request.cookies.get("sendnex_session");
-  if (!session || !verifySession(session.value)) {
+  const sessionCookie = request.cookies.get("sendnex_session");
+  if (!sessionCookie || !verifySession(sessionCookie.value)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const session = getSessionData(sessionCookie.value);
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { path } = await params;
   const apiPath = "/" + path.join("/");
+
+  // Block admin routes for non-admin sessions
+  if (apiPath.startsWith("/api/v1/admin/") && session.role !== "superadmin" && session.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Reject path traversal attempts
+  if (apiPath.includes("..")) {
+    return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+  }
+
   const url = new URL(apiPath, API_INTERNAL_URL);
 
   // Forward query parameters
@@ -33,12 +49,9 @@ async function proxyRequest(
 
   // For admin routes, forward session data as trusted headers
   if (apiPath.startsWith("/api/v1/admin/")) {
-    const sessionData = getSessionData(session.value);
-    if (sessionData) {
-      headers["X-Admin-User-Id"] = sessionData.userId;
-      headers["X-Admin-Email"] = sessionData.email;
-      headers["X-Admin-Role"] = sessionData.role;
-    }
+    headers["X-Admin-User-Id"] = session.userId;
+    headers["X-Admin-Email"] = session.email;
+    headers["X-Admin-Role"] = session.role;
     // Still send API key for proxy identification
     headers["Authorization"] = `Bearer ${API_KEY}`;
   } else {
@@ -63,7 +76,14 @@ async function proxyRequest(
   }
 
   try {
-    const response = await fetch(url.toString(), fetchOptions);
+    const controller = new AbortController();
+    const proxyTimeout = setTimeout(() => controller.abort(), 30000);
+    let response: Response;
+    try {
+      response = await fetch(url.toString(), { ...fetchOptions, signal: controller.signal });
+    } finally {
+      clearTimeout(proxyTimeout);
+    }
     const responseBody = await response.text();
 
     return new NextResponse(responseBody, {

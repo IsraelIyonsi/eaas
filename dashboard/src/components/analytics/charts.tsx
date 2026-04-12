@@ -14,6 +14,7 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TimelinePoint } from "@/types";
 import { format, parseISO } from "date-fns";
@@ -53,10 +54,14 @@ interface SendVolumeChartProps {
 }
 
 export function SendVolumeChart({ data }: SendVolumeChartProps) {
-  const formatted = data.map((p) => ({
-    ...p,
-    date: format(parseISO(p.timestamp), "MMM d"),
-  }));
+  const formatted = useMemo(
+    () =>
+      data.map((p) => ({
+        ...p,
+        date: format(parseISO(p.timestamp), "MMM d"),
+      })),
+    [data],
+  );
 
   return (
     <Card className="border-border bg-card shadow-sm">
@@ -130,10 +135,14 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
 }
 
 export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
-  const formatted = data.map((p) => ({
-    ...p,
-    date: format(parseISO(p.timestamp), "MMM d"),
-  }));
+  const formatted = useMemo(
+    () =>
+      data.map((p) => ({
+        ...p,
+        date: format(parseISO(p.timestamp), "MMM d"),
+      })),
+    [data],
+  );
 
   return (
     <Card className="border-border bg-card shadow-sm">
@@ -189,10 +198,14 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
 }
 
 export function EngagementChart({ data }: SendVolumeChartProps) {
-  const formatted = data.map((p) => ({
-    ...p,
-    date: format(parseISO(p.timestamp), "MMM d"),
-  }));
+  const formatted = useMemo(
+    () =>
+      data.map((p) => ({
+        ...p,
+        date: format(parseISO(p.timestamp), "MMM d"),
+      })),
+    [data],
+  );
 
   return (
     <Card className="border-border bg-card shadow-sm">

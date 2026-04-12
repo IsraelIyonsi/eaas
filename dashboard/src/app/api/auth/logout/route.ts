@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { getSecureCookieFlag } from "@/lib/auth/cookie-flags";
 
 export async function POST() {
   const response = NextResponse.json({ success: true });
 
   response.cookies.set("sendnex_session", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: getSecureCookieFlag(),
     sameSite: "lax",
     path: "/",
     maxAge: 0,

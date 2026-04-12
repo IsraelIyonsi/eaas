@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+const EMPTY_SET = new Set<string>();
+
 interface Column<T> {
   key: string;
   header: string;
@@ -40,7 +42,7 @@ export function DataTable<T>({
   loading = false,
   emptyState,
   selectable = false,
-  selectedIds = new Set(),
+  selectedIds,
   onSelectionChange,
   getRowId,
 }: DataTableProps<T>) {
@@ -49,16 +51,17 @@ export function DataTable<T>({
   const end = Math.min(page * pageSize, total ?? data.length);
   const displayTotal = total ?? data.length;
 
-  const allSelected = data.length > 0 && getRowId && data.every((item) => selectedIds.has(getRowId(item)));
+  const resolvedSelectedIds = selectedIds ?? EMPTY_SET;
+  const allSelected = data.length > 0 && getRowId && data.every((item) => resolvedSelectedIds.has(getRowId(item)));
 
   function handleSelectAll() {
     if (!getRowId || !onSelectionChange) return;
     if (allSelected) {
-      const next = new Set(selectedIds);
+      const next = new Set(resolvedSelectedIds);
       data.forEach((item) => next.delete(getRowId(item)));
       onSelectionChange(next);
     } else {
-      const next = new Set(selectedIds);
+      const next = new Set(resolvedSelectedIds);
       data.forEach((item) => next.add(getRowId(item)));
       onSelectionChange(next);
     }
@@ -67,7 +70,7 @@ export function DataTable<T>({
   function handleSelectRow(item: T) {
     if (!getRowId || !onSelectionChange) return;
     const id = getRowId(item);
-    const next = new Set(selectedIds);
+    const next = new Set(resolvedSelectedIds);
     if (next.has(id)) {
       next.delete(id);
     } else {
@@ -159,7 +162,7 @@ export function DataTable<T>({
         <tbody>
           {data.map((item, index) => {
             const rowId = getRowId?.(item);
-            const isSelected = rowId ? selectedIds.has(rowId) : false;
+            const isSelected = rowId ? resolvedSelectedIds.has(rowId) : false;
 
             return (
               <tr

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SendNext — Email delivery that just works.</title>
+  <title>SendNex — Email delivery that just works.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -1007,6 +1007,13 @@
       .hero-ctas .btn-primary, .hero-ctas .btn-secondary { justify-content: center; text-align: center; }
       .code-block-wrapper { max-width: 100%; }
     }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1017,12 +1024,12 @@
     <div class="nav-logo-mark">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     </div>
-    SendNext
+    SendNex
   </a>
 
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
-    <li><a href="#how-it-works">Docs</a></li>
+    <li><a href="/docs">Docs</a></li>
     <li><a href="#waitlist">Pricing</a></li>
   </ul>
 
@@ -1037,11 +1044,11 @@
   <a href="#features" onclick="closeMobileMenu()">Features</a>
   <a href="#how-it-works" onclick="closeMobileMenu()">Docs</a>
   <a href="#waitlist" onclick="closeMobileMenu()">Pricing</a>
-  <a href="#waitlist" class="mobile-cta" onclick="closeMobileMenu()">Get Early Access — It's Free</a>
+  <a href="/signup" class="mobile-cta" onclick="closeMobileMenu()">Get Early Access — It's Free</a>
 </div>
 
 <!-- ─── HERO ─── -->
-<section class="hero" style="padding-top:120px; display:grid;">
+<section class="hero">
   <div class="hero-content">
     <div class="hero-eyebrow">
       <span class="dot"></span>
@@ -1050,8 +1057,8 @@
     <h1><span>Email delivery<br>that just works.</span></h1>
     <p class="hero-sub">A transactional email API built for developers who are done fighting with deliverability, complex dashboards, and pricing tiers that punish growth. Send your first email in under five minutes.</p>
     <div class="hero-ctas">
-      <a href="#waitlist" class="btn-primary">Get Early Access — It's Free</a>
-      <a href="/app" class="btn-secondary">Read the Docs →</a>
+      <a href="/signup" class="btn-primary">Get Early Access — It's Free</a>
+      <a href="/docs" class="btn-secondary">Read the Docs →</a>
     </div>
   </div>
 
@@ -1113,8 +1120,8 @@
 
 <!-- ─── VALUE PROPS ─── -->
 <section id="features">
-  <p class="section-label">Why SendNext</p>
-  <h2 class="section-title">Why developers choose SendNext</h2>
+  <p class="section-label">Why SendNex</p>
+  <h2 class="section-title">Why developers choose SendNex</h2>
   <p class="section-sub">Built by developers who spent too many hours debugging email. Every design decision optimizes for your time.</p>
   <div class="value-grid">
     <div class="value-card">
@@ -1188,7 +1195,7 @@
 <section id="social-proof">
   <p class="section-label">Social Proof</p>
   <h2 class="section-title">Trusted by developers<br>from day one.</h2>
-  <p class="section-sub">Early access engineers have already put SendNext through its paces.</p>
+  <p class="section-sub">Early access engineers have already put SendNex through its paces.</p>
   <div class="social-grid">
     <div class="testimonial-card">
       <div class="testimonial-stars">
@@ -1202,7 +1209,7 @@
       <div class="testimonial-author">
         <div class="author-avatar">AK</div>
         <div>
-          <div class="author-name">Arjun K. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-name">Arjun K.</div>
           <div class="author-role">Founder, SaaS startup</div>
         </div>
       </div>
@@ -1215,11 +1222,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       </div>
-      <blockquote>"Finally an email API that doesn't charge per seat. Our team of 12 was paying $400/month for features we never used. SendNext has everything we actually need."</blockquote>
+      <blockquote>"Finally an email API that doesn't charge per seat. Our team of 12 was paying $400/month for features we never used. SendNex has everything we actually need."</blockquote>
       <div class="testimonial-author">
         <div class="author-avatar">SL</div>
         <div>
-          <div class="author-name">Sofia L. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-name">Sofia L.</div>
           <div class="author-role">Engineering Lead, Fintech</div>
         </div>
       </div>
@@ -1236,7 +1243,7 @@
       <div class="testimonial-author">
         <div class="author-avatar">TM</div>
         <div>
-          <div class="author-name">Tobi M. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-name">Tobi M.</div>
           <div class="author-role">Senior Backend Engineer</div>
         </div>
       </div>
@@ -1330,10 +1337,10 @@
         Copy
       </button>
       <div class="code-scroll">
-        <pre id="node-code"><span class="c-keyword">import</span> { <span class="c-fn">SendNextClient</span> } <span class="c-keyword">from</span> <span class="c-string">'@sendnext/sdk'</span>;
+        <pre id="node-code"><span class="c-keyword">import</span> { <span class="c-fn">SendNexClient</span> } <span class="c-keyword">from</span> <span class="c-string">'@sendnex/sdk'</span>;
 
-<span class="c-keyword">const</span> <span class="c-var">client</span> = <span class="c-keyword">new</span> <span class="c-fn">SendNextClient</span>({
-  <span class="c-prop">apiKey</span>: process.env.<span class="c-var">SENDNEXT_API_KEY</span>
+<span class="c-keyword">const</span> <span class="c-var">client</span> = <span class="c-keyword">new</span> <span class="c-fn">SendNexClient</span>({
+  <span class="c-prop">apiKey</span>: process.env.<span class="c-var">SENDNEX_API_KEY</span>
 });
 
 <span class="c-keyword">const</span> <span class="c-var">result</span> = <span class="c-keyword">await</span> client.email.<span class="c-method">send</span>({
@@ -1390,7 +1397,7 @@ console.<span class="c-method">log</span>(result.<span class="c-prop">messageId<
           Community support only
         </li>
       </ul>
-      <a href="#waitlist" class="btn-pricing-outline">Get Started Free</a>
+      <a href="/signup" class="btn-pricing-outline">Get Started Free</a>
     </div>
 
     <!-- Early Access -->
@@ -1426,7 +1433,7 @@ console.<span class="c-method">log</span>(result.<span class="c-prop">messageId<
           Priority email support
         </li>
       </ul>
-      <a href="#waitlist" class="btn-pricing-primary">Get Early Access — It's Free</a>
+      <a href="/signup" class="btn-pricing-primary">Get Early Access — It's Free</a>
     </div>
 
     <!-- Growth -->
@@ -1491,10 +1498,10 @@ console.<span class="c-method">log</span>(result.<span class="c-prop">messageId<
     </div>
     <div class="faq-item">
       <button class="faq-question">
-        Can I use SendNext for marketing emails?
+        Can I use SendNex for marketing emails?
         <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
-      <div class="faq-answer">SendNext is optimized for transactional email (OTPs, receipts, password resets, notifications). We don't currently support bulk marketing campaigns or list management — that keeps our deliverability rates high for everyone.</div>
+      <div class="faq-answer">SendNex is optimized for transactional email (OTPs, receipts, password resets, notifications). We don't currently support bulk marketing campaigns or list management — that keeps our deliverability rates high for everyone.</div>
     </div>
     <div class="faq-item">
       <button class="faq-question">
@@ -1514,7 +1521,7 @@ console.<span class="c-method">log</span>(result.<span class="c-prop">messageId<
         <div class="nav-logo-mark">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         </div>
-        SendNext
+        SendNex
       </a>
       <p>A transactional email API built for developers. Fast, honest, and infrastructure-grade from day one.</p>
     </div>
@@ -1523,34 +1530,34 @@ console.<span class="c-method">log</span>(result.<span class="c-prop">messageId<
       <ul>
         <li><a href="#features">Features</a></li>
         <li><a href="#waitlist">Pricing</a></li>
-        <li><a href="#how-it-works">Docs</a></li>
-        <li><a href="#waitlist">Changelog</a></li>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="#">Changelog</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h4>Developers</h4>
       <ul>
-        <li><a href="#how-it-works">Quick Start</a></li>
-        <li><a href="#how-it-works">API Reference</a></li>
-        <li><a href="#how-it-works">SDKs</a></li>
-        <li><a href="#how-it-works">Webhooks</a></li>
+        <li><a href="/docs">Quick Start</a></li>
+        <li><a href="/docs">API Reference</a></li>
+        <li><a href="/docs">SDKs</a></li>
+        <li><a href="/docs">Webhooks</a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h4>Company</h4>
       <ul>
-        <li><a href="#waitlist">About</a></li>
-        <li><a href="#waitlist">Blog</a></li>
-        <li><a href="#waitlist">Status</a></li>
-        <li><a href="#waitlist">Contact</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Status</a></li>
+        <li><a href="mailto:support@sendnex.xyz">Contact</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <div class="footer-legal">
-      &copy; 2025 SendNext. All rights reserved.
-      &nbsp;&middot;&nbsp; <a href="#waitlist">Privacy Policy</a>
-      &nbsp;&middot;&nbsp; <a href="#waitlist">Terms of Service</a>
+      &copy; 2026 SendNex. All rights reserved.
+      &nbsp;&middot;&nbsp; <a href="/privacy">Privacy Policy</a>
+      &nbsp;&middot;&nbsp; <a href="/terms">Terms of Service</a>
     </div>
     <div class="footer-badges">
       <span class="footer-badge">AWS SES</span>

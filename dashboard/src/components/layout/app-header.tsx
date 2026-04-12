@@ -53,12 +53,14 @@ export function AppHeader({ sidebarCollapsed, onSidebarToggle, userName, userEma
         <div className="h-5 w-px bg-border" />
 
         <h1 className="text-[13px] font-semibold text-foreground">SendNex Dashboard</h1>
-        <Badge
-          variant="outline"
-          className="hidden text-[10px] font-semibold uppercase tracking-[0.04em] text-primary border-primary/30 bg-primary/10 sm:inline-flex"
-        >
-          Development
-        </Badge>
+        {process.env.NEXT_PUBLIC_ENV_LABEL && (
+          <Badge
+            variant="outline"
+            className="hidden text-[10px] font-semibold uppercase tracking-[0.04em] text-primary border-primary/30 bg-primary/10 sm:inline-flex"
+          >
+            {process.env.NEXT_PUBLIC_ENV_LABEL}
+          </Badge>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

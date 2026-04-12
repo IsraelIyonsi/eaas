@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useAnalyticsSummary, useAnalyticsTimeline } from "@/lib/hooks/use-analytics";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/overview/stat-card";
@@ -9,7 +8,6 @@ import {
   DeliveryBreakdownChart,
   EngagementChart,
 } from "@/components/analytics/charts";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Send,
@@ -19,17 +17,8 @@ import {
   MousePointerClick,
   AlertTriangle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-const dateRanges = [
-  { label: "7d", days: 7 },
-  { label: "30d", days: 30 },
-  { label: "90d", days: 90 },
-];
 
 export default function AnalyticsPage() {
-  const [selectedRange, setSelectedRange] = useState(30);
-
   const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary();
   const { data: timeline, isLoading: timelineLoading } = useAnalyticsTimeline({ granularity: 'day' });
 
@@ -39,26 +28,6 @@ export default function AnalyticsPage() {
       <PageHeader
         title="Analytics"
         description="Delivery performance, engagement tracking, and sending trends."
-        action={
-          <div className="flex items-center rounded-lg border border-border bg-card p-1">
-            {dateRanges.map((range) => (
-              <Button
-                key={range.days}
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedRange(range.days)}
-                className={cn(
-                  "px-3 text-xs",
-                  selectedRange === range.days
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {range.label}
-              </Button>
-            ))}
-          </div>
-        }
       />
 
       {/* KPI Cards */}

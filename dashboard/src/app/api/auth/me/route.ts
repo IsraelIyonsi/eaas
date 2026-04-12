@@ -14,5 +14,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid session" }, { status: 401 });
   }
 
-  return NextResponse.json({ success: true, data: sessionData });
+  return NextResponse.json({
+    success: true,
+    data: {
+      userId: sessionData.userId,
+      email: sessionData.email,
+      displayName: sessionData.displayName,
+      role: sessionData.role,
+    },
+  });
 }

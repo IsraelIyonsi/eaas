@@ -14,7 +14,7 @@ const emailStatusConfig: Record<
   },
   sending: {
     label: "Sending",
-    className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+    className: "bg-amber-500/15 text-amber-400 border-amber-500/30",
   },
   sent: {
     label: "Sent",

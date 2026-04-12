@@ -26,7 +26,7 @@ async function verifySessionEdge(
     );
     payload = JSON.parse(json);
     if (!payload.userId || !payload.email || !payload.role) return null;
-    if (payload.expiresAt && Date.now() / 1000 > payload.expiresAt) return null;
+    if (!payload.expiresAt || Date.now() / 1000 > payload.expiresAt) return null;
   } catch {
     return null;
   }

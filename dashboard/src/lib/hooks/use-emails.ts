@@ -21,13 +21,15 @@ export function useEmail(id: string) {
     queryKey: QueryKeys.emails.detail(id),
     queryFn: () => repositories.email.getById(id),
     enabled: !!id,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
 export function useEmailEvents(id: string | undefined) {
   return useQuery({
-    queryKey: QueryKeys.emails.events(id!),
-    queryFn: () => repositories.email.getEvents(id!),
+    queryKey: QueryKeys.emails.events(id ?? ""),
+    queryFn: () => repositories.email.getEvents(id ?? ""),
     enabled: !!id,
+    staleTime: 5 * 60 * 1000,
   });
 }
