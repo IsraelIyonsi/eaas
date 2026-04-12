@@ -215,6 +215,15 @@ jobs:
       - name: Start services
         run: |
           cp .env.example .env
+          docker compose up -d || true
+          # Give postgres time to finish init scripts before checking
+          sleep 10
+          if ! docker compose ps postgres | grep -q "running\|healthy"; then
+            echo "=== Postgres container logs ==="
+            docker compose logs postgres 2>&1 | tail -50
+            echo "=== End postgres logs ==="
+          fi
+          # Ensure all services are started
           docker compose up -d
 
       - name: Wait for services to be healthy
