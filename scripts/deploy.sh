@@ -43,6 +43,16 @@ done
 echo "[deploy] Starting services..."
 docker compose -f docker-compose.yml up -d api worker webhook-processor dashboard nginx
 
+# Run idempotent database migrations that may not have been applied
+# (Docker init scripts only run on first DB creation; these handle schema drift)
+echo "[deploy] Running database migrations..."
+for migration in migrate_review_gate.sql migrate_scalability.sql migrate_scheduled_emails.sql migrate_sprint8_billing.sql; do
+  if [ -f "/opt/eaas/scripts/${migration}" ]; then
+    docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/${migration}" 2>&1 \
+      | tail -5 || echo "[deploy] Warning: ${migration} had issues"
+  fi
+done
+
 echo "[deploy] Waiting for health checks..."
 sleep 20
 docker compose -f docker-compose.yml ps

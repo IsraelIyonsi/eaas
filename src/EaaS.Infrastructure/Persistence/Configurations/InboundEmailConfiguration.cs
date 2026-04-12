@@ -11,7 +11,7 @@ public sealed class InboundEmailConfiguration : IEntityTypeConfiguration<Inbound
     {
         builder.ToTable("inbound_emails");
 
-        builder.HasKey(e => e.Id);
+        builder.HasKey(e => new { e.Id, e.ReceivedAt });
 
         builder.Property(e => e.Id)
             .HasColumnName("id")
