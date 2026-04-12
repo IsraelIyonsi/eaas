@@ -31,12 +31,17 @@ echo "SECURE_COOKIES=false" >> /opt/eaas/.env
 echo "[deploy] Building Docker images..."
 docker compose -f docker-compose.yml build --no-cache api worker webhook-processor dashboard
 
-# Clean up stale containers from interrupted deploys
-echo "[deploy] Cleaning up stale containers..."
-docker compose -f docker-compose.yml down --remove-orphans api worker webhook-processor dashboard nginx 2>/dev/null || true
+# Stop and remove application containers (including stale renamed orphans from interrupted deploys)
+echo "[deploy] Stopping application containers..."
+for svc in eaas-api eaas-worker eaas-webhook-processor eaas-dashboard eaas-nginx; do
+  # Remove the primary container
+  docker rm -f "$svc" 2>/dev/null || true
+  # Remove any orphaned containers with hash-prefixed names (e.g., 4f65fa308e51_eaas-api)
+  docker ps -a --filter "name=${svc}" --format '{{.ID}}' | xargs -r docker rm -f 2>/dev/null || true
+done
 
-echo "[deploy] Restarting services..."
-docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard nginx
+echo "[deploy] Starting services..."
+docker compose -f docker-compose.yml up -d api worker webhook-processor dashboard nginx
 
 echo "[deploy] Waiting for health checks..."
 sleep 20
