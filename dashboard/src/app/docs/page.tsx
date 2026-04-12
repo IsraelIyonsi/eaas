@@ -85,7 +85,7 @@ export default function DocsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Documentation"
-        description="Guides, API reference, and integration tutorials for EaaS."
+        description="Guides, API reference, and integration tutorials for SendNex."
       />
 
       <div className="grid gap-4 md:grid-cols-2">

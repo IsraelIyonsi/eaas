@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EaaS Dashboard",
+  title: "SendNex Dashboard",
   description: "System health and email sending activity at a glance.",
 };
 

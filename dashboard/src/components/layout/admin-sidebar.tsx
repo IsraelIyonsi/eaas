@@ -82,7 +82,7 @@ export function AdminSidebar({ collapsed, onToggle: _onToggle }: AdminSidebarPro
           {!collapsed && (
             <div className="flex items-center gap-2">
               <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#f1f5f9]">
-                EaaS
+                SendNex
               </span>
               <span className="flex items-center gap-1 rounded-md bg-[#7c3aed]/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#a78bfa]">
                 <Shield className="h-3 w-3" />

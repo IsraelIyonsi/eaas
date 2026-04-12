@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Acceptable Use Policy - EaaS",
+  title: "Acceptable Use Policy - SendNex",
   description:
-    "Rules governing the acceptable use of the EaaS email sending platform.",
+    "Rules governing the acceptable use of the SendNex email sending platform.",
 };
 
 export default function AcceptableUsePolicyPage() {
@@ -16,21 +16,21 @@ export default function AcceptableUsePolicyPage() {
 
       <p>
         This Acceptable Use Policy (&quot;AUP&quot;) governs your use of the
-        EaaS email sending platform. By using our service, you agree to comply
+        SendNex email sending platform. By using our service, you agree to comply
         with this policy. Violations may result in account suspension or
         termination.
       </p>
 
       <h2 id="purpose">1. Purpose</h2>
       <p>
-        This policy exists to ensure that EaaS is used responsibly and legally,
+        This policy exists to ensure that SendNex is used responsibly and legally,
         to protect the reputation and deliverability of our shared email
         infrastructure, and to comply with international anti-spam and data
         protection regulations.
       </p>
 
       <h2 id="prohibited-content">2. Prohibited Content</h2>
-      <p>You may not use EaaS to send emails containing:</p>
+      <p>You may not use SendNex to send emails containing:</p>
       <ul>
         <li>
           <strong>Spam</strong> — unsolicited bulk commercial email
@@ -94,16 +94,16 @@ export default function AcceptableUsePolicyPage() {
         </li>
         <li>
           <strong>Reverse engineer the API</strong> — decompile, disassemble,
-          or attempt to derive the source code of the EaaS platform
+          or attempt to derive the source code of the SendNex platform
         </li>
         <li>
           <strong>Resell without authorization</strong> — redistribute or resell
-          EaaS services to third parties without prior written consent
+          SendNex services to third parties without prior written consent
         </li>
       </ul>
 
       <h2 id="sending-requirements">4. Email Sending Requirements</h2>
-      <p>All emails sent through EaaS must:</p>
+      <p>All emails sent through SendNex must:</p>
       <ul>
         <li>
           <strong>Have recipient consent</strong> — recipients must have opted
@@ -135,7 +135,7 @@ export default function AcceptableUsePolicyPage() {
 
       <h2 id="compliance">5. Compliance Requirements</h2>
       <p>
-        You are responsible for ensuring your use of EaaS complies with all
+        You are responsible for ensuring your use of SendNex complies with all
         applicable laws in your jurisdiction and the jurisdictions of your
         recipients, including but not limited to:
       </p>
@@ -171,7 +171,7 @@ export default function AcceptableUsePolicyPage() {
 
       <h2 id="monitoring">6. Monitoring and Enforcement</h2>
       <p>
-        EaaS monitors sending activity to protect our platform, our customers,
+        SendNex monitors sending activity to protect our platform, our customers,
         and email recipients. We track the following metrics:
       </p>
       <ul>
@@ -188,7 +188,7 @@ export default function AcceptableUsePolicyPage() {
           immediate review
         </li>
       </ul>
-      <p>EaaS reserves the right to:</p>
+      <p>SendNex reserves the right to:</p>
       <ul>
         <li>
           <strong>Warn</strong> — notify you of a policy violation and request
@@ -240,13 +240,13 @@ export default function AcceptableUsePolicyPage() {
 
       <h2 id="reporting">8. Reporting Abuse</h2>
       <p>
-        If you believe someone is using EaaS in violation of this policy, please
+        If you believe someone is using SendNex in violation of this policy, please
         report it to:
       </p>
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:abuse@eaas.dev">abuse@eaas.dev</a>
+          <a href="mailto:abuse@sendnex.xyz">abuse@sendnex.xyz</a>
         </li>
       </ul>
       <p>
@@ -269,7 +269,7 @@ export default function AcceptableUsePolicyPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:legal@eaas.dev">legal@eaas.dev</a>
+          <a href="mailto:legal@sendnex.xyz">legal@sendnex.xyz</a>
         </li>
         <li>
           <strong>Location:</strong> Lagos, Nigeria

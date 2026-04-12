@@ -112,7 +112,7 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail }: SidebarPro
           </div>
           {!collapsed && (
             <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#f1f5f9]">
-              EaaS
+              SendNex
             </span>
           )}
         </Link>

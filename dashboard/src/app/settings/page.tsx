@@ -92,7 +92,7 @@ export default function SettingsPage() {
                 API Access
               </h3>
               <p className="text-sm text-muted-foreground">
-                Use your API keys to authenticate requests to the EaaS API.
+                Use your API keys to authenticate requests to the SendNex API.
                 Keys can be managed from the API Keys page.
               </p>
               <div className="flex items-center gap-3">
@@ -107,7 +107,7 @@ export default function SettingsPage() {
                   </Button>
                 </Link>
                 <a
-                  href="https://docs.eaas.dev"
+                  href="https://docs.sendnex.xyz"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -127,7 +127,7 @@ export default function SettingsPage() {
             <div className="rounded-lg border border-border bg-card p-5 space-y-3">
               <h3 className="text-sm font-semibold text-foreground">Base URL</h3>
               <code className="block rounded-md border border-border bg-muted px-4 py-2.5 font-mono text-sm text-foreground/80">
-                https://api.eaas.dev/v1
+                https://api.sendnex.xyz/v1
               </code>
             </div>
 

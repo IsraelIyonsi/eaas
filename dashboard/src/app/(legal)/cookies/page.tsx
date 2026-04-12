@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy - EaaS",
-  description: "How EaaS uses cookies.",
+  title: "Cookie Policy - SendNex",
+  description: "How SendNex uses cookies.",
 };
 
 export default function CookiePolicyPage() {
@@ -22,7 +22,7 @@ export default function CookiePolicyPage() {
 
       <h2 id="cookies-we-use">2. Cookies We Use</h2>
       <p>
-        EaaS uses <strong>essential cookies only</strong>. We do not use
+        SendNex uses <strong>essential cookies only</strong>. We do not use
         tracking cookies, analytics cookies, or third-party cookies.
       </p>
 
@@ -84,7 +84,7 @@ export default function CookiePolicyPage() {
       </ul>
       <p>
         Since we only use essential cookies, blocking them will prevent you from
-        using the EaaS dashboard. The API itself does not require cookies — it
+        using the SendNex dashboard. The API itself does not require cookies — it
         uses API key authentication.
       </p>
 
@@ -99,7 +99,7 @@ export default function CookiePolicyPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a>
+          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
         </li>
       </ul>
     </>

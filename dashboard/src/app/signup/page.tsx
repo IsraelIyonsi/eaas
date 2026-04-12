@@ -71,12 +71,12 @@ export default function SignupPage() {
         setApiKey(data.data.apiKey);
         setShowApiKeyDialog(true);
       } else {
-        router.push("/");
+        router.push("/emails");
         router.refresh();
       }
     } catch {
       setError(
-        "Unable to connect to the EaaS API. Check that the API server is running and try again.",
+        "Unable to connect. Please check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export default function SignupPage() {
 
   function handleDialogClose() {
     setShowApiKeyDialog(false);
-    router.push("/");
+    router.push("/emails");
     router.refresh();
   }
 
@@ -97,7 +97,7 @@ export default function SignupPage() {
             <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle className="text-xl font-bold text-foreground">
-            Create your EaaS account
+            Create your SendNex account
           </CardTitle>
         </CardHeader>
         <CardContent>

@@ -106,7 +106,7 @@ export default function ApiKeysPage() {
     <div className="space-y-6">
       <PageHeader
         title="API Keys"
-        description="Manage API keys for authenticating with the EaaS API."
+        description="Manage API keys for authenticating with the SendNex API."
         badge={keys.length > 0 ? `${keys.length}` : undefined}
         action={
           <Button
@@ -128,7 +128,7 @@ export default function ApiKeysPage() {
           <EmptyState
             icon={Key}
             title="No API keys yet"
-            description="Create an API key to start sending emails through the EaaS API."
+            description="Create an API key to start sending emails through the SendNex API."
             action={{ label: "Create API Key", onClick: () => setCreateOpen(true) }}
           />
         }

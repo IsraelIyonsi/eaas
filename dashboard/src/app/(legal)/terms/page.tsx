@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service - EaaS",
-  description: "Terms and conditions for using the EaaS platform.",
+  title: "Terms of Service - SendNex",
+  description: "Terms and conditions for using the SendNex platform.",
 };
 
 export default function TermsOfServicePage() {
@@ -15,14 +15,14 @@ export default function TermsOfServicePage() {
 
       <h2 id="service-description">1. Service Description</h2>
       <p>
-        EaaS (&quot;Email as a Service&quot;) is an API-based email sending and
+        SendNex (&quot;Email as a Service&quot;) is an API-based email sending and
         receiving platform. We provide infrastructure for developers and
         businesses to send transactional and marketing emails programmatically
         through our REST API and dashboard.
       </p>
 
       <h2 id="account-registration">2. Account Registration</h2>
-      <p>To use EaaS, you must:</p>
+      <p>To use SendNex, you must:</p>
       <ul>
         <li>
           Be at least <strong>18 years old</strong>
@@ -45,7 +45,7 @@ export default function TermsOfServicePage() {
 
       <h2 id="acceptable-use">3. Acceptable Use</h2>
       <p>
-        You agree <strong>not</strong> to use EaaS to:
+        You agree <strong>not</strong> to use SendNex to:
       </p>
       <ul>
         <li>
@@ -124,7 +124,7 @@ export default function TermsOfServicePage() {
 
       <h2 id="sla">6. Service Level</h2>
       <p>
-        We target <strong>99.9% uptime</strong> for the EaaS API. During the
+        We target <strong>99.9% uptime</strong> for the SendNex API. During the
         beta period, this is a best-effort target, not a contractual guarantee.
         We do not offer SLA credits during beta.
       </p>
@@ -137,10 +137,10 @@ export default function TermsOfServicePage() {
       <ul>
         <li>
           <strong>Your content:</strong> You retain full ownership of all email
-          content, templates, and data you upload or send through EaaS
+          content, templates, and data you upload or send through SendNex
         </li>
         <li>
-          <strong>Our platform:</strong> EaaS, its logo, API, dashboard, and
+          <strong>Our platform:</strong> SendNex, its logo, API, dashboard, and
           documentation are our intellectual property
         </li>
         <li>
@@ -151,7 +151,7 @@ export default function TermsOfServicePage() {
 
       <h2 id="liability">8. Limitation of Liability</h2>
       <p>
-        The EaaS service is provided <strong>&quot;as is&quot;</strong> during
+        The SendNex service is provided <strong>&quot;as is&quot;</strong> during
         the beta period. To the maximum extent permitted by law:
       </p>
       <ul>
@@ -214,7 +214,7 @@ export default function TermsOfServicePage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:legal@eaas.dev">legal@eaas.dev</a>
+          <a href="mailto:legal@sendnex.xyz">legal@sendnex.xyz</a>
         </li>
         <li>
           <strong>Location:</strong> Lagos, Nigeria

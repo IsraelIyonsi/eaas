@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Data Processing Agreement - EaaS",
+  title: "Data Processing Agreement - SendNex",
   description:
-    "Data Processing Agreement between EaaS (Processor) and its customers (Controllers) under GDPR Article 28.",
+    "Data Processing Agreement between SendNex (Processor) and its customers (Controllers) under GDPR Article 28.",
 };
 
 export default function DpaPage() {
@@ -17,7 +17,7 @@ export default function DpaPage() {
 
       <p>
         This Data Processing Agreement (&quot;DPA&quot;) forms part of the
-        agreement between you (&quot;Controller&quot;) and EaaS
+        agreement between you (&quot;Controller&quot;) and SendNex
         (&quot;Processor&quot;) for the provision of email sending services. This
         DPA is entered into pursuant to{" "}
         <strong>Article 28 of the General Data Protection Regulation</strong>{" "}
@@ -30,11 +30,11 @@ export default function DpaPage() {
       <ul>
         <li>
           <strong>Controller</strong> — the entity that determines the purposes
-          and means of processing personal data (you, the EaaS customer).
+          and means of processing personal data (you, the SendNex customer).
         </li>
         <li>
           <strong>Processor</strong> — the entity that processes personal data on
-          behalf of the Controller (EaaS).
+          behalf of the Controller (SendNex).
         </li>
         <li>
           <strong>Data Subject</strong> — an identified or identifiable natural
@@ -56,7 +56,7 @@ export default function DpaPage() {
 
       <h2 id="subject-matter">2. Subject Matter and Duration</h2>
       <p>
-        This DPA governs the processing of personal data by EaaS when providing
+        This DPA governs the processing of personal data by SendNex when providing
         its API-based email sending, receiving, and tracking services to the
         Controller. The duration of processing corresponds to the term of the
         underlying service agreement between the parties, plus any retention
@@ -65,13 +65,13 @@ export default function DpaPage() {
 
       <h2 id="nature-purpose">3. Nature and Purpose of Processing</h2>
       <p>
-        EaaS processes personal data solely for the purpose of providing email
+        SendNex processes personal data solely for the purpose of providing email
         services to the Controller. This includes:
       </p>
       <ul>
         <li>
           <strong>Sending emails</strong> on behalf of the Controller via the
-          EaaS API
+          SendNex API
         </li>
         <li>
           <strong>Receiving inbound emails</strong> routed through Controller
@@ -124,7 +124,7 @@ export default function DpaPage() {
       <ul>
         <li>
           <strong>Controller&apos;s customers</strong> — recipients of emails
-          sent through EaaS
+          sent through SendNex
         </li>
         <li>
           <strong>Email recipients</strong> — any individual whose email address
@@ -132,7 +132,7 @@ export default function DpaPage() {
         </li>
         <li>
           <strong>Controller&apos;s employees</strong> — individuals who use the
-          EaaS dashboard or API
+          SendNex dashboard or API
         </li>
       </ul>
 
@@ -141,13 +141,13 @@ export default function DpaPage() {
       <ul>
         <li>
           Ensure a <strong>lawful basis</strong> exists for processing personal
-          data through EaaS (GDPR Art 6)
+          data through SendNex (GDPR Art 6)
         </li>
         <li>
-          Ensure the <strong>accuracy</strong> of personal data provided to EaaS
+          Ensure the <strong>accuracy</strong> of personal data provided to SendNex
         </li>
         <li>
-          Provide <strong>documented instructions</strong> to EaaS regarding the
+          Provide <strong>documented instructions</strong> to SendNex regarding the
           processing of personal data
         </li>
         <li>
@@ -161,7 +161,7 @@ export default function DpaPage() {
           and all applicable data protection laws
         </li>
         <li>
-          Respond to Data Subject requests and inform EaaS where assistance is
+          Respond to Data Subject requests and inform SendNex where assistance is
           required
         </li>
       </ul>
@@ -170,23 +170,23 @@ export default function DpaPage() {
 
       <h3 id="instructions">7.1 Processing on Instructions</h3>
       <p>
-        EaaS shall process personal data only on documented instructions from
+        SendNex shall process personal data only on documented instructions from
         the Controller (GDPR Art 28(3)(a)), unless required to do so by
-        applicable law. If such a legal requirement arises, EaaS will inform
+        applicable law. If such a legal requirement arises, SendNex will inform
         the Controller before processing, unless the law prohibits such
         notification.
       </p>
 
       <h3 id="confidentiality">7.2 Confidentiality</h3>
       <p>
-        EaaS ensures that all personnel authorized to process personal data have
+        SendNex ensures that all personnel authorized to process personal data have
         committed to confidentiality obligations or are under an appropriate
         statutory obligation of confidentiality (GDPR Art 28(3)(b)).
       </p>
 
       <h3 id="security-measures">7.3 Security Measures</h3>
       <p>
-        EaaS implements appropriate technical and organizational measures to
+        SendNex implements appropriate technical and organizational measures to
         ensure a level of security appropriate to the risk (GDPR Art 32),
         including:
       </p>
@@ -220,8 +220,8 @@ export default function DpaPage() {
 
       <h3 id="sub-processors">7.4 Sub-Processors</h3>
       <p>
-        EaaS shall not engage another processor without prior written
-        authorization from the Controller (GDPR Art 28(2)). EaaS maintains a
+        SendNex shall not engage another processor without prior written
+        authorization from the Controller (GDPR Art 28(2)). SendNex maintains a
         list of approved sub-processors at our{" "}
         <Link
           href="/sub-processors"
@@ -235,23 +235,23 @@ export default function DpaPage() {
 
       <h3 id="data-subject-requests">7.5 Data Subject Requests</h3>
       <p>
-        EaaS shall assist the Controller in fulfilling its obligations to
+        SendNex shall assist the Controller in fulfilling its obligations to
         respond to Data Subject requests (GDPR Art 28(3)(e)), including requests
-        for access, rectification, erasure, and data portability. EaaS will
+        for access, rectification, erasure, and data portability. SendNex will
         respond to Controller requests for assistance within{" "}
         <strong>72 hours</strong>.
       </p>
 
       <h3 id="dpia">7.6 Data Protection Impact Assessments</h3>
       <p>
-        EaaS shall assist the Controller with data protection impact assessments
+        SendNex shall assist the Controller with data protection impact assessments
         and prior consultation with supervisory authorities where required (GDPR
         Art 28(3)(f), Art 35, Art 36).
       </p>
 
       <h3 id="deletion">7.7 Deletion or Return of Data</h3>
       <p>
-        Upon termination of the service agreement, EaaS shall, at the
+        Upon termination of the service agreement, SendNex shall, at the
         Controller&apos;s choice, delete or return all personal data within{" "}
         <strong>30 days</strong> and delete existing copies, unless applicable
         law requires further storage (GDPR Art 28(3)(g)).
@@ -259,7 +259,7 @@ export default function DpaPage() {
 
       <h3 id="audit">7.8 Audit and Compliance</h3>
       <p>
-        EaaS shall make available to the Controller all information necessary to
+        SendNex shall make available to the Controller all information necessary to
         demonstrate compliance with GDPR Art 28 obligations and allow for and
         contribute to audits, including inspections, conducted by the Controller
         or another auditor mandated by the Controller (GDPR Art 28(3)(h)).
@@ -272,13 +272,13 @@ export default function DpaPage() {
           href="/sub-processors"
           className="text-primary hover:underline"
         >
-          eaas.dev/sub-processors
+          sendnex.xyz/sub-processors
         </Link>
         .
       </p>
       <ul>
         <li>
-          EaaS will provide <strong>30 days&apos; written notice</strong> before
+          SendNex will provide <strong>30 days&apos; written notice</strong> before
           adding or replacing a sub-processor
         </li>
         <li>
@@ -293,7 +293,7 @@ export default function DpaPage() {
 
       <h2 id="data-transfers">9. International Data Transfers</h2>
       <p>
-        EaaS is based in Lagos, Nigeria. Personal data may be transferred to and
+        SendNex is based in Lagos, Nigeria. Personal data may be transferred to and
         processed in the following locations:
       </p>
       <ul>
@@ -302,11 +302,11 @@ export default function DpaPage() {
           region within the EU
         </li>
         <li>
-          <strong>Nigeria</strong> — EaaS operational base
+          <strong>Nigeria</strong> — SendNex operational base
         </li>
       </ul>
       <p>
-        For transfers from the EU/EEA to Nigeria, EaaS relies on{" "}
+        For transfers from the EU/EEA to Nigeria, SendNex relies on{" "}
         <strong>Standard Contractual Clauses</strong> (SCCs) as approved by the
         European Commission (GDPR Art 46(2)(c)). For transfers to the US (where
         sub-processors are located), the applicable sub-processor&apos;s own
@@ -337,7 +337,7 @@ export default function DpaPage() {
 
       <h2 id="breach-notification">11. Data Breach Notification</h2>
       <p>
-        In the event of a personal data breach (GDPR Art 33), EaaS shall:
+        In the event of a personal data breach (GDPR Art 33), SendNex shall:
       </p>
       <ul>
         <li>
@@ -384,20 +384,20 @@ export default function DpaPage() {
       <h2 id="audit-rights">13. Audit Rights</h2>
       <ul>
         <li>
-          The Controller may audit EaaS&apos;s compliance with this DPA{" "}
+          The Controller may audit SendNex&apos;s compliance with this DPA{" "}
           <strong>once per year</strong> with at least <strong>30 days</strong>{" "}
           prior written notice
         </li>
         <li>
           Audits shall be conducted during normal business hours and shall not
-          unreasonably interfere with EaaS&apos;s operations
+          unreasonably interfere with SendNex&apos;s operations
         </li>
         <li>
           The Controller bears the cost of the audit unless a material breach is
           discovered
         </li>
         <li>
-          As an alternative to on-site audits, EaaS may provide a{" "}
+          As an alternative to on-site audits, SendNex may provide a{" "}
           <strong>SOC 2 Type II report</strong> or equivalent third-party
           certification
         </li>
@@ -455,7 +455,7 @@ export default function DpaPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a>
+          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
         </li>
         <li>
           <strong>Location:</strong> Lagos, Nigeria

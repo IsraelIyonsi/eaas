@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Sub-Processor List - EaaS",
+  title: "Sub-Processor List - SendNex",
   description:
-    "List of third-party sub-processors that process personal data on behalf of EaaS customers.",
+    "List of third-party sub-processors that process personal data on behalf of SendNex customers.",
 };
 
 export default function SubProcessorsPage() {
@@ -16,10 +16,10 @@ export default function SubProcessorsPage() {
       </p>
 
       <p>
-        Under <strong>GDPR Article 28(2)</strong>, EaaS is required to maintain
+        Under <strong>GDPR Article 28(2)</strong>, SendNex is required to maintain
         a list of sub-processors that process personal data on behalf of our
         customers. This page lists every third-party service provider that may
-        process personal data as part of delivering the EaaS platform.
+        process personal data as part of delivering the SendNex platform.
       </p>
       <p>
         For full details on how sub-processors are governed, see Section 8 of
@@ -98,7 +98,7 @@ export default function SubProcessorsPage() {
 
       <h2 id="non-sub-processors">2. Services That Are Not Sub-Processors</h2>
       <p>
-        The following services are used internally by EaaS but do not process
+        The following services are used internally by SendNex but do not process
         customer personal data:
       </p>
       <ul>
@@ -110,7 +110,7 @@ export default function SubProcessorsPage() {
 
       <h2 id="change-notification">3. Notification of Changes</h2>
       <p>
-        When EaaS intends to add or replace a sub-processor, we will:
+        When SendNex intends to add or replace a sub-processor, we will:
       </p>
       <ul>
         <li>
@@ -138,14 +138,14 @@ export default function SubProcessorsPage() {
       <ul>
         <li>
           Submit your objection in writing to{" "}
-          <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a> within{" "}
+          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a> within{" "}
           <strong>14 days</strong> of receiving the notification
         </li>
         <li>
           Include the specific reasons for your objection
         </li>
         <li>
-          EaaS will work with you to find a reasonable alternative. If no
+          SendNex will work with you to find a reasonable alternative. If no
           alternative is available, either party may terminate the affected
           service
         </li>
@@ -159,7 +159,7 @@ export default function SubProcessorsPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a>
+          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
         </li>
         <li>
           <strong>Location:</strong> Lagos, Nigeria

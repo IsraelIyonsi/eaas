@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - EaaS",
-  description: "How EaaS collects, uses, and protects your data.",
+  title: "Privacy Policy - SendNex",
+  description: "How SendNex collects, uses, and protects your data.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
 
       <h2 id="introduction">1. Introduction</h2>
       <p>
-        EaaS (&quot;Email as a Service&quot;) is an API-based email sending
+        SendNex (&quot;Email as a Service&quot;) is an API-based email sending
         platform operated from Lagos, Nigeria. This privacy policy explains how
         we collect, use, store, and protect your personal data when you use our
         service.
@@ -116,7 +116,7 @@ export default function PrivacyPolicyPage() {
 
       <h2 id="data-processor-role">4. Our Role as Data Processor</h2>
       <p>
-        When you send emails through EaaS, <strong>you are the data controller</strong>{" "}
+        When you send emails through SendNex, <strong>you are the data controller</strong>{" "}
         and <strong>we are the data processor</strong>. We process email content
         and recipient data solely on your behalf and according to your
         instructions. We do not use your email content for our own purposes.
@@ -195,7 +195,7 @@ export default function PrivacyPolicyPage() {
 
       <p>
         To exercise any of these rights, email us at{" "}
-        <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a>. We will respond
+        <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>. We will respond
         within 30 days.
       </p>
 
@@ -221,7 +221,7 @@ export default function PrivacyPolicyPage() {
 
       <h2 id="children">10. Children</h2>
       <p>
-        EaaS is not intended for use by anyone under the age of 18. We do not
+        SendNex is not intended for use by anyone under the age of 18. We do not
         knowingly collect data from children.
       </p>
 
@@ -239,7 +239,7 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@eaas.dev">privacy@eaas.dev</a>
+          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
         </li>
         <li>
           <strong>Location:</strong> Lagos, Nigeria

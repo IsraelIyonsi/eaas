@@ -79,13 +79,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // If authenticated and visiting /login or /signup, redirect to overview
+  // If authenticated and visiting /login or /signup, redirect to dashboard
   if (
     session &&
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/signup"))
   ) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/emails", request.url));
   }
 
   // Role-based access: /admin/* pages are restricted to admin users only (superadmin or admin from AdminUsers table).
@@ -96,7 +96,7 @@ export async function middleware(request: NextRequest) {
     session.role !== "superadmin" &&
     session.role !== "admin"
   ) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/emails", request.url));
   }
 
   return NextResponse.next();

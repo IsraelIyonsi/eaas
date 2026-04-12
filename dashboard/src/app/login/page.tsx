@@ -35,11 +35,11 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/");
+      router.push("/emails");
       router.refresh();
     } catch {
       setError(
-        "Unable to connect to the EaaS API. Check that the API server is running and try again.",
+        "Unable to connect. Please check your connection and try again.",
       );
     } finally {
       setLoading(false);
@@ -54,7 +54,7 @@ export default function LoginPage() {
             <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle className="text-xl font-bold text-foreground">
-            Sign in to EaaS
+            Sign in to SendNex
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -119,7 +119,7 @@ export default function LoginPage() {
             </p>
             <p>
               <a
-                href="mailto:support@eaas.dev"
+                href="mailto:support@sendnex.xyz"
                 className="text-primary hover:underline"
               >
                 Forgot your password?
