@@ -226,7 +226,7 @@ h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
 .clear-filters:hover { text-decoration: underline; }
 
 /* Data Table */
-.data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow-x: auto; box-shadow: var(--shadow-sm); }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table thead { background: var(--bg-surface); }
 .data-table th {

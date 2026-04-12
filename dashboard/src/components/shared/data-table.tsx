@@ -212,6 +212,7 @@ export function DataTable<T>({
             <button
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
+              aria-label="Previous page"
               className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -223,6 +224,7 @@ export function DataTable<T>({
             <button
               onClick={() => onPageChange(page + 1)}
               disabled={page >= computedTotalPages}
+              aria-label="Next page"
               className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-30 disabled:pointer-events-none"
             >
               <span className="hidden sm:inline">Next</span>

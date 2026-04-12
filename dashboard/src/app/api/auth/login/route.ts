@@ -7,6 +7,33 @@ const API_INTERNAL_URL =
   process.env.EAAS_API_INTERNAL_URL ?? "http://localhost:5000";
 const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours
 
+// In-memory rate limiting: 5 attempts per IP per 60 seconds
+const LOGIN_WINDOW_MS = 60_000;
+const LOGIN_MAX_ATTEMPTS = 5;
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > LOGIN_MAX_ATTEMPTS;
+}
+
+// Periodic cleanup to prevent memory leak (runs at most every 5 minutes)
+let lastCleanup = Date.now();
+function cleanupStaleEntries() {
+  const now = Date.now();
+  if (now - lastCleanup < 300_000) return;
+  lastCleanup = now;
+  for (const [ip, entry] of loginAttempts) {
+    if (now > entry.resetAt) loginAttempts.delete(ip);
+  }
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
@@ -18,6 +45,19 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
 }
 
 export async function POST(request: NextRequest) {
+  cleanupStaleEntries();
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    ?? request.headers.get("x-real-ip")
+    ?? "unknown";
+
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again in a minute." },
+      { status: 429 },
+    );
+  }
+
   const body = await request.json();
   const { email, password } = body;
 

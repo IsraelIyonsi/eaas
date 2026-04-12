@@ -16,7 +16,7 @@
 
   /* Data Tables */
   .data-table-wrap {
-    @apply border border-border rounded-lg overflow-hidden shadow-sm;
+    @apply border border-border rounded-lg overflow-x-auto shadow-sm;
   }
 
   /* Status Dots */

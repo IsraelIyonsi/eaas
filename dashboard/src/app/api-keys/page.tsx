@@ -61,6 +61,7 @@ export default function ApiKeysPage() {
     {
       key: "createdAt",
       header: "Created",
+      className: "min-w-[100px]",
       render: (item: ApiKey) => (
         <span className="text-xs text-muted-foreground">
           {format(parseISO(item.createdAt), "MMM d, yyyy")}
@@ -70,9 +71,10 @@ export default function ApiKeysPage() {
     {
       key: "actions",
       header: "",
+      className: "min-w-[160px]",
       render: (item: ApiKey) =>
         item.isActive ? (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 whitespace-nowrap">
             <Button
               variant="ghost"
               size="sm"
