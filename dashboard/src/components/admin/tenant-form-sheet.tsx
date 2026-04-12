@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -34,15 +34,18 @@ export function TenantFormSheet({
   const [company, setCompany] = useState("");
   const [dailyLimit, setDailyLimit] = useState("");
   const [monthlyLimit, setMonthlyLimit] = useState("");
+  const [prevTenantId, setPrevTenantId] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
+  const currentTenantId = tenant?.id;
+  if (currentTenantId !== prevTenantId) {
+    setPrevTenantId(currentTenantId);
     if (tenant) {
       setName(tenant.name);
       setCompany(tenant.company ?? "");
       setDailyLimit(String(tenant.dailyEmailLimit));
       setMonthlyLimit(String(tenant.monthlyEmailLimit));
     }
-  }, [tenant]);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

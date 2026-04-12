@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -46,12 +46,17 @@ export function WebhookFormSheet({
   const createMutation = useCreateWebhook();
   const updateMutation = useUpdateWebhook();
 
+  const webhookKey = webhook?.id ?? "";
+  const [prevWebhookKey, setPrevWebhookKey] = useState(webhookKey);
+  const [prevOpen, setPrevOpen] = useState(open);
   const [url, setUrl] = useState("");
   const [events, setEvents] = useState<string[]>([]);
   const [secret, setSecret] = useState("");
   const [active, setActive] = useState(true);
 
-  useEffect(() => {
+  if (prevOpen !== open || prevWebhookKey !== webhookKey) {
+    setPrevOpen(open);
+    setPrevWebhookKey(webhookKey);
     if (open) {
       if (webhook) {
         setUrl(webhook.url);
@@ -65,7 +70,7 @@ export function WebhookFormSheet({
         setActive(true);
       }
     }
-  }, [open, webhook]);
+  }
 
   function toggleEvent(evt: string) {
     setEvents((prev) =>

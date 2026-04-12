@@ -58,7 +58,7 @@ interface AdminSidebarProps {
   onToggle: () => void;
 }
 
-export function AdminSidebar({ collapsed, onToggle: _onToggle }: AdminSidebarProps) {
+export function AdminSidebar({ collapsed }: AdminSidebarProps) {
   const pathname = usePathname();
 
   function isActive(href: string) {

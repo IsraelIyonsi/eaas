@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -61,10 +61,13 @@ export function PlanDialog({
   plan,
 }: PlanDialogProps) {
   const [form, setForm] = useState<CreatePlanRequest>(defaultFormState);
+  const [prevPlanId, setPrevPlanId] = useState<string | undefined>(undefined);
 
   const isEdit = !!plan;
+  const currentPlanId = plan?.id;
 
-  useEffect(() => {
+  if (currentPlanId !== prevPlanId) {
+    setPrevPlanId(currentPlanId);
     if (plan) {
       setForm({
         name: plan.name,
@@ -83,7 +86,7 @@ export function PlanDialog({
     } else {
       setForm(defaultFormState);
     }
-  }, [plan]);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

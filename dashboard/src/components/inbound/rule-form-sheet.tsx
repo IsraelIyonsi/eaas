@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import {
@@ -41,6 +41,9 @@ export function RuleFormSheet({ open, onOpenChange, rule }: RuleFormSheetProps) 
   const createRule = useCreateInboundRule();
   const updateRule = useUpdateInboundRule();
 
+  const formKey = rule?.id ?? "";
+  const [prevFormKey, setPrevFormKey] = useState(formKey);
+  const [prevOpen, setPrevOpen] = useState(open);
   const [name, setName] = useState("");
   const [domainId, setDomainId] = useState("");
   const [matchPattern, setMatchPattern] = useState("*");
@@ -50,7 +53,9 @@ export function RuleFormSheet({ open, onOpenChange, rule }: RuleFormSheetProps) 
   const [priority, setPriority] = useState(0);
   const [isActive, setIsActive] = useState(true);
 
-  useEffect(() => {
+  if (prevFormKey !== formKey || prevOpen !== open) {
+    setPrevFormKey(formKey);
+    setPrevOpen(open);
     if (rule) {
       setName(rule.name);
       setDomainId(rule.domainId);
@@ -70,7 +75,7 @@ export function RuleFormSheet({ open, onOpenChange, rule }: RuleFormSheetProps) 
       setPriority(0);
       setIsActive(true);
     }
-  }, [rule, open]);
+  }
 
   const loading = createRule.isPending || updateRule.isPending;
 
