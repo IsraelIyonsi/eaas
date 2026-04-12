@@ -280,12 +280,11 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@eaas.local}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_LISTEN_PORT: 5050
-    ports:
-      - "127.0.0.1:5050:5050"
+      SCRIPT_NAME: /pgadmin
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
-    profiles:
-      - tools
     deploy:
       resources:
         limits:
@@ -357,3 +356,4 @@ volumes:
   prometheus_data:
   loki_data:
   grafana_data:
+  pgadmin_data:
