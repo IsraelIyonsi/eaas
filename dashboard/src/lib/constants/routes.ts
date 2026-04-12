@@ -3,7 +3,7 @@
 // ============================================================
 
 export const Routes = {
-  OVERVIEW: '/',
+  OVERVIEW: '/overview',
   EMAILS: '/emails',
   EMAIL_DETAIL: (id: string) => `/emails/${id}`,
   INBOUND_EMAILS: '/inbound/emails',
