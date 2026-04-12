@@ -64,4 +64,41 @@ echo "[deploy] Waiting for health checks..."
 sleep 20
 docker compose -f docker-compose.yml ps
 
+# Install certbot if not already present
+if ! command -v certbot &>/dev/null; then
+  echo "[deploy] Installing certbot..."
+  apt-get update -qq && apt-get install -y -qq certbot >/dev/null 2>&1 || true
+fi
+
+# SSL: Obtain certificate if DNS is ready and cert doesn't exist yet.
+# Certbot writes certs to /opt/eaas/docker/nginx/ssl/ which is mounted into the
+# nginx container at /etc/letsencrypt/ — so the paths in nginx-ssl.conf resolve correctly.
+SSL_DIR="/opt/eaas/docker/nginx/ssl"
+CERT_PATH="$SSL_DIR/live/sendnex.xyz/fullchain.pem"
+
+if [ ! -f "$CERT_PATH" ]; then
+  echo "[deploy] Checking DNS for sendnex.xyz..."
+  RESOLVED_IP=$(dig +short sendnex.xyz A 2>/dev/null | head -1)
+  SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || echo "unknown")
+  if [ "$RESOLVED_IP" = "$SERVER_IP" ]; then
+    echo "[deploy] DNS verified. Obtaining SSL certificate..."
+    mkdir -p /var/www/certbot
+    certbot certonly --webroot -w /var/www/certbot \
+      --config-dir "$SSL_DIR" \
+      --work-dir /tmp/certbot-work \
+      --logs-dir /tmp/certbot-logs \
+      -d sendnex.xyz -d www.sendnex.xyz \
+      --non-interactive --agree-tos --email iyonsiisrael@gmail.com \
+      && echo "[deploy] SSL certificate obtained! Activating HTTPS..." \
+      && cp /opt/eaas/docker/nginx/nginx-ssl.conf /opt/eaas/docker/nginx/nginx.conf \
+      && docker exec eaas-nginx nginx -s reload \
+      || echo "[deploy] SSL certificate request failed (will retry next deploy)"
+  else
+    echo "[deploy] DNS not ready yet (resolved=$RESOLVED_IP, expected=$SERVER_IP)"
+  fi
+else
+  echo "[deploy] SSL certificate already exists, renewing if needed..."
+  certbot renew --config-dir "$SSL_DIR" --quiet || true
+fi
+
 echo "[deploy] Deployment complete at $(date)"
