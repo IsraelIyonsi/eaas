@@ -13,6 +13,7 @@ if [ "${DEPLOY_PHASE:-1}" = "1" ]; then
 
   # Re-execute the updated script (Phase 2) so migration/config changes take effect
   echo "[deploy] Re-executing updated deploy script..."
+  chmod +x /opt/eaas/scripts/deploy.sh
   DEPLOY_PHASE=2 exec /opt/eaas/scripts/deploy.sh
 fi
 
