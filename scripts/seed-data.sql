@@ -16,7 +16,7 @@ VALUES (
     '00000000-0000-0000-0000-000000000002',
     '00000000-0000-0000-0000-000000000001',
     'Development Key',
-    'b0c4de8f2a1b3c5d7e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d',
+    '37c93dce3286b0864c1b75f06133833523d1c1f241e8c48c60f040bb3024acb8',
     'eaas_liv',
     'active',
     TRUE
