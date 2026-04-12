@@ -32,7 +32,7 @@ echo "[deploy] Building Docker images..."
 docker compose -f docker-compose.yml build --no-cache api worker webhook-processor dashboard
 
 echo "[deploy] Restarting services..."
-docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard
+docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard nginx
 
 echo "[deploy] Waiting for health checks..."
 sleep 20
