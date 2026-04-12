@@ -17,12 +17,12 @@ public sealed class GetTenantRankingsHandler : IRequestHandler<GetTenantRankings
     {
         var rankings = await _dbContext.Tenants
             .AsNoTracking()
+            .OrderByDescending(t => t.Emails.Count)
+            .Take(10)
             .Select(t => new TenantRankingResult(
                 t.Id,
                 t.Name,
                 t.Emails.Count))
-            .OrderByDescending(r => r.EmailCount)
-            .Take(10)
             .ToListAsync(cancellationToken);
 
         return rankings;
