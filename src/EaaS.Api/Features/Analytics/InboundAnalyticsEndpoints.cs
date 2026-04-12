@@ -95,6 +95,7 @@ public static class InboundAnalyticsEndpoints
         group.MapGet("/inbound/top-senders", async (
             HttpContext httpContext,
             AppDbContext dbContext,
+            ILoggerFactory loggerFactory,
             string? date_from = null,
             string? date_to = null,
             int limit = 10,
@@ -103,28 +104,39 @@ public static class InboundAnalyticsEndpoints
             var tenantId = Guid.Parse(
                 httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
 
-            var query = dbContext.InboundEmails
-                .Where(e => e.TenantId == tenantId);
+            try
+            {
+                var query = dbContext.InboundEmails
+                    .Where(e => e.TenantId == tenantId);
 
-            if (DateTime.TryParse(date_from, out var from))
-                query = query.Where(e => e.ReceivedAt >= from);
+                if (DateTime.TryParse(date_from, out var from))
+                    query = query.Where(e => e.ReceivedAt >= from);
 
-            if (DateTime.TryParse(date_to, out var to))
-                query = query.Where(e => e.ReceivedAt <= to);
+                if (DateTime.TryParse(date_to, out var to))
+                    query = query.Where(e => e.ReceivedAt <= to);
 
-            var senders = await query
-                .GroupBy(e => e.FromEmail)
-                .Select(g => new
-                {
-                    email = g.Key,
-                    total_emails = g.Count(),
-                    last_receivedAt = g.Max(e => e.ReceivedAt)
-                })
-                .OrderByDescending(s => s.total_emails)
-                .Take(limit)
-                .ToListAsync(cancellationToken);
+                var senders = await query
+                    .GroupBy(e => e.FromEmail)
+                    .Select(g => new
+                    {
+                        email = g.Key,
+                        total_emails = g.Count(),
+                        last_received_at = g.Max(e => e.ReceivedAt)
+                    })
+                    .OrderByDescending(s => s.total_emails)
+                    .Take(limit)
+                    .ToListAsync(cancellationToken);
 
-            return Results.Ok(ApiResponse.Ok(senders));
+                return Results.Ok(ApiResponse.Ok(senders));
+            }
+            catch (Exception ex)
+            {
+                var logger = loggerFactory.CreateLogger("InboundAnalytics");
+#pragma warning disable CA1848
+                logger.LogError(ex, "Failed to query inbound top senders for tenant {TenantId}", tenantId);
+#pragma warning restore CA1848
+                return Results.Ok(ApiResponse.Ok(Array.Empty<object>()));
+            }
         })
         .WithName("GetInboundTopSenders");
     }
