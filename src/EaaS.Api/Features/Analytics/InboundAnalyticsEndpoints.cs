@@ -33,22 +33,20 @@ public static class InboundAnalyticsEndpoints
                 .Where(e => e.TenantId == tenantId && e.Status == InboundEmailStatus.Forwarded)
                 .CountAsync(cancellationToken);
 
-            var topSenders = await dbContext.InboundEmails
-                .Where(e => e.TenantId == tenantId)
-                .GroupBy(e => e.FromEmail)
-                .Select(g => new { email = g.Key, count = g.Count(), lastReceivedAt = g.Max(e => e.ReceivedAt) })
-                .OrderByDescending(g => g.count)
-                .Take(10)
-                .ToListAsync(cancellationToken);
+            var processingRate = totalReceived > 0
+                ? (double)processed / totalReceived
+                : 0.0;
 
             return Results.Ok(ApiResponse.Ok(new
             {
-                totalReceived,
+                total_received = totalReceived,
                 processed,
                 failed,
                 forwarded,
-                avgProcessingTimeMs = 0,
-                topSenders,
+                spam_flagged = 0,
+                virus_flagged = 0,
+                avg_processing_time_ms = 0,
+                processing_rate = processingRate,
             }));
         })
         .WithName("GetInboundAnalyticsSummary");
@@ -93,5 +91,41 @@ public static class InboundAnalyticsEndpoints
             }));
         })
         .WithName("GetInboundAnalyticsTimeline");
+
+        group.MapGet("/inbound/top-senders", async (
+            HttpContext httpContext,
+            AppDbContext dbContext,
+            string? date_from = null,
+            string? date_to = null,
+            int limit = 10,
+            CancellationToken cancellationToken = default) =>
+        {
+            var tenantId = Guid.Parse(
+                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+
+            var query = dbContext.InboundEmails
+                .Where(e => e.TenantId == tenantId);
+
+            if (DateTime.TryParse(date_from, out var from))
+                query = query.Where(e => e.ReceivedAt >= from);
+
+            if (DateTime.TryParse(date_to, out var to))
+                query = query.Where(e => e.ReceivedAt <= to);
+
+            var senders = await query
+                .GroupBy(e => e.FromEmail)
+                .Select(g => new
+                {
+                    email = g.Key,
+                    total_emails = g.Count(),
+                    last_receivedAt = g.Max(e => e.ReceivedAt)
+                })
+                .OrderByDescending(s => s.total_emails)
+                .Take(limit)
+                .ToListAsync(cancellationToken);
+
+            return Results.Ok(ApiResponse.Ok(senders));
+        })
+        .WithName("GetInboundTopSenders");
     }
 }
