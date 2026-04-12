@@ -124,9 +124,9 @@ public sealed class AdminSessionAuthHandlerTests
         var cookie = CreateSessionCookie(userId.ToString(), "admin@test.com", "SuperAdmin",
             DateTimeOffset.UtcNow.AddHours(1).ToUnixTimeSeconds(), TestSecret);
 
-        // Tamper with signature
+        // Replace signature with a completely invalid one
         var parts = cookie.Split('.');
-        var tamperedCookie = $"{parts[0]}.{"a" + parts[1][1..]}";
+        var tamperedCookie = $"{parts[0]}.{"0".PadLeft(parts[1].Length, '0')}";
 
         var httpContext = CreateHttpContextWithCookie("eaas_admin_session", tamperedCookie);
 
