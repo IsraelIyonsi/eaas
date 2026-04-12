@@ -13,21 +13,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #09090F;
-      --bg-raised: #1A1A28;
-      --bg-card: #1E1E2E;
-      --bg-card-hover: #26263A;
-      --bg-code: #0D0D15;
+      --bg: #0B0B14;
+      --bg-raised: #1C1C2E;
+      --bg-card: #222236;
+      --bg-card-hover: #2A2A42;
+      --bg-code: #0D0D18;
       --accent: #6C63FF;
-      --accent-soft: rgba(108,99,255,0.12);
-      --accent-glow: rgba(108,99,255,0.25);
+      --accent-soft: rgba(108,99,255,0.15);
+      --accent-glow: rgba(108,99,255,0.30);
       --green: #10B981;
-      --green-soft: rgba(16,185,129,0.12);
+      --green-soft: rgba(16,185,129,0.15);
       --amber: #F59E0B;
       --text: #F5F5F7;
-      --text-secondary: #CDCDD4;
-      --text-muted: #9898A4;
-      --border: rgba(255,255,255,0.10);
+      --text-secondary: #D0D0D8;
+      --text-muted: #A0A0AE;
+      --border: rgba(255,255,255,0.12);
       --border-accent: rgba(108,99,255,0.25);
       --font: 'Inter', -apple-system, system-ui, sans-serif;
       --mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -148,6 +148,7 @@
 
     /* ── Section helpers ── */
     .section { padding: 100px 0; }
+    .section-alt { background: var(--bg-raised); }
     .section-label {
       font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
       color: var(--accent); margin-bottom: 14px;
@@ -363,6 +364,8 @@
     .cta-section {
       text-align: center; padding: 100px 0;
       position: relative;
+      background: var(--bg-raised);
+      border-top: 1px solid var(--border);
     }
     .cta-section::before {
       content: '';
@@ -511,7 +514,7 @@
   </section>
 
   <!-- Features -->
-  <section class="section" id="features">
+  <section class="section section-alt" id="features">
     <div class="wrap">
       <div class="section-header reveal">
         <div class="section-label">Why SendNex</div>
@@ -647,7 +650,7 @@ result = client.emails.<span class="fn">send</span>(
   </section>
 
   <!-- Pricing -->
-  <section class="section" id="pricing">
+  <section class="section section-alt" id="pricing">
     <div class="wrap">
       <div class="section-header reveal">
         <div class="section-label">Pricing</div>
