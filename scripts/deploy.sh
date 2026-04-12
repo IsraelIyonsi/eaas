@@ -19,6 +19,14 @@ if [ -f /root/.env.backup ]; then
   cp /root/.env.backup /opt/eaas/.env
 fi
 
+# Ensure SECURE_COOKIES is always set correctly.
+# The site runs behind nginx SSL termination; the dashboard itself is plain HTTP.
+# Secure=true on the cookie is not needed — nginx handles HTTPS.
+# If the backup is missing this setting, the docker-compose default would incorrectly
+# mark cookies as Secure, causing the browser to silently drop them → login loop.
+sed -i '/^SECURE_COOKIES=/d' /opt/eaas/.env
+echo "SECURE_COOKIES=false" >> /opt/eaas/.env
+
 # Rebuild and restart application containers only (infra stays up)
 echo "[deploy] Building Docker images..."
 docker compose -f docker-compose.yml build --no-cache api worker webhook-processor dashboard
