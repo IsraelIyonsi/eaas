@@ -35,8 +35,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/emails");
-      router.refresh();
+      window.location.href = "/emails";
     } catch {
       setError(
         "Unable to connect. Please check your connection and try again.",

@@ -13,7 +13,7 @@ async function proxyRequest(
   { params }: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
   // Verify dashboard session
-  const session = request.cookies.get("eaas_session");
+  const session = request.cookies.get("sendnex_session");
   if (!session || !verifySession(session.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -74,7 +74,7 @@ async function proxyRequest(
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to reach EaaS API";
+      error instanceof Error ? error.message : "Failed to reach SendNex API";
     return NextResponse.json(
       { success: false, error: message },
       { status: 502 },

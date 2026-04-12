@@ -38,7 +38,7 @@ export default function CookiePolicyPage() {
         <tbody>
           <tr>
             <td>
-              <code>eaas_session</code>
+              <code>sendnex_session</code>
             </td>
             <td>
               Authenticates your session after login. Required for the dashboard

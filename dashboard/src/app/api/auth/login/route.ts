@@ -82,7 +82,7 @@ function createSessionResponse(
   const sessionToken = signSession(payload);
   const response = NextResponse.json({ success: true });
 
-  response.cookies.set("eaas_session", sessionToken, {
+  response.cookies.set("sendnex_session", sessionToken, {
     httpOnly: true,
     secure: process.env.SECURE_COOKIES === "true",
     sameSite: "lax",

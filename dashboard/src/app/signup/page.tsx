@@ -71,8 +71,7 @@ export default function SignupPage() {
         setApiKey(data.data.apiKey);
         setShowApiKeyDialog(true);
       } else {
-        router.push("/emails");
-        router.refresh();
+        window.location.href = "/emails";
       }
     } catch {
       setError(
@@ -85,8 +84,7 @@ export default function SignupPage() {
 
   function handleDialogClose() {
     setShowApiKeyDialog(false);
-    router.push("/emails");
-    router.refresh();
+    window.location.href = "/emails";
   }
 
   return (

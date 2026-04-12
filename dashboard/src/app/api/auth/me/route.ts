@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionData } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
-  const token = request.cookies.get("eaas_session")?.value;
+  const token = request.cookies.get("sendnex_session")?.value;
 
   if (!token) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });

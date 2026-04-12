@@ -62,7 +62,7 @@ async function verifySessionEdge(
 }
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("eaas_session")?.value;
+  const token = request.cookies.get("sendnex_session")?.value;
   const session = token ? await verifySessionEdge(token) : null;
 
   if (

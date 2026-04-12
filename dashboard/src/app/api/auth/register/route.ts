@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       data: { apiKey: data.apiKey, tenantId: data.tenantId },
     });
 
-    response.cookies.set("eaas_session", sessionToken, {
+    response.cookies.set("sendnex_session", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     return response;
   } catch {
     return NextResponse.json(
-      { error: "Unable to connect to the EaaS API. Please try again." },
+      { error: "Unable to connect. Please try again." },
       { status: 502 },
     );
   }
