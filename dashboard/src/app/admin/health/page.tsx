@@ -34,7 +34,7 @@ export default function AdminHealthPage() {
 
       {/* Service Status Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {health?.services.map((service) => (
+        {health?.services?.map((service) => (
           <Card key={service.name} className="border-border bg-card shadow-none">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -74,25 +74,25 @@ export default function AdminHealthPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Tenant Count"
-              value={health?.metrics.tenantCount ?? 0}
+              value={health?.metrics?.tenantCount ?? 0}
               icon={Building2}
               color="#7c3aed"
             />
             <StatCard
               title="Total Emails"
-              value={(health?.metrics.totalEmailsSent ?? 0).toLocaleString()}
+              value={(health?.metrics?.totalEmailsSent ?? 0).toLocaleString()}
               icon={Send}
               color="var(--chart-1)"
             />
             <StatCard
               title="Queue Depth"
-              value={health?.metrics.queueDepth ?? 0}
+              value={health?.metrics?.queueDepth ?? 0}
               icon={Layers}
               color="var(--chart-3)"
             />
             <StatCard
               title="Avg Latency"
-              value={`${health?.metrics.avgLatencyMs ?? 0}ms`}
+              value={`${health?.metrics?.avgLatencyMs ?? 0}ms`}
               icon={Activity}
               color="var(--chart-2)"
             />

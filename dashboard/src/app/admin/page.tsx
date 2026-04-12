@@ -119,7 +119,7 @@ export default function AdminOverviewPage() {
                 ))}
               </div>
             ) : (
-              health?.services.map((service: AdminServiceHealth) => (
+              health?.services?.map((service: AdminServiceHealth) => (
                 <div
                   key={service.name}
                   className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
