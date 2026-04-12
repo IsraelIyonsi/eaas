@@ -1,6 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
+# Prevent concurrent deploys — use a lockfile
+LOCKFILE="/tmp/eaas-deploy.lock"
+if [ "${DEPLOY_PHASE:-1}" = "1" ]; then
+  exec 200>"$LOCKFILE"
+  if ! flock -n 200; then
+    echo "[deploy] Another deploy is already running. Waiting..."
+    flock 200
+  fi
+fi
+
 # Two-phase deploy: Phase 1 pulls code, Phase 2 re-execs updated script
 if [ "${DEPLOY_PHASE:-1}" = "1" ]; then
   echo "[deploy] Starting deployment at $(date)"
@@ -52,7 +62,7 @@ for svc in eaas-api eaas-worker eaas-webhook-processor eaas-dashboard eaas-nginx
 done
 
 echo "[deploy] Starting services..."
-docker compose -f docker-compose.yml up -d api worker webhook-processor dashboard nginx
+docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard nginx
 
 # Run idempotent database migrations that may not have been applied
 # (Docker init scripts only run on first DB creation; these handle schema drift)
