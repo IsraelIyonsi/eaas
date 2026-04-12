@@ -70,6 +70,8 @@ docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-p
 echo "[deploy] Running database migrations..."
 docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/migrate_review_gate.sql" 2>&1 \
   | tail -3 || echo "[deploy] Warning: migrate_review_gate.sql had issues"
+docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/migrate_service_keys.sql" 2>&1 \
+  | tail -3 || echo "[deploy] Warning: migrate_service_keys.sql had issues"
 
 echo "[deploy] Waiting for health checks..."
 sleep 20

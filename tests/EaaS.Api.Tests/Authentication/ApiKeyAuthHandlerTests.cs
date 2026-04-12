@@ -112,7 +112,7 @@ public sealed class ApiKeyAuthHandlerTests
         const string rawKey = "test-api-key-cached";
         var keyHash = ComputeSha256Hash(rawKey);
 
-        var cachedData = JsonSerializer.Serialize(new { TenantId = tenantId, ApiKeyId = apiKeyId, Name = "Cached Key" });
+        var cachedData = JsonSerializer.Serialize(new { TenantId = tenantId, ApiKeyId = apiKeyId, Name = "Cached Key", IsServiceKey = false });
         _apiKeyCache.GetApiKeyCacheAsync(keyHash, Arg.Any<CancellationToken>()).Returns(cachedData);
 
         var httpContext = new DefaultHttpContext();
@@ -284,6 +284,51 @@ public sealed class ApiKeyAuthHandlerTests
     }
 
     [Fact]
+    public async Task Should_ImpersonateTenant_WhenServiceKey_AndXTenantIdHeader()
+    {
+        var serviceTenantId = Guid.NewGuid();
+        var impersonatedTenantId = Guid.NewGuid();
+        var apiKeyId = Guid.NewGuid();
+        const string rawKey = "service-key-impersonate";
+        var keyHash = ComputeSha256Hash(rawKey);
+
+        var cachedData = JsonSerializer.Serialize(new { TenantId = serviceTenantId, ApiKeyId = apiKeyId, Name = "Service Key", IsServiceKey = true });
+        _apiKeyCache.GetApiKeyCacheAsync(keyHash, Arg.Any<CancellationToken>()).Returns(cachedData);
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["Authorization"] = $"Bearer {rawKey}";
+        httpContext.Request.Headers["X-Tenant-Id"] = impersonatedTenantId.ToString();
+
+        var result = await AuthenticateAsync(httpContext);
+
+        result.Succeeded.Should().BeTrue();
+        result.Ticket!.Principal.FindFirst("TenantId")!.Value.Should().Be(impersonatedTenantId.ToString());
+    }
+
+    [Fact]
+    public async Task Should_NotImpersonate_WhenNonServiceKey_AndXTenantIdHeader()
+    {
+        var ownTenantId = Guid.NewGuid();
+        var impersonatedTenantId = Guid.NewGuid();
+        var apiKeyId = Guid.NewGuid();
+        const string rawKey = "regular-key-no-impersonate";
+        var keyHash = ComputeSha256Hash(rawKey);
+
+        var cachedData = JsonSerializer.Serialize(new { TenantId = ownTenantId, ApiKeyId = apiKeyId, Name = "Regular Key", IsServiceKey = false });
+        _apiKeyCache.GetApiKeyCacheAsync(keyHash, Arg.Any<CancellationToken>()).Returns(cachedData);
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["Authorization"] = $"Bearer {rawKey}";
+        httpContext.Request.Headers["X-Tenant-Id"] = impersonatedTenantId.ToString();
+
+        var result = await AuthenticateAsync(httpContext);
+
+        result.Succeeded.Should().BeTrue();
+        // Should use the key's own tenant, NOT the header value
+        result.Ticket!.Principal.FindFirst("TenantId")!.Value.Should().Be(ownTenantId.ToString());
+    }
+
+    [Fact]
     public async Task Should_SetCorrectClaims_TenantId_ApiKeyId_Name()
     {
         var tenantId = Guid.NewGuid();
@@ -292,7 +337,7 @@ public sealed class ApiKeyAuthHandlerTests
         const string rawKey = "claims-test-key";
         var keyHash = ComputeSha256Hash(rawKey);
 
-        var cachedData = JsonSerializer.Serialize(new { TenantId = tenantId, ApiKeyId = apiKeyId, Name = keyName });
+        var cachedData = JsonSerializer.Serialize(new { TenantId = tenantId, ApiKeyId = apiKeyId, Name = keyName, IsServiceKey = false });
         _apiKeyCache.GetApiKeyCacheAsync(keyHash, Arg.Any<CancellationToken>()).Returns(cachedData);
 
         var httpContext = new DefaultHttpContext();

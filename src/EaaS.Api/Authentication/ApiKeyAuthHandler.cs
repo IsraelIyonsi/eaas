@@ -53,38 +53,48 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
 
         // Check Redis cache first
         var cached = await _apiKeyCache.GetApiKeyCacheAsync(keyHash);
+        CachedApiKeyData? keyData = null;
         if (cached is not null)
         {
-            var cachedData = JsonSerializer.Deserialize<CachedApiKeyData>(cached);
-            if (cachedData is not null)
-            {
-                var cachedPrincipal = BuildClaimsPrincipal(cachedData.TenantId, cachedData.ApiKeyId, cachedData.Name);
-                return AuthenticateResult.Success(new AuthenticationTicket(cachedPrincipal, SchemeName));
-            }
+            keyData = JsonSerializer.Deserialize<CachedApiKeyData>(cached);
         }
 
-        // Look up in DB - Active or Rotating (within grace period)
-        var dbKey = await _dbContext.ApiKeys
-            .AsNoTracking()
-            .Where(k => k.KeyHash == keyHash
-                        && (k.Status == ApiKeyStatus.Active
-                            || (k.Status == ApiKeyStatus.Rotating && k.RotatingExpiresAt > DateTime.UtcNow)))
-            .Select(k => new { k.Id, k.TenantId, k.Name })
-            .FirstOrDefaultAsync();
-
-        if (dbKey is null)
+        if (keyData is null)
         {
-            LogInvalidApiKey(Logger, Request.Path);
-            return AuthenticateResult.Fail("Invalid or revoked API key.");
+            // Look up in DB - Active or Rotating (within grace period)
+            var dbKey = await _dbContext.ApiKeys
+                .AsNoTracking()
+                .Where(k => k.KeyHash == keyHash
+                            && (k.Status == ApiKeyStatus.Active
+                                || (k.Status == ApiKeyStatus.Rotating && k.RotatingExpiresAt > DateTime.UtcNow)))
+                .Select(k => new { k.Id, k.TenantId, k.Name, k.IsServiceKey })
+                .FirstOrDefaultAsync();
+
+            if (dbKey is null)
+            {
+                LogInvalidApiKey(Logger, Request.Path);
+                return AuthenticateResult.Fail("Invalid or revoked API key.");
+            }
+
+            // Cache the result
+            keyData = new CachedApiKeyData(dbKey.TenantId, dbKey.Id, dbKey.Name, dbKey.IsServiceKey);
+            await _apiKeyCache.SetApiKeyCacheAsync(keyHash, JsonSerializer.Serialize(keyData));
         }
 
-        // Cache the result
-        var dataToCache = new CachedApiKeyData(dbKey.TenantId, dbKey.Id, dbKey.Name);
-        await _apiKeyCache.SetApiKeyCacheAsync(keyHash, JsonSerializer.Serialize(dataToCache));
+        var effectiveTenantId = keyData.TenantId;
 
-        LogApiKeyAuthenticated(Logger, dbKey.Id, dbKey.TenantId, Request.Path);
+        // Service key impersonation: dashboard proxy sends X-Tenant-Id to act on behalf of a tenant
+        if (keyData.IsServiceKey
+            && Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader)
+            && Guid.TryParse(tenantIdHeader.ToString(), out var impersonatedTenantId))
+        {
+            effectiveTenantId = impersonatedTenantId;
+            LogServiceKeyImpersonation(Logger, keyData.ApiKeyId, impersonatedTenantId, Request.Path);
+        }
 
-        var principal = BuildClaimsPrincipal(dbKey.TenantId, dbKey.Id, dbKey.Name);
+        LogApiKeyAuthenticated(Logger, keyData.ApiKeyId, effectiveTenantId, Request.Path);
+
+        var principal = BuildClaimsPrincipal(effectiveTenantId, keyData.ApiKeyId, keyData.Name);
         return AuthenticateResult.Success(new AuthenticationTicket(principal, SchemeName));
     }
 
@@ -107,7 +117,7 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    private sealed record CachedApiKeyData(Guid TenantId, Guid ApiKeyId, string Name);
+    private sealed record CachedApiKeyData(Guid TenantId, Guid ApiKeyId, string Name, bool IsServiceKey);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "No Authorization header present on request")]
     private static partial void LogMissingAuthHeader(ILogger logger);
@@ -117,4 +127,7 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "API key {ApiKeyId} authenticated for TenantId={TenantId} on {RequestPath}")]
     private static partial void LogApiKeyAuthenticated(ILogger logger, Guid apiKeyId, Guid tenantId, string requestPath);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Service key {ApiKeyId} impersonating TenantId={TenantId} on {RequestPath}")]
+    private static partial void LogServiceKeyImpersonation(ILogger logger, Guid apiKeyId, Guid tenantId, string requestPath);
 }

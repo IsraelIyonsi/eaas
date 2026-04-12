@@ -61,6 +61,10 @@ public sealed class ApiKeyConfiguration : IEntityTypeConfiguration<ApiKey>
         builder.Property(a => a.ReplacedByKeyId)
             .HasColumnName("replaced_by_key_id");
 
+        builder.Property(a => a.IsServiceKey)
+            .HasColumnName("is_service_key")
+            .HasDefaultValue(false);
+
         // Unique constraint on key_hash
         builder.HasIndex(a => a.KeyHash)
             .IsUnique()

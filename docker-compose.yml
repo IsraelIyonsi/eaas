@@ -30,6 +30,7 @@ services:
       - ./scripts/migrate_sprint8_billing.sql:/docker-entrypoint-initdb.d/04f-migrate-sprint8-billing.sql:ro
       - ./scripts/migrate_scheduled_emails.sql:/docker-entrypoint-initdb.d/04g-migrate-scheduled-emails.sql:ro
       - ./scripts/migrate_review_gate.sql:/docker-entrypoint-initdb.d/04h-migrate-review-gate.sql:ro
+      - ./scripts/migrate_service_keys.sql:/docker-entrypoint-initdb.d/04i-migrate-service-keys.sql:ro
       - ./scripts/seed-data.sql:/docker-entrypoint-initdb.d/05-seed.sql:ro
     ports:
       - "127.0.0.1:5432:5432"

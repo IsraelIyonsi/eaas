@@ -47,15 +47,19 @@ async function proxyRequest(
     "Content-Type": "application/json",
   };
 
+  headers["Authorization"] = `Bearer ${API_KEY}`;
+
   // For admin routes, forward session data as trusted headers
   if (apiPath.startsWith("/api/v1/admin/")) {
     headers["X-Admin-User-Id"] = session.userId;
     headers["X-Admin-Email"] = session.email;
     headers["X-Admin-Role"] = session.role;
-    // Still send API key for proxy identification
-    headers["Authorization"] = `Bearer ${API_KEY}`;
-  } else {
-    headers["Authorization"] = `Bearer ${API_KEY}`;
+  }
+
+  // For tenant sessions, tell the API which tenant to act as.
+  // The service key (EAAS_API_KEY) authorizes impersonation server-side.
+  if (session.role === "tenant") {
+    headers["X-Tenant-Id"] = session.userId;
   }
 
   const fetchOptions: RequestInit = {
