@@ -4,7 +4,7 @@
 
 import { HttpClient } from '../client';
 import { ApiPaths } from '@/lib/constants/api-paths';
-import type { Template, CreateTemplateRequest, UpdateTemplateRequest } from '@/types/template';
+import type { Template, TemplateVersion, CreateTemplateRequest, UpdateTemplateRequest } from '@/types/template';
 import type { PaginatedResponse } from '@/types/common';
 
 export class TemplateRepository extends HttpClient {
@@ -37,5 +37,13 @@ export class TemplateRepository extends HttpClient {
       ApiPaths.TEMPLATE_PREVIEW(id),
       { variables },
     );
+  }
+
+  async listVersions(id: string): Promise<{ items: TemplateVersion[]; totalCount: number }> {
+    return this.get<{ items: TemplateVersion[]; totalCount: number }>(ApiPaths.TEMPLATE_VERSIONS(id));
+  }
+
+  async rollback(id: string, version: number): Promise<Template> {
+    return this.post<Template>(ApiPaths.TEMPLATE_ROLLBACK(id), { version });
   }
 }

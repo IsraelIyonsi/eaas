@@ -1,4 +1,5 @@
 using EaaS.Api.Features.Emails;
+using EaaS.Api.Services;
 using EaaS.Api.Tests.Helpers;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
@@ -27,8 +28,24 @@ public sealed class ScheduleEmailHandlerTests : IDisposable
         _subscriptionLimitService.CanSendEmailAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(true);
 
+        // Seed verified domain used by all tests ("example.com")
+        _dbContext.Domains.Add(new SendingDomain
+        {
+            Id = Guid.NewGuid(),
+            TenantId = _tenantId,
+            DomainName = "example.com",
+            Status = DomainStatus.Verified,
+            CreatedAt = DateTime.UtcNow
+        });
+        _dbContext.SaveChanges();
+
+        var suppressionCache = Substitute.For<ISuppressionCache>();
+        suppressionCache.IsEmailSuppressedAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(false);
+        var suppressionChecker = new SuppressionChecker(suppressionCache, _dbContext);
+
         var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger<ScheduleEmailHandler>>();
-        _sut = new ScheduleEmailHandler(_dbContext, _subscriptionLimitService, logger);
+        _sut = new ScheduleEmailHandler(_dbContext, _subscriptionLimitService, suppressionChecker, logger);
     }
 
     [Fact]

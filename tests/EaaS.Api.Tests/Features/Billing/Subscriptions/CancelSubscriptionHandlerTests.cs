@@ -120,7 +120,9 @@ public sealed class CancelSubscriptionHandlerTests : IDisposable
         var command = new CancelSubscriptionCommand(tenantId, false);
         var act = () => _sut.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ValidationException>();
+        // After the fix, cancelled subscriptions are excluded from the query,
+        // so the handler sees no active subscription and throws NotFoundException.
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     public void Dispose()

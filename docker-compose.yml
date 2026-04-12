@@ -23,6 +23,13 @@ services:
       - ./scripts/migrate.sql:/docker-entrypoint-initdb.d/02-migrate.sql:ro
       - ./scripts/migrate_sprint2.sql:/docker-entrypoint-initdb.d/03-migrate-sprint2.sql:ro
       - ./scripts/migrate_sprint3.sql:/docker-entrypoint-initdb.d/04-migrate-sprint3.sql:ro
+      - ./scripts/migrate_sprint4.sql:/docker-entrypoint-initdb.d/04b-migrate-sprint4.sql:ro
+      - ./scripts/migrate_sprint5.sql:/docker-entrypoint-initdb.d/04c-migrate-sprint5.sql:ro
+      - ./scripts/migrate_template_versions.sql:/docker-entrypoint-initdb.d/04d-migrate-template-versions.sql:ro
+      - ./scripts/migrate_sprint7.sql:/docker-entrypoint-initdb.d/04e-migrate-sprint7.sql:ro
+      - ./scripts/migrate_sprint8_billing.sql:/docker-entrypoint-initdb.d/04f-migrate-sprint8-billing.sql:ro
+      - ./scripts/migrate_scheduled_emails.sql:/docker-entrypoint-initdb.d/04g-migrate-scheduled-emails.sql:ro
+      - ./scripts/migrate_review_gate.sql:/docker-entrypoint-initdb.d/04h-migrate-review-gate.sql:ro
       - ./scripts/seed-data.sql:/docker-entrypoint-initdb.d/05-seed.sql:ro
     ports:
       - "127.0.0.1:5432:5432"
@@ -106,6 +113,7 @@ services:
       - Ses__Region=${AWS_REGION}
       - Ses__AccessKeyId=${AWS_ACCESS_KEY_ID}
       - Ses__SecretAccessKey=${AWS_SECRET_ACCESS_KEY}
+      - AdminSession__SessionSecret=${SESSION_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -201,12 +209,12 @@ services:
       - EAAS_API_INTERNAL_URL=http://api:8080
       - EAAS_API_KEY=${EAAS_API_KEY}
       - SESSION_SECRET=${SESSION_SECRET}
-      - SECURE_COOKIES=${SECURE_COOKIES:-false}
+      - SECURE_COOKIES=${SECURE_COOKIES:-true}
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://0.0.0.0:3000/api/health || exit 1"]
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -288,7 +296,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
 
   # ============================================================
   # LOCAL DEV TOOLS

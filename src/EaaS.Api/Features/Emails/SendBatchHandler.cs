@@ -21,6 +21,7 @@ public sealed partial class SendBatchHandler : IRequestHandler<SendBatchCommand,
     private readonly IRateLimiter _rateLimiter;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
+    private readonly ISubscriptionLimitService _subscriptionLimitService;
     private readonly ILogger<SendBatchHandler> _logger;
 
     public SendBatchHandler(
@@ -28,19 +29,24 @@ public sealed partial class SendBatchHandler : IRequestHandler<SendBatchCommand,
         IRateLimiter rateLimiter,
         IPublishEndpoint publishEndpoint,
         SuppressionChecker suppressionChecker,
+        ISubscriptionLimitService subscriptionLimitService,
         ILogger<SendBatchHandler> logger)
     {
         _dbContext = dbContext;
         _rateLimiter = rateLimiter;
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
+        _subscriptionLimitService = subscriptionLimitService;
         _logger = logger;
     }
 
-    private const int MaxBatchSize = 500;
-
     public async Task<SendBatchResult> Handle(SendBatchCommand request, CancellationToken cancellationToken)
     {
+        // 0. Check subscription quota for the entire batch up-front
+        var canSend = await _subscriptionLimitService.CanSendEmailAsync(request.TenantId, cancellationToken);
+        if (!canSend)
+            throw new QuotaExceededException("Monthly email limit exceeded. Upgrade your plan.");
+
         // Rate limit: consume N slots for N emails in the batch, not just 1
         var rateLimitKey = $"ratelimit:send:{request.ApiKeyId}";
         var slotsToConsume = request.Emails.Count;
@@ -52,8 +58,8 @@ public sealed partial class SendBatchHandler : IRequestHandler<SendBatchCommand,
         }
 
         // Enforce maximum batch size to prevent abuse
-        if (request.Emails.Count > MaxBatchSize)
-            throw new ArgumentException($"Batch size {request.Emails.Count} exceeds the maximum allowed size of {MaxBatchSize}.");
+        if (request.Emails.Count > EmailConstants.MaxBatchSize)
+            throw new ArgumentException($"Batch size {request.Emails.Count} exceeds the maximum allowed size of {EmailConstants.MaxBatchSize}.");
 
         var batchId = IdGenerator.GenerateBatchId();
         var results = new List<BatchEmailResultItem>();

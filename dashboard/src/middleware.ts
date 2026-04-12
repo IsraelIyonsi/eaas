@@ -88,7 +88,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Role-based access: admin pages require superadmin or admin role
+  // Role-based access: /admin/* pages are restricted to admin users only (superadmin or admin from AdminUsers table).
+  // Tenant sessions use role="tenant" and must never access admin routes.
   if (
     session &&
     request.nextUrl.pathname.startsWith("/admin") &&

@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Try backend authentication (3s timeout to fail fast when backend is down)
+    // Try backend authentication (10s timeout — EF cold start can take 3-5s)
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
     const backendResponse = await fetch(
       `${API_INTERNAL_URL}/api/v1/admin/auth/login`,

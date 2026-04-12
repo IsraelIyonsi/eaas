@@ -20,6 +20,7 @@ public sealed class SendBatchHandlerTests
     private readonly IRateLimiter _rateLimiter = Substitute.For<IRateLimiter>();
     private readonly IPublishEndpoint _publishEndpoint = Substitute.For<IPublishEndpoint>();
     private readonly ISuppressionCache _suppressionCache = Substitute.For<ISuppressionCache>();
+    private readonly ISubscriptionLimitService _subscriptionLimitService = Substitute.For<ISubscriptionLimitService>();
     private readonly ILogger<SendBatchHandler> _logger = Substitute.For<ILogger<SendBatchHandler>>();
 
     private readonly Guid _tenantId = Guid.NewGuid();
@@ -32,6 +33,10 @@ public sealed class SendBatchHandlerTests
 
         _suppressionCache.IsEmailSuppressedAsync(Arg.Any<Guid>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(false);
+
+        // Default: quota allows sending
+        _subscriptionLimitService.CanSendEmailAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
+            .Returns(true);
     }
 
     [Fact]
@@ -129,7 +134,7 @@ public sealed class SendBatchHandlerTests
     {
         var dbContext = DbContextFactory.Create();
         var suppressionChecker = new SuppressionChecker(_suppressionCache, dbContext);
-        var handler = new SendBatchHandler(dbContext, _rateLimiter, _publishEndpoint, suppressionChecker, _logger);
+        var handler = new SendBatchHandler(dbContext, _rateLimiter, _publishEndpoint, suppressionChecker, _subscriptionLimitService, _logger);
         return (dbContext, handler);
     }
 

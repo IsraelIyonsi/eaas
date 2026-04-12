@@ -30,3 +30,14 @@ export interface UpdateTemplateRequest {
   textBody?: string;
   variablesSchema?: string;
 }
+
+export interface TemplateVersion {
+  id: string;
+  version: number;
+  name: string;
+  subject: string;
+  htmlBody?: string;
+  textBody?: string;
+  description?: string;
+  createdAt: string;
+}

@@ -43,6 +43,7 @@ public static class EndpointMappingExtensions
 
         AddDomainEndpoint.Map(domainsGroup);
         ListDomainsEndpoint.Map(domainsGroup);
+        GetDomainEndpoint.Map(domainsGroup);
         VerifyDomainEndpoint.Map(domainsGroup);
         RemoveDomainEndpoint.Map(domainsGroup);
 
@@ -55,6 +56,7 @@ public static class EndpointMappingExtensions
         SendBatchEndpoint.Map(emailsGroup);
         ScheduleEmailEndpoint.Map(emailsGroup);
         GetEmailEndpoint.Map(emailsGroup);
+        GetEmailEventsEndpoint.Map(emailsGroup);
         ListEmailsEndpoint.Map(emailsGroup);
 
         // Template endpoints
@@ -97,6 +99,7 @@ public static class EndpointMappingExtensions
         CreateWebhookEndpoint.Map(webhooksGroup);
         ListWebhooksEndpoint.Map(webhooksGroup);
         GetWebhookEndpoint.Map(webhooksGroup);
+        GetWebhookDeliveriesEndpoint.Map(webhooksGroup);
         UpdateWebhookEndpoint.Map(webhooksGroup);
         DeleteWebhookEndpoint.Map(webhooksGroup);
         TestWebhookEndpoint.Map(webhooksGroup);
@@ -119,6 +122,8 @@ public static class EndpointMappingExtensions
 
         ListInboundEmailsEndpoint.Map(inboundEmailsGroup);
         GetInboundEmailEndpoint.Map(inboundEmailsGroup);
+        DeleteInboundEmailEndpoint.Map(inboundEmailsGroup);
+        RetryInboundWebhookEndpoint.Map(inboundEmailsGroup);
 
         // Inbound simulation (development only)
         if (app.Environment.IsDevelopment())
@@ -198,6 +203,13 @@ public static class EndpointMappingExtensions
         GetPlanEndpoint.Map(adminBillingPlansGroup);
         CreatePlanEndpoint.Map(adminBillingPlansGroup);
         UpdatePlanEndpoint.Map(adminBillingPlansGroup);
+
+        // Customer billing plans (public, authenticated — no admin policy)
+        var billingPlansGroup = app.MapGroup(RouteConstants.BillingPlans)
+            .RequireAuthorization()
+            .WithTags(TagConstants.BillingPlans);
+
+        ListBillingPlansEndpoint.Map(billingPlansGroup);
 
         // Billing subscription endpoints (customer-facing)
         var billingGroup = app.MapGroup(RouteConstants.BillingSubscriptions)

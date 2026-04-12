@@ -64,3 +64,6 @@ dashboard/.next/
 *.log
 *.tmp
 *.bak
+dashboard/test-results/
+test-diag*.txt
+dashboard-login.png

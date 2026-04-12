@@ -20,11 +20,11 @@ public sealed class GetEmailHandler : IRequestHandler<GetEmailQuery, EmailDetail
         var email = await _dbContext.Emails
             .AsNoTracking()
             .Include(e => e.Events)
-            .Where(e => e.TenantId == request.TenantId && e.MessageId == request.MessageId)
+            .Where(e => e.Id == request.Id && e.TenantId == request.TenantId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (email is null)
-            throw new NotFoundException($"Email with messageId '{request.MessageId}' not found.");
+            throw new NotFoundException($"Email with id '{request.Id}' not found.");
 
         var toList = JsonSerializer.Deserialize<List<string>>(email.ToEmails) ?? new List<string>();
 

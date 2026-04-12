@@ -25,6 +25,8 @@ export const ApiPaths = {
   TEMPLATES: '/api/v1/templates',
   TEMPLATE_BY_ID: (id: string) => `/api/v1/templates/${id}`,
   TEMPLATE_PREVIEW: (id: string) => `/api/v1/templates/${id}/preview`,
+  TEMPLATE_VERSIONS: (id: string) => `/api/v1/templates/${id}/versions`,
+  TEMPLATE_ROLLBACK: (id: string) => `/api/v1/templates/${id}/rollback`,
 
   // Domains
   DOMAINS: '/api/v1/domains',

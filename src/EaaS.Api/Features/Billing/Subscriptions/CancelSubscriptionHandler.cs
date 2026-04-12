@@ -19,7 +19,9 @@ public sealed class CancelSubscriptionHandler : IRequestHandler<CancelSubscripti
     {
         var subscription = await _dbContext.Subscriptions
             .Include(s => s.Plan)
-            .FirstOrDefaultAsync(s => s.TenantId == request.TenantId, cancellationToken);
+            .FirstOrDefaultAsync(s => s.TenantId == request.TenantId
+                && s.Status != SubscriptionStatus.Cancelled
+                && s.Status != SubscriptionStatus.Expired, cancellationToken);
 
         if (subscription is null)
             throw new NotFoundException("No subscription found for this tenant.");

@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS } from '@/lib/constants/ui';
-import type { CreateTemplateRequest, UpdateTemplateRequest } from '@/types/template';
+import type { CreateTemplateRequest, UpdateTemplateRequest, TemplateVersion } from '@/types/template';
 
 export function useTemplates(params?: { search?: string; page?: number; page_size?: number }) {
   return useQuery({
@@ -59,5 +59,24 @@ export function usePreviewTemplate() {
   return useMutation({
     mutationFn: ({ id, variables }: { id: string; variables?: Record<string, unknown> }) =>
       repositories.template.preview(id, variables),
+  });
+}
+
+export function useTemplateVersions(id: string | undefined) {
+  return useQuery<{ items: TemplateVersion[]; totalCount: number }>({
+    queryKey: QueryKeys.templates.versions(id!),
+    queryFn: () => repositories.template.listVersions(id!),
+    enabled: !!id,
+  });
+}
+
+export function useRollbackTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, version }: { id: string; version: number }) =>
+      repositories.template.rollback(id, version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.templates.all });
+    },
   });
 }

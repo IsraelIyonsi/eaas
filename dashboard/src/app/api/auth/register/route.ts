@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       userId: data.tenantId ?? data.userId ?? "user-001",
       email,
       displayName: name,
-      role: "admin",
+      role: "tenant",
       expiresAt: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
     };
 

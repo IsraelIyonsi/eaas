@@ -2,7 +2,7 @@ using MediatR;
 
 namespace EaaS.Api.Features.Emails;
 
-public sealed record GetEmailQuery(Guid TenantId, string MessageId) : IRequest<EmailDetailResult>;
+public sealed record GetEmailQuery(Guid TenantId, Guid Id) : IRequest<EmailDetailResult>;
 
 public sealed record EmailDetailResult(
     Guid Id,

@@ -24,6 +24,7 @@ export const QueryKeys = {
     all: ['templates'] as const,
     list: (params?: Record<string, unknown>) => ['templates', 'list', params] as const,
     detail: (id: string) => ['templates', 'detail', id] as const,
+    versions: (id: string) => ['templates', 'versions', id] as const,
   },
   domains: {
     all: ['domains'] as const,

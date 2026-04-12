@@ -173,7 +173,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             {
                 email.SesMessageId = result.MessageId;
                 email.SentAt = DateTime.UtcNow;
-                await UpdateEmailStatus(email, EmailStatus.Sending, null, context.CancellationToken);
+                await _dbContext.SaveChangesAsync(context.CancellationToken);
 
                 EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "success").Inc();
                 LogEmailSent(_logger, message.EmailId, result.MessageId!);

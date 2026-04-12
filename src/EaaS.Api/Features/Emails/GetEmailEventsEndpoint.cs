@@ -3,22 +3,22 @@ using MediatR;
 
 namespace EaaS.Api.Features.Emails;
 
-public static class GetEmailEndpoint
+public static class GetEmailEventsEndpoint
 {
     public static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/{id:guid}", async (Guid id, HttpContext httpContext, IMediator mediator) =>
+        group.MapGet("/{id:guid}/events", async (Guid id, HttpContext httpContext, IMediator mediator) =>
         {
             var tenantId = GetTenantId(httpContext);
-            var query = new GetEmailQuery(tenantId, id);
+            var query = new GetEmailEventsQuery(tenantId, id);
             var result = await mediator.Send(query);
 
             return Results.Ok(ApiResponse.Ok(result));
         })
-        .WithName("GetEmail")
-        .WithSummary("Get email detail")
-        .WithDescription("Returns a single email by its UUID.")
-        .Produces<ApiResponse<EmailDetailResult>>(StatusCodes.Status200OK)
+        .WithName("GetEmailEvents")
+        .WithSummary("Get events for an email")
+        .WithDescription("Returns all tracking events for the specified email, ordered by time.")
+        .Produces<ApiResponse<List<EmailEventDto>>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }
 

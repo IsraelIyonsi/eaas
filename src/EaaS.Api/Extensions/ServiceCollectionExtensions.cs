@@ -32,6 +32,8 @@ public static class ServiceCollectionExtensions
         // Application services
         services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
         services.AddScoped<EaaS.Api.Services.SuppressionChecker>();
+        services.AddScoped<EaaS.Api.Features.Inbound.Emails.DeleteInboundEmailHandler>();
+        services.AddScoped<EaaS.Api.Features.Inbound.Emails.RetryInboundWebhookHandler>();
 
         // MediatR
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());

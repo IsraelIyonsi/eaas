@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EaaS.Api.Services;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Exceptions;
@@ -6,6 +7,7 @@ using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Utilities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace EaaS.Api.Features.Emails;
@@ -14,15 +16,18 @@ public sealed partial class ScheduleEmailHandler : IRequestHandler<ScheduleEmail
 {
     private readonly AppDbContext _dbContext;
     private readonly ISubscriptionLimitService _subscriptionLimitService;
+    private readonly SuppressionChecker _suppressionChecker;
     private readonly ILogger<ScheduleEmailHandler> _logger;
 
     public ScheduleEmailHandler(
         AppDbContext dbContext,
         ISubscriptionLimitService subscriptionLimitService,
+        SuppressionChecker suppressionChecker,
         ILogger<ScheduleEmailHandler> logger)
     {
         _dbContext = dbContext;
         _subscriptionLimitService = subscriptionLimitService;
+        _suppressionChecker = suppressionChecker;
         _logger = logger;
     }
 
@@ -39,6 +44,22 @@ public sealed partial class ScheduleEmailHandler : IRequestHandler<ScheduleEmail
         var canSend = await _subscriptionLimitService.CanSendEmailAsync(request.TenantId, cancellationToken);
         if (!canSend)
             throw new QuotaExceededException("Monthly email limit exceeded. Upgrade your plan.");
+
+        // 2a. Verify from address belongs to a verified domain for this tenant
+        var fromDomain = request.From.Split('@').Last().ToLowerInvariant();
+        var domainVerified = await _dbContext.Domains
+            .AsNoTracking()
+            .AnyAsync(d => d.TenantId == request.TenantId
+                           && d.DomainName == fromDomain
+                           && d.Status == DomainStatus.Verified
+                           && d.DeletedAt == null, cancellationToken);
+
+        if (!domainVerified)
+            throw new DomainNotVerifiedException($"Domain '{fromDomain}' is not verified for this tenant.");
+
+        // 2b. Check recipient against suppression list
+        await _suppressionChecker.EnsureNoneSuppressedOrThrowAsync(
+            request.TenantId, new[] { request.To }, cancellationToken);
 
         // 3. Create Email entity with Scheduled status
         var email = new Email
@@ -66,7 +87,7 @@ public sealed partial class ScheduleEmailHandler : IRequestHandler<ScheduleEmail
         {
             Id = Guid.NewGuid(),
             EmailId = email.Id,
-            EventType = EventType.Queued,
+            EventType = EventType.Scheduled,
             Data = JsonSerializer.Serialize(new { scheduledAt = request.ScheduledAt }),
             CreatedAt = DateTime.UtcNow
         });

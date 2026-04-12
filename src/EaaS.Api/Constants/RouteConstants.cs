@@ -26,6 +26,7 @@ public static class RouteConstants
     public const string AdminAnalytics = $"{AdminBase}/analytics";
     public const string AdminAuditLogs = $"{AdminBase}/audit-logs";
     public const string AdminBillingPlans = $"{AdminBase}/billing/plans";
+    public const string BillingPlans = $"{ApiBase}/billing/plans";
     public const string BillingSubscriptions = $"{ApiBase}/billing/subscriptions";
     public const string PaymentWebhooks = $"{ApiBase}/webhooks/payments";
 }
