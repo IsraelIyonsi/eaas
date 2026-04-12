@@ -27,3 +27,9 @@ ON CONFLICT (id) DO UPDATE SET
     key_hash = EXCLUDED.key_hash,
     is_service_key = TRUE,
     status = 'active';
+
+-- Reset admin password to 'admin' (temporary — change after first login)
+UPDATE admin_users
+SET password_hash = '$2b$12$zS1Falh.9c0YS31qXy.2K.pMqpbVseBXxNAP8IxmK6uyW6OaldEnK',
+    updated_at = NOW()
+WHERE email = 'admin@eaas.local';
