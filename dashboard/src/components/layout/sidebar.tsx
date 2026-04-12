@@ -96,6 +96,8 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail, userRole }: 
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
+    // Exact match for leaf routes like /analytics (don't match /analytics/inbound)
+    if (href === Routes.ANALYTICS_OUTBOUND) return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   }
 
