@@ -23,21 +23,9 @@ const tenantColumns = [
     ),
   },
   {
-    key: "company",
-    header: "Company",
-    render: (item: TenantRanking) => (
-      <span className="text-muted-foreground">{item.company ?? "-"}</span>
-    ),
-  },
-  {
     key: "emailCount",
-    header: "Emails",
-    render: (item: TenantRanking) => item.emailCount.toLocaleString(),
-  },
-  {
-    key: "domainCount",
-    header: "Domains",
-    render: (item: TenantRanking) => item.domainCount,
+    header: "Emails Sent",
+    render: (item: TenantRanking) => (item.emailCount ?? 0).toLocaleString(),
   },
 ];
 
