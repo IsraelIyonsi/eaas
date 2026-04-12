@@ -269,6 +269,29 @@ services:
       - local
 
   # ============================================================
+  # DATABASE ADMIN
+  # ============================================================
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: eaas-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@eaas.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: 5050
+    ports:
+      - "127.0.0.1:5050:5050"
+    depends_on:
+      - postgres
+    profiles:
+      - tools
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ============================================================
   # LOCAL DEV TOOLS
   # ============================================================
 
