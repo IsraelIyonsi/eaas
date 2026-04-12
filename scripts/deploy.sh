@@ -50,11 +50,11 @@ echo "SECURE_COOKIES=false" >> /opt/eaas/.env
 
 # Rebuild and restart application containers only (infra stays up)
 echo "[deploy] Building Docker images..."
-docker compose -f docker-compose.yml build --no-cache api worker webhook-processor dashboard
+docker compose -f docker-compose.yml build --no-cache api worker webhook-processor
 
 # Stop and remove application containers (including stale renamed orphans from interrupted deploys)
 echo "[deploy] Stopping application containers..."
-for svc in eaas-api eaas-worker eaas-webhook-processor eaas-dashboard eaas-nginx; do
+for svc in eaas-api eaas-worker eaas-webhook-processor eaas-nginx; do
   # Remove the primary container
   docker rm -f "$svc" 2>/dev/null || true
   # Remove any orphaned containers with hash-prefixed names (e.g., 4f65fa308e51_eaas-api)
@@ -62,7 +62,7 @@ for svc in eaas-api eaas-worker eaas-webhook-processor eaas-dashboard eaas-nginx
 done
 
 echo "[deploy] Starting services..."
-docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor dashboard nginx
+docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-processor nginx
 
 # Run idempotent database migrations that may not have been applied
 # (Docker init scripts only run on first DB creation; these handle schema drift)

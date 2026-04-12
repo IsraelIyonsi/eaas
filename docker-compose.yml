@@ -203,6 +203,8 @@ services:
         limits:
           memory: 128M
 
+  # Dashboard is deployed to Vercel (app.sendnex.xyz).
+  # Keep this service for local development only.
   dashboard:
     build:
       context: ./dashboard
@@ -225,6 +227,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    profiles:
+      - local
     deploy:
       resources:
         limits:
@@ -344,7 +348,6 @@ services:
     depends_on:
       - api
       - webhook-processor
-      - dashboard
     deploy:
       resources:
         limits:
