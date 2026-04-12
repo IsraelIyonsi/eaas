@@ -70,7 +70,7 @@ export const ApiPaths = {
 
   // Admin - Analytics
   ADMIN_PLATFORM_SUMMARY: '/api/v1/admin/analytics/summary',
-  ADMIN_TENANT_RANKINGS: '/api/v1/admin/analytics/rankings',
+  ADMIN_TENANT_RANKINGS: '/api/v1/admin/analytics/tenants/rankings',
   ADMIN_GROWTH_METRICS: '/api/v1/admin/analytics/growth',
 
   // Admin - Health
