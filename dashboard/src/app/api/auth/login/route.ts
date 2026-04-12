@@ -7,6 +7,16 @@ const API_INTERNAL_URL =
   process.env.EAAS_API_INTERNAL_URL ?? "http://localhost:5000";
 const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours
 
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { email, password } = body;
@@ -32,38 +42,49 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Try backend authentication (10s timeout — EF cold start can take 3-5s)
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    // Try customer (tenant) login first, then admin login.
+    // Most users are tenants; admin accounts are in a separate table.
+    const authPayload = JSON.stringify({ email, password });
+    const headers = { "Content-Type": "application/json" };
 
-    const backendResponse = await fetch(
-      `${API_INTERNAL_URL}/api/v1/admin/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        signal: controller.signal,
-      },
+    // 1. Try customer auth
+    const customerRes = await fetchWithTimeout(
+      `${API_INTERNAL_URL}/api/v1/auth/login`,
+      { method: "POST", headers, body: authPayload },
     );
 
-    clearTimeout(timeout);
-
-    if (!backendResponse.ok) {
-      const errorBody = await backendResponse.json().catch(() => null);
-      const message =
-        errorBody?.error?.message ?? "Invalid email or password.";
-      return NextResponse.json({ error: message }, { status: backendResponse.status });
+    if (customerRes.ok) {
+      const result = await customerRes.json();
+      const data = result.data ?? result;
+      return createSessionResponse({
+        userId: data.tenantId ?? data.userId,
+        email: data.email,
+        displayName: data.displayName ?? data.name,
+        role: "tenant",
+      });
     }
 
-    const result = await backendResponse.json();
-    const data = result.data ?? result;
+    // 2. Fall back to admin auth
+    const adminRes = await fetchWithTimeout(
+      `${API_INTERNAL_URL}/api/v1/admin/auth/login`,
+      { method: "POST", headers, body: authPayload },
+    );
 
-    return createSessionResponse({
-      userId: data.userId,
-      email: data.email,
-      displayName: data.displayName,
-      role: (data.role as string).toLowerCase() as SessionData["role"],
-    });
+    if (adminRes.ok) {
+      const result = await adminRes.json();
+      const data = result.data ?? result;
+      return createSessionResponse({
+        userId: data.userId,
+        email: data.email,
+        displayName: data.displayName,
+        role: (data.role as string).toLowerCase() as SessionData["role"],
+      });
+    }
+
+    const errorBody = await adminRes.json().catch(() => null);
+    const message =
+      errorBody?.error?.message ?? "Invalid email or password.";
+    return NextResponse.json({ error: message }, { status: adminRes.status });
   } catch {
     return NextResponse.json(
       { error: "Invalid email or password." },
