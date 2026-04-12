@@ -304,6 +304,7 @@ services:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/ssl:/etc/nginx/ssl:ro
       - certbot_data:/var/www/certbot:ro
+      - ./landing:/usr/share/nginx/landing:ro
     depends_on:
       - api
       - webhook-processor

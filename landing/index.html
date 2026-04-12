@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SendNext — Email delivery that just works.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0A0A0F;
+      --bg-elevated: #111118;
+      --bg-card: #13131A;
+      --bg-card-hover: #1A1A24;
+      --accent: #6C63FF;
+      --accent-dim: rgba(108,99,255,0.15);
+      --accent-glow: rgba(108,99,255,0.35);
+      --green: #22C55E;
+      --green-dim: rgba(34,197,94,0.12);
+      --text: #F8F8F8;
+      --text-muted: #6B7280;
+      --text-dim: #9CA3AF;
+      --border: rgba(255,255,255,0.07);
+      --border-accent: rgba(108,99,255,0.3);
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 10px;
+      --radius-lg: 16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; }
+    button { cursor: pointer; font-family: var(--font-body); }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 max(24px, calc((100vw - 1200px) / 2));
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s, backdrop-filter 0.3s, border-bottom 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo-mark {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+    }
+    .nav-logo-mark svg { width: 16px; height: 16px; color: #fff; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      background: rgba(10,10,15,0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px 28px;
+      z-index: 99;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-dim);
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .mobile-menu a:last-of-type { border-bottom: none; }
+    .mobile-menu a:hover { color: var(--text); }
+    .mobile-menu .mobile-cta {
+      margin-top: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 64px;
+      padding: 120px max(24px, calc((100vw - 1200px) / 2)) 80px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #a89cff;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-eyebrow .dot {
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, #fff 30%, #a89cff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 460px;
+      margin-bottom: 36px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 9px;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--accent-glow);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 20px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      transition: color 0.2s, border-color 0.2s, transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Terminal */
+    .hero-terminal {
+      position: relative;
+    }
+    .terminal-glow {
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(ellipse at 50% 50%, rgba(108,99,255,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .terminal-window {
+      background: #0D0D14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px;
+      background: #0A0A12;
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .td-red { background: #FF5F57; }
+    .td-yellow { background: #FFBD2E; }
+    .td-green { background: #28CA41; }
+    .terminal-title {
+      margin-left: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .terminal-body {
+      padding: 20px 20px 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      min-height: 320px;
+      overflow-x: auto;
+    }
+    .terminal-prompt {
+      color: var(--green);
+    }
+    .terminal-command {
+      color: #CBD5E1;
+      white-space: pre;
+    }
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px; height: 14px;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .terminal-response {
+      margin-top: 12px;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .terminal-response.visible { opacity: 1; }
+    .resp-status { color: var(--green); font-weight: 600; }
+    .resp-key { color: #93C5FD; }
+    .resp-str { color: #FCA5A5; }
+    .resp-num { color: #FDE68A; }
+    .resp-brace { color: var(--text-muted); }
+
+    /* ─── TRUST STRIP ─── */
+    .trust-strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px max(24px, calc((100vw - 1200px) / 2));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      overflow-x: auto;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .trust-icon {
+      width: 32px; height: 32px;
+      background: var(--accent-dim);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .trust-icon svg { width: 15px; height: 15px; color: var(--accent); }
+    .trust-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+    .trust-label strong {
+      color: var(--text);
+      display: block;
+      font-size: 14px;
+    }
+    .trust-sep {
+      width: 1px;
+      height: 32px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ─── SECTIONS COMMON ─── */
+    section {
+      padding: 96px max(24px, calc((100vw - 1200px) / 2));
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(26px, 3.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ─── VALUE PROPS ─── */
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .value-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .value-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+    }
+    .value-card:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-3px);
+    }
+    .value-icon {
+      width: 40px; height: 40px;
+      background: var(--accent-dim);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 16px;
+    }
+    .value-icon svg { width: 20px; height: 20px; color: var(--accent); }
+    .value-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .value-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ─── FEATURES ─── */
+    .features-section { background: var(--bg-elevated); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .feature-card:hover {
+      border-color: var(--border-accent);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: var(--accent-dim);
+      border-radius: 11px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+    }
+    .feature-icon svg { width: 22px; height: 22px; color: var(--accent); }
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ─── SOCIAL PROOF ─── */
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .testimonial-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+    }
+    .testimonial-stars {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 16px;
+    }
+    .testimonial-stars svg { width: 14px; height: 14px; color: #FBBF24; fill: #FBBF24; }
+    .testimonial-card blockquote {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.75;
+      margin-bottom: 20px;
+      font-style: normal;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .author-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .author-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .author-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .stats-block {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .stat-item {
+      padding: 32px 28px;
+      border-right: 1px solid var(--border);
+      text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-value {
+      font-size: clamp(28px, 3.5vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .stat-value span { color: var(--accent); }
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    .hiw-section { background: var(--bg-elevated); }
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .steps-row::before {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: calc(16.66% + 20px);
+      right: calc(16.66% + 20px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--border-accent), var(--border-accent));
+      z-index: 0;
+    }
+    .step {
+      padding: 0 24px 0 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step:last-child { padding-right: 0; }
+    .step-number {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .step-number-inner {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .step h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+      letter-spacing: -0.015em;
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .step-tag {
+      display: inline-block;
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--green);
+      background: var(--green-dim);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* ─── CODE SAMPLE ─── */
+    .code-section { background: var(--bg); }
+    .code-block-wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      overflow: hidden;
+    }
+    .code-tab {
+      padding: 12px 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .code-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+      background: rgba(108,99,255,0.06);
+    }
+    .code-tab:hover:not(.active) { color: var(--text-dim); }
+
+    .code-panel {
+      display: none;
+      position: relative;
+      background: #0D0D14;
+      border: 1px solid var(--border);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+    .code-panel.active { display: block; }
+    .copy-btn {
+      position: absolute;
+      top: 14px; right: 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 2;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .copy-btn svg { width: 13px; height: 13px; }
+    .copy-btn.copied { color: var(--green); border-color: rgba(34,197,94,0.3); }
+
+    .code-scroll {
+      overflow-x: auto;
+      padding: 24px 20px 28px;
+    }
+    .code-scroll pre {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.75;
+      color: #CBD5E1;
+      white-space: pre;
+      margin: 0;
+    }
+    .c-comment { color: #4B5563; }
+    .c-keyword { color: #c084fc; }
+    .c-string { color: #86efac; }
+    .c-fn { color: #7dd3fc; }
+    .c-var { color: #fca5a5; }
+    .c-method { color: #93c5fd; }
+    .c-prop { color: #cbd5e1; }
+
+    /* ─── PRICING ─── */
+    .pricing-section { background: var(--bg-elevated); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 64px;
+      align-items: center;
+    }
+    .pricing-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .pricing-card.featured {
+      background: linear-gradient(160deg, #13132A 0%, #0D0D1A 100%);
+      border-color: var(--border-accent);
+      opacity: 1;
+      position: relative;
+      box-shadow: 0 0 0 1px var(--border-accent), 0 20px 60px rgba(108,99,255,0.15);
+    }
+    .pricing-card:hover { opacity: 1; }
+    .pricing-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .pricing-tier {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .pricing-featured .pricing-tier { color: var(--accent); }
+    .pricing-price {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1;
+    }
+    .pricing-price sup {
+      font-size: 20px;
+      font-weight: 600;
+      vertical-align: top;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .pricing-period {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    .pricing-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .pricing-features li svg {
+      width: 15px; height: 15px;
+      color: var(--green);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pricing-features li.muted svg { color: var(--text-muted); }
+    .pricing-features li.muted { color: var(--text-muted); }
+    .btn-pricing-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px;
+      border-radius: 9px;
+      border: none;
+      transition: opacity 0.2s, transform 0.15s;
+      text-align: center;
+      display: block;
+    }
+    .btn-pricing-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-pricing-outline {
+      width: 100%;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      transition: color 0.2s, border-color 0.2s;
+      text-align: center;
+      display: block;
+    }
+    .btn-pricing-outline:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    /* FAQ */
+    .faq-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+    .faq-list {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-question {
+      width: 100%;
+      background: var(--bg-card);
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 18px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background 0.2s;
+      line-height: 1.5;
+    }
+    .faq-question:hover { background: var(--bg-card-hover); }
+    .faq-chevron {
+      width: 18px; height: 18px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      transition: transform 0.25s;
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+    .faq-answer {
+      display: none;
+      padding: 0 20px 18px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      background: var(--bg-card);
+    }
+    .faq-item.open .faq-answer { display: block; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px max(24px, calc((100vw - 1200px) / 2)) 32px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 56px;
+    }
+    .footer-brand p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-top: 14px;
+      max-width: 240px;
+    }
+    .footer-col h4 {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul a {
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .footer-col ul a:hover { color: var(--text); }
+    .footer-bottom {
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-legal {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-legal a { color: var(--text-muted); transition: color 0.2s; }
+    .footer-legal a:hover { color: var(--text); }
+    .footer-badges {
+      display: flex;
+      gap: 8px;
+    }
+    .footer-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: var(--bg-card);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; gap: 48px; min-height: auto; padding-top: 100px; }
+      .hero-sub { max-width: 100%; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .social-grid { grid-template-columns: 1fr; }
+      .stats-block { grid-template-columns: repeat(3, 1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .steps-row { grid-template-columns: 1fr; gap: 32px; }
+      .steps-row::before { display: none; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      section { padding: 64px 20px; }
+      nav { padding: 0 20px; }
+      .hero { padding: 88px 20px 64px; }
+      .trust-strip { padding: 16px 20px; justify-content: flex-start; gap: 24px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-block { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+      .footer-top { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+      .hero-ctas { flex-direction: column; align-items: stretch; }
+      .hero-ctas .btn-primary, .hero-ctas .btn-secondary { justify-content: center; text-align: center; }
+      .code-block-wrapper { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav id="nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    SendNext
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">Docs</a></li>
+    <li><a href="#waitlist">Pricing</a></li>
+  </ul>
+
+  <a href="#waitlist" class="nav-cta">Get Early Access</a>
+
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#features" onclick="closeMobileMenu()">Features</a>
+  <a href="#how-it-works" onclick="closeMobileMenu()">Docs</a>
+  <a href="#waitlist" onclick="closeMobileMenu()">Pricing</a>
+  <a href="#waitlist" class="mobile-cta" onclick="closeMobileMenu()">Get Early Access — It's Free</a>
+</div>
+
+<!-- ─── HERO ─── -->
+<section class="hero" style="padding-top:120px; display:grid;">
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <span class="dot"></span>
+      Now in Early Access
+    </div>
+    <h1><span>Email delivery<br>that just works.</span></h1>
+    <p class="hero-sub">A transactional email API built for developers who are done fighting with deliverability, complex dashboards, and pricing tiers that punish growth. Send your first email in under five minutes.</p>
+    <div class="hero-ctas">
+      <a href="#waitlist" class="btn-primary">Get Early Access — It's Free</a>
+      <a href="/app" class="btn-secondary">Read the Docs →</a>
+    </div>
+  </div>
+
+  <div class="hero-terminal">
+    <div class="terminal-glow"></div>
+    <div class="terminal-window">
+      <div class="terminal-bar">
+        <div class="terminal-dot td-red"></div>
+        <div class="terminal-dot td-yellow"></div>
+        <div class="terminal-dot td-green"></div>
+        <span class="terminal-title">~/project — bash</span>
+      </div>
+      <div class="terminal-body">
+        <div>
+          <span class="terminal-prompt">❯ </span><span id="typed-cmd" class="terminal-command"></span><span class="terminal-cursor" id="cursor"></span>
+        </div>
+        <div class="terminal-response" id="terminal-response">
+          <div style="margin-top:8px; color:#6B7280; font-size:12px;">HTTP/2 200 OK</div>
+          <div style="color:#6B7280; font-size:12px; margin-bottom:8px;">Content-Type: application/json</div>
+          <span class="resp-brace">{</span><br>
+          &nbsp;&nbsp;<span class="resp-key">"messageId"</span><span class="resp-brace">: </span><span class="resp-str">"msg_01HXYZ9QK2NPRT4VWCBD83EF7G"</span><span class="resp-brace">,</span><br>
+          &nbsp;&nbsp;<span class="resp-key">"status"</span><span class="resp-brace">: </span><span class="resp-str">"queued"</span><span class="resp-brace">,</span><br>
+          &nbsp;&nbsp;<span class="resp-key">"timestamp"</span><span class="resp-brace">: </span><span class="resp-str">"2025-10-14T09:41:22.314Z"</span><br>
+          <span class="resp-brace">}</span><br><br>
+          <span class="resp-status">✓ Email queued successfully in 142ms</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRUST STRIP ─── -->
+<div class="trust-strip">
+  <div class="trust-item">
+    <div class="trust-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+    <div class="trust-label"><strong>99.97%</strong>Uptime SLA</div>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <div class="trust-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+    <div class="trust-label"><strong>&lt;200ms</strong>API Latency</div>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <div class="trust-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div class="trust-label"><strong>DKIM + SPF</strong>Built-In</div>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <div class="trust-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+    <div class="trust-label"><strong>AWS SES</strong>Backbone</div>
+  </div>
+  <div class="trust-sep"></div>
+  <div class="trust-item">
+    <div class="trust-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div class="trust-label"><strong>SOC 2 Ready</strong><span style="font-size:10px">*In progress</span></div>
+  </div>
+</div>
+
+<!-- ─── VALUE PROPS ─── -->
+<section id="features">
+  <p class="section-label">Why SendNext</p>
+  <h2 class="section-title">Why developers choose SendNext</h2>
+  <p class="section-sub">Built by developers who spent too many hours debugging email. Every design decision optimizes for your time.</p>
+  <div class="value-grid">
+    <div class="value-card">
+      <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+      <h3>REST API First</h3>
+      <p>One POST request. That's it. No SDK required to get started. Integrate in any language in minutes.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <h3>Sub-200ms Delivery</h3>
+      <p>Emails queued and dispatched via AWS SES in under 200ms. Your users get their OTPs fast.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h3>Auth Built-In</h3>
+      <p>DKIM signing, SPF records, and DMARC alignment configured automatically when you verify a domain.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <h3>Webhook Events</h3>
+      <p>Real-time delivery, bounce, and spam event webhooks. Build your own analytics or plug into Datadog.</p>
+    </div>
+    <div class="value-card">
+      <div class="value-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
+      <h3>Honest Pricing</h3>
+      <p>Pay per email sent. No seat licenses, no overage surprises, no minimum commitments. Scales with you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES ─── -->
+<section class="features-section">
+  <p class="section-label">Features</p>
+  <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+  <p class="section-sub">No feature bloat. No forced upsells. Just the infrastructure primitives developers actually use.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+      <h3>Multi-Domain Support</h3>
+      <p>Verify unlimited sending domains and manage them all from a single API key or isolated per project.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"/><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"/><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"/><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"/><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"/><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"/></svg></div>
+      <h3>Tagging & Metadata</h3>
+      <p>Attach custom tags and metadata to every send. Query by tag in logs and webhook filters downstream.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+      <h3>Delivery Webhooks</h3>
+      <p>Subscribe to delivered, bounced, complained, and opened events. Signed payloads you can verify.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+      <h3>SDK Libraries</h3>
+      <p>Official SDKs for Node.js, Python, Go, and PHP. Type-safe, zero-dependency, tree-shakeable.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <h3>API Key Scoping</h3>
+      <p>Create keys scoped to send-only, read-only, or full access. Rotate without downtime using dual-key windows.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <h3>Delivery Logs</h3>
+      <p>72-hour full log retention on all plans. Filterable by recipient, tag, status, and timestamp range.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SOCIAL PROOF ─── -->
+<section id="social-proof">
+  <p class="section-label">Social Proof</p>
+  <h2 class="section-title">Trusted by developers<br>from day one.</h2>
+  <p class="section-sub">Early access engineers have already put SendNext through its paces.</p>
+  <div class="social-grid">
+    <div class="testimonial-card">
+      <div class="testimonial-stars">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <blockquote>"Migrated from SendGrid in a Saturday afternoon. The API is so clean that I didn't need to read the docs more than once. OTP emails now consistently land in under 180ms."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">AK</div>
+        <div>
+          <div class="author-name">Arjun K. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-role">Founder, SaaS startup</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <blockquote>"Finally an email API that doesn't charge per seat. Our team of 12 was paying $400/month for features we never used. SendNext has everything we actually need."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">SL</div>
+        <div>
+          <div class="author-name">Sofia L. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-role">Engineering Lead, Fintech</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <blockquote>"The webhook signature verification worked first try. DKIM setup was two DNS records, took five minutes. I've integrated with four email APIs — this is the cleanest by a mile."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar">TM</div>
+        <div>
+          <div class="author-name">Tobi M. <span style="color:var(--text-muted);font-weight:400;">· placeholder</span></div>
+          <div class="author-role">Senior Backend Engineer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-block">
+    <div class="stat-item">
+      <div class="stat-value">99.<span>97%</span></div>
+      <div class="stat-label">Uptime over rolling 90 days</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">&lt;<span>200</span>ms</div>
+      <div class="stat-label">p99 API response latency</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">&lt;0.<span>05%</span></div>
+      <div class="stat-label">Average bounce rate</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section id="how-it-works" class="hiw-section">
+  <p class="section-label">How It Works</p>
+  <h2 class="section-title">Live in three steps.</h2>
+  <p class="section-sub">No onboarding calls. No CSM required. Just a terminal and five minutes of your time.</p>
+  <div class="steps-row">
+    <div class="step">
+      <div class="step-number"><span class="step-number-inner">01</span></div>
+      <h3>Get your API key</h3>
+      <p>Sign up, hit the dashboard, copy your API key. It's scoped to send-only by default so you can share it safely with CI environments.</p>
+      <span class="step-tag">~30 seconds</span>
+    </div>
+    <div class="step">
+      <div class="step-number"><span class="step-number-inner">02</span></div>
+      <h3>Verify your domain</h3>
+      <p>Add two DNS records. We check them in real time and auto-configure DKIM, SPF, and DMARC alignment. No waiting 48 hours.</p>
+      <span class="step-tag">~2 minutes</span>
+    </div>
+    <div class="step">
+      <div class="step-number"><span class="step-number-inner">03</span></div>
+      <h3>Send your first email</h3>
+      <p>One POST request. Paste the cURL snippet from the dashboard, swap in your recipient, and watch the 200 OK roll back in milliseconds.</p>
+      <span class="step-tag">~2 minutes</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CODE SAMPLE ─── -->
+<section class="code-section">
+  <p class="section-label">Code Sample</p>
+  <h2 class="section-title">Looks familiar.<br>Works immediately.</h2>
+  <p class="section-sub">Idiomatic API design. If you've used Stripe or Resend, you already know how this works.</p>
+
+  <div class="code-block-wrapper">
+    <div class="code-tabs">
+      <button class="code-tab active" data-tab="curl">cURL</button>
+      <button class="code-tab" data-tab="node">Node.js</button>
+    </div>
+
+    <div class="code-panel active" id="panel-curl">
+      <button class="copy-btn" data-target="curl-code">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+      <div class="code-scroll">
+        <pre id="curl-code"><span class="c-keyword">curl</span> -X POST https://api.sendnex.xyz/v1/emails \
+  -H <span class="c-string">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="c-string">"Content-Type: application/json"</span> \
+  -d <span class="c-string">'{
+    "from": "hello@yourdomain.com",
+    "to": "user@example.com",
+    "subject": "Welcome to the app",
+    "html": "&lt;h1&gt;You'\''re in.&lt;/h1&gt;&lt;p&gt;Thanks for signing up.&lt;/p&gt;",
+    "tags": ["welcome", "onboarding"]
+  }'</span>
+
+<span class="c-comment"># Response</span>
+<span class="resp-brace">{</span>
+  <span class="resp-key">"messageId"</span>: <span class="resp-str">"msg_01HXYZ9QK2NPRT4VWCBD83EF7G"</span>,
+  <span class="resp-key">"status"</span>: <span class="resp-str">"queued"</span>,
+  <span class="resp-key">"timestamp"</span>: <span class="resp-str">"2025-10-14T09:41:22.314Z"</span>
+<span class="resp-brace">}</span></pre>
+      </div>
+    </div>
+
+    <div class="code-panel" id="panel-node">
+      <button class="copy-btn" data-target="node-code">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy
+      </button>
+      <div class="code-scroll">
+        <pre id="node-code"><span class="c-keyword">import</span> { <span class="c-fn">SendNextClient</span> } <span class="c-keyword">from</span> <span class="c-string">'@sendnext/sdk'</span>;
+
+<span class="c-keyword">const</span> <span class="c-var">client</span> = <span class="c-keyword">new</span> <span class="c-fn">SendNextClient</span>({
+  <span class="c-prop">apiKey</span>: process.env.<span class="c-var">SENDNEXT_API_KEY</span>
+});
+
+<span class="c-keyword">const</span> <span class="c-var">result</span> = <span class="c-keyword">await</span> client.email.<span class="c-method">send</span>({
+  <span class="c-prop">from</span>: <span class="c-string">'hello@yourdomain.com'</span>,
+  <span class="c-prop">to</span>: <span class="c-string">'user@example.com'</span>,
+  <span class="c-prop">subject</span>: <span class="c-string">'Welcome to the app'</span>,
+  <span class="c-prop">html</span>: <span class="c-string">'&lt;h1&gt;You\'re in.&lt;/h1&gt;&lt;p&gt;Thanks for signing up.&lt;/p&gt;'</span>,
+  <span class="c-prop">tags</span>: [<span class="c-string">'welcome'</span>, <span class="c-string">'onboarding'</span>],
+});
+
+console.<span class="c-method">log</span>(result.<span class="c-prop">messageId</span>);
+<span class="c-comment">// msg_01HXYZ9QK2NPRT4VWCBD83EF7G</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section id="waitlist" class="pricing-section">
+  <p class="section-label">Pricing</p>
+  <h2 class="section-title">Simple, honest pricing.</h2>
+  <p class="section-sub">Early access is free. No credit card required. Lock in your rate before we launch.</p>
+
+  <div class="pricing-grid">
+    <!-- Starter -->
+    <div class="pricing-card">
+      <div class="pricing-tier">Starter</div>
+      <div class="pricing-price"><sup>$</sup>0</div>
+      <div class="pricing-period">per month, free forever</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          3,000 emails / month
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          1 verified domain
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          DKIM + SPF auto-setup
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          24h delivery logs
+        </li>
+        <li class="muted">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          No webhooks
+        </li>
+        <li class="muted">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Community support only
+        </li>
+      </ul>
+      <a href="#waitlist" class="btn-pricing-outline">Get Started Free</a>
+    </div>
+
+    <!-- Early Access -->
+    <div class="pricing-card featured">
+      <div class="pricing-badge">Early Access</div>
+      <div class="pricing-tier" style="color:var(--accent);">Early Access</div>
+      <div class="pricing-price"><sup>$</sup>0</div>
+      <div class="pricing-period">free while in early access</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          50,000 emails / month
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Unlimited domains
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Delivery webhooks
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          72h delivery logs
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Tags &amp; metadata
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Priority email support
+        </li>
+      </ul>
+      <a href="#waitlist" class="btn-pricing-primary">Get Early Access — It's Free</a>
+    </div>
+
+    <!-- Growth -->
+    <div class="pricing-card">
+      <div class="pricing-tier">Growth</div>
+      <div class="pricing-price"><sup>$</sup>29</div>
+      <div class="pricing-period">per month at launch</div>
+      <div class="pricing-divider"></div>
+      <ul class="pricing-features">
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          250,000 emails / month
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Unlimited domains
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Full webhook suite
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          30-day log retention
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Team access (5 members)
+        </li>
+        <li>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Dedicated Slack support
+        </li>
+      </ul>
+      <a href="#waitlist" class="btn-pricing-outline">Join Waitlist</a>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-title">Frequently asked questions</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-question">
+        Do I need a credit card to sign up?
+        <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">No. Early access is completely free, no credit card required. When we launch paid plans you'll get advance notice and the option to lock in an early-access rate.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">
+        What happens when early access ends?
+        <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">Early access users will be migrated to a paid plan at a discounted rate as a thank-you for helping us build the product. You'll never be automatically charged — we'll ask for your payment details first.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">
+        Which sending domains are supported?
+        <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">Any domain you own. We support all major registrars and DNS providers. Verification requires two TXT/CNAME records and typically propagates in under five minutes on most providers.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">
+        Can I use SendNext for marketing emails?
+        <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">SendNext is optimized for transactional email (OTPs, receipts, password resets, notifications). We don't currently support bulk marketing campaigns or list management — that keeps our deliverability rates high for everyone.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-question">
+        What's the deliverability like compared to competitors?
+        <svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">We route through AWS SES with dedicated IP warm-up for Growth plan users, combined with automatic DKIM/SPF/DMARC setup. Early access users share a high-reputation IP pool. Our average bounce rate across early users is under 0.05%.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="/" class="nav-logo" style="display:inline-flex;">
+        <div class="nav-logo-mark">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        SendNext
+      </a>
+      <p>A transactional email API built for developers. Fast, honest, and infrastructure-grade from day one.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#waitlist">Pricing</a></li>
+        <li><a href="#how-it-works">Docs</a></li>
+        <li><a href="#waitlist">Changelog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Developers</h4>
+      <ul>
+        <li><a href="#how-it-works">Quick Start</a></li>
+        <li><a href="#how-it-works">API Reference</a></li>
+        <li><a href="#how-it-works">SDKs</a></li>
+        <li><a href="#how-it-works">Webhooks</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#waitlist">About</a></li>
+        <li><a href="#waitlist">Blog</a></li>
+        <li><a href="#waitlist">Status</a></li>
+        <li><a href="#waitlist">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-legal">
+      &copy; 2025 SendNext. All rights reserved.
+      &nbsp;&middot;&nbsp; <a href="#waitlist">Privacy Policy</a>
+      &nbsp;&middot;&nbsp; <a href="#waitlist">Terms of Service</a>
+    </div>
+    <div class="footer-badges">
+      <span class="footer-badge">AWS SES</span>
+      <span class="footer-badge">SOC 2*</span>
+      <span class="footer-badge">DKIM</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ─── NAV SCROLL ───
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // ─── HAMBURGER ───
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  function closeMobileMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+  // ─── TERMINAL TYPEWRITER ───
+  (function() {
+    const lines = [
+      'curl -X POST https://api.sendnex.xyz/v1/emails \\',
+      '  -H "Authorization: Bearer sk_live_••••••••••" \\',
+      '  -H "Content-Type: application/json" \\',
+      '  -d \'{',
+      '    "from": "hello@yourdomain.com",',
+      '    "to": "user@example.com",',
+      '    "subject": "Welcome to the app",',
+      '    "tags": ["welcome", "onboarding"]',
+      '  }\''
+    ];
+    const fullText = lines.join('\n');
+    const el = document.getElementById('typed-cmd');
+    const cursor = document.getElementById('cursor');
+    const response = document.getElementById('terminal-response');
+    let i = 0;
+    let started = false;
+
+    function typeNext() {
+      if (i < fullText.length) {
+        el.textContent += fullText[i];
+        i++;
+        const delay = fullText[i - 1] === '\n' ? 60 : (Math.random() * 30 + 18);
+        setTimeout(typeNext, delay);
+      } else {
+        cursor.style.display = 'none';
+        setTimeout(() => {
+          response.classList.add('visible');
+        }, 500);
+      }
+    }
+
+    // Start when hero is in view
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !started) {
+          started = true;
+          setTimeout(typeNext, 800);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const terminal = document.querySelector('.hero-terminal');
+    if (terminal) observer.observe(terminal);
+  })();
+
+  // ─── CODE TABS ───
+  document.querySelectorAll('.code-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + target).classList.add('active');
+    });
+  });
+
+  // ─── COPY BUTTON ───
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const pre = document.getElementById(targetId);
+      const text = pre ? pre.innerText : '';
+      navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+        }, 2000);
+      });
+    });
+  });
+
+  // ─── FAQ ACCORDION ───
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>
