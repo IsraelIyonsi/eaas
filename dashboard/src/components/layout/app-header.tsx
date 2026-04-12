@@ -92,7 +92,6 @@ export function AppHeader({ sidebarCollapsed, onSidebarToggle, userName, userEma
           className="relative inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Bell className="h-4 w-4" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
         </Link>
 
         {/* User avatar + dropdown */}
