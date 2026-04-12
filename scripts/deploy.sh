@@ -1,13 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "[deploy] Starting deployment at $(date)"
-cd /opt/eaas
+# Two-phase deploy: Phase 1 pulls code, Phase 2 re-execs updated script
+if [ "${DEPLOY_PHASE:-1}" = "1" ]; then
+  echo "[deploy] Starting deployment at $(date)"
+  cd /opt/eaas
 
-# Pull latest from dev
-echo "[deploy] Pulling latest code..."
-git fetch origin dev
-git reset --hard origin/dev
+  # Pull latest from dev
+  echo "[deploy] Pulling latest code..."
+  git fetch origin dev
+  git reset --hard origin/dev
+
+  # Re-execute the updated script (Phase 2) so migration/config changes take effect
+  echo "[deploy] Re-executing updated deploy script..."
+  DEPLOY_PHASE=2 exec /opt/eaas/scripts/deploy.sh
+fi
+
+echo "[deploy] Phase 2: Running updated deploy script..."
+cd /opt/eaas
 
 # Remove local dev override file — it must never run in production.
 # Docker Compose auto-merges docker-compose.override.yml if it exists,
