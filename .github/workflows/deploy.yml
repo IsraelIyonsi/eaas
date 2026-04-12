@@ -62,17 +62,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Dashboard image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./dashboard
-          file: ./dashboard/Dockerfile
-          push: true
-          tags: |
-            ${{ env.IMAGE_PREFIX }}-dashboard:${{ steps.version.outputs.tag }}
-            ${{ env.IMAGE_PREFIX }}-dashboard:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # Dashboard is deployed to Vercel (app.sendnex.xyz) — no Docker image needed
 
       - name: Build and push Worker image
         uses: docker/build-push-action@v5
@@ -140,10 +130,9 @@ jobs:
             # Update image tags in compose file
             export EAAS_VERSION="${VERSION}"
 
-            # Pull new images
+            # Pull new images (dashboard is on Vercel, not VPS)
             echo "Pulling images for version ${VERSION}..."
             docker pull "${IMAGE_PREFIX}-api:${VERSION}"
-            docker pull "${IMAGE_PREFIX}-dashboard:${VERSION}"
             docker pull "${IMAGE_PREFIX}-worker:${VERSION}"
             docker pull "${IMAGE_PREFIX}-webhook:${VERSION}"
 
@@ -158,7 +147,6 @@ jobs:
             # Recreate containers with new images (zero-downtime via rolling update)
             echo "Recreating containers..."
             docker compose up -d --no-deps --force-recreate api
-            docker compose up -d --no-deps --force-recreate dashboard
             docker compose up -d --no-deps --force-recreate worker
             docker compose up -d --no-deps --force-recreate webhook-processor
 
