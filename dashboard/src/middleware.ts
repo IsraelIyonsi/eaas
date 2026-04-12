@@ -62,6 +62,13 @@ async function verifySessionEdge(
 }
 
 export async function middleware(request: NextRequest) {
+  // RSC prefetch requests (sidebar link hover) should pass through without
+  // auth checks — the page handler enforces auth on its own. Redirecting
+  // these lightweight data fetches causes ERR_TOO_MANY_REDIRECTS loops.
+  if (request.headers.get("RSC") === "1") {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get("sendnex_session")?.value;
   const session = token ? await verifySessionEdge(token) : null;
 
