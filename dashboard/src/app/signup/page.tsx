@@ -71,7 +71,7 @@ export default function SignupPage() {
         setApiKey(data.data.apiKey);
         setShowApiKeyDialog(true);
       } else {
-        window.location.href = "/emails";
+        window.location.href = "/overview";
       }
     } catch {
       setError(
@@ -84,7 +84,7 @@ export default function SignupPage() {
 
   function handleDialogClose() {
     setShowApiKeyDialog(false);
-    window.location.href = "/emails";
+    window.location.href = "/overview";
   }
 
   return (

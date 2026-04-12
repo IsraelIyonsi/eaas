@@ -35,7 +35,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/emails";
+      window.location.href = "/overview";
     } catch {
       setError(
         "Unable to connect. Please check your connection and try again.",

@@ -80,10 +80,10 @@ export default function InboundAnalyticsPage() {
   // Donut chart data
   const donutData = summary
     ? [
-        { name: "Processed", value: summary.processed, color: STATUS_COLORS.processed },
-        { name: "Failed", value: summary.failed, color: STATUS_COLORS.failed },
-        { name: "Spam", value: summary.spam_flagged, color: STATUS_COLORS.spam },
-        { name: "Virus", value: summary.virus_flagged, color: STATUS_COLORS.virus },
+        { name: "Processed", value: summary.processed ?? 0, color: STATUS_COLORS.processed },
+        { name: "Failed", value: summary.failed ?? 0, color: STATUS_COLORS.failed },
+        { name: "Spam", value: summary.spam_flagged ?? 0, color: STATUS_COLORS.spam },
+        { name: "Virus", value: summary.virus_flagged ?? 0, color: STATUS_COLORS.virus },
       ]
     : [];
 
@@ -132,7 +132,7 @@ export default function InboundAnalyticsPage() {
             color="#34d399"
             subtitle={
               summary
-                ? `${(summary.processing_rate * 100).toFixed(1)}% rate`
+                ? `${((summary.processing_rate ?? 0) * 100).toFixed(1)}% rate`
                 : undefined
             }
           />
@@ -146,7 +146,7 @@ export default function InboundAnalyticsPage() {
             title="Avg Processing"
             value={
               summary
-                ? `${summary.avg_processing_time_ms}ms`
+                ? `${summary.avg_processing_time_ms ?? 0}ms`
                 : "0ms"
             }
             icon={Clock}
