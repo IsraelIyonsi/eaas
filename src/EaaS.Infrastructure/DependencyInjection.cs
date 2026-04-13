@@ -116,9 +116,13 @@ public static class DependencyInjection
 
         var inboundSettings = configuration.GetSection(InboundSettings.SectionName).Get<InboundSettings>()
             ?? new InboundSettings();
+        var sesSettings = configuration.GetSection(SesSettings.SectionName).Get<SesSettings>()
+            ?? new SesSettings();
 
         services.AddSingleton<Amazon.S3.IAmazonS3>(_ =>
             new Amazon.S3.AmazonS3Client(
+                sesSettings.AccessKeyId,
+                sesSettings.SecretAccessKey,
                 Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region)));
 
         services.AddSingleton<IInboundEmailStorage, S3InboundEmailStorage>();
