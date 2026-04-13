@@ -9,12 +9,21 @@ public sealed record EmailDetailResult(
     string MessageId,
     string From,
     List<string> To,
+    List<string>? Cc,
+    List<string>? Bcc,
     string Subject,
     string Status,
+    string? HtmlBody,
+    string? TextBody,
+    Guid? TemplateId,
+    string? TemplateName,
+    string[] Tags,
     List<EmailEventDto> Events,
     DateTime CreatedAt,
     DateTime? SentAt,
-    DateTime? DeliveredAt);
+    DateTime? DeliveredAt,
+    DateTime? OpenedAt,
+    DateTime? ClickedAt);
 
 public sealed record EmailEventDto(
     Guid Id,

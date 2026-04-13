@@ -189,12 +189,12 @@ export default function InboundEmailDetailPage() {
       </div>
 
       {/* Thread link */}
-      {email.outbound_emailId && (
+      {email.outboundEmailId && (
         <div className="rounded-lg border border-border bg-card p-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Reply to:</span>
             <Link
-              href={Routes.EMAIL_DETAIL(email.outbound_emailId)}
+              href={Routes.EMAIL_DETAIL(email.outboundEmailId)}
               className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
             >
               Original email

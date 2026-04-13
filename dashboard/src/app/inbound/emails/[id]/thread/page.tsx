@@ -54,9 +54,9 @@ export default function InboundThreadPage() {
   const threadEmails: ThreadEmail[] = [];
 
   // If there's an outbound email this is a reply to, add it first
-  if (email.outbound_emailId) {
+  if (email.outboundEmailId) {
     threadEmails.push({
-      id: email.outbound_emailId,
+      id: email.outboundEmailId,
       direction: "sent",
       from: email.toEmails[0]?.email ?? "you",
       to: email.fromEmail,
@@ -64,7 +64,7 @@ export default function InboundThreadPage() {
       bodyPreview: "Original outbound email",
       timestamp: email.createdAt, // Approximation
       attachmentCount: 0,
-      detailHref: Routes.EMAIL_DETAIL(email.outbound_emailId),
+      detailHref: Routes.EMAIL_DETAIL(email.outboundEmailId),
     });
   }
 

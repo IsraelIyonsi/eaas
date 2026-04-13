@@ -173,7 +173,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             {
                 email.SesMessageId = result.MessageId;
                 email.SentAt = DateTime.UtcNow;
-                await _dbContext.SaveChangesAsync(context.CancellationToken);
+                await UpdateEmailStatus(email, EmailStatus.Sent, null, context.CancellationToken);
 
                 EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "success").Inc();
                 LogEmailSent(_logger, message.EmailId, result.MessageId!);
@@ -326,7 +326,8 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
         var eventType = status switch
         {
-            EmailStatus.Sending => EventType.Sent,
+            EmailStatus.Sending => EventType.Queued,
+            EmailStatus.Sent => EventType.Sent,
             EmailStatus.Delivered => EventType.Delivered,
             EmailStatus.Failed => EventType.Failed,
             _ => EventType.Queued

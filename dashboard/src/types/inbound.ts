@@ -28,7 +28,7 @@ export interface InboundEmail {
   dkimVerdict?: VerdictStatus;
   dmarcVerdict?: VerdictStatus;
   inReplyTo?: string;
-  outbound_emailId?: string;
+  outboundEmailId?: string;
   attachments: InboundAttachment[];
   receivedAt: string;
   processedAt?: string;
