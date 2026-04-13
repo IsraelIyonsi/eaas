@@ -165,7 +165,10 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail, userRole }: 
                       <>
                         <span className="flex-1 truncate">{item.label}</span>
                         {item.badge && (
-                          <span className="rounded-full bg-blue-500 px-[6px] py-[1px] text-[10px] font-semibold leading-tight text-white">
+                          <span
+                            aria-label="new feature"
+                            className="rounded-full bg-blue-500 px-[6px] py-[1px] text-[10px] font-semibold leading-tight text-white"
+                          >
                             {item.badge}
                           </span>
                         )}

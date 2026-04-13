@@ -32,13 +32,13 @@ export default function AnalyticsPage() {
 
       {/* KPI Cards */}
       {summaryLoading ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-[120px] rounded-lg bg-muted" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
           <StatCard
             title="Total Sent"
             value={summary?.total_sent.toLocaleString() ?? "0"}

@@ -372,7 +372,7 @@ export default function SandboxPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <ScrollArea className="h-[320px] pr-2">
+              <ScrollArea className="h-[200px] lg:h-[320px] pr-2">
                 <div className="space-y-1">
                   {ENDPOINT_GROUPS.map((group) => (
                     <div key={group.section}>
@@ -564,13 +564,13 @@ export default function SandboxPage() {
             </CardHeader>
             <CardContent className="pt-0">
               {!response && !loading && (
-                <div className="flex h-[400px] items-center justify-center text-sm text-muted-foreground">
+                <div className="flex h-[200px] lg:h-[400px] items-center justify-center text-sm text-muted-foreground">
                   Send a request to see the response here.
                 </div>
               )}
 
               {loading && (
-                <div className="flex h-[400px] items-center justify-center">
+                <div className="flex h-[200px] lg:h-[400px] items-center justify-center">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               )}
@@ -620,7 +620,7 @@ export default function SandboxPage() {
                       </span>
                       <CopyButton value={response.body} label="Response" />
                     </div>
-                    <ScrollArea className="h-[450px]">
+                    <ScrollArea className="h-[280px] lg:h-[450px]">
                       <pre className="rounded-md border border-border bg-[#0d1117] p-3 font-mono text-xs leading-5 text-emerald-300 whitespace-pre-wrap break-all">
                         {response.body}
                       </pre>
