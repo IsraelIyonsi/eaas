@@ -46,13 +46,12 @@ export interface TestWebhookResult {
 }
 
 export const WEBHOOK_EVENT_TYPES = [
-  'email.queued',
-  'email.sent',
-  'email.delivered',
-  'email.bounced',
-  'email.complained',
-  'email.opened',
-  'email.clicked',
-  'email.failed',
-  'inbound.received',
+  'queued',
+  'sent',
+  'delivered',
+  'bounced',
+  'complained',
+  'opened',
+  'clicked',
+  'failed',
 ] as const;

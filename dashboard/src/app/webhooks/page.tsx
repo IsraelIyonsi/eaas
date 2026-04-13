@@ -47,15 +47,14 @@ const statusBadgeClass: Record<WebhookStatus, string> = {
 };
 
 const eventColors: Record<string, string> = {
-  "email.queued": "bg-gray-500/15 text-gray-400 border-gray-500/30",
-  "email.sent": "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  "email.delivered": "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-  "email.bounced": "bg-red-500/15 text-red-400 border-red-500/30",
-  "email.complained": "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  "email.opened": "bg-violet-500/15 text-violet-400 border-violet-500/30",
-  "email.clicked": "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
-  "email.failed": "bg-red-600/15 text-red-500 border-red-600/30",
-  "inbound.received": "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  queued: "bg-gray-500/15 text-gray-400 border-gray-500/30",
+  sent: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  delivered: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  bounced: "bg-red-500/15 text-red-400 border-red-500/30",
+  complained: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  opened: "bg-violet-500/15 text-violet-400 border-violet-500/30",
+  clicked: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+  failed: "bg-red-600/15 text-red-500 border-red-600/30",
 };
 
 export default function WebhooksPage() {

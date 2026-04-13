@@ -5,7 +5,7 @@ namespace EaaS.Api.Features.Webhooks;
 public sealed class UpdateWebhookValidator : AbstractValidator<UpdateWebhookCommand>
 {
     private static readonly string[] ValidEvents =
-        { "sent", "delivered", "bounced", "complained", "opened", "clicked", "failed" };
+        { "queued", "sent", "delivered", "bounced", "complained", "opened", "clicked", "failed" };
 
     public UpdateWebhookValidator()
     {
