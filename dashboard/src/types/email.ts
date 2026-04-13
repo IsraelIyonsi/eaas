@@ -20,7 +20,7 @@ export interface Email {
   id: string;
   messageId: string;
   from: string;
-  to: string;
+  to: string | string[];
   cc?: string[];
   bcc?: string[];
   subject: string;
@@ -39,10 +39,13 @@ export interface Email {
 
 export interface EmailEvent {
   id: string;
-  emailId: string;
+  emailId?: string;
   eventType: EmailStatus;
+  /** API returns createdAt; normalized to timestamp for display */
   timestamp: string;
+  createdAt?: string;
   details?: string;
+  data?: string;
 }
 
 export interface EmailListParams extends PaginationParams, SortParams, DateRangeParams {

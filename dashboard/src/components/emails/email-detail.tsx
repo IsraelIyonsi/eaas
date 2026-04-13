@@ -87,7 +87,7 @@ export function EmailDetailSheet({
             <span className="text-sm text-foreground">{email.from}</span>
           </MetaRow>
           <MetaRow label="To">
-            <span className="text-sm text-foreground">{email.to}</span>
+            <span className="text-sm text-foreground">{Array.isArray(email.to) ? email.to.join(", ") : email.to}</span>
           </MetaRow>
           {email.cc && email.cc.length > 0 && (
             <MetaRow label="CC">

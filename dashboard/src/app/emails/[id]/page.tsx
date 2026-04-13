@@ -65,7 +65,7 @@ export default function EmailDetailPage() {
             </div>
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground/60">To</p>
-              <p className="text-sm text-foreground">{email.to}</p>
+              <p className="text-sm text-foreground">{Array.isArray(email.to) ? email.to.join(", ") : email.to}</p>
             </div>
             {email.cc && email.cc.length > 0 && (
               <div className="space-y-1">
@@ -181,7 +181,7 @@ export default function EmailDetailPage() {
               <pre className="mt-4 max-h-[400px] overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted p-4 font-mono text-xs text-muted-foreground">
                 Message-ID: {email.messageId}
                 {"\n"}From: {email.from}
-                {"\n"}To: {email.to}
+                {"\n"}To: {Array.isArray(email.to) ? email.to.join(", ") : email.to}
                 {email.cc ? `\nCc: ${email.cc.join(", ")}` : ""}
                 {"\n"}Subject: {email.subject}
                 {"\n"}Date: {email.createdAt}

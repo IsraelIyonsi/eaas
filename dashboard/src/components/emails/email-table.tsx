@@ -97,7 +97,7 @@ export function EmailTable({
                     <EmailStatusBadge status={email.status} />
                   </TableCell>
                   <TableCell className="text-sm text-foreground/80">
-                    {email.to}
+                    {Array.isArray(email.to) ? email.to.join(", ") : email.to}
                   </TableCell>
                   <TableCell className="max-w-[200px] truncate text-sm text-foreground">
                     {email.subject}

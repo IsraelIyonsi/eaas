@@ -28,7 +28,12 @@ export class EmailRepository extends HttpClient {
   }
 
   async getEvents(id: string): Promise<EmailEvent[]> {
-    return this.get<EmailEvent[]>(ApiPaths.EMAIL_EVENTS(id));
+    const raw = await this.get<EmailEvent[]>(ApiPaths.EMAIL_EVENTS(id));
+    return (raw ?? []).map((evt) => ({
+      ...evt,
+      timestamp: evt.timestamp ?? evt.createdAt ?? '',
+      details: evt.details ?? evt.data ?? undefined,
+    }));
   }
 
   async remove(id: string): Promise<void> {
