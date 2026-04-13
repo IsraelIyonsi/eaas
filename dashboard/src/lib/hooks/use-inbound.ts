@@ -22,18 +22,20 @@ export function useInboundEmails(params?: InboundEmailListParams) {
 }
 
 export function useInboundEmail(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.inboundEmails.detail(id!),
     queryFn: () => repositories.inboundEmail.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 
 export function useInboundThread(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.inboundEmails.thread(id!),
     queryFn: () => repositories.inboundEmail.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 
@@ -70,10 +72,11 @@ export function useInboundRules() {
 }
 
 export function useInboundRule(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.inboundRules.detail(id!),
     queryFn: () => repositories.inboundRule.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 

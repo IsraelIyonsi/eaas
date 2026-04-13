@@ -20,19 +20,21 @@ export function useEmails(params?: EmailListParams) {
 }
 
 export function useEmail(id: string) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.emails.detail(id),
     queryFn: () => repositories.email.getById(id),
-    enabled: !!id,
+    enabled: isTenant && !!id,
     staleTime: DETAIL_STALE_TIME_MS,
   });
 }
 
 export function useEmailEvents(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.emails.events(id ?? ""),
     queryFn: () => repositories.email.getEvents(id ?? ""),
-    enabled: !!id,
+    enabled: isTenant && !!id,
     staleTime: DETAIL_STALE_TIME_MS,
   });
 }

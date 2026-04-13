@@ -20,10 +20,11 @@ export function useTemplates(params?: { search?: string; page?: number; page_siz
 }
 
 export function useTemplate(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.templates.detail(id!),
     queryFn: () => repositories.template.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 
@@ -66,10 +67,11 @@ export function usePreviewTemplate() {
 }
 
 export function useTemplateVersions(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery<{ items: TemplateVersion[]; totalCount: number }>({
     queryKey: QueryKeys.templates.versions(id!),
     queryFn: () => repositories.template.listVersions(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 

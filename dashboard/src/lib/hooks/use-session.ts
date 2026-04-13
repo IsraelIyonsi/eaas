@@ -16,7 +16,11 @@ interface SessionResponse {
 export function useSession() {
   const query = useQuery<SessionResponse>({
     queryKey: ['session'],
-    queryFn: () => fetch('/api/auth/me').then((r) => r.json()),
+    queryFn: async () => {
+      const r = await fetch('/api/auth/me');
+      if (!r.ok) throw new Error(`Session fetch failed: ${r.status}`);
+      return r.json();
+    },
     retry: false,
     staleTime: DETAIL_STALE_TIME_MS,
     refetchOnWindowFocus: true,

@@ -20,10 +20,11 @@ export function useWebhooks() {
 }
 
 export function useWebhook(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.webhooks.detail(id!),
     queryFn: () => repositories.webhook.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 
@@ -68,10 +69,11 @@ export function useWebhookDeliveries(
   id: string | undefined,
   params?: { page?: number; page_size?: number; success?: boolean },
 ) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.webhooks.deliveries(id!, params),
     queryFn: () => repositories.webhook.getDeliveries(id!, params),
-    enabled: !!id,
+    enabled: isTenant && !!id,
     staleTime: STALE_TIME_MS,
   });
 }

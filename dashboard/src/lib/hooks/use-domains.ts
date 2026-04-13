@@ -19,10 +19,11 @@ export function useDomains() {
 }
 
 export function useDomain(id: string | undefined) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.domains.detail(id!),
     queryFn: () => repositories.domain.getById(id!),
-    enabled: !!id,
+    enabled: isTenant && !!id,
   });
 }
 

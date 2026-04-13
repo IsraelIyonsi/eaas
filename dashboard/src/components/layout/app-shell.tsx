@@ -2,27 +2,18 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { Sidebar } from "./sidebar";
 import { AppHeader } from "./app-header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { DETAIL_STALE_TIME_MS } from "@/lib/constants/ui";
-import type { SessionData } from "@/lib/auth/types";
+import { useSession } from "@/lib/hooks/use-session";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  const { data: session } = useQuery<{ success: boolean; data: SessionData }>({
-    queryKey: ["session"],
-    queryFn: () => fetch("/api/auth/me").then((r) => r.json()),
-    retry: false,
-    staleTime: DETAIL_STALE_TIME_MS,
-  });
-
-  const userData = session?.data;
+  const { session: userData } = useSession();
 
   if (
     pathname === "/login" ||
@@ -62,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-[240px] border-sidebar-border bg-[#0f172a] p-0">
+        <SheetContent side="left" className="w-[240px] border-sidebar-border bg-sidebar p-0">
           <Sidebar
             collapsed={false}
             onToggle={() => setMobileOpen(false)}

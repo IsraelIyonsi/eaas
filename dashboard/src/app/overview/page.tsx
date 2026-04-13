@@ -72,28 +72,28 @@ export default function OverviewPage() {
         />
         <StatCard
           title="Delivery Rate"
-          value={`${summary?.delivery_rate.toFixed(1) ?? "0"}%`}
+          value={`${(summary?.delivery_rate ?? 0).toFixed(1)}%`}
           icon={CheckCircle2}
           color="var(--chart-2)"
           tooltip="Percentage of sent emails confirmed delivered by the recipient's mail server."
         />
         <StatCard
           title="Bounce Rate"
-          value={`${summary?.bounce_rate.toFixed(2) ?? "0"}%`}
+          value={`${(summary?.bounce_rate ?? 0).toFixed(2)}%`}
           icon={XCircle}
           color="var(--destructive)"
           tooltip="Percentage of sent emails permanently rejected. Keep below 2% to protect sender reputation."
         />
         <StatCard
           title="Open Rate"
-          value={`${summary?.open_rate.toFixed(1) ?? "0"}%`}
+          value={`${(summary?.open_rate ?? 0).toFixed(1)}%`}
           icon={Eye}
           color="var(--primary)"
           tooltip="Percentage of delivered emails where the tracking pixel was loaded. Undercounts due to image blocking."
         />
         <StatCard
           title="Click Rate"
-          value={`${summary?.click_rate.toFixed(1) ?? "0"}%`}
+          value={`${(summary?.click_rate ?? 0).toFixed(1)}%`}
           icon={MousePointerClick}
           color="var(--chart-1)"
           tooltip="Percentage of delivered emails where at least one tracked link was clicked."
@@ -101,7 +101,7 @@ export default function OverviewPage() {
         <StatCard
           title="Complaints"
           value={summary?.complained ?? 0}
-          subtitle={`${summary?.complaint_rate.toFixed(2) ?? "0"}% rate`}
+          subtitle={`${(summary?.complaint_rate ?? 0).toFixed(2)}% rate`}
           icon={AlertTriangle}
           color="var(--chart-3)"
           tooltip="Percentage of delivered emails marked as spam by recipients. SES suspends at 0.1%."
