@@ -17,6 +17,6 @@ public static class GetGrowthMetricsEndpoint
         .WithName("GetGrowthMetrics")
         .WithSummary("Get growth metrics")
         .WithDescription("Returns new tenant count per month for the last 12 months.")
-        .Produces<ApiResponse<IReadOnlyList<GrowthMetricResult>>>(StatusCodes.Status200OK);
+        .Produces<ApiResponse<GrowthMetricResult>>(StatusCodes.Status200OK);
     }
 }

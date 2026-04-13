@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PAGE_SIZE_COMPACT, STATS_SKELETON_COUNT } from "@/lib/constants/ui";
 import { useState } from "react";
 import type { Email } from "@/types";
 
@@ -28,7 +29,7 @@ export default function OverviewPage() {
 
   const { data: summary, isLoading: summaryLoading } = useAnalyticsSummary();
   const { data: timeline, isLoading: timelineLoading } = useAnalyticsTimeline({ granularity: 'day' });
-  const { data: emails, isLoading: emailsLoading } = useEmails({ page: 1, page_size: 10 });
+  const { data: emails, isLoading: emailsLoading } = useEmails({ page: 1, page_size: PAGE_SIZE_COMPACT });
   const { data: health } = useHealth();
   const { data: events } = useEmailEvents(selectedEmail?.id);
 
@@ -41,7 +42,7 @@ export default function OverviewPage() {
         />
         {/* Hi-fi: 3 columns, 16px gap */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: STATS_SKELETON_COUNT }).map((_, i) => (
             <Skeleton
               key={i}
               className="h-[120px] rounded-lg bg-muted"

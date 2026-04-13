@@ -10,9 +10,13 @@ export interface ApiResponse<T> {
 
 export interface PaginatedResponse<T> {
   items: T[];
-  totalCount: number;
+  /** Returned by endpoints using the shared PagedResponse contract */
+  total?: number;
+  /** Returned by endpoints with custom result types */
+  totalCount?: number;
   page: number;
   pageSize: number;
+  totalPages?: number;
 }
 
 export interface PaginationParams {

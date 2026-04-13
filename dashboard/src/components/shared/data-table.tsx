@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { PAGE_SIZE_DEFAULT, DATA_TABLE_SKELETON_ROWS } from "@/lib/constants/ui";
 
 const EMPTY_SET = new Set<string>();
 
@@ -35,7 +36,7 @@ export function DataTable<T>({
   data,
   total,
   page = 1,
-  pageSize = 20,
+  pageSize = PAGE_SIZE_DEFAULT,
   totalPages,
   onPageChange,
   onRowClick,
@@ -100,7 +101,7 @@ export function DataTable<T>({
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: DATA_TABLE_SKELETON_ROWS }).map((_, i) => (
               <tr key={i} className="border-b border-border">
                 {selectable && (
                   <td className="px-[14px] py-[10px]">

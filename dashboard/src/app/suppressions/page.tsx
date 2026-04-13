@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { SuppressionReasonConfig } from "@/lib/constants/status";
+import { PAGE_SIZE_DEFAULT } from "@/lib/constants/ui";
 import {
   Table,
   TableBody,
@@ -64,7 +65,7 @@ export default function SuppressionsPage() {
     search: search || undefined,
     reason: reason === "all" ? undefined : reason,
     page,
-    page_size: 20,
+    page_size: PAGE_SIZE_DEFAULT,
   });
 
   const createMutation = useCreateSuppression();

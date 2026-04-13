@@ -199,6 +199,10 @@ const adminRoleConfig: Record<
   AdminRole,
   { label: string; className: string }
 > = {
+  super_admin: {
+    label: "Super Admin",
+    className: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  },
   superadmin: {
     label: "Super Admin",
     className: "bg-purple-500/15 text-purple-400 border-purple-500/30",
@@ -206,6 +210,10 @@ const adminRoleConfig: Record<
   admin: {
     label: "Admin",
     className: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  },
+  read_only: {
+    label: "Read Only",
+    className: "bg-gray-500/15 text-gray-400 border-gray-500/30",
   },
   readonly: {
     label: "Read Only",

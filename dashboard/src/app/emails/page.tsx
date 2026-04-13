@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EmailTable } from "@/components/emails/email-table";
 import { EmailDetailSheet } from "@/components/emails/email-detail";
 import { EmailStatusConfig } from "@/lib/constants/status";
+import { PAGE_SIZE_COMPACT } from "@/lib/constants/ui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FilterBar } from "@/components/shared/filter-bar";
 import type { Email } from "@/types";
@@ -28,7 +29,7 @@ export default function EmailsPage() {
 
   const { data, isLoading } = useEmails({
     page,
-    page_size: 10,
+    page_size: PAGE_SIZE_COMPACT,
     status: status === "all" ? undefined : (status as Email["status"]),
     search: search || undefined,
   });
@@ -83,8 +84,8 @@ export default function EmailsPage() {
           emails={extractItems(data)}
           total={data?.totalCount ?? 0}
           page={data?.page ?? 1}
-          pageSize={data?.pageSize ?? 10}
-          totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? 20))}
+          pageSize={data?.pageSize ?? PAGE_SIZE_COMPACT}
+          totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? PAGE_SIZE_COMPACT))}
           onPageChange={setPage}
           onRowClick={setSelectedEmail}
         />

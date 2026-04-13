@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EaaS.Api.Features.Admin.Analytics;
 
-public sealed class GetGrowthMetricsHandler : IRequestHandler<GetGrowthMetricsQuery, IReadOnlyList<GrowthMetricResult>>
+public sealed class GetGrowthMetricsHandler : IRequestHandler<GetGrowthMetricsQuery, GrowthMetricResult>
 {
     private readonly AppDbContext _dbContext;
 
@@ -13,22 +13,38 @@ public sealed class GetGrowthMetricsHandler : IRequestHandler<GetGrowthMetricsQu
         _dbContext = dbContext;
     }
 
-    public async Task<IReadOnlyList<GrowthMetricResult>> Handle(GetGrowthMetricsQuery request, CancellationToken cancellationToken)
+    public async Task<GrowthMetricResult> Handle(GetGrowthMetricsQuery request, CancellationToken cancellationToken)
     {
-        var since = DateTime.UtcNow.AddMonths(-12);
+        var now = DateTime.UtcNow;
+        var thisMonthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var lastMonthStart = thisMonthStart.AddMonths(-1);
 
-        var metrics = await _dbContext.Tenants
-            .AsNoTracking()
-            .Where(t => t.CreatedAt >= since)
-            .GroupBy(t => new { t.CreatedAt.Year, t.CreatedAt.Month })
-            .Select(g => new GrowthMetricResult(
-                g.Key.Year,
-                g.Key.Month,
-                g.Count()))
-            .OrderBy(m => m.Year)
-            .ThenBy(m => m.Month)
-            .ToListAsync(cancellationToken);
+        // Tenant growth
+        var newTenantsThisMonth = await _dbContext.Tenants
+            .CountAsync(t => t.CreatedAt >= thisMonthStart, cancellationToken);
 
-        return metrics;
+        var newTenantsLastMonth = await _dbContext.Tenants
+            .CountAsync(t => t.CreatedAt >= lastMonthStart && t.CreatedAt < thisMonthStart, cancellationToken);
+
+        var tenantGrowthPercent = newTenantsLastMonth > 0
+            ? Math.Round((double)(newTenantsThisMonth - newTenantsLastMonth) / newTenantsLastMonth * 100, 1)
+            : newTenantsThisMonth > 0 ? 100.0 : 0.0;
+
+        // Email growth
+        var emailsThisMonth = await _dbContext.Emails
+            .CountAsync(e => e.CreatedAt >= thisMonthStart, cancellationToken);
+
+        var emailsLastMonth = await _dbContext.Emails
+            .CountAsync(e => e.CreatedAt >= lastMonthStart && e.CreatedAt < thisMonthStart, cancellationToken);
+
+        var emailGrowthPercent = emailsLastMonth > 0
+            ? Math.Round((double)(emailsThisMonth - emailsLastMonth) / emailsLastMonth * 100, 1)
+            : emailsThisMonth > 0 ? 100.0 : 0.0;
+
+        return new GrowthMetricResult(
+            newTenantsThisMonth,
+            newTenantsLastMonth,
+            tenantGrowthPercent,
+            emailGrowthPercent);
     }
 }

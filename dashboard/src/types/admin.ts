@@ -7,7 +7,7 @@ import type { PaginationParams, SortParams, DateRangeParams } from './common';
 // --- Enums ---
 
 export type TenantStatus = 'active' | 'suspended' | 'deactivated';
-export type AdminRole = 'superadmin' | 'admin' | 'readonly';
+export type AdminRole = 'super_admin' | 'superadmin' | 'admin' | 'read_only' | 'readonly';
 
 // --- Entities ---
 

@@ -16,6 +16,7 @@ import { useWebhookDeliveries } from "@/lib/hooks/use-webhooks";
 import { format, parseISO } from "date-fns";
 import { ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PAGE_SIZE_COMPACT } from "@/lib/constants/ui";
 import type { WebhookDelivery } from "@/types/webhook";
 
 function statusCodeClass(code: number): string {
@@ -39,7 +40,7 @@ export function DeliveryLogs({ webhookId }: DeliveryLogsProps) {
   const [page, setPage] = useState(1);
   const { data, isLoading } = useWebhookDeliveries(webhookId, {
     page,
-    page_size: 10,
+    page_size: PAGE_SIZE_COMPACT,
   });
 
   const deliveries: WebhookDelivery[] = Array.isArray(data)
@@ -47,7 +48,7 @@ export function DeliveryLogs({ webhookId }: DeliveryLogsProps) {
     : (data as { items?: WebhookDelivery[] })?.items ?? [];
   const totalPages =
     (data as { totalCount?: number; pageSize?: number })?.totalCount
-      ? Math.ceil(((data as { totalCount: number }).totalCount) / ((data as { pageSize?: number }).pageSize ?? 20))
+      ? Math.ceil(((data as { totalCount: number }).totalCount) / ((data as { pageSize?: number }).pageSize ?? PAGE_SIZE_COMPACT))
       : 1;
 
   if (isLoading) {

@@ -7,6 +7,7 @@ import { Sidebar } from "./sidebar";
 import { AppHeader } from "./app-header";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { DETAIL_STALE_TIME_MS } from "@/lib/constants/ui";
 import type { SessionData } from "@/lib/auth/types";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -18,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     queryKey: ["session"],
     queryFn: () => fetch("/api/auth/me").then((r) => r.json()),
     retry: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: DETAIL_STALE_TIME_MS,
   });
 
   const userData = session?.data;

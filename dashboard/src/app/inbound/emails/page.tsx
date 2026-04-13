@@ -97,7 +97,7 @@ export default function InboundEmailsPage() {
         total={total}
         page={data?.page ?? 1}
         pageSize={data?.pageSize ?? PAGE_SIZE_DEFAULT}
-        totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? 20))}
+        totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? PAGE_SIZE_DEFAULT))}
         onPageChange={setPage}
         loading={isLoading}
         getRowId={(e) => e.id}

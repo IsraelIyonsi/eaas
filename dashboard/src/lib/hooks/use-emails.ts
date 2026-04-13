@@ -5,7 +5,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
-import { STALE_TIME_MS } from '@/lib/constants/ui';
+import { STALE_TIME_MS, DETAIL_STALE_TIME_MS } from '@/lib/constants/ui';
 import type { EmailListParams } from '@/types/email';
 
 export function useEmails(params?: EmailListParams) {
@@ -21,7 +21,7 @@ export function useEmail(id: string) {
     queryKey: QueryKeys.emails.detail(id),
     queryFn: () => repositories.email.getById(id),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: DETAIL_STALE_TIME_MS,
   });
 }
 
@@ -30,6 +30,6 @@ export function useEmailEvents(id: string | undefined) {
     queryKey: QueryKeys.emails.events(id ?? ""),
     queryFn: () => repositories.email.getEvents(id ?? ""),
     enabled: !!id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: DETAIL_STALE_TIME_MS,
   });
 }

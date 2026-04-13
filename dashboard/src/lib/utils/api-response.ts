@@ -24,7 +24,8 @@ export function extractTotalCount<T>(
 ): number {
   if (!data) return 0;
   if (Array.isArray(data)) return data.length;
-  if ("totalCount" in data) return data.totalCount;
+  if ("totalCount" in data && typeof data.totalCount === "number") return data.totalCount;
+  if ("total" in data && typeof data.total === "number") return data.total;
   return 0;
 }
 
