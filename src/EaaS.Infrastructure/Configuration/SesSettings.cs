@@ -8,4 +8,5 @@ public sealed class SesSettings
     public string AccessKeyId { get; set; } = string.Empty;
     public string SecretAccessKey { get; set; } = string.Empty;
     public int MaxSendRate { get; set; } = 14;
+    public string? ConfigurationSetName { get; set; }
 }

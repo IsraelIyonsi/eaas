@@ -11,11 +11,13 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
 {
     private readonly IAmazonSimpleEmailServiceV2 _sesClient;
     private readonly ILogger<SesEmailService> _logger;
+    private readonly string? _configurationSetName;
 
-    public SesEmailService(IAmazonSimpleEmailServiceV2 sesClient, ILogger<SesEmailService> logger)
+    public SesEmailService(IAmazonSimpleEmailServiceV2 sesClient, IOptions<SesSettings> sesSettings, ILogger<SesEmailService> logger)
     {
         _sesClient = sesClient;
         _logger = logger;
+        _configurationSetName = sesSettings.Value.ConfigurationSetName;
     }
 
     public async Task<DomainIdentityResult> CreateDomainIdentityAsync(string domain, CancellationToken cancellationToken = default)
@@ -124,7 +126,8 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
                             Text = textBody != null ? new Content { Data = textBody } : null
                         }
                     }
-                }
+                },
+                ConfigurationSetName = _configurationSetName
             };
 
             var response = await _sesClient.SendEmailAsync(request, cancellationToken);
@@ -155,7 +158,8 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
                     {
                         Data = memoryStream
                     }
-                }
+                },
+                ConfigurationSetName = _configurationSetName
             };
 
             var response = await _sesClient.SendEmailAsync(request, cancellationToken);
