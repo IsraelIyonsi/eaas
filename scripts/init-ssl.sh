@@ -36,15 +36,14 @@ sleep 3
 
 # Step 4: Get real certificate from Let's Encrypt
 echo ">> Requesting Let's Encrypt certificate..."
-docker compose run --rm certbot certonly \
+docker compose run --rm --entrypoint '' certbot certbot certonly \
   --webroot \
   -w /var/www/certbot \
   -d "${DOMAIN}" \
   -d "www.${DOMAIN}" \
   --email "${EMAIL}" \
   --agree-tos \
-  --non-interactive \
-  --force-renewal
+  --non-interactive
 
 # Step 5: Restart nginx to use the real cert
 echo ">> Restarting nginx with real certificate..."
