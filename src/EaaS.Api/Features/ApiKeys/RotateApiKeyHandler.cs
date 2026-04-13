@@ -57,10 +57,12 @@ public sealed partial class RotateApiKeyHandler : IRequestHandler<RotateApiKeyCo
             CreatedAt = DateTime.UtcNow
         };
 
-        // Set audit trail
-        existingKey.ReplacedByKeyId = newApiKey.Id;
-
+        // Insert new key first to avoid FK violation on ReplacedByKeyId
         _dbContext.ApiKeys.Add(newApiKey);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        // Now set the audit trail FK (new key exists in DB)
+        existingKey.ReplacedByKeyId = newApiKey.Id;
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         // Cache the new key

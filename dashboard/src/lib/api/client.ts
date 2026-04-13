@@ -37,9 +37,12 @@ export class HttpClient {
       }
     }
 
+    const headers: HeadersInit = body
+      ? this.baseHeaders()
+      : {};
     const res = await fetch(url.toString(), {
       method,
-      headers: this.baseHeaders(),
+      headers,
       credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     });
