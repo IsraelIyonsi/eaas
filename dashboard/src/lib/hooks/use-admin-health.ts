@@ -12,5 +12,6 @@ export function useAdminSystemHealth() {
     queryKey: QueryKeys.adminHealth,
     queryFn: () => repositories.adminHealth.getSystemHealth(),
     refetchInterval: HEALTH_POLL_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
 }

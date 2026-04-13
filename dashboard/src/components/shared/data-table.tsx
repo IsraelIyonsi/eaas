@@ -47,23 +47,24 @@ export function DataTable<T>({
   onSelectionChange,
   getRowId,
 }: DataTableProps<T>) {
+  const safeData = data ?? [];
   const computedTotalPages = totalPages ?? (total ? Math.ceil(total / pageSize) : 1);
   const start = (page - 1) * pageSize + 1;
-  const end = Math.min(page * pageSize, total ?? data.length);
-  const displayTotal = total ?? data.length;
+  const end = Math.min(page * pageSize, total ?? safeData.length);
+  const displayTotal = total ?? safeData.length;
 
   const resolvedSelectedIds = selectedIds ?? EMPTY_SET;
-  const allSelected = data.length > 0 && getRowId && data.every((item) => resolvedSelectedIds.has(getRowId(item)));
+  const allSelected = safeData.length > 0 && getRowId && safeData.every((item) => resolvedSelectedIds.has(getRowId(item)));
 
   function handleSelectAll() {
     if (!getRowId || !onSelectionChange) return;
     if (allSelected) {
       const next = new Set(resolvedSelectedIds);
-      data.forEach((item) => next.delete(getRowId(item)));
+      safeData.forEach((item) => next.delete(getRowId(item)));
       onSelectionChange(next);
     } else {
       const next = new Set(resolvedSelectedIds);
-      data.forEach((item) => next.add(getRowId(item)));
+      safeData.forEach((item) => next.add(getRowId(item)));
       onSelectionChange(next);
     }
   }
@@ -121,7 +122,7 @@ export function DataTable<T>({
     );
   }
 
-  if (data.length === 0 && emptyState) {
+  if (safeData.length === 0 && emptyState) {
     return (
       <div className="data-table-wrap bg-background">
         {emptyState}
@@ -161,7 +162,7 @@ export function DataTable<T>({
         </thead>
         {/* tbody tr:hover: bg-hover */}
         <tbody>
-          {data.map((item, index) => {
+          {safeData.map((item, index) => {
             const rowId = getRowId?.(item);
             const isSelected = rowId ? resolvedSelectedIds.has(rowId) : false;
 

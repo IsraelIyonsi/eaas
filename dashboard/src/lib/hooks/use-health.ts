@@ -12,5 +12,6 @@ export function useHealth() {
     queryKey: QueryKeys.health,
     queryFn: () => repositories.health.getHealth(),
     refetchInterval: HEALTH_POLL_INTERVAL_MS,
+    refetchIntervalInBackground: false,
   });
 }

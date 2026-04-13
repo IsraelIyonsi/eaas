@@ -67,3 +67,5 @@ dashboard/.next/
 dashboard/test-results/
 test-diag*.txt
 dashboard-login.png
+
+.vercel

@@ -14,6 +14,9 @@ export class ApiError extends Error {
   }
 }
 
+// Guard to prevent multiple concurrent 401 redirects
+let isRedirectingToLogin = false;
+
 export class HttpClient {
   private baseHeaders(): HeadersInit {
     return { 'Content-Type': 'application/json' };
@@ -42,7 +45,8 @@ export class HttpClient {
     });
 
     if (res.status === 401) {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !isRedirectingToLogin) {
+        isRedirectingToLogin = true;
         window.location.href = '/login';
       }
       throw new ApiError(401, 'Session expired');

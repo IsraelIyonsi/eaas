@@ -47,7 +47,9 @@ export default function AdminAnalyticsPage() {
   const { data: rankings, isLoading: rankingsLoading } = useAdminTenantRankings({ limit: 10 });
   const { data: growth, isLoading: growthLoading } = useAdminGrowthMetrics();
 
-  const topTenants = extractItems(rankings);
+  const topTenants = extractItems(rankings) ?? [];
+  const tenantGrowth = growth?.tenantGrowthPercent ?? 0;
+  const emailGrowth = growth?.emailGrowthPercent ?? 0;
 
   if (summaryLoading || growthLoading) {
     return (
@@ -84,30 +86,18 @@ export default function AdminAnalyticsPage() {
         />
         <StatCard
           title="Tenant Growth"
-          value={`${growth?.tenantGrowthPercent ?? 0}%`}
+          value={`${tenantGrowth}%`}
           icon={TrendingUp}
           color="var(--chart-2)"
-          trend={
-            (growth?.tenantGrowthPercent ?? 0) > 0
-              ? "up"
-              : (growth?.tenantGrowthPercent ?? 0) < 0
-                ? "down"
-                : "flat"
-          }
+          trend={tenantGrowth > 0 ? "up" : tenantGrowth < 0 ? "down" : "flat"}
           trendValue={`${growth?.newTenantsThisMonth ?? 0} this month`}
         />
         <StatCard
           title="Email Growth"
-          value={`${growth?.emailGrowthPercent ?? 0}%`}
+          value={`${emailGrowth}%`}
           icon={BarChart3}
           color="var(--primary)"
-          trend={
-            (growth?.emailGrowthPercent ?? 0) > 0
-              ? "up"
-              : (growth?.emailGrowthPercent ?? 0) < 0
-                ? "down"
-                : "flat"
-          }
+          trend={emailGrowth > 0 ? "up" : emailGrowth < 0 ? "down" : "flat"}
           trendValue="vs last month"
         />
       </div>
