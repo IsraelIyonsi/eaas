@@ -2,7 +2,7 @@ namespace EaaS.Shared.Constants;
 
 public static class EmailConstants
 {
-    public const string MessageIdPrefix = "eaas_";
+    public const string MessageIdPrefix = "snx_";
     public const string BatchIdPrefix = "batch_";
     public const int BatchShortIdLength = 8;
     public const int MaxRecipientsPerEmail = 50;

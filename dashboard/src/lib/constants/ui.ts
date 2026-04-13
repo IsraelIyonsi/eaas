@@ -77,4 +77,5 @@ export const EMAIL_EVENT_ICON_COLORS: Record<string, string> = {
   failed: "text-red-500",
   opened: "text-violet-400",
   clicked: "text-cyan-400",
+  scheduled: "text-indigo-400",
 } as const;

@@ -12,6 +12,7 @@ export const EmailStatusConfig = {
   failed: { label: 'Failed', color: 'bg-red-500', textColor: 'text-red-400' },
   opened: { label: 'Opened', color: 'bg-purple-500', textColor: 'text-purple-400' },
   clicked: { label: 'Clicked', color: 'bg-cyan-500', textColor: 'text-cyan-400' },
+  scheduled: { label: 'Scheduled', color: 'bg-indigo-500', textColor: 'text-indigo-400' },
 } as const;
 
 export const InboundEmailStatusConfig = {

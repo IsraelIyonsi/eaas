@@ -152,6 +152,10 @@ services:
       - Ses__Region=${AWS_REGION}
       - Ses__AccessKeyId=${AWS_ACCESS_KEY_ID}
       - Ses__SecretAccessKey=${AWS_SECRET_ACCESS_KEY}
+      - Ses__ConfigurationSetName=sendnex-production
+      - Tracking__BaseUrl=https://sendnex.xyz
+      - Tracking__HmacSecret=${TRACKING_HMAC_SECRET}
+      - Tracking__FallbackRedirectUrl=https://sendnex.xyz
     depends_on:
       postgres:
         condition: service_healthy
@@ -187,6 +191,8 @@ services:
       - RabbitMq__Password=${RABBITMQ_PASSWORD}
       - RabbitMq__VirtualHost=eaas
       - Tracking__BaseUrl=https://sendnex.xyz
+      - Tracking__HmacSecret=${TRACKING_HMAC_SECRET}
+      - Tracking__FallbackRedirectUrl=https://sendnex.xyz
     depends_on:
       postgres:
         condition: service_healthy

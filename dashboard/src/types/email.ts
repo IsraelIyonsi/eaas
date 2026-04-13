@@ -13,7 +13,8 @@ export type EmailStatus =
   | 'complained'
   | 'failed'
   | 'opened'
-  | 'clicked';
+  | 'clicked'
+  | 'scheduled';
 
 export interface Email {
   id: string;

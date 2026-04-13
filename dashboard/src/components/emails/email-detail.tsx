@@ -19,6 +19,7 @@ import {
   XCircle,
   AlertTriangle,
   CircleDot,
+  CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ const EVENT_ICONS: Record<EmailStatus, LucideIcon> = {
   failed: XCircle,
   opened: Eye,
   clicked: MousePointerClick,
+  scheduled: CalendarClock,
 };
 
 const eventIconMap: Record<EmailStatus, { icon: LucideIcon; color: string }> =

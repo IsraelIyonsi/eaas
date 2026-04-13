@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { DetailSkeleton } from "@/components/shared/loading-skeleton";
 import { EmailStatusBadge } from "@/components/shared/status-badge";
@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useEmail, useEmailEvents } from "@/lib/hooks/use-emails";
+import { useEmail, useEmailEvents, useDeleteEmail } from "@/lib/hooks/use-emails";
 import { Routes } from "@/lib/constants/routes";
 import { format, parseISO } from "date-fns";
 import { RotateCw, Code, Trash2 } from "lucide-react";
@@ -22,8 +22,10 @@ export default function EmailDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
+  const router = useRouter();
   const { data: email, isLoading } = useEmail(id);
   const { data: events } = useEmailEvents(id);
+  const deleteEmail = useDeleteEmail();
 
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -206,8 +208,9 @@ export default function EmailDetailPage() {
         <Button
           variant="outline"
           size="sm"
-          className="border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={() => toast.info("Resend functionality coming soon")}
+          disabled
+          title="Resend is not yet available"
+          className="border-border text-muted-foreground opacity-50"
         >
           <RotateCw className="mr-1.5 h-3.5 w-3.5" />
           Resend
@@ -238,9 +241,18 @@ export default function EmailDetailPage() {
         description="Are you sure you want to delete this email record? This action cannot be undone."
         confirmLabel="Delete"
         variant="destructive"
+        loading={deleteEmail.isPending}
         onConfirm={() => {
-          toast.success("Email deleted");
-          setDeleteOpen(false);
+          deleteEmail.mutate(id, {
+            onSuccess: () => {
+              toast.success("Email deleted");
+              setDeleteOpen(false);
+              router.push(Routes.EMAILS);
+            },
+            onError: () => {
+              toast.error("Failed to delete email");
+            },
+          });
         }}
       />
     </div>

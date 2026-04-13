@@ -10,6 +10,7 @@ import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { getInboundEmailColumns } from "@/components/inbound/inbound-email-table";
 import { useInboundEmails } from "@/lib/hooks/use-inbound";
+import { useDomains } from "@/lib/hooks/use-domains";
 import { Routes } from "@/lib/constants/routes";
 import { PAGE_SIZE_DEFAULT } from "@/lib/constants/ui";
 import type { InboundEmail, InboundEmailStatus } from "@/types/inbound";
@@ -28,6 +29,9 @@ export default function InboundEmailsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [hasAttachments, setHasAttachments] = useState(false);
+
+  const { data: domains } = useDomains();
+  const hasVerifiedDomain = domains?.some((d) => d.status === "Verified") ?? false;
 
   const { data, isLoading } = useInboundEmails({
     page,
@@ -102,15 +106,23 @@ export default function InboundEmailsPage() {
         loading={isLoading}
         getRowId={(e) => e.id}
         emptyState={
-          <EmptyState
-            icon={Inbox}
-            title="No inbound emails yet"
-            description="Set up your domain to start receiving emails. Configure MX records and inbound rules to get started."
-            action={{
-              label: "Set Up Domain",
-              href: Routes.DOMAINS,
-            }}
-          />
+          hasVerifiedDomain ? (
+            <EmptyState
+              icon={Inbox}
+              title="No inbound emails yet"
+              description="Your domain is configured and ready. Inbound emails will appear here once they start arriving."
+            />
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title="No domain configured"
+              description="Set up your domain to start receiving emails. Configure MX records and inbound rules to get started."
+              action={{
+                label: "Set Up Domain",
+                href: Routes.DOMAINS,
+              }}
+            />
+          )
         }
       />
     </div>

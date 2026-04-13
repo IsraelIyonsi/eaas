@@ -30,4 +30,8 @@ export class EmailRepository extends HttpClient {
   async getEvents(id: string): Promise<EmailEvent[]> {
     return this.get<EmailEvent[]>(ApiPaths.EMAIL_EVENTS(id));
   }
+
+  async remove(id: string): Promise<void> {
+    return this.del(ApiPaths.EMAIL_BY_ID(id));
+  }
 }

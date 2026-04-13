@@ -2,7 +2,7 @@ namespace EaaS.Shared.Constants;
 
 public static class ApiKeyConstants
 {
-    public const string LiveKeyPrefix = "eaas_live_";
+    public const string LiveKeyPrefix = "snx_live_";
     public const int RandomPartLength = 40;
     public const string AllowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public const int MaxNameLength = 100;

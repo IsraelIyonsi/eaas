@@ -44,6 +44,10 @@ const emailStatusConfig: Record<
     label: "Clicked",
     className: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
   },
+  scheduled: {
+    label: "Scheduled",
+    className: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+  },
 };
 
 const domainStatusConfig: Record<

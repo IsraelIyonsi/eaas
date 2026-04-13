@@ -2,7 +2,7 @@
 // EaaS Dashboard - Email React Query Hooks
 // ============================================================
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS, DETAIL_STALE_TIME_MS } from '@/lib/constants/ui';
@@ -36,5 +36,15 @@ export function useEmailEvents(id: string | undefined) {
     queryFn: () => repositories.email.getEvents(id ?? ""),
     enabled: isTenant && !!id,
     staleTime: DETAIL_STALE_TIME_MS,
+  });
+}
+
+export function useDeleteEmail() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => repositories.email.remove(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.emails.all });
+    },
   });
 }
