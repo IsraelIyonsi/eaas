@@ -35,7 +35,7 @@ export default function OverviewPage() {
 
   if (summaryLoading) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-6">
         <PageHeader
           title="Overview"
           description="System health and email sending activity at a glance."
@@ -54,7 +54,7 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
         title="Overview"

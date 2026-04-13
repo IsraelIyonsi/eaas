@@ -62,27 +62,26 @@ async function verifySessionEdge(
 }
 
 export async function middleware(request: NextRequest) {
-  // RSC prefetch requests (sidebar link hover) should pass through without
-  // auth checks — the page handler enforces auth on its own. Redirecting
-  // these lightweight data fetches causes ERR_TOO_MANY_REDIRECTS loops.
-  if (request.headers.get("RSC") === "1") {
-    return NextResponse.next();
-  }
+  const isRSC = request.headers.get("RSC") === "1";
 
   const token = request.cookies.get("sendnex_session")?.value;
   const session = token ? await verifySessionEdge(token) : null;
 
-  if (
-    !session &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/privacy") &&
-    !request.nextUrl.pathname.startsWith("/terms") &&
-    !request.nextUrl.pathname.startsWith("/cookies") &&
-    !request.nextUrl.pathname.startsWith("/dpa") &&
-    !request.nextUrl.pathname.startsWith("/sub-processors") &&
-    !request.nextUrl.pathname.startsWith("/acceptable-use")
-  ) {
+  const isPublicPath =
+    request.nextUrl.pathname.startsWith("/login") ||
+    request.nextUrl.pathname.startsWith("/signup") ||
+    request.nextUrl.pathname.startsWith("/privacy") ||
+    request.nextUrl.pathname.startsWith("/terms") ||
+    request.nextUrl.pathname.startsWith("/cookies") ||
+    request.nextUrl.pathname.startsWith("/dpa") ||
+    request.nextUrl.pathname.startsWith("/sub-processors") ||
+    request.nextUrl.pathname.startsWith("/acceptable-use");
+
+  if (!session && !isPublicPath) {
+    // RSC prefetch: return 401 instead of redirect to avoid ERR_TOO_MANY_REDIRECTS
+    if (isRSC) {
+      return new NextResponse(null, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

@@ -138,7 +138,7 @@ export default function SettingsPage() {
                 Include your API key in the <code className="text-foreground">Authorization</code> header:
               </p>
               <code className="block rounded-md border border-border bg-muted px-4 py-2.5 font-mono text-xs text-foreground/80">
-                Authorization: Bearer eaas_your_api_key_here
+                Authorization: Bearer snx_your_api_key_here
               </code>
             </div>
           </div>

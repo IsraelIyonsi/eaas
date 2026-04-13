@@ -48,35 +48,35 @@ export default function AnalyticsPage() {
           <StatCard
             title="Delivered"
             value={summary?.delivered.toLocaleString() ?? "0"}
-            subtitle={`${summary?.delivery_rate.toFixed(1)}%`}
+            subtitle={`${(summary?.delivery_rate ?? 0).toFixed(1)}%`}
             icon={CheckCircle2}
             color="var(--chart-2)"
           />
           <StatCard
             title="Bounced"
             value={summary?.bounced ?? 0}
-            subtitle={`${summary?.bounce_rate.toFixed(2)}%`}
+            subtitle={`${(summary?.bounce_rate ?? 0).toFixed(2)}%`}
             icon={XCircle}
             color="var(--destructive)"
           />
           <StatCard
             title="Opened"
             value={summary?.opened.toLocaleString() ?? "0"}
-            subtitle={`${summary?.open_rate.toFixed(1)}%`}
+            subtitle={`${(summary?.open_rate ?? 0).toFixed(1)}%`}
             icon={Eye}
             color="var(--primary)"
           />
           <StatCard
             title="Clicked"
             value={summary?.clicked.toLocaleString() ?? "0"}
-            subtitle={`${summary?.click_rate.toFixed(1)}%`}
+            subtitle={`${(summary?.click_rate ?? 0).toFixed(1)}%`}
             icon={MousePointerClick}
             color="var(--chart-1)"
           />
           <StatCard
             title="Complaints"
             value={summary?.complained ?? 0}
-            subtitle={`${summary?.complaint_rate.toFixed(2)}% rate`}
+            subtitle={`${(summary?.complaint_rate ?? 0).toFixed(2)}% rate`}
             icon={AlertTriangle}
             color="var(--chart-3)"
           />

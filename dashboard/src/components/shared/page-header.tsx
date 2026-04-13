@@ -22,7 +22,7 @@ export function PageHeader({
   backLabel = "Back",
 }: PageHeaderProps) {
   return (
-    <div className="mb-6 space-y-2">
+    <div className="space-y-2">
       {backHref && (
         <Link
           href={backHref}

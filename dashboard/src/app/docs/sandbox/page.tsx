@@ -508,7 +508,7 @@ export default function SandboxPage() {
                     onChange={(e) => setBody(e.target.value)}
                     rows={10}
                     spellCheck={false}
-                    className="w-full rounded-md border border-border bg-[#0d1117] px-3 py-2 font-mono text-xs text-emerald-300 placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+                    className="w-full rounded-md border border-border bg-sidebar px-3 py-2 font-mono text-xs text-emerald-300 placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
                     placeholder="{}"
                   />
                 </div>
@@ -621,7 +621,7 @@ export default function SandboxPage() {
                       <CopyButton value={response.body} label="Response" />
                     </div>
                     <ScrollArea className="h-[280px] lg:h-[450px]">
-                      <pre className="rounded-md border border-border bg-[#0d1117] p-3 font-mono text-xs leading-5 text-emerald-300 whitespace-pre-wrap break-all">
+                      <pre className="rounded-md border border-border bg-sidebar p-3 font-mono text-xs leading-5 text-emerald-300 whitespace-pre-wrap break-all">
                         {response.body}
                       </pre>
                     </ScrollArea>
