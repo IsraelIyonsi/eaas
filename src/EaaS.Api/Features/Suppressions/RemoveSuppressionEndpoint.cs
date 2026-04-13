@@ -1,6 +1,7 @@
 using EaaS.Shared.Contracts;
 using MediatR;
 
+using EaaS.Api.Constants;
 namespace EaaS.Api.Features.Suppressions;
 
 public static class RemoveSuppressionEndpoint
@@ -27,7 +28,7 @@ public static class RemoveSuppressionEndpoint
 
     private static Guid GetTenantId(HttpContext httpContext)
     {
-        var tenantClaim = httpContext.User.FindFirst("TenantId")?.Value;
+        var tenantClaim = httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value;
         return tenantClaim is not null ? Guid.Parse(tenantClaim) : Guid.Empty;
     }
 }

@@ -2,8 +2,10 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using EaaS.Api.Authentication;
 using EaaS.Api.Behaviors;
+using EaaS.Api.Constants;
 using EaaS.Api.Middleware;
 using EaaS.Domain.Interfaces;
+using EaaS.Shared.Constants;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Infrastructure.Services;
 using FluentValidation;
@@ -52,42 +54,42 @@ public static class ServiceCollectionExtensions
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("SuperAdminPolicy", policy =>
+            options.AddPolicy(AuthorizationPolicyConstants.SuperAdminPolicy, policy =>
             {
                 policy.AuthenticationSchemes.Add(AdminSessionAuthHandler.SchemeName);
                 policy.RequireAuthenticatedUser();
-                policy.RequireClaim("AdminRole", "SuperAdmin");
+                policy.RequireClaim(ClaimNameConstants.AdminRole, AdminRoleConstants.SuperAdmin);
             });
 
-            options.AddPolicy("AdminPolicy", policy =>
+            options.AddPolicy(AuthorizationPolicyConstants.AdminPolicy, policy =>
             {
                 policy.AuthenticationSchemes.Add(AdminSessionAuthHandler.SchemeName);
                 policy.RequireAuthenticatedUser();
-                policy.RequireClaim("AdminRole", "SuperAdmin", "Admin");
+                policy.RequireClaim(ClaimNameConstants.AdminRole, AdminRoleConstants.SuperAdmin, AdminRoleConstants.Admin);
             });
 
-            options.AddPolicy("AdminReadPolicy", policy =>
+            options.AddPolicy(AuthorizationPolicyConstants.AdminReadPolicy, policy =>
             {
                 policy.AuthenticationSchemes.Add(AdminSessionAuthHandler.SchemeName);
                 policy.RequireAuthenticatedUser();
-                policy.RequireClaim("AdminRole", "SuperAdmin", "Admin", "ReadOnly");
+                policy.RequireClaim(ClaimNameConstants.AdminRole, AdminRoleConstants.SuperAdmin, AdminRoleConstants.Admin, AdminRoleConstants.ReadOnly);
             });
         });
 
         // Login rate limiting (ASP.NET built-in, separate from Redis-based per-tenant limiter)
         services.AddRateLimiter(options =>
         {
-            options.AddFixedWindowLimiter("AuthLogin", opt =>
+            options.AddFixedWindowLimiter(RateLimitConstants.AuthLoginPolicy, opt =>
             {
-                opt.Window = TimeSpan.FromMinutes(1);
-                opt.PermitLimit = 5;
+                opt.Window = RateLimitConstants.AuthLoginWindow;
+                opt.PermitLimit = RateLimitConstants.AuthLoginPermitLimit;
                 opt.QueueLimit = 0;
             });
 
             options.OnRejected = async (context, ct) =>
             {
                 context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                context.HttpContext.Response.Headers.RetryAfter = "60";
+                context.HttpContext.Response.Headers.RetryAfter = RateLimitConstants.AuthLoginRetryAfterSeconds;
                 context.HttpContext.Response.ContentType = "application/json";
                 await context.HttpContext.Response.WriteAsync(
                     """{"error":"Too many login attempts. Try again in 1 minute."}""", ct);
@@ -95,8 +97,8 @@ public static class ServiceCollectionExtensions
         });
 
         // HTTP clients
-        services.AddHttpClient("WebhookTest");
-        services.AddHttpClient("WebhookDispatch");
+        services.AddHttpClient(HttpClientNameConstants.WebhookTest);
+        services.AddHttpClient(HttpClientNameConstants.WebhookDispatch);
 
         // Exception handling
         services.AddExceptionHandler<GlobalExceptionHandler>();

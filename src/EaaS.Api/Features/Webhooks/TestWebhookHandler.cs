@@ -1,3 +1,4 @@
+using EaaS.Api.Constants;
 using EaaS.Domain.Exceptions;
 using System.Security.Cryptography;
 using System.Text;
@@ -44,7 +45,7 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
 
         try
         {
-            var client = _httpClientFactory.CreateClient("WebhookTest");
+            var client = _httpClientFactory.CreateClient(HttpClientNameConstants.WebhookTest);
             client.Timeout = TimeSpan.FromSeconds(WebhookConstants.TestTimeoutSeconds);
 
             var response = await client.PostAsync(webhook.Url, content, cancellationToken);

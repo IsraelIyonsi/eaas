@@ -1,5 +1,6 @@
 using EaaS.Shared.Contracts;
 
+using EaaS.Api.Constants;
 namespace EaaS.Api.Features.Inbound.Emails;
 
 public static class DeleteInboundEmailEndpoint
@@ -29,7 +30,7 @@ public static class DeleteInboundEmailEndpoint
 
     private static Guid GetTenantId(HttpContext httpContext)
     {
-        var tenantClaim = httpContext.User.FindFirst("TenantId")?.Value;
+        var tenantClaim = httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value;
         return tenantClaim is not null ? Guid.Parse(tenantClaim) : Guid.Empty;
     }
 }

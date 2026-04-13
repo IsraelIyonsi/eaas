@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using EaaS.Api.Constants;
 using EaaS.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace EaaS.Api.Authentication;
 public sealed partial class AdminSessionAuthHandler : AuthenticationHandler<AdminSessionAuthSchemeOptions>
 {
     public const string SchemeName = "AdminSession";
-    private const string CookieName = "eaas_admin_session";
+    private const string CookieName = AuthCookieConstants.AdminSessionCookie;
 
     private readonly AppDbContext _dbContext;
 
@@ -110,7 +111,7 @@ public sealed partial class AdminSessionAuthHandler : AuthenticationHandler<Admi
 
     private async Task<AuthenticateResult> HandleProxyHeaderFallback()
     {
-        if (!Request.Headers.TryGetValue("X-Admin-User-Id", out var userIdHeader))
+        if (!Request.Headers.TryGetValue(HttpHeaderConstants.AdminUserId, out var userIdHeader))
             return AuthenticateResult.NoResult();
 
         var userIdStr = userIdHeader.ToString();
@@ -148,9 +149,9 @@ public sealed partial class AdminSessionAuthHandler : AuthenticationHandler<Admi
 
         var claims = new[]
         {
-            new Claim("AdminUserId", userId.ToString()),
-            new Claim("AdminEmail", adminUser.Email),
-            new Claim("AdminRole", adminUser.Role.ToString())
+            new Claim(ClaimNameConstants.AdminUserId, userId.ToString()),
+            new Claim(ClaimNameConstants.AdminEmail, adminUser.Email),
+            new Claim(ClaimNameConstants.AdminRole, adminUser.Role.ToString())
         };
 
         var identity = new ClaimsIdentity(claims, SchemeName);

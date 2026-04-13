@@ -1,3 +1,4 @@
+using EaaS.Api.Constants;
 using EaaS.Shared.Contracts;
 using MediatR;
 
@@ -13,8 +14,8 @@ public static class ProcessPaymentWebhookEndpoint
             IMediator mediator) =>
         {
             var payload = await new StreamReader(context.Request.Body).ReadToEndAsync();
-            var signature = context.Request.Headers["X-Paystack-Signature"].FirstOrDefault()
-                ?? context.Request.Headers["Stripe-Signature"].FirstOrDefault()
+            var signature = context.Request.Headers[HttpHeaderConstants.PaystackSignature].FirstOrDefault()
+                ?? context.Request.Headers[HttpHeaderConstants.StripeSignature].FirstOrDefault()
                 ?? string.Empty;
 
             await mediator.Send(new ProcessPaymentWebhookCommand(provider, payload, signature));

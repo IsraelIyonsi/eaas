@@ -5,6 +5,7 @@ using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
+using EaaS.Api.Constants;
 namespace EaaS.Api.Features.Inbound.Simulate;
 
 /// <summary>
@@ -34,7 +35,7 @@ public static class SimulateInboundEndpoint
             CancellationToken cancellationToken) =>
         {
             var tenantId = Guid.Parse(
-                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+                httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value ?? Guid.Empty.ToString());
 
             // Resolve domain from recipient
             var recipientDomain = request.To.FirstOrDefault()?.Split('@').LastOrDefault();

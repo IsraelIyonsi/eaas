@@ -1,3 +1,4 @@
+using EaaS.Api.Constants;
 using EaaS.Api.Middleware;
 using Prometheus;
 using Scalar.AspNetCore;
@@ -31,14 +32,14 @@ public static class MiddlewareExtensions
         app.UseMiddleware<RateLimitingMiddleware>();
 
         // Liveness probe: always returns 200 if Kestrel is accepting requests (Docker HEALTHCHECK target)
-        app.MapGet("/health", () => Results.Ok("Healthy"));
+        app.MapGet(MiddlewarePathConstants.HealthCheck, () => Results.Ok("Healthy"));
 
         // Readiness probe: includes DB, MassTransit bus, and any registered IHealthCheck
-        app.MapHealthChecks("/health/ready");
+        app.MapHealthChecks($"{MiddlewarePathConstants.HealthCheck}/ready");
 
         app.MapGet("/", () => Results.Ok(new { Service = "EaaS API", Status = "Running" }));
 
-        app.MapMetrics("/metrics");
+        app.MapMetrics(MiddlewarePathConstants.Metrics);
 
         return app;
     }

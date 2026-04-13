@@ -1,3 +1,4 @@
+using EaaS.Api.Constants;
 using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Contracts;
@@ -15,7 +16,7 @@ public static class InboundAnalyticsEndpoints
             CancellationToken cancellationToken) =>
         {
             var tenantId = Guid.Parse(
-                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+                httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value ?? Guid.Empty.ToString());
 
             var totalReceived = await dbContext.InboundEmails
                 .Where(e => e.TenantId == tenantId)
@@ -58,7 +59,7 @@ public static class InboundAnalyticsEndpoints
             CancellationToken cancellationToken = default) =>
         {
             var tenantId = Guid.Parse(
-                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+                httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value ?? Guid.Empty.ToString());
 
             var since = granularity == "hour"
                 ? DateTime.UtcNow.AddHours(-24)
@@ -98,11 +99,11 @@ public static class InboundAnalyticsEndpoints
             ILoggerFactory loggerFactory,
             string? date_from = null,
             string? date_to = null,
-            int limit = 10,
+            int limit = PaginationConstants.DefaultTopLimit,
             CancellationToken cancellationToken = default) =>
         {
             var tenantId = Guid.Parse(
-                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+                httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value ?? Guid.Empty.ToString());
 
             try
             {

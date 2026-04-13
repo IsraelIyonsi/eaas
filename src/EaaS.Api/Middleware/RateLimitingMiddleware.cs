@@ -1,4 +1,5 @@
 using System.Globalization;
+using EaaS.Api.Constants;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Configuration;
 using EaaS.Infrastructure.Metrics;
@@ -19,14 +20,14 @@ public sealed class RateLimitingMiddleware
     {
         // Skip rate limiting for health/metrics endpoints
         var path = context.Request.Path.Value ?? "";
-        if (path.StartsWith("/health", StringComparison.Ordinal) || path.StartsWith("/metrics", StringComparison.Ordinal) || path == "/")
+        if (path.StartsWith(MiddlewarePathConstants.HealthCheck, StringComparison.Ordinal) || path.StartsWith(MiddlewarePathConstants.Metrics, StringComparison.Ordinal) || path == "/")
         {
             await _next(context);
             return;
         }
 
         // Extract tenant ID from authenticated claims, fall back to IP
-        var tenantId = context.User?.FindFirst("TenantId")?.Value;
+        var tenantId = context.User?.FindFirst(ClaimNameConstants.TenantId)?.Value;
         var rateLimitKey = tenantId ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
         var config = settings.Value;
@@ -34,16 +35,16 @@ public sealed class RateLimitingMiddleware
             rateLimitKey, config.RequestsPerSecond, TimeSpan.FromSeconds(1));
 
         // Set rate limit headers on all responses
-        context.Response.Headers["X-RateLimit-Limit"] = config.RequestsPerSecond.ToString(CultureInfo.InvariantCulture);
-        context.Response.Headers["X-RateLimit-Remaining"] = Math.Max(0, result.Remaining).ToString(CultureInfo.InvariantCulture);
-        context.Response.Headers["X-RateLimit-Reset"] = result.ResetAtUnixMs.ToString(CultureInfo.InvariantCulture);
+        context.Response.Headers[HttpHeaderConstants.RateLimitLimit] = config.RequestsPerSecond.ToString(CultureInfo.InvariantCulture);
+        context.Response.Headers[HttpHeaderConstants.RateLimitRemaining] = Math.Max(0, result.Remaining).ToString(CultureInfo.InvariantCulture);
+        context.Response.Headers[HttpHeaderConstants.RateLimitReset] = result.ResetAtUnixMs.ToString(CultureInfo.InvariantCulture);
 
         if (!result.Allowed)
         {
             EmailMetrics.RateLimitExceeded.WithLabels(tenantId ?? "anonymous").Inc();
 
             var retryAfterSeconds = Math.Max(1, (result.ResetAtUnixMs - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()) / 1000);
-            context.Response.Headers["Retry-After"] = retryAfterSeconds.ToString(CultureInfo.InvariantCulture);
+            context.Response.Headers[HttpHeaderConstants.RetryAfter] = retryAfterSeconds.ToString(CultureInfo.InvariantCulture);
             context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(new { error = "RATE_LIMITED", message = "Too many requests. Please retry later." });

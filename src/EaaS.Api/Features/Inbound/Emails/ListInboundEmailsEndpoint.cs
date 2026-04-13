@@ -3,6 +3,7 @@ using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
+using EaaS.Api.Constants;
 namespace EaaS.Api.Features.Inbound.Emails;
 
 public static class ListInboundEmailsEndpoint
@@ -20,7 +21,7 @@ public static class ListInboundEmailsEndpoint
             CancellationToken cancellationToken = default) =>
         {
             var tenantId = Guid.Parse(
-                httpContext.User.FindFirst("TenantId")?.Value ?? Guid.Empty.ToString());
+                httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value ?? Guid.Empty.ToString());
 
             var query = dbContext.InboundEmails
                 .AsNoTracking()

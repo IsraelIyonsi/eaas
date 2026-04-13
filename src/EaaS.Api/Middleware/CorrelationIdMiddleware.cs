@@ -1,10 +1,11 @@
+using EaaS.Api.Constants;
 using Serilog.Context;
 
 namespace EaaS.Api.Middleware;
 
 public sealed class CorrelationIdMiddleware
 {
-    private const string HeaderName = "X-Correlation-Id";
+    private const string HeaderName = HttpHeaderConstants.CorrelationId;
     private readonly RequestDelegate _next;
 
     public CorrelationIdMiddleware(RequestDelegate next)
@@ -17,7 +18,7 @@ public sealed class CorrelationIdMiddleware
         var correlationId = context.Request.Headers[HeaderName].FirstOrDefault()
                             ?? Guid.NewGuid().ToString("N");
 
-        context.Items["CorrelationId"] = correlationId;
+        context.Items[ContextItemConstants.CorrelationId] = correlationId;
         context.Response.Headers[HeaderName] = correlationId;
 
         using (LogContext.PushProperty("CorrelationId", correlationId))

@@ -1,6 +1,7 @@
 using EaaS.Shared.Contracts;
 using MediatR;
 
+using EaaS.Api.Constants;
 namespace EaaS.Api.Features.Emails;
 
 public static class ScheduleEmailEndpoint
@@ -45,13 +46,13 @@ public static class ScheduleEmailEndpoint
 
     private static Guid GetTenantId(HttpContext httpContext)
     {
-        var tenantClaim = httpContext.User.FindFirst("TenantId")?.Value;
+        var tenantClaim = httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value;
         return tenantClaim is not null ? Guid.Parse(tenantClaim) : Guid.Empty;
     }
 
     private static Guid GetApiKeyId(HttpContext httpContext)
     {
-        var claim = httpContext.User.FindFirst("ApiKeyId")?.Value;
+        var claim = httpContext.User.FindFirst(ClaimNameConstants.ApiKeyId)?.Value;
         return claim is not null ? Guid.Parse(claim) : Guid.Empty;
     }
 }

@@ -149,7 +149,7 @@ public static class EndpointMappingExtensions
 
         // Admin tenant endpoints (Admin + SuperAdmin)
         var adminTenantsGroup = app.MapGroup(RouteConstants.AdminTenants)
-            .RequireAuthorization("AdminPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.AdminPolicy)
             .WithTags(TagConstants.AdminTenants);
 
         ListTenantsEndpoint.Map(adminTenantsGroup);
@@ -162,7 +162,7 @@ public static class EndpointMappingExtensions
 
         // Admin users endpoints (SuperAdmin only)
         var adminUsersGroup = app.MapGroup(RouteConstants.AdminUsers)
-            .RequireAuthorization("SuperAdminPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.SuperAdminPolicy)
             .WithTags(TagConstants.AdminUsers);
 
         ListAdminUsersEndpoint.Map(adminUsersGroup);
@@ -172,14 +172,14 @@ public static class EndpointMappingExtensions
 
         // Admin health endpoints (all admin roles)
         var adminHealthGroup = app.MapGroup(RouteConstants.AdminHealth)
-            .RequireAuthorization("AdminReadPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.AdminReadPolicy)
             .WithTags(TagConstants.AdminHealth);
 
         GetSystemHealthEndpoint.Map(adminHealthGroup);
 
         // Admin analytics endpoints (Admin + SuperAdmin)
         var adminAnalyticsGroup = app.MapGroup(RouteConstants.AdminAnalytics)
-            .RequireAuthorization("AdminPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.AdminPolicy)
             .WithTags(TagConstants.AdminAnalytics);
 
         GetPlatformSummaryEndpoint.Map(adminAnalyticsGroup);
@@ -189,14 +189,14 @@ public static class EndpointMappingExtensions
 
         // Admin audit log endpoints (all admin roles)
         var adminAuditLogsGroup = app.MapGroup(RouteConstants.AdminAuditLogs)
-            .RequireAuthorization("AdminReadPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.AdminReadPolicy)
             .WithTags(TagConstants.AdminAuditLogs);
 
         ListAuditLogsEndpoint.Map(adminAuditLogsGroup);
 
         // Admin billing plans endpoints (SuperAdmin only)
         var adminBillingPlansGroup = app.MapGroup(RouteConstants.AdminBillingPlans)
-            .RequireAuthorization("SuperAdminPolicy")
+            .RequireAuthorization(AuthorizationPolicyConstants.SuperAdminPolicy)
             .WithTags(TagConstants.BillingPlans);
 
         ListPlansEndpoint.Map(adminBillingPlansGroup);

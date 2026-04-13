@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using EaaS.Api.Constants;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure.Persistence;
@@ -33,7 +34,7 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("Authorization", out var authHeader))
+        if (!Request.Headers.TryGetValue(HttpHeaderConstants.Authorization, out var authHeader))
         {
             LogMissingAuthHeader(Logger);
             return AuthenticateResult.NoResult();
@@ -41,10 +42,10 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
 
         var headerValue = authHeader.ToString();
 
-        if (!headerValue.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        if (!headerValue.StartsWith(HttpHeaderConstants.BearerPrefix, StringComparison.OrdinalIgnoreCase))
             return AuthenticateResult.NoResult();
 
-        var apiKey = headerValue["Bearer ".Length..].Trim();
+        var apiKey = headerValue[HttpHeaderConstants.BearerPrefix.Length..].Trim();
 
         if (string.IsNullOrWhiteSpace(apiKey))
             return AuthenticateResult.Fail("API key is empty.");
@@ -85,7 +86,7 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
 
         // Service key impersonation: dashboard proxy sends X-Tenant-Id to act on behalf of a tenant
         if (keyData.IsServiceKey
-            && Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdHeader)
+            && Request.Headers.TryGetValue(HttpHeaderConstants.TenantId, out var tenantIdHeader)
             && Guid.TryParse(tenantIdHeader.ToString(), out var impersonatedTenantId))
         {
             effectiveTenantId = impersonatedTenantId;
@@ -102,8 +103,8 @@ public sealed partial class ApiKeyAuthHandler : AuthenticationHandler<ApiKeyAuth
     {
         var claims = new[]
         {
-            new Claim("TenantId", tenantId.ToString()),
-            new Claim("ApiKeyId", apiKeyId.ToString()),
+            new Claim(ClaimNameConstants.TenantId, tenantId.ToString()),
+            new Claim(ClaimNameConstants.ApiKeyId, apiKeyId.ToString()),
             new Claim(ClaimTypes.Name, name)
         };
 

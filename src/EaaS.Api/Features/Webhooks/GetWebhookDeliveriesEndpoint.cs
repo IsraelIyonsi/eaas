@@ -1,3 +1,4 @@
+using EaaS.Api.Constants;
 using EaaS.Shared.Contracts;
 using MediatR;
 
@@ -12,7 +13,7 @@ public static class GetWebhookDeliveriesEndpoint
             HttpContext httpContext,
             IMediator mediator,
             int page = 1,
-            int page_size = 20,
+            int page_size = PaginationConstants.DefaultPageSize,
             bool? success = null) =>
         {
             var tenantId = GetTenantId(httpContext);
@@ -36,7 +37,7 @@ public static class GetWebhookDeliveriesEndpoint
 
     private static Guid GetTenantId(HttpContext httpContext)
     {
-        var tenantClaim = httpContext.User.FindFirst("TenantId")?.Value;
+        var tenantClaim = httpContext.User.FindFirst(ClaimNameConstants.TenantId)?.Value;
         return tenantClaim is not null ? Guid.Parse(tenantClaim) : Guid.Empty;
     }
 }
