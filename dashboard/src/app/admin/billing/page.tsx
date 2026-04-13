@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { extractItems } from "@/lib/utils/api-response";
+import { extractItems, extractTotalCount } from "@/lib/utils/api-response";
 import { PageHeader } from "@/components/shared/page-header";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -94,7 +94,7 @@ export default function AdminBillingPage() {
   const updateMutation = useUpdatePlan();
 
   const plans = extractItems(data);
-  const total = data?.totalCount ?? 0;
+  const total = extractTotalCount(data);
 
   function handleCreate(formData: CreatePlanRequest) {
     createMutation.mutate(formData, {

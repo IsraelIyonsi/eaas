@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { extractItems } from "@/lib/utils/api-response";
+import { extractItems, extractTotalCount } from "@/lib/utils/api-response";
 import { PageHeader } from "@/components/shared/page-header";
 import { FilterBar } from "@/components/shared/filter-bar";
 import { DataTable } from "@/components/shared/data-table";
@@ -80,7 +80,7 @@ export default function AdminAuditLogsPage() {
   });
 
   const logs = extractItems(data);
-  const total = data?.totalCount ?? 0;
+  const total = extractTotalCount(data);
 
   function clearFilters() {
     setAction("all");
