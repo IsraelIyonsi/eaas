@@ -4,21 +4,18 @@ import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { EmailEvent } from "@/types/email";
 import type { EmailStatus } from "@/types/email";
+import { EMAIL_EVENT_DOT_COLORS } from "@/lib/constants/ui";
+import { EmailStatusConfig } from "@/lib/constants/status";
 
 const eventConfig: Record<
   EmailStatus,
   { color: string; label: string }
-> = {
-  queued: { color: "bg-gray-400", label: "Queued" },
-  sending: { color: "bg-blue-400", label: "Sending" },
-  sent: { color: "bg-blue-400", label: "Sent" },
-  delivered: { color: "bg-emerald-400", label: "Delivered" },
-  bounced: { color: "bg-red-400", label: "Bounced" },
-  complained: { color: "bg-amber-400", label: "Complained" },
-  failed: { color: "bg-red-500", label: "Failed" },
-  opened: { color: "bg-violet-400", label: "Opened" },
-  clicked: { color: "bg-cyan-400", label: "Clicked" },
-};
+> = Object.fromEntries(
+  Object.entries(EmailStatusConfig).map(([key, { label }]) => [
+    key,
+    { color: EMAIL_EVENT_DOT_COLORS[key] ?? "bg-gray-400", label },
+  ]),
+) as Record<EmailStatus, { color: string; label: string }>;
 
 interface EventTimelineProps {
   events: EmailEvent[];

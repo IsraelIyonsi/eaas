@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { STALE_TIME_MS, TOOLTIP_DELAY_MS } from "@/lib/constants/ui";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -12,7 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30_000,
+            staleTime: STALE_TIME_MS,
             retry: 1,
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
@@ -29,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider delay={300}>
+        <TooltipProvider delay={TOOLTIP_DELAY_MS}>
           {children}
           <Toaster richColors position="bottom-right" />
         </TooltipProvider>

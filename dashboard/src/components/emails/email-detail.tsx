@@ -23,18 +23,27 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EmailStatus } from "@/types";
+import { EMAIL_EVENT_ICON_COLORS } from "@/lib/constants/ui";
 
-const eventIconMap: Record<EmailStatus, { icon: LucideIcon; color: string }> = {
-  queued: { icon: Clock, color: "text-gray-400" },
-  sending: { icon: Send, color: "text-blue-400" },
-  sent: { icon: Send, color: "text-blue-400" },
-  delivered: { icon: CheckCircle2, color: "text-emerald-400" },
-  bounced: { icon: XCircle, color: "text-red-400" },
-  complained: { icon: AlertTriangle, color: "text-amber-400" },
-  failed: { icon: XCircle, color: "text-red-500" },
-  opened: { icon: Eye, color: "text-violet-400" },
-  clicked: { icon: MousePointerClick, color: "text-cyan-400" },
+const EVENT_ICONS: Record<EmailStatus, LucideIcon> = {
+  queued: Clock,
+  sending: Send,
+  sent: Send,
+  delivered: CheckCircle2,
+  bounced: XCircle,
+  complained: AlertTriangle,
+  failed: XCircle,
+  opened: Eye,
+  clicked: MousePointerClick,
 };
+
+const eventIconMap: Record<EmailStatus, { icon: LucideIcon; color: string }> =
+  Object.fromEntries(
+    Object.entries(EVENT_ICONS).map(([key, icon]) => [
+      key,
+      { icon, color: EMAIL_EVENT_ICON_COLORS[key] ?? "text-muted-foreground" },
+    ]),
+  ) as Record<EmailStatus, { icon: LucideIcon; color: string }>;
 
 interface EmailDetailProps {
   email: Email | null;

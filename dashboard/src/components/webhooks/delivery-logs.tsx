@@ -16,16 +16,8 @@ import { useWebhookDeliveries } from "@/lib/hooks/use-webhooks";
 import { format, parseISO } from "date-fns";
 import { ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PAGE_SIZE_COMPACT } from "@/lib/constants/ui";
+import { PAGE_SIZE_COMPACT, httpStatusCodeClass } from "@/lib/constants/ui";
 import type { WebhookDelivery } from "@/types/webhook";
-
-function statusCodeClass(code: number): string {
-  if (code >= 200 && code < 300)
-    return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-  if (code >= 400 && code < 500)
-    return "bg-amber-500/15 text-amber-400 border-amber-500/30";
-  return "bg-red-500/15 text-red-400 border-red-500/30";
-}
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -109,7 +101,7 @@ export function DeliveryLogs({ webhookId }: DeliveryLogsProps) {
                     variant="outline"
                     className={cn(
                       "text-[10px] font-medium",
-                      statusCodeClass(d.statusCode),
+                      httpStatusCodeClass(d.statusCode),
                     )}
                   >
                     {d.statusCode}

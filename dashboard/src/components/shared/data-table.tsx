@@ -105,12 +105,12 @@ export function DataTable<T>({
             {Array.from({ length: DATA_TABLE_SKELETON_ROWS }).map((_, i) => (
               <tr key={i} className="border-b border-border">
                 {selectable && (
-                  <td className="px-[14px] py-[10px]">
+                  <td className="px-[14px] py-[13px]">
                     <Skeleton className="h-4 w-4" />
                   </td>
                 )}
                 {columns.map((col) => (
-                  <td key={col.key} className="px-[14px] py-[10px]">
+                  <td key={col.key} className="px-[14px] py-[13px]">
                     <Skeleton className="h-4 w-24" />
                   </td>
                 ))}
@@ -178,7 +178,7 @@ export function DataTable<T>({
               >
                 {selectable && (
                   <td
-                    className="px-[14px] py-[10px] align-middle"
+                    className="px-[14px] py-[13px] align-middle"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
@@ -193,7 +193,7 @@ export function DataTable<T>({
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={cn("px-[14px] py-[10px] align-middle text-[13px]", col.className)}
+                    className={cn("px-[14px] py-[13px] align-middle text-[13px]", col.className)}
                   >
                     {col.render(item)}
                   </td>

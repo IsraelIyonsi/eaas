@@ -13,6 +13,7 @@ import {
 } from "@/lib/hooks/use-admin-analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Send, TrendingUp, BarChart3 } from "lucide-react";
+import { CHART_COLOR_ADMIN } from "@/lib/constants/ui";
 import type { TenantRanking } from "@/types/admin";
 
 const rankingColumns = [
@@ -76,7 +77,7 @@ export default function AdminAnalyticsPage() {
           title="Total Tenants"
           value={summary?.totalTenants ?? 0}
           icon={Building2}
-          color="#7c3aed"
+          color={CHART_COLOR_ADMIN}
         />
         <StatCard
           title="Total Emails"
@@ -95,8 +96,8 @@ export default function AdminAnalyticsPage() {
         <StatCard
           title="Email Growth"
           value={`${emailGrowth}%`}
-          icon={BarChart3}
-          color="var(--primary)"
+          icon={TrendingUp}
+          color="var(--chart-2)"
           trend={emailGrowth > 0 ? "up" : emailGrowth < 0 ? "down" : "flat"}
           trendValue="vs last month"
         />

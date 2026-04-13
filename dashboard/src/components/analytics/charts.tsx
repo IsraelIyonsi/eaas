@@ -18,6 +18,12 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TimelinePoint } from "@/types";
 import { format, parseISO } from "date-fns";
+import {
+  CHART_COLOR_BLUE,
+  CHART_COLOR_GREEN,
+  CHART_COLOR_RED,
+  CHART_COLOR_PURPLE,
+} from "@/lib/constants/ui";
 
 // Custom tooltip matching theme
 function CustomTooltip({
@@ -76,8 +82,8 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
             <AreaChart data={formatted}>
               <defs>
                 <linearGradient id="sentGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <stop offset="5%" stopColor={CHART_COLOR_BLUE} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={CHART_COLOR_BLUE} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient
                   id="deliveredGrad"
@@ -86,8 +92,8 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
                   x2="0"
                   y2="1"
                 >
-                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                  <stop offset="5%" stopColor={CHART_COLOR_GREEN} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={CHART_COLOR_GREEN} stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -114,7 +120,7 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="sent"
                 name="Sent"
-                stroke="#2563eb"
+                stroke={CHART_COLOR_BLUE}
                 fill="url(#sentGrad)"
                 strokeWidth={2}
               />
@@ -122,7 +128,7 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="delivered"
                 name="Delivered"
-                stroke="#22c55e"
+                stroke={CHART_COLOR_GREEN}
                 fill="url(#deliveredGrad)"
                 strokeWidth={2}
               />
@@ -178,14 +184,14 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
               <Bar
                 dataKey="delivered"
                 name="Delivered"
-                fill="#22c55e"
+                fill={CHART_COLOR_GREEN}
                 radius={[3, 3, 0, 0]}
                 opacity={0.85}
               />
               <Bar
                 dataKey="bounced"
                 name="Bounced"
-                fill="#ef4444"
+                fill={CHART_COLOR_RED}
                 radius={[3, 3, 0, 0]}
                 opacity={0.85}
               />
@@ -242,7 +248,7 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="opened"
                 name="Opened"
-                stroke="#2563eb"
+                stroke={CHART_COLOR_BLUE}
                 strokeWidth={2}
                 dot={false}
               />
@@ -250,7 +256,7 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
                 type="monotone"
                 dataKey="clicked"
                 name="Clicked"
-                stroke="#8b5cf6"
+                stroke={CHART_COLOR_PURPLE}
                 strokeWidth={2}
                 dot={false}
               />

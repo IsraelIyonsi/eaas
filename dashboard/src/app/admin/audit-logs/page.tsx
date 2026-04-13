@@ -7,7 +7,6 @@ import { FilterBar } from "@/components/shared/filter-bar";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { useAdminAuditLogs } from "@/lib/hooks/use-admin-audit-logs";
-import { PAGE_SIZE_DEFAULT } from "@/lib/constants/ui";
 import { ScrollText } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { AuditLog } from "@/types/admin";
@@ -45,7 +44,7 @@ const columns = [
     key: "action",
     header: "Action",
     render: (item: AuditLog) => (
-      <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+      <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[13px] text-foreground">
         {item.action}
       </span>
     ),
@@ -64,7 +63,7 @@ const columns = [
     key: "ipAddress",
     header: "IP",
     render: (item: AuditLog) => (
-      <span className="font-mono text-xs text-muted-foreground">{item.ipAddress}</span>
+      <span className="font-mono text-[13px] text-muted-foreground">{item.ipAddress}</span>
     ),
   },
 ];
@@ -73,9 +72,11 @@ export default function AdminAuditLogsPage() {
   const [page, setPage] = useState(1);
   const [action, setAction] = useState("all");
 
+  const auditPageSize = 15;
+
   const { data, isLoading } = useAdminAuditLogs({
     page,
-    page_size: PAGE_SIZE_DEFAULT,
+    page_size: auditPageSize,
     action: action === "all" ? undefined : action,
   });
 
@@ -117,7 +118,7 @@ export default function AdminAuditLogsPage() {
         data={logs}
         total={total}
         page={page}
-        pageSize={PAGE_SIZE_DEFAULT}
+        pageSize={auditPageSize}
         onPageChange={setPage}
         loading={isLoading}
         getRowId={(item) => item.id}

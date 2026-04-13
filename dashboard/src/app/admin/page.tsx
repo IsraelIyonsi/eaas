@@ -9,6 +9,7 @@ import { StatCardsSkeleton } from "@/components/shared/loading-skeleton";
 import { useAdminPlatformSummary, useAdminTenantRankings } from "@/lib/hooks/use-admin-analytics";
 import { useAdminSystemHealth } from "@/lib/hooks/use-admin-health";
 import { Building2, Users, Send, Globe, Activity } from "lucide-react";
+import { CHART_COLOR_ADMIN } from "@/lib/constants/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TenantRanking, AdminServiceHealth } from "@/types/admin";
@@ -61,7 +62,7 @@ export default function AdminOverviewPage() {
           title="Total Tenants"
           value={summary?.totalTenants ?? 0}
           icon={Building2}
-          color="#7c3aed"
+          color={CHART_COLOR_ADMIN}
         />
         <StatCard
           title="Active Tenants"

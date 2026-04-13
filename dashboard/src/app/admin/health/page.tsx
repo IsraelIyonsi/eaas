@@ -8,6 +8,7 @@ import { useAdminSystemHealth } from "@/lib/hooks/use-admin-health";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Activity, Building2, Send, Layers } from "lucide-react";
+import { CHART_COLOR_ADMIN } from "@/lib/constants/ui";
 import type { HealthStatus } from "@/types/health";
 
 export default function AdminHealthPage() {
@@ -76,7 +77,7 @@ export default function AdminHealthPage() {
               title="Tenant Count"
               value={health?.metrics?.tenantCount ?? 0}
               icon={Building2}
-              color="#7c3aed"
+              color={CHART_COLOR_ADMIN}
             />
             <StatCard
               title="Total Emails"

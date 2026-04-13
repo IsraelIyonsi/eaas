@@ -40,19 +40,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, parseISO, subDays, subHours } from "date-fns";
+import { INBOUND_STATUS_COLORS } from "@/lib/constants/ui";
 
 const ranges = [
   { label: "24h", hours: 24 },
   { label: "7d", hours: 168 },
   { label: "30d", hours: 720 },
 ];
-
-const STATUS_COLORS = {
-  processed: "#34d399",
-  failed: "#f87171",
-  spam: "#fbbf24",
-  virus: "#a78bfa",
-};
 
 export default function InboundAnalyticsPage() {
   const [rangeIdx, setRangeIdx] = useState(1);
@@ -80,10 +74,10 @@ export default function InboundAnalyticsPage() {
   // Donut chart data
   const donutData = summary
     ? [
-        { name: "Processed", value: summary.processed ?? 0, color: STATUS_COLORS.processed },
-        { name: "Failed", value: summary.failed ?? 0, color: STATUS_COLORS.failed },
-        { name: "Spam", value: summary.spam_flagged ?? 0, color: STATUS_COLORS.spam },
-        { name: "Virus", value: summary.virus_flagged ?? 0, color: STATUS_COLORS.virus },
+        { name: "Processed", value: summary.processed ?? 0, color: INBOUND_STATUS_COLORS.processed },
+        { name: "Failed", value: summary.failed ?? 0, color: INBOUND_STATUS_COLORS.failed },
+        { name: "Spam", value: summary.spam_flagged ?? 0, color: INBOUND_STATUS_COLORS.spam },
+        { name: "Virus", value: summary.virus_flagged ?? 0, color: INBOUND_STATUS_COLORS.virus },
       ]
     : [];
 
@@ -129,7 +123,7 @@ export default function InboundAnalyticsPage() {
             title="Processed"
             value={summary?.processed ?? 0}
             icon={CheckCircle2}
-            color="#34d399"
+            color={INBOUND_STATUS_COLORS.processed}
             subtitle={
               summary
                 ? `${((summary.processing_rate ?? 0) * 100).toFixed(1)}% rate`
@@ -140,7 +134,7 @@ export default function InboundAnalyticsPage() {
             title="Failed"
             value={summary?.failed ?? 0}
             icon={XCircle}
-            color="#f87171"
+            color={INBOUND_STATUS_COLORS.failed}
           />
           <StatCard
             title="Avg Processing"
@@ -150,7 +144,7 @@ export default function InboundAnalyticsPage() {
                 : "0ms"
             }
             icon={Clock}
-            color="#fbbf24"
+            color={INBOUND_STATUS_COLORS.spam}
           />
         </div>
       )}
