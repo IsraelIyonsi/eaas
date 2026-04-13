@@ -185,9 +185,9 @@ export default function SignupPage() {
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
                 required
               />
-              <Label
+              <label
                 htmlFor="agreeToTerms"
-                className="text-xs leading-relaxed text-muted-foreground [&>a]:inline"
+                className="text-xs leading-relaxed text-muted-foreground"
               >
                 I agree to the{" "}
                 <Link
@@ -213,7 +213,7 @@ export default function SignupPage() {
                 >
                   Acceptable Use Policy
                 </Link>
-              </Label>
+              </label>
             </div>
             {error && (
               <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
