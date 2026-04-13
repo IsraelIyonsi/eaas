@@ -171,7 +171,7 @@ export default function TemplatesPage() {
                 <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 md:table-cell">
                   Version
                 </TableHead>
-                <TableHead className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+                <TableHead className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground/60 sm:table-cell">
                   Updated
                 </TableHead>
                 <TableHead className="w-12" />
@@ -192,7 +192,7 @@ export default function TemplatesPage() {
                   <TableCell className="hidden text-sm text-muted-foreground/60 md:table-cell">
                     v{tpl.version}
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground/60 whitespace-nowrap">
+                  <TableCell className="hidden text-xs text-muted-foreground/60 whitespace-nowrap sm:table-cell">
                     {format(parseISO(tpl.updatedAt), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>

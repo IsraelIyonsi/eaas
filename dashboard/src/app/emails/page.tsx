@@ -36,6 +36,8 @@ export default function EmailsPage() {
 
   const { data: events } = useEmailEvents(selectedEmail?.id);
 
+  const hasFilters = status !== "all" || search !== "";
+
   function clearFilters() {
     setStatus("all");
     setSearch("");
@@ -88,6 +90,7 @@ export default function EmailsPage() {
           totalPages={Math.ceil((data?.totalCount ?? 0) / (data?.pageSize ?? PAGE_SIZE_COMPACT))}
           onPageChange={setPage}
           onRowClick={setSelectedEmail}
+          hasFilters={hasFilters}
         />
       )}
 

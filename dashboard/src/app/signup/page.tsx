@@ -182,17 +182,17 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={agreedToTerms}
                 onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
                 required
               />
               <Label
                 htmlFor="agreeToTerms"
-                className="text-xs leading-relaxed text-muted-foreground"
+                className="text-xs leading-relaxed text-muted-foreground [&>a]:inline"
               >
                 I agree to the{" "}
                 <Link
                   href={Routes.TERMS}
-                  className="text-primary hover:underline"
+                  className="whitespace-nowrap text-primary hover:underline"
                   target="_blank"
                 >
                   Terms of Service
@@ -200,7 +200,7 @@ export default function SignupPage() {
                 ,{" "}
                 <Link
                   href={Routes.PRIVACY}
-                  className="text-primary hover:underline"
+                  className="whitespace-nowrap text-primary hover:underline"
                   target="_blank"
                 >
                   Privacy Policy
@@ -208,7 +208,7 @@ export default function SignupPage() {
                 , and{" "}
                 <Link
                   href={Routes.ACCEPTABLE_USE}
-                  className="text-primary hover:underline"
+                  className="whitespace-nowrap text-primary hover:underline"
                   target="_blank"
                 >
                   Acceptable Use Policy

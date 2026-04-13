@@ -18,12 +18,32 @@ import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TimelinePoint } from "@/types";
 import { format, parseISO } from "date-fns";
+import { BarChart3 } from "lucide-react";
 import {
   CHART_COLOR_BLUE,
   CHART_COLOR_GREEN,
   CHART_COLOR_RED,
   CHART_COLOR_PURPLE,
 } from "@/lib/constants/ui";
+
+/** Returns true when there are no data points or every numeric field is zero. */
+function isTimelineEmpty(data: TimelinePoint[], keys: (keyof TimelinePoint)[]): boolean {
+  if (!data || data.length === 0) return true;
+  return data.every((point) =>
+    keys.every((key) => (point[key] as number) === 0),
+  );
+}
+
+function ChartEmptyState() {
+  return (
+    <div className="flex h-[280px] flex-col items-center justify-center gap-3">
+      <BarChart3 className="h-10 w-10 text-muted-foreground/40" />
+      <p className="text-sm text-muted-foreground">
+        Send your first email to see analytics here
+      </p>
+    </div>
+  );
+}
 
 // Custom tooltip matching theme
 function CustomTooltip({
@@ -60,6 +80,7 @@ interface SendVolumeChartProps {
 }
 
 export function SendVolumeChart({ data }: SendVolumeChartProps) {
+  const empty = isTimelineEmpty(data, ["sent", "delivered"]);
   const formatted = useMemo(
     () =>
       data.map((p) => ({
@@ -77,6 +98,9 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {empty ? (
+          <ChartEmptyState />
+        ) : (
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={formatted}>
@@ -135,12 +159,14 @@ export function SendVolumeChart({ data }: SendVolumeChartProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   );
 }
 
 export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
+  const empty = isTimelineEmpty(data, ["delivered", "bounced"]);
   const formatted = useMemo(
     () =>
       data.map((p) => ({
@@ -158,6 +184,9 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {empty ? (
+          <ChartEmptyState />
+        ) : (
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={formatted}>
@@ -198,12 +227,14 @@ export function DeliveryBreakdownChart({ data }: SendVolumeChartProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   );
 }
 
 export function EngagementChart({ data }: SendVolumeChartProps) {
+  const empty = isTimelineEmpty(data, ["opened", "clicked"]);
   const formatted = useMemo(
     () =>
       data.map((p) => ({
@@ -221,6 +252,9 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {empty ? (
+          <ChartEmptyState />
+        ) : (
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={formatted}>
@@ -263,6 +297,7 @@ export function EngagementChart({ data }: SendVolumeChartProps) {
             </LineChart>
           </ResponsiveContainer>
         </div>
+        )}
       </CardContent>
     </Card>
   );

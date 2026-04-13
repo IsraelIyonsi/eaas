@@ -18,6 +18,7 @@ import {
   Eye,
   MousePointerClick,
   AlertTriangle,
+  Activity,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PAGE_SIZE_COMPACT, STATS_SKELETON_COUNT } from "@/lib/constants/ui";
@@ -117,7 +118,18 @@ export default function OverviewPage() {
             <SendVolumeChart data={timeline?.points ?? []} />
           )}
         </div>
-        <div>{health && <HealthStatus health={health} />}</div>
+        <div>
+          {health ? (
+            <HealthStatus health={health} />
+          ) : (
+            <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 rounded-lg border border-border bg-card shadow-sm">
+              <Activity className="h-10 w-10 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                Health data unavailable
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Recent Emails — hi-fi: card wrapper with border, shadow-sm */}

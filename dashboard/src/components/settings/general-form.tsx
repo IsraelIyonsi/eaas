@@ -141,15 +141,21 @@ export function GeneralForm() {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-md border border-border bg-muted/50 p-3">
             <p className="text-xs text-muted-foreground/60">Per Second</p>
-            <p className="text-lg font-bold text-foreground">14</p>
+            <p className="text-lg font-bold text-foreground">
+              14 <span className="text-sm font-normal text-muted-foreground">emails/sec</span>
+            </p>
           </div>
           <div className="rounded-md border border-border bg-muted/50 p-3">
             <p className="text-xs text-muted-foreground/60">Per Day</p>
-            <p className="text-lg font-bold text-foreground">50,000</p>
+            <p className="text-lg font-bold text-foreground">
+              50,000 <span className="text-sm font-normal text-muted-foreground">emails/day</span>
+            </p>
           </div>
           <div className="rounded-md border border-border bg-muted/50 p-3">
             <p className="text-xs text-muted-foreground/60">Per Month</p>
-            <p className="text-lg font-bold text-foreground">1,000,000</p>
+            <p className="text-lg font-bold text-foreground">
+              1,000,000 <span className="text-sm font-normal text-muted-foreground">emails/mo</span>
+            </p>
           </div>
         </div>
       </section>

@@ -6,12 +6,19 @@ const API_INTERNAL_URL =
   process.env.EAAS_API_INTERNAL_URL ?? "http://localhost:5000";
 
 // API key for authenticating with the EaaS API
-const API_KEY = process.env.EAAS_API_KEY ?? "";
+const API_KEY = process.env.EAAS_API_KEY;
 
 async function proxyRequest(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
+  if (!API_KEY) {
+    return NextResponse.json(
+      { error: "API key not configured" },
+      { status: 500 },
+    );
+  }
+
   // Verify dashboard session
   const sessionCookie = request.cookies.get("sendnex_session");
   if (!sessionCookie || !verifySession(sessionCookie.value)) {
