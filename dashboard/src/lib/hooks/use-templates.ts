@@ -6,13 +6,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS } from '@/lib/constants/ui';
+import { useSession } from './use-session';
 import type { CreateTemplateRequest, UpdateTemplateRequest, TemplateVersion } from '@/types/template';
 
 export function useTemplates(params?: { search?: string; page?: number; page_size?: number }) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.templates.list(params),
     queryFn: () => repositories.template.list(params),
     staleTime: STALE_TIME_MS,
+    enabled: isTenant,
   });
 }
 

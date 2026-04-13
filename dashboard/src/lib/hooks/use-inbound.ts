@@ -6,15 +6,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS } from '@/lib/constants/ui';
+import { useSession } from './use-session';
 import type { InboundEmailListParams, CreateInboundRuleRequest, UpdateInboundRuleRequest } from '@/types/inbound';
 
 // --- Inbound Emails ---
 
 export function useInboundEmails(params?: InboundEmailListParams) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.inboundEmails.list(params as Record<string, unknown>),
     queryFn: () => repositories.inboundEmail.list(params),
     staleTime: STALE_TIME_MS,
+    enabled: isTenant,
   });
 }
 
@@ -57,10 +60,12 @@ export function useDeleteInboundEmail() {
 // --- Inbound Rules ---
 
 export function useInboundRules() {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.inboundRules.list(),
     queryFn: () => repositories.inboundRule.list(),
     staleTime: STALE_TIME_MS,
+    enabled: isTenant,
   });
 }
 

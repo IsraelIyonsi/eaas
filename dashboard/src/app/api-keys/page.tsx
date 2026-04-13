@@ -90,7 +90,7 @@ export default function ApiKeysPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-red-400/70 hover:text-red-400"
+              className="h-7 text-xs text-red-600 hover:text-red-700"
               onClick={(e) => {
                 e.stopPropagation();
                 setRevokeKey(item);

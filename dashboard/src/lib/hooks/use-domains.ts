@@ -6,12 +6,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS } from '@/lib/constants/ui';
+import { useSession } from './use-session';
 
 export function useDomains() {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.domains.list(),
     queryFn: () => repositories.domain.list(),
     staleTime: STALE_TIME_MS,
+    enabled: isTenant,
   });
 }
 

@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repositories } from '@/lib/api/index';
 import { QueryKeys } from '@/lib/constants/query-keys';
 import { STALE_TIME_MS } from '@/lib/constants/ui';
+import { useSession } from './use-session';
 import type { CreateSuppressionRequest } from '@/types/suppression';
 
 export function useSuppressions(params?: {
@@ -14,10 +15,12 @@ export function useSuppressions(params?: {
   page?: number;
   page_size?: number;
 }) {
+  const { isTenant } = useSession();
   return useQuery({
     queryKey: QueryKeys.suppressions.list(params),
     queryFn: () => repositories.suppression.list(params),
     staleTime: STALE_TIME_MS,
+    enabled: isTenant,
   });
 }
 
