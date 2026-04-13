@@ -41,7 +41,7 @@ export default function OverviewPage() {
           description="System health and email sending activity at a glance."
         />
         {/* Hi-fi: 3 columns, 16px gap */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
           {Array.from({ length: STATS_SKELETON_COUNT }).map((_, i) => (
             <Skeleton
               key={i}
@@ -62,7 +62,7 @@ export default function OverviewPage() {
       />
 
       {/* Stat Cards — hi-fi: grid 3 columns, 16px gap (2 rows of 3) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
         <StatCard
           title="Sent Today"
           value={summary?.total_sent.toLocaleString() ?? "0"}

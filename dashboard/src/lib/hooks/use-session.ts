@@ -19,6 +19,7 @@ export function useSession() {
     queryFn: () => fetch('/api/auth/me').then((r) => r.json()),
     retry: false,
     staleTime: DETAIL_STALE_TIME_MS,
+    refetchOnWindowFocus: true,
   });
 
   return {
