@@ -13,5 +13,13 @@ public sealed class CreateTenantValidator : AbstractValidator<CreateTenantComman
         RuleFor(x => x.ContactEmail)
             .EmailAddress().WithMessage("ContactEmail must be a valid email address.")
             .When(x => !string.IsNullOrWhiteSpace(x.ContactEmail));
+
+        RuleFor(x => x.LegalEntityName)
+            .NotEmpty().WithMessage("Legal entity name is required (CAN-SPAM §7704(a)(5)).")
+            .MaximumLength(255);
+
+        RuleFor(x => x.PostalAddress)
+            .NotEmpty().WithMessage("Postal address is required (CAN-SPAM §7704(a)(5)).")
+            .MaximumLength(1000);
     }
 }

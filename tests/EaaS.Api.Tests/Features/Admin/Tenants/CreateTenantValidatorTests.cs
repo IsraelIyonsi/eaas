@@ -81,4 +81,54 @@ public sealed class CreateTenantValidatorTests
 
         result.ShouldNotHaveValidationErrorFor(x => x.ContactEmail);
     }
+
+    [Fact]
+    public void Should_Fail_When_LegalEntityNameEmpty()
+    {
+        var command = TestDataBuilders.CreateTenant()
+            .WithLegalEntityName(string.Empty)
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.LegalEntityName)
+            .WithErrorMessage("Legal entity name is required (CAN-SPAM §7704(a)(5)).");
+    }
+
+    [Fact]
+    public void Should_Fail_When_LegalEntityNameTooLong()
+    {
+        var command = TestDataBuilders.CreateTenant()
+            .WithLegalEntityName(new string('A', 256))
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.LegalEntityName);
+    }
+
+    [Fact]
+    public void Should_Fail_When_PostalAddressEmpty()
+    {
+        var command = TestDataBuilders.CreateTenant()
+            .WithPostalAddress(string.Empty)
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.PostalAddress)
+            .WithErrorMessage("Postal address is required (CAN-SPAM §7704(a)(5)).");
+    }
+
+    [Fact]
+    public void Should_Fail_When_PostalAddressTooLong()
+    {
+        var command = TestDataBuilders.CreateTenant()
+            .WithPostalAddress(new string('A', 1001))
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.PostalAddress);
+    }
 }

@@ -99,6 +99,11 @@ public static class DependencyInjection
         services.AddScoped<TrackingPixelInjector>();
         services.AddScoped<ClickTrackingLinkRewriter>();
 
+        // List-Unsubscribe + CAN-SPAM footer injection
+        services.Configure<ListUnsubscribeSettings>(configuration.GetSection(ListUnsubscribeSettings.SectionName));
+        services.AddSingleton<ListUnsubscribeService>();
+        services.AddSingleton<EmailFooterInjector>();
+
         // MassTransit with RabbitMQ
         if (includeMassTransit && publishOnly)
             services.AddMassTransitPublishOnly();

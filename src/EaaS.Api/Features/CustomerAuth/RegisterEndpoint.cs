@@ -5,13 +5,25 @@ namespace EaaS.Api.Features.CustomerAuth;
 
 public static class RegisterEndpoint
 {
-    public sealed record RegisterRequest(string Name, string Email, string Password, string? CompanyName);
+    public sealed record RegisterRequest(
+        string Name,
+        string Email,
+        string Password,
+        string? CompanyName,
+        string LegalEntityName,
+        string PostalAddress);
 
     public static void Map(RouteGroupBuilder group)
     {
         group.MapPost("/register", async (RegisterRequest request, IMediator mediator) =>
         {
-            var command = new RegisterCommand(request.Name, request.Email, request.Password, request.CompanyName);
+            var command = new RegisterCommand(
+                request.Name,
+                request.Email,
+                request.Password,
+                request.CompanyName,
+                request.LegalEntityName,
+                request.PostalAddress);
             var result = await mediator.Send(command);
             return Results.Created($"/api/v1/tenants/{result.TenantId}", ApiResponse.Ok(result));
         })

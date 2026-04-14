@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SENDNEX_LEGAL_ENTITY, SENDNEX_POSTAL_ADDRESS } from "@/lib/constants/legal";
 
 export const metadata: Metadata = {
   title: "Cookie Policy - SendNex",
@@ -100,6 +101,13 @@ export default function CookiePolicyPage() {
         <li>
           <strong>Email:</strong>{" "}
           <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
+        </li>
+        <li>
+          <strong>Legal entity:</strong> {SENDNEX_LEGAL_ENTITY}
+        </li>
+        <li>
+          <strong>Postal address:</strong>{" "}
+          <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
         </li>
       </ul>
     </>

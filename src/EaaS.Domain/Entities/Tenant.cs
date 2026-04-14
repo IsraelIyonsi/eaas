@@ -9,6 +9,10 @@ public class Tenant
     public TenantStatus Status { get; set; } = TenantStatus.Active;
     public string? ContactEmail { get; set; }
     public string? CompanyName { get; set; }
+    /// <summary>Registered legal entity name (CAN-SPAM §7704(a)(5), GDPR Art 13(1)(a)).</summary>
+    public string? LegalEntityName { get; set; }
+    /// <summary>Physical postal address required in every marketing email footer (CAN-SPAM §7704(a)(5)).</summary>
+    public string? PostalAddress { get; set; }
     public int? MaxApiKeys { get; set; }
     public int? MaxDomainsCount { get; set; }
     public long? MonthlyEmailLimit { get; set; }

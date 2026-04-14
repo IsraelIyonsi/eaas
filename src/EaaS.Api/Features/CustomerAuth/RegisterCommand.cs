@@ -6,4 +6,6 @@ public sealed record RegisterCommand(
     string Name,
     string Email,
     string Password,
-    string? CompanyName) : IRequest<RegisterResult>;
+    string? CompanyName,
+    string LegalEntityName,
+    string PostalAddress) : IRequest<RegisterResult>;

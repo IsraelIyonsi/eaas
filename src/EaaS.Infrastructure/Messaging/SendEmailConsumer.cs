@@ -20,6 +20,8 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
     private readonly ITemplateRenderingService _templateRenderingService;
     private readonly TrackingPixelInjector? _pixelInjector;
     private readonly ClickTrackingLinkRewriter? _linkRewriter;
+    private readonly ListUnsubscribeService? _unsubscribeService;
+    private readonly EmailFooterInjector? _footerInjector;
     private readonly ILogger<SendEmailConsumer> _logger;
 
     public SendEmailConsumer(
@@ -28,7 +30,9 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         ITemplateRenderingService templateRenderingService,
         ILogger<SendEmailConsumer> logger,
         TrackingPixelInjector? pixelInjector = null,
-        ClickTrackingLinkRewriter? linkRewriter = null)
+        ClickTrackingLinkRewriter? linkRewriter = null,
+        ListUnsubscribeService? unsubscribeService = null,
+        EmailFooterInjector? footerInjector = null)
     {
         _dbContext = dbContext;
         _emailDeliveryService = emailDeliveryService;
@@ -36,6 +40,8 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         _logger = logger;
         _pixelInjector = pixelInjector;
         _linkRewriter = linkRewriter;
+        _unsubscribeService = unsubscribeService;
+        _footerInjector = footerInjector;
     }
 
     public async Task Consume(ConsumeContext<SendEmailMessage> context)
@@ -113,6 +119,35 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                 LogClickTrackingApplied(_logger, message.EmailId);
             }
 
+            // 4b. CAN-SPAM §7704(a)(5) footer + RFC 8058 List-Unsubscribe (injected for ALL
+            // emails until we introduce an explicit Category field — safe default).
+            string? mailtoUnsub = null;
+            string? httpsUnsub = null;
+            if (_unsubscribeService is not null && _footerInjector is not null)
+            {
+                var sentAt = DateTime.UtcNow;
+                var primaryRecipient = ExtractPrimaryRecipient(message.To);
+                if (!string.IsNullOrWhiteSpace(primaryRecipient))
+                {
+                    var unsubscribeToken = _unsubscribeService.GenerateToken(message.TenantId, primaryRecipient, sentAt);
+                    mailtoUnsub = _unsubscribeService.MailtoUnsubscribe(unsubscribeToken);
+                    httpsUnsub = _unsubscribeService.HttpsUnsubscribe(unsubscribeToken);
+
+                    var tenant = await _dbContext.Tenants
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(t => t.Id == message.TenantId, context.CancellationToken);
+
+                    var displayName = tenant?.LegalEntityName
+                        ?? tenant?.CompanyName
+                        ?? tenant?.Name
+                        ?? "Sender";
+                    var postalAddress = tenant?.PostalAddress ?? "[Postal address pending]";
+
+                    htmlBody = _footerInjector.InjectHtmlFooter(htmlBody, displayName, postalAddress, httpsUnsub);
+                    textBody = _footerInjector.InjectTextFooter(textBody, displayName, postalAddress, httpsUnsub);
+                }
+            }
+
             // 5. Update status to Sending
             await UpdateEmailStatus(email, EmailStatus.Sending, null, context.CancellationToken);
 
@@ -139,9 +174,12 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
             SendEmailResult result;
 
-            if (attachments.Count > 0)
+            // Whenever we need custom headers (List-Unsubscribe) OR have attachments,
+            // we must use the raw-MIME path — SES SendEmail does not support custom headers.
+            var needsRaw = attachments.Count > 0 || mailtoUnsub is not null;
+
+            if (needsRaw)
             {
-                // 8a. Build MIME message with MimeKit and send raw
                 using var mimeStream = BuildMimeMessage(
                     message.From,
                     message.FromName,
@@ -151,13 +189,15 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                     subject,
                     htmlBody,
                     textBody,
-                    attachments);
+                    attachments,
+                    mailtoUnsub,
+                    httpsUnsub);
 
                 result = await _emailDeliveryService.SendRawEmailAsync(mimeStream, context.CancellationToken);
             }
             else
             {
-                // 8b. Standard simple send
+                // Standard simple send (no headers needed)
                 result = await _emailDeliveryService.SendEmailAsync(
                     message.From,
                     recipients,
@@ -213,10 +253,22 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         string subject,
         string? htmlBody,
         string? textBody,
-        List<AttachmentMetadata> attachments)
+        List<AttachmentMetadata> attachments,
+        string? listUnsubscribeMailto = null,
+        string? listUnsubscribeHttps = null)
     {
         var mimeMessage = new MimeMessage();
         mimeMessage.From.Add(new MailboxAddress(fromName ?? string.Empty, from));
+
+        // RFC 2369 List-Unsubscribe + RFC 8058 One-Click
+        if (listUnsubscribeMailto is not null || listUnsubscribeHttps is not null)
+        {
+            var parts = new List<string>(2);
+            if (listUnsubscribeMailto is not null) parts.Add($"<{listUnsubscribeMailto}>");
+            if (listUnsubscribeHttps is not null) parts.Add($"<{listUnsubscribeHttps}>");
+            mimeMessage.Headers.Add("List-Unsubscribe", string.Join(", ", parts));
+            mimeMessage.Headers.Add("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+        }
 
         foreach (var to in toRecipients)
             mimeMessage.To.Add(MailboxAddress.Parse(to));
@@ -373,4 +425,17 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to clean up temp file {FilePath}")]
     private static partial void LogTempFileCleanupFailed(ILogger logger, Exception ex, string filePath);
+
+    private static string? ExtractPrimaryRecipient(string toJson)
+    {
+        try
+        {
+            var list = JsonSerializer.Deserialize<List<string>>(toJson);
+            return list is { Count: > 0 } ? list[0] : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

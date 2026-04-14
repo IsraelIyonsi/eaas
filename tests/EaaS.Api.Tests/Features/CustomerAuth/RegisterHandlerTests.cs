@@ -24,7 +24,7 @@ public sealed class RegisterHandlerTests
         var dbContext = CreateMockDbContext(tenants, apiKeys);
         var sut = new RegisterHandler(dbContext, _logger);
 
-        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", "Acme Corp");
+        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", "Acme Corp", "Acme Legal Ltd.", "123 Main St, Lagos");
 
         var result = await sut.Handle(command, CancellationToken.None);
 
@@ -52,7 +52,7 @@ public sealed class RegisterHandlerTests
         var dbContext = CreateMockDbContext(tenants, apiKeys);
         var sut = new RegisterHandler(dbContext, _logger);
 
-        var command = new RegisterCommand("Jane Doe", "existing@example.com", "SecurePass1", null);
+        var command = new RegisterCommand("Jane Doe", "existing@example.com", "SecurePass1", null, "Acme Legal Ltd.", "123 Main St, Lagos");
 
         var act = () => sut.Handle(command, CancellationToken.None);
 
@@ -68,7 +68,7 @@ public sealed class RegisterHandlerTests
         var dbContext = CreateMockDbContext(tenants, apiKeys);
         var sut = new RegisterHandler(dbContext, _logger);
 
-        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", null);
+        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", null, "Acme Legal Ltd.", "123 Main St, Lagos");
 
         var result = await sut.Handle(command, CancellationToken.None);
 
@@ -86,7 +86,7 @@ public sealed class RegisterHandlerTests
         var dbContext = CreateMockDbContext(tenants, apiKeys);
         var sut = new RegisterHandler(dbContext, _logger);
 
-        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", null);
+        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", null, "Acme Legal Ltd.", "123 Main St, Lagos");
 
         await sut.Handle(command, CancellationToken.None);
 
@@ -106,7 +106,7 @@ public sealed class RegisterHandlerTests
         var dbContext = CreateMockDbContext(tenants, apiKeys);
         var sut = new RegisterHandler(dbContext, _logger);
 
-        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", "Acme Corp");
+        var command = new RegisterCommand("John Doe", "john@example.com", "SecurePass1", "Acme Corp", "Acme Legal Ltd.", "123 Main St, Lagos");
 
         await sut.Handle(command, CancellationToken.None);
 

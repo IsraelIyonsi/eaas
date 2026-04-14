@@ -7,6 +7,8 @@ public sealed record CreateTenantCommand(
     string Name,
     string? ContactEmail,
     string? CompanyName,
+    string LegalEntityName,
+    string PostalAddress,
     int? MaxApiKeys,
     int? MaxDomainsCount,
     long? MonthlyEmailLimit,

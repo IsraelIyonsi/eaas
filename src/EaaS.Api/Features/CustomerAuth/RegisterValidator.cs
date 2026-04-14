@@ -24,5 +24,13 @@ public sealed class RegisterValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.CompanyName)
             .MaximumLength(200).WithMessage("Company name must not exceed 200 characters.");
+
+        RuleFor(x => x.LegalEntityName)
+            .NotEmpty().WithMessage("Legal entity name is required (CAN-SPAM §7704(a)(5)).")
+            .MaximumLength(255).WithMessage("Legal entity name must not exceed 255 characters.");
+
+        RuleFor(x => x.PostalAddress)
+            .NotEmpty().WithMessage("Postal address is required (CAN-SPAM §7704(a)(5)).")
+            .MaximumLength(1000).WithMessage("Postal address must not exceed 1000 characters.");
     }
 }

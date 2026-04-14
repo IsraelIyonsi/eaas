@@ -12,6 +12,7 @@ using EaaS.Api.Features.Domains;
 using EaaS.Api.Features.Emails;
 using EaaS.Api.Features.Suppressions;
 using EaaS.Api.Features.Templates;
+using EaaS.Api.Features.Unsubscribe;
 using EaaS.Api.Features.Inbound.Emails;
 using EaaS.Api.Features.Inbound.Rules;
 using EaaS.Api.Features.Inbound.Simulate;
@@ -226,6 +227,9 @@ public static class EndpointMappingExtensions
             .WithTags(TagConstants.PaymentWebhooks);
 
         ProcessPaymentWebhookEndpoint.Map(paymentWebhooksGroup);
+
+        // List-Unsubscribe endpoints (CAN-SPAM §7704(a)(4) + RFC 8058) — top-level, anonymous
+        UnsubscribeEndpoint.Map(app);
 
         return app;
     }

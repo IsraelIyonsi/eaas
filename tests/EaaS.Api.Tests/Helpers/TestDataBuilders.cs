@@ -297,6 +297,8 @@ public static class TestDataBuilders
         private string _name = "Test Tenant";
         private string? _contactEmail;
         private string? _companyName;
+        private string _legalEntityName = "Test Legal Ltd.";
+        private string _postalAddress = "123 Test St, Lagos, Nigeria";
         private int? _maxApiKeys;
         private int? _maxDomainsCount;
         private long? _monthlyEmailLimit;
@@ -306,6 +308,8 @@ public static class TestDataBuilders
         public CreateTenantCommandBuilder WithName(string name) { _name = name; return this; }
         public CreateTenantCommandBuilder WithContactEmail(string? email) { _contactEmail = email; return this; }
         public CreateTenantCommandBuilder WithCompanyName(string? name) { _companyName = name; return this; }
+        public CreateTenantCommandBuilder WithLegalEntityName(string name) { _legalEntityName = name; return this; }
+        public CreateTenantCommandBuilder WithPostalAddress(string addr) { _postalAddress = addr; return this; }
         public CreateTenantCommandBuilder WithMaxApiKeys(int? max) { _maxApiKeys = max; return this; }
         public CreateTenantCommandBuilder WithMaxDomainsCount(int? max) { _maxDomainsCount = max; return this; }
         public CreateTenantCommandBuilder WithMonthlyEmailLimit(long? limit) { _monthlyEmailLimit = limit; return this; }
@@ -313,6 +317,7 @@ public static class TestDataBuilders
 
         public CreateTenantCommand Build() => new(
             _adminUserId, _name, _contactEmail, _companyName,
+            _legalEntityName, _postalAddress,
             _maxApiKeys, _maxDomainsCount, _monthlyEmailLimit, _notes);
     }
 

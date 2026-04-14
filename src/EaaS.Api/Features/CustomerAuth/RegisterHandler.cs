@@ -36,6 +36,8 @@ public sealed partial class RegisterHandler : IRequestHandler<RegisterCommand, R
             Name = request.Name,
             ContactEmail = request.Email,
             CompanyName = request.CompanyName,
+            LegalEntityName = request.LegalEntityName,
+            PostalAddress = request.PostalAddress,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Status = TenantStatus.Active,
             MonthlyEmailLimit = 3000,

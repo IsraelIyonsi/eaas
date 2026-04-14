@@ -34,6 +34,14 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnName("company_name")
             .HasMaxLength(255);
 
+        builder.Property(t => t.LegalEntityName)
+            .HasColumnName("legal_entity_name")
+            .HasMaxLength(255);
+
+        builder.Property(t => t.PostalAddress)
+            .HasColumnName("postal_address")
+            .HasColumnType("text");
+
         builder.Property(t => t.MaxApiKeys)
             .HasColumnName("max_api_keys");
 

@@ -27,6 +27,8 @@ public sealed class CreateTenantHandler : IRequestHandler<CreateTenantCommand, T
             Status = TenantStatus.Active,
             ContactEmail = request.ContactEmail,
             CompanyName = request.CompanyName,
+            LegalEntityName = request.LegalEntityName,
+            PostalAddress = request.PostalAddress,
             MaxApiKeys = request.MaxApiKeys,
             MaxDomainsCount = request.MaxDomainsCount,
             MonthlyEmailLimit = request.MonthlyEmailLimit,

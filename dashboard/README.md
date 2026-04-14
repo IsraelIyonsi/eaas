@@ -1,5 +1,20 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## IMPORTANT: Legal compliance env vars (required before production)
+
+The legal pages (Privacy, Terms, Cookies) display the registered legal entity
+name and the physical postal address required by **CAN-SPAM Act §7704(a)(5)**
+and **GDPR Art 13(1)(a)**. Both come from public env vars — defaults are
+placeholders and **must not ship to production**:
+
+- `NEXT_PUBLIC_SENDNEX_LEGAL_ENTITY` — e.g. `"SendNex Ltd."`
+- `NEXT_PUBLIC_SENDNEX_POSTAL_ADDRESS` — multi-line accepted, e.g. `"42 Marina Rd\nLagos, Nigeria"`
+
+If these are not set, pages will render `"SendNex Ltd., [ADDRESS REQUIRED]"`
+and `"[Postal address pending registration]"` — which is intentionally obvious
+so ops notices before launch.
+
+
 ## Getting Started
 
 First, run the development server:
