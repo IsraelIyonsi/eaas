@@ -23,15 +23,19 @@ public sealed partial class ClickTrackingHandler
 
     public async Task<IResult> HandleAsync(string token, HttpContext httpContext, CancellationToken cancellationToken)
     {
+        // Security: clicks must only redirect to URLs we embedded at send time.
+        // The destination is NEVER taken from the request (query/body/HMAC payload) —
+        // only from the TrackingLink row stored when the outgoing email was rewritten.
+        // This eliminates open-redirect even if signing keys are ever compromised.
+        if (string.IsNullOrWhiteSpace(token))
+            return Results.NotFound();
+
         var trackingLink = await _dbContext.TrackingLinks
             .FirstOrDefaultAsync(t => t.Token == token, cancellationToken);
 
         if (trackingLink is null)
         {
-            var data = _tokenService.ValidateToken(token);
-            if (data is not null && data.EventType == "click" && !string.IsNullOrWhiteSpace(data.OriginalUrl))
-                return Results.Redirect(data.OriginalUrl);
-
+            LogUnknownToken(_logger, Truncate(token));
             return Results.NotFound();
         }
 
@@ -74,4 +78,10 @@ public sealed partial class ClickTrackingHandler
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Click tracking event failed to persist for EmailId={EmailId}")]
     private static partial void LogClickTrackingFailed(ILogger logger, Guid emailId, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Click tracking token not found in store: {TokenPrefix}")]
+    private static partial void LogUnknownToken(ILogger logger, string tokenPrefix);
+
+    private static string Truncate(string value) =>
+        value.Length <= 8 ? value : value[..8] + "...";
 }

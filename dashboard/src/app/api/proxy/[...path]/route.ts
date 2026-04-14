@@ -1,5 +1,33 @@
+import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession, getSessionData } from "@/lib/auth/session";
+
+/**
+ * Builds a short-lived HMAC-signed proxy token bound to the admin user id AND
+ * the exact outbound request (method + path). A captured token therefore
+ * cannot be replayed against a different endpoint — it can only re-run the
+ * same operation, and only within the 60s freshness window.
+ *
+ * Format: base64url(timestampUnix).hex(hmac-sha256(DOMAIN + method + path + userId + "." + timestamp))
+ * Domain prefix ("eaas.proxy.v1\n") separates this HMAC namespace from the
+ * session cookie HMAC namespace ("eaas.cookie.v1\n") even though both use
+ * SESSION_SECRET.
+ */
+const PROXY_TOKEN_HMAC_DOMAIN = "eaas.proxy.v1\n";
+
+function signAdminProxyToken(userId: string, method: string, path: string): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error("SESSION_SECRET is required to sign admin proxy tokens.");
+  }
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const encodedTs = Buffer.from(timestamp, "utf-8").toString("base64url");
+  const hmac = crypto.createHmac("sha256", secret);
+  hmac.update(
+    `${PROXY_TOKEN_HMAC_DOMAIN}${method.toUpperCase()}\n${path}\n${userId}.${timestamp}`,
+  );
+  return `${encodedTs}.${hmac.digest("hex")}`;
+}
 
 // Internal URL for server-side calls (container-to-container in Docker)
 const API_INTERNAL_URL =
@@ -56,11 +84,20 @@ async function proxyRequest(
 
   headers["Authorization"] = `Bearer ${API_KEY}`;
 
-  // For admin routes, forward session data as trusted headers
+  // For admin routes, forward session data plus a short-lived signed proxy token.
+  // The API verifies the HMAC signature against SESSION_SECRET before trusting the user id.
   if (apiPath.startsWith("/api/v1/admin/")) {
     headers["X-Admin-User-Id"] = session.userId;
     headers["X-Admin-Email"] = session.email;
     headers["X-Admin-Role"] = session.role;
+    // Bind token to the exact method+path of the outbound request.
+    // Query string is NOT signed — admin endpoints must not rely on query
+    // parameters for authorization-affecting state.
+    headers["X-Admin-Proxy-Token"] = signAdminProxyToken(
+      session.userId,
+      request.method,
+      apiPath,
+    );
   }
 
   // For tenant sessions, tell the API which tenant to act as.

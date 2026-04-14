@@ -6,6 +6,7 @@ using EaaS.Api.Constants;
 using EaaS.Api.Middleware;
 using EaaS.Domain.Interfaces;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Infrastructure.Services;
 using FluentValidation;
@@ -45,11 +46,49 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssemblyContaining<Program>();
 
         // Authentication
+        // Bind AdminSession options from "Authentication:AdminSession" configuration
+        // section so RequireProxyToken / EnforceAfter / SessionSecret are all driven
+        // by config. The legacy "AdminSession:SessionSecret" key is still honoured
+        // as a fallback so existing deployments keep working during rollout.
+        var adminSessionSection = configuration.GetSection("Authentication:AdminSession");
+        services.Configure<AdminSessionAuthSchemeOptions>(adminSessionSection);
+
         services.AddAuthentication(ApiKeyAuthHandler.SchemeName)
             .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeyAuthHandler.SchemeName, null)
             .AddScheme<AdminSessionAuthSchemeOptions, AdminSessionAuthHandler>(AdminSessionAuthHandler.SchemeName, options =>
             {
-                options.SessionSecret = configuration["AdminSession:SessionSecret"] ?? string.Empty;
+                // Config binding above feeds the named options; here we only apply
+                // fallbacks and the fail-fast secret-strength guard.
+                if (string.IsNullOrEmpty(options.SessionSecret))
+                {
+                    options.SessionSecret =
+                        adminSessionSection["SessionSecret"]
+                        ?? configuration["AdminSession:SessionSecret"]
+                        ?? string.Empty;
+                }
+
+                // RequireProxyToken defaults to true (secure by default). If the
+                // config section exists but omits the key, keep the secure default.
+                var requireProxyTokenRaw = adminSessionSection["RequireProxyToken"];
+                if (!string.IsNullOrEmpty(requireProxyTokenRaw)
+                    && bool.TryParse(requireProxyTokenRaw, out var requireProxyToken))
+                {
+                    options.RequireProxyToken = requireProxyToken;
+                }
+
+                // Startup fail-fast: if the signed-token contract is on, the secret
+                // MUST exist and be long enough for a meaningful HMAC-SHA256 key.
+                // 32 bytes (256 bits) is the minimum we accept.
+                if (options.RequireProxyToken)
+                {
+                    var secretBytes = System.Text.Encoding.UTF8.GetByteCount(options.SessionSecret);
+                    if (secretBytes < 32)
+                    {
+                        throw new InvalidOperationException(
+                            "Authentication:AdminSession:SessionSecret must be configured with at least 32 bytes "
+                            + "when RequireProxyToken=true. Set a strong secret via configuration/secret store.");
+                    }
+                }
             });
 
         services.AddAuthorization(options =>
@@ -96,9 +135,12 @@ public static class ServiceCollectionExtensions
             };
         });
 
-        // HTTP clients
-        services.AddHttpClient(HttpClientNameConstants.WebhookTest);
-        services.AddHttpClient(HttpClientNameConstants.WebhookDispatch);
+        // HTTP clients — wired with SSRF-guarded handler (Finding C3) that pins to
+        // the resolved public IP at connect time to prevent DNS rebinding.
+        services.AddHttpClient(HttpClientNameConstants.WebhookTest)
+            .ConfigurePrimaryHttpMessageHandler(SsrfGuard.CreateGuardedHandler);
+        services.AddHttpClient(HttpClientNameConstants.WebhookDispatch)
+            .ConfigurePrimaryHttpMessageHandler(SsrfGuard.CreateGuardedHandler);
 
         // Exception handling
         services.AddExceptionHandler<GlobalExceptionHandler>();

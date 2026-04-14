@@ -39,6 +39,10 @@ public sealed class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
             .HasColumnName("status")
             .HasDefaultValue(WebhookStatus.Active);
 
+        builder.Property(w => w.ConsecutiveFailures)
+            .HasColumnName("consecutive_failures")
+            .HasDefaultValue(0);
+
         builder.Property(w => w.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("NOW()");

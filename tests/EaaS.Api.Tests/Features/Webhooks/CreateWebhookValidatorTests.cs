@@ -87,6 +87,23 @@ public sealed class CreateWebhookValidatorTests
             .WithErrorMessage("Events must be one of: queued, sent, delivered, bounced, complained, opened, clicked, failed.");
     }
 
+    [Theory]
+    [InlineData("https://169.254.169.254/latest/meta-data/")] // AWS IMDS
+    [InlineData("https://10.0.0.1/hook")]                     // RFC1918
+    [InlineData("https://192.168.1.1/hook")]                  // RFC1918
+    [InlineData("https://127.0.0.1/hook")]                    // loopback
+    [InlineData("https://localhost/hook")]                    // blocked hostname
+    [InlineData("https://foo.internal/hook")]                 // blocked suffix
+    [InlineData("https://[fd00:ec2::254]/meta")]              // AWS IMDS v6 / ULA
+    public void Should_Fail_When_UrlTargetsSsrfRange(string url)
+    {
+        var command = TestDataBuilders.CreateWebhook().WithUrl(url).Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Url);
+    }
+
     [Fact]
     public void Should_Pass_When_AllValidEventTypes()
     {

@@ -12,11 +12,18 @@ function getSessionSecret(): string {
   return secret;
 }
 
+// Domain-separation prefix: prevents an HMAC produced for a session cookie
+// from ever colliding with HMACs produced for proxy tokens (or any future
+// signed artefact) even though they share SESSION_SECRET.
+// BREAKING CHANGE: existing cookies will fail verification and users will
+// need to re-login on deploy.
+const COOKIE_HMAC_DOMAIN = "eaas.cookie.v1\n";
+
 export function signSession(payload: SessionData): string {
   const encoded = Buffer.from(JSON.stringify(payload))
     .toString("base64url");
   const hmac = crypto.createHmac("sha256", getSessionSecret());
-  hmac.update(encoded);
+  hmac.update(COOKIE_HMAC_DOMAIN + encoded);
   return `${encoded}.${hmac.digest("hex")}`;
 }
 
@@ -25,7 +32,7 @@ export function verifySession(token: string): boolean {
   if (parts.length !== 2) return false;
   const [encoded, signature] = parts;
   const hmac = crypto.createHmac("sha256", getSessionSecret());
-  hmac.update(encoded);
+  hmac.update(COOKIE_HMAC_DOMAIN + encoded);
   const expected = hmac.digest("hex");
   if (signature.length !== expected.length) return false;
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));

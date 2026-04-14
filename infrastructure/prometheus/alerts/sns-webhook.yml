@@ -1,0 +1,62 @@
+# SNS webhook signature-verification alert rules.
+#
+# Source counters (see src/EaaS.WebhookProcessor/Handlers/SnsMetrics.cs):
+#   - sns_signature_verifications_total{result=success|rejected|disabled}
+#   - sns_signature_rejections_total{reason=signature_mismatch|bad_cert_url|cert_fetch_failed|...}
+#   - sns_cert_fetch_failures_total{reason=http_error|parse_error|other}
+#
+# Runbook: docs/runbooks/sns-signature-verification.md
+groups:
+  - name: eaas-sns-webhook
+    rules:
+      # Kill switch intentionally flipped (SignatureVerificationEnabled=false). Operator-controlled
+      # but loud: we never want to silently ship unverified payloads. Pages immediately — the whole
+      # point of the kill switch is that an on-call human stays in the loop.
+      - alert: SnsSignatureVerificationDisabled
+        expr: sum(rate(sns_signature_verifications_total{result="disabled"}[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SNS signature verification kill switch is ON"
+          description: "Unverified SNS payloads are being accepted (kill switch flipped). If this was not an intentional incident bypass, revert Sns:SignatureVerificationEnabled=true immediately."
+          runbook: "docs/runbooks/sns-signature-verification.md#kill-switch"
+
+      # Cert-fetch errors exceeding a trickle indicate AWS outage, DNS trouble, or a new cert URL
+      # we can't parse. >0.1/s sustained means the negative cache is churning and real traffic is
+      # being rejected with reason=cert_fetch_failed.
+      - alert: SnsCertFetchFailures
+        expr: sum(rate(sns_cert_fetch_failures_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: "SNS signing-cert fetch failures elevated"
+          description: "Cert fetch error rate is {{ $value | printf \"%.3f\" }}/s over 5m. Check AWS SNS status, DNS, and the SignatureVerificationDisabled runbook as a last resort."
+          runbook: "docs/runbooks/sns-signature-verification.md#cert-fetch-failures"
+
+      # A real mismatch spike is either an in-flight attack (spoofed payloads) or a cert rotation
+      # we missed. AWS normally rotates by URL (naturally cache-compatible); a same-URL rotation is
+      # rare but would transiently spike this metric.
+      - alert: SnsSignatureMismatchSpike
+        expr: sum(rate(sns_signature_rejections_total{reason="signature_mismatch"}[5m])) > 1
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "SNS signature mismatches spiking (possible attack or missed cert rotation)"
+          description: "Signature-mismatch reject rate is {{ $value | printf \"%.2f\" }}/s. Investigate SigningCertURL cache, and correlate with AWS SNS cert-rotation notices."
+          runbook: "docs/runbooks/sns-signature-verification.md#signature-mismatch"
+
+      # Silent-failure canary: if verifications stop being reported altogether (handler crashed,
+      # metric dropped, meter export broken), absent_over_time fires at 15m. This is the backstop
+      # that catches outages the other alerts can't see (because they depend on the counter existing).
+      - alert: SnsVerificationDroppedToZero
+        expr: absent_over_time(sns_signature_verifications_total[15m]) == 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SNS signature verifications not reporting — silent failure suspected"
+          description: "No sns_signature_verifications_total samples in 15m. Webhook processor may be crashed, the Prometheus scrape broken, or the meter export wedged."
+          runbook: "docs/runbooks/sns-signature-verification.md#silent-failure"

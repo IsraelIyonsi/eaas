@@ -49,6 +49,18 @@ public sealed partial class ClickTrackingLinkRewriter
                 continue;
             }
 
+            // Scheme allowlist: only http(s) absolute URLs may be persisted and rewritten.
+            // Anything else (javascript:, data:, file:, vbscript:, relative, malformed) is
+            // left untouched so it cannot be laundered through our click endpoint.
+            if (!Uri.TryCreate(href, UriKind.Absolute, out var parsedUri)
+                || !(string.Equals(parsedUri.Scheme, "http", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(parsedUri.Scheme, "https", StringComparison.OrdinalIgnoreCase)))
+            {
+                var scheme = parsedUri?.Scheme ?? "(unparseable)";
+                LogDisallowedScheme(_logger, scheme, emailId);
+                continue;
+            }
+
             // Generate a short random token for the lookup table
             var token = GenerateShortToken();
 
@@ -88,4 +100,7 @@ public sealed partial class ClickTrackingLinkRewriter
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Rewrote {Count} links for click tracking on EmailId={EmailId}")]
     private static partial void LogLinksRewritten(ILogger logger, int count, Guid emailId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Skipped link rewrite for disallowed scheme '{Scheme}' on EmailId={EmailId}")]
+    private static partial void LogDisallowedScheme(ILogger logger, string scheme, Guid emailId);
 }

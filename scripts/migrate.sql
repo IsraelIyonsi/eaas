@@ -209,9 +209,12 @@ CREATE TABLE IF NOT EXISTS webhooks (
     events          TEXT[] NOT NULL,
     secret          VARCHAR(255),
     status          VARCHAR(20) NOT NULL DEFAULT 'active',
+    consecutive_failures INT NOT NULL DEFAULT 0,
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE webhooks ADD COLUMN IF NOT EXISTS consecutive_failures INT NOT NULL DEFAULT 0;
 
 CREATE INDEX IF NOT EXISTS idx_webhooks_tenant ON webhooks(tenant_id);
 

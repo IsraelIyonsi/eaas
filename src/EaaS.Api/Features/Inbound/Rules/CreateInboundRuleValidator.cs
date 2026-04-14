@@ -1,4 +1,5 @@
 using EaaS.Domain.Enums;
+using EaaS.Shared.Utilities;
 using FluentValidation;
 
 namespace EaaS.Api.Features.Inbound.Rules;
@@ -25,6 +26,8 @@ public sealed class CreateInboundRuleValidator : AbstractValidator<CreateInbound
             .NotEmpty().WithMessage("WebhookUrl is required when Action is Webhook.")
             .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
             .WithMessage("WebhookUrl must be a valid absolute URL.")
+            .Must(url => SsrfGuard.IsSyntacticallySafe(url, out _))
+            .WithMessage("WebhookUrl must be HTTPS and must not point to a private, loopback, metadata, or reserved address.")
             .When(x => x.Action == InboundRuleAction.Webhook);
 
         RuleFor(x => x.ForwardTo)

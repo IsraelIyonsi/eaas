@@ -5,6 +5,7 @@ public static class HttpHeaderConstants
     public const string AdminUserId = "X-Admin-User-Id";
     public const string AdminEmail = "X-Admin-Email";
     public const string AdminRole = "X-Admin-Role";
+    public const string AdminProxyToken = "X-Admin-Proxy-Token";
     public const string TenantId = "X-Tenant-Id";
     public const string CorrelationId = "X-Correlation-Id";
     public const string RateLimitLimit = "X-RateLimit-Limit";

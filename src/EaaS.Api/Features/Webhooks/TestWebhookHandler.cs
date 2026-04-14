@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,15 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new NotFoundException($"Webhook with id '{request.Id}' not found.");
 
+        // Defence in depth against Finding C3: re-validate persisted URL before
+        // issuing the test request.
+        if (!SsrfGuard.IsSyntacticallySafe(webhook.Url, out var ssrfReason))
+        {
+            SsrfGuard.RecordSsrfRejection("syntactic");
+            return new TestWebhookResult(false, 0,
+                "We could not reach this URL because it resolves to a restricted or private network.");
+        }
+
         var testPayload = new
         {
             @event = "test",
@@ -48,8 +58,28 @@ public sealed class TestWebhookHandler : IRequestHandler<TestWebhookCommand, Tes
             var client = _httpClientFactory.CreateClient(HttpClientNameConstants.WebhookTest);
             client.Timeout = TimeSpan.FromSeconds(WebhookConstants.TestTimeoutSeconds);
 
-            var response = await client.PostAsync(webhook.Url, content, cancellationToken);
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, webhook.Url) { Content = content };
+            using var response = await client.SendAsync(
+                requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+
+            // Drain up to 64 KB of the body with truncation (customer may legitimately return
+            // a larger response, but we only need the prefix for diagnostics).
+            _ = await SsrfGuard.ReadBoundedStringAsync(
+                response, truncate: true, cancellationToken: cancellationToken);
+
             return new TestWebhookResult(response.IsSuccessStatusCode, (int)response.StatusCode, null);
+        }
+        catch (HttpRequestException ex) when (
+            ex.Message.Contains("blocked range", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("did not resolve", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("SSRF", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("refused by SSRF", StringComparison.OrdinalIgnoreCase))
+        {
+            // Map guard-level refusals to a customer-friendly message. Do NOT leak the raw
+            // reason (which includes the resolved IP — a minor info disclosure).
+            SsrfGuard.RecordSsrfRejection("connect_guard");
+            return new TestWebhookResult(false, 0,
+                "We could not reach this URL because it resolves to a restricted or private network.");
         }
         catch (Exception ex)
         {

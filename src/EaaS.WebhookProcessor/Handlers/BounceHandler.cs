@@ -12,7 +12,13 @@ using Microsoft.Extensions.Logging;
 
 namespace EaaS.WebhookProcessor.Handlers;
 
-public sealed partial class BounceHandler
+/// <summary>Handler abstraction so <see cref="SnsMessageHandler"/> is testable via NSubstitute.</summary>
+public interface IBounceHandler
+{
+    Task HandleAsync(SesNotification notification, CancellationToken cancellationToken);
+}
+
+public sealed partial class BounceHandler : IBounceHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly RecipientSuppressor _suppressor;

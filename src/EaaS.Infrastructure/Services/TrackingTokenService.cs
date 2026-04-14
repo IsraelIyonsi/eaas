@@ -19,9 +19,9 @@ public sealed partial class TrackingTokenService : ITrackingTokenService
         _logger = logger;
     }
 
-    public string GenerateToken(Guid emailId, string eventType, string? originalUrl = null)
+    public string GenerateToken(Guid emailId, string eventType)
     {
-        var payload = new TrackingTokenPayload(emailId, eventType, originalUrl);
+        var payload = new TrackingTokenPayload(emailId, eventType);
         var payloadJson = JsonSerializer.Serialize(payload);
         var payloadBytes = Encoding.UTF8.GetBytes(payloadJson);
 
@@ -76,7 +76,7 @@ public sealed partial class TrackingTokenService : ITrackingTokenService
             if (payload is null)
                 return null;
 
-            return new TrackingTokenData(payload.EmailId, payload.EventType, payload.OriginalUrl);
+            return new TrackingTokenData(payload.EmailId, payload.EventType);
         }
         catch (Exception ex)
         {
@@ -91,7 +91,7 @@ public sealed partial class TrackingTokenService : ITrackingTokenService
         return hmac.ComputeHash(data);
     }
 
-    private sealed record TrackingTokenPayload(Guid EmailId, string EventType, string? OriginalUrl);
+    private sealed record TrackingTokenPayload(Guid EmailId, string EventType);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Tracking token has invalid HMAC signature")]
     private static partial void LogInvalidSignature(ILogger logger);

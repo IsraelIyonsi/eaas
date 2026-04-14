@@ -6,6 +6,7 @@ using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
+using EaaS.Shared.Utilities;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -33,8 +34,9 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         var message = context.Message;
         LogDispatchStarted(_logger, message.EventType, message.TenantId);
 
+        // NOTE: tracked query — we update ConsecutiveFailures / Status on each dispatch
+        // so we can auto-disable after repeated failures (C3 rev-2).
         var webhooks = await _dbContext.Webhooks
-            .AsNoTracking()
             .Where(w => w.TenantId == message.TenantId
                         && w.Status == EaaS.Domain.Enums.WebhookStatus.Active
                         && w.Events.Contains(message.EventType))
@@ -80,13 +82,33 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
 
         try
         {
+            // Defence in depth against Finding C3: re-validate persisted URL before
+            // dispatch in case a row was created before the validator was added.
+            if (!SsrfGuard.IsSyntacticallySafe(webhook.Url, out var ssrfReason))
+            {
+                errorMessage = $"Webhook URL rejected by SSRF guard: {ssrfReason}";
+                LogDeliveryException(_logger, webhook.Id, new InvalidOperationException(errorMessage));
+                EmailMetrics.WebhookDispatched.WithLabels("failed").Inc();
+                SsrfGuard.RecordSsrfRejection("syntactic");
+                await PersistDeliveryLog(webhook, message, 0, false, errorMessage, cancellationToken);
+                return;
+            }
+
             var client = _httpClientFactory.CreateClient("WebhookDispatch");
             client.Timeout = TimeSpan.FromSeconds(WebhookConstants.DispatchTimeoutSeconds);
 
+            // Manually follow redirects so legitimate customer apex→www redirects succeed,
+            // but each Location is re-validated by SsrfGuard (cap 3 hops).
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, webhook.Url) { Content = content };
             var sw = Stopwatch.StartNew();
-            var response = await client.PostAsync(webhook.Url, content, cancellationToken);
+            using var response = await SsrfGuard.SendWithSafeRedirectsAsync(client, requestMessage, cancellationToken);
             sw.Stop();
             EmailMetrics.WebhookDispatchDuration.WithLabels(message.TenantId.ToString()).Observe(sw.Elapsed.TotalSeconds);
+
+            // Drain up to 64 KB of the body (truncated). Customer endpoints may legitimately
+            // return a larger response but we only log a prefix for diagnostics (C3 rev-3).
+            _ = await SsrfGuard.ReadBoundedStringAsync(
+                response, truncate: true, cancellationToken: cancellationToken);
 
             statusCode = (int)response.StatusCode;
             success = response.IsSuccessStatusCode;
@@ -103,13 +125,55 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
                 LogDeliverySuccess(_logger, webhook.Id, message.EventType);
             }
         }
+        catch (HttpRequestException ex) when (
+            ex.Message.Contains("blocked range", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("did not resolve", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("SSRF", StringComparison.OrdinalIgnoreCase) ||
+            ex.Message.Contains("refused by SSRF", StringComparison.OrdinalIgnoreCase))
+        {
+            // ConnectCallback / redirect re-validation refused the destination. Record the
+            // rejection metric and surface a generic error to avoid leaking resolved IPs.
+            SsrfGuard.RecordSsrfRejection("connect_guard");
+            errorMessage = "Destination refused by SSRF guard (private/restricted IP).";
+            LogDeliveryException(_logger, webhook.Id, ex);
+        }
         catch (Exception ex)
         {
             errorMessage = ex.Message;
             LogDeliveryException(_logger, webhook.Id, ex);
         }
 
-        // Log delivery result
+        // Update consecutive-failure counter and auto-disable at threshold.
+        if (success)
+        {
+            webhook.ConsecutiveFailures = 0;
+        }
+        else
+        {
+            webhook.ConsecutiveFailures++;
+            if (webhook.ConsecutiveFailures >= WebhookConstants.AutoDisableThreshold
+                && webhook.Status == EaaS.Domain.Enums.WebhookStatus.Active)
+            {
+                webhook.Status = EaaS.Domain.Enums.WebhookStatus.Disabled;
+                webhook.UpdatedAt = DateTime.UtcNow;
+                LogWebhookAutoDisabled(_logger, webhook.Id, webhook.ConsecutiveFailures);
+            }
+        }
+
+        await PersistDeliveryLog(webhook, message, statusCode, success, errorMessage, cancellationToken);
+
+        if (!success)
+            throw new InvalidOperationException($"Webhook delivery to {webhook.Url} failed: {errorMessage}");
+    }
+
+    private async Task PersistDeliveryLog(
+        Webhook webhook,
+        WebhookDispatchMessage message,
+        int statusCode,
+        bool success,
+        string? errorMessage,
+        CancellationToken cancellationToken)
+    {
         _dbContext.WebhookDeliveryLogs.Add(new WebhookDeliveryLog
         {
             Id = Guid.NewGuid(),
@@ -124,9 +188,6 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-
-        if (!success)
-            throw new InvalidOperationException($"Webhook delivery to {webhook.Url} failed: {errorMessage}");
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Dispatching webhook event {EventType} for tenant {TenantId}")]
@@ -143,4 +204,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Webhook {WebhookId} delivery threw an exception")]
     private static partial void LogDeliveryException(ILogger logger, Guid webhookId, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Webhook {WebhookId} auto-disabled after {ConsecutiveFailures} consecutive delivery failures")]
+    private static partial void LogWebhookAutoDisabled(ILogger logger, Guid webhookId, int consecutiveFailures);
 }

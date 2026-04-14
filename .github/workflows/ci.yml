@@ -146,6 +146,9 @@ jobs:
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
+      - name: Verify production config guards
+        run: bash scripts/verify-prod-config.sh
+
       - name: Run tests with coverage
         run: |
           dotnet test \

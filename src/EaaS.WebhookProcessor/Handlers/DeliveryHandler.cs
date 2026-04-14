@@ -10,7 +10,12 @@ using Microsoft.Extensions.Logging;
 
 namespace EaaS.WebhookProcessor.Handlers;
 
-public sealed partial class DeliveryHandler
+public interface IDeliveryHandler
+{
+    Task HandleAsync(SesNotification notification, CancellationToken cancellationToken);
+}
+
+public sealed partial class DeliveryHandler : IDeliveryHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly IPublishEndpoint _publishEndpoint;

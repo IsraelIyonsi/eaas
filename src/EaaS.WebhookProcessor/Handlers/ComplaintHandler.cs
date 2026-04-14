@@ -12,7 +12,12 @@ using Microsoft.Extensions.Logging;
 
 namespace EaaS.WebhookProcessor.Handlers;
 
-public sealed partial class ComplaintHandler
+public interface IComplaintHandler
+{
+    Task HandleAsync(SesNotification notification, CancellationToken cancellationToken);
+}
+
+public sealed partial class ComplaintHandler : IComplaintHandler
 {
     private readonly AppDbContext _dbContext;
     private readonly RecipientSuppressor _suppressor;

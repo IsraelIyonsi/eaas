@@ -2,6 +2,7 @@ using EaaS.Api.Commands;
 using EaaS.Api.Extensions;
 using EaaS.Infrastructure;
 using EaaS.Infrastructure.Payments;
+using EaaS.Shared.Utilities;
 using Serilog;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Grafana.Loki;

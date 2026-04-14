@@ -4,6 +4,7 @@ using EaaS.Domain.Interfaces;
 using EaaS.Infrastructure;
 using EaaS.Infrastructure.Configuration;
 using EaaS.Infrastructure.Services;
+using EaaS.Shared.Utilities;
 using EaaS.Worker.Jobs;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -38,6 +39,10 @@ try
         // Infrastructure services (DbContext, Redis, MassTransit consumers)
         services.AddInfrastructure(context.Configuration);
 
+        // SSRF guard (C3 rev-4): ops-tunable kill-switch + CIDR/host allowlists.
+        services.Configure<SsrfGuardOptions>(context.Configuration.GetSection(SsrfGuardOptions.SectionName));
+        services.AddSingleton<SsrfGuardService>();
+
         // Email delivery: SMTP (Mailpit) for local dev, SES for production
         services.AddEmailProvider(context.Configuration);
 
@@ -47,8 +52,10 @@ try
         // Template rendering
         services.AddSingleton<ITemplateRenderingService, TemplateRenderingService>();
 
-        // HTTP client for webhook dispatch
-        services.AddHttpClient("WebhookDispatch");
+        // HTTP client for webhook dispatch — SSRF-guarded handler pins to
+        // validated public IP at connect time (Finding C3, prevents DNS rebinding).
+        services.AddHttpClient("WebhookDispatch")
+            .ConfigurePrimaryHttpMessageHandler(SsrfGuard.CreateGuardedHandler);
 
         // Scheduled email background job
         services.AddHostedService<ScheduledEmailJob>();
