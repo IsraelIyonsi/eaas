@@ -1,0 +1,84 @@
+name: SNS Verify (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Verify nginx proxy + SNS subscriptions + SES event destinations
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: SSH + run verification probes
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 4m
+          script: |
+            set -e
+            echo "=== 1. Local curl POST to http://localhost/hooks/sns ==="
+            curl -sS -o /tmp/curl_local.out -w "HTTP:%{http_code} SIZE:%{size_download} TIME:%{time_total}\n" \
+              -X POST http://localhost/hooks/sns \
+              -H "Content-Type: text/plain" \
+              -H "x-amz-sns-message-type: Notification" \
+              --data '{"Type":"Notification","MessageId":"sns-verify-probe","TopicArn":"arn:aws:sns:local:test","Message":"probe"}' \
+              --max-time 15 || echo "curl localhost FAILED"
+            echo "--- body (first 400 chars) ---"
+            head -c 400 /tmp/curl_local.out || true
+            echo ""
+            echo ""
+            echo "=== 2. Public curl POST to https://sendnex.xyz/hooks/sns ==="
+            curl -sS -o /tmp/curl_public.out -w "HTTP:%{http_code} SIZE:%{size_download} TIME:%{time_total}\n" \
+              -X POST https://sendnex.xyz/hooks/sns \
+              -H "Content-Type: text/plain" \
+              -H "x-amz-sns-message-type: Notification" \
+              --data '{"Type":"Notification","MessageId":"sns-verify-probe-public","TopicArn":"arn:aws:sns:public:test","Message":"probe"}' \
+              --max-time 15 || echo "curl public FAILED"
+            echo "--- body (first 400 chars) ---"
+            head -c 400 /tmp/curl_public.out || true
+            echo ""
+            echo ""
+            echo "=== 3. webhook-processor logs for those probes (last 30s) ==="
+            docker logs --since 30s eaas-webhook-processor 2>&1 | grep -iE "(sns-verify-probe|hooks|sns)" | tail -40 || true
+            echo ""
+            echo "=== 4. nginx access log for those probes (last 30s) ==="
+            docker logs --since 30s eaas-nginx 2>&1 | grep -iE "(hooks|sns-verify)" | tail -40 || true
+            echo ""
+            echo "=== 5. AWS CLI: list SNS topics ==="
+            AWS_KEY=$(grep ^AWS_ACCESS_KEY_ID /opt/eaas/.env | cut -d= -f2-)
+            AWS_SECRET=$(grep ^AWS_SECRET_ACCESS_KEY /opt/eaas/.env | cut -d= -f2-)
+            AWS_REG=$(grep ^AWS_REGION /opt/eaas/.env | cut -d= -f2-)
+            AWS_REG="${AWS_REG:-eu-west-1}"
+            AWSCLI() {
+              docker run --rm \
+                -e AWS_ACCESS_KEY_ID="$AWS_KEY" \
+                -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET" \
+                -e AWS_DEFAULT_REGION="$AWS_REG" \
+                amazon/aws-cli "$@"
+            }
+            TOPICS_JSON=$(AWSCLI sns list-topics 2>&1 || echo '{"Topics":[]}')
+            echo "$TOPICS_JSON"
+            echo ""
+            echo "=== 6. Subscriptions per topic ==="
+            TOPIC_ARNS=$(echo "$TOPICS_JSON" | grep -oE 'arn:aws:sns:[^"]+' || true)
+            for ARN in $TOPIC_ARNS; do
+              echo "--- TOPIC: $ARN ---"
+              AWSCLI sns list-subscriptions-by-topic --topic-arn "$ARN" 2>&1 || true
+              echo ""
+            done
+            echo ""
+            echo "=== 7. SES configuration sets ==="
+            AWSCLI ses list-configuration-sets 2>&1 || true
+            echo ""
+            echo "=== 8. SES sendnex-production event destinations ==="
+            AWSCLI ses describe-configuration-set \
+              --configuration-set-name sendnex-production \
+              --configuration-set-attribute-names eventDestinations 2>&1 || true
+            echo ""
+            echo "=== 9. SESv2 fallback (in case v1 has no event destinations API) ==="
+            AWSCLI sesv2 get-configuration-set-event-destinations \
+              --configuration-set-name sendnex-production 2>&1 || true
+            echo ""
+            echo "=== done ==="
