@@ -19,6 +19,12 @@ RUN dotnet publish src/EaaS.Api/EaaS.Api.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
 WORKDIR /app
 
+# krb5-libs provides libgssapi_krb5.so.2, which Npgsql dlopen's at startup
+# for optional Kerberos/GSSAPI auth. Missing it is harmless (Npgsql falls back
+# to password auth) but produces a noisy "No such file or directory" log line
+# on every container boot. Installing it silences the log cleanly.
+RUN apk add --no-cache krb5-libs
+
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
