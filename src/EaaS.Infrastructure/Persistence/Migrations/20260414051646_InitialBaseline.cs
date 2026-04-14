@@ -1,0 +1,964 @@
+﻿using System;
+using EaaS.Domain.Enums;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace EaaS.Infrastructure.Persistence.Migrations
+{
+    /// <inheritdoc />
+    public partial class InitialBaseline : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:admin_role", "super_admin,admin,read_only")
+                .Annotation("Npgsql:Enum:api_key_status", "active,revoked,rotating")
+                .Annotation("Npgsql:Enum:audit_action", "tenant_created,tenant_updated,tenant_suspended,tenant_activated,tenant_deactivated,admin_user_created,admin_user_updated,admin_user_deleted,admin_login,admin_login_failed,settings_updated")
+                .Annotation("Npgsql:Enum:dns_record_purpose", "spf,dkim,dmarc")
+                .Annotation("Npgsql:Enum:dns_record_type", "txt,cname,mx")
+                .Annotation("Npgsql:Enum:domain_status", "pending_verification,verified,failed,suspended")
+                .Annotation("Npgsql:Enum:email_status", "queued,sending,sent,delivered,bounced,complained,failed,scheduled")
+                .Annotation("Npgsql:Enum:event_type", "queued,scheduled,sent,delivered,bounced,complained,opened,clicked,failed")
+                .Annotation("Npgsql:Enum:inbound_email_status", "received,processing,processed,forwarded,failed")
+                .Annotation("Npgsql:Enum:inbound_rule_action", "webhook,forward,store")
+                .Annotation("Npgsql:Enum:invoice_status", "pending,paid,failed,refunded")
+                .Annotation("Npgsql:Enum:payment_provider", "none,stripe,pay_stack,flutterwave,pay_pal")
+                .Annotation("Npgsql:Enum:plan_tier", "free,starter,pro,business,enterprise")
+                .Annotation("Npgsql:Enum:subscription_status", "trial,active,past_due,cancelled,expired")
+                .Annotation("Npgsql:Enum:suppression_reason", "hard_bounce,soft_bounce_limit,complaint,manual")
+                .Annotation("Npgsql:Enum:tenant_status", "active,suspended,deactivated")
+                .Annotation("Npgsql:Enum:webhook_status", "active,inactive,disabled");
+
+            migrationBuilder.CreateTable(
+                name: "admin_users",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    display_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    password_hash = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    role = table.Column<AdminRole>(type: "admin_role", nullable: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    last_login_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_admin_users", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "plans",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    tier = table.Column<PlanTier>(type: "plan_tier", nullable: false, defaultValue: PlanTier.Free),
+                    monthly_price_usd = table.Column<decimal>(type: "numeric(10,2)", nullable: false, defaultValue: 0m),
+                    annual_price_usd = table.Column<decimal>(type: "numeric(10,2)", nullable: false, defaultValue: 0m),
+                    daily_email_limit = table.Column<int>(type: "integer", nullable: false, defaultValue: 100),
+                    monthly_email_limit = table.Column<long>(type: "bigint", nullable: false, defaultValue: 3000L),
+                    max_api_keys = table.Column<int>(type: "integer", nullable: false, defaultValue: 3),
+                    max_domains = table.Column<int>(type: "integer", nullable: false, defaultValue: 2),
+                    max_templates = table.Column<int>(type: "integer", nullable: false, defaultValue: 10),
+                    max_webhooks = table.Column<int>(type: "integer", nullable: false, defaultValue: 5),
+                    custom_domain_branding = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    priority_support = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_plans", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tenants",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    status = table.Column<TenantStatus>(type: "tenant_status", nullable: false, defaultValue: TenantStatus.Active),
+                    contact_email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    company_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    legal_entity_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    postal_address = table.Column<string>(type: "text", nullable: true),
+                    max_api_keys = table.Column<int>(type: "integer", nullable: true),
+                    max_domains_count = table.Column<int>(type: "integer", nullable: true),
+                    monthly_email_limit = table.Column<long>(type: "bigint", nullable: true),
+                    password_hash = table.Column<string>(type: "text", nullable: true),
+                    notes = table.Column<string>(type: "text", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tenants", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "audit_logs",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    admin_user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    action = table.Column<AuditAction>(type: "audit_action", nullable: false),
+                    target_type = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    target_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    details = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'{}'::jsonb"),
+                    ip_address = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_audit_logs", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_audit_logs_admin_users_admin_user_id",
+                        column: x => x.admin_user_id,
+                        principalTable: "admin_users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "api_keys",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    key_hash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    prefix = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
+                    allowed_domains = table.Column<string[]>(type: "text[]", nullable: false, defaultValueSql: "'{}'"),
+                    status = table.Column<ApiKeyStatus>(type: "api_key_status", nullable: false, defaultValue: ApiKeyStatus.Active),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    last_used_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    revoked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    rotating_expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    replaced_by_key_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    is_service_key = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_api_keys", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_api_keys_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "domains",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    domain_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    status = table.Column<DomainStatus>(type: "domain_status", nullable: false, defaultValue: DomainStatus.PendingVerification),
+                    ses_identity_arn = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    verified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    last_checked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_domains", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_domains_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "subscriptions",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    plan_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    status = table.Column<SubscriptionStatus>(type: "subscription_status", nullable: false, defaultValue: SubscriptionStatus.Trial),
+                    provider = table.Column<PaymentProvider>(type: "payment_provider", nullable: false, defaultValue: PaymentProvider.Stripe),
+                    external_subscription_id = table.Column<string>(type: "text", nullable: true),
+                    external_customer_id = table.Column<string>(type: "text", nullable: true),
+                    current_period_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    current_period_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    cancelled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    trial_ends_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_subscriptions", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_subscriptions_plans_plan_id",
+                        column: x => x.plan_id,
+                        principalTable: "plans",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_subscriptions_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "suppression_list",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email_address = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    reason = table.Column<SuppressionReason>(type: "suppression_reason", nullable: false),
+                    source_message_id = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    suppressed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_suppression_list", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_suppression_list_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "templates",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    subject_template = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
+                    html_body = table.Column<string>(type: "text", nullable: false),
+                    text_body = table.Column<string>(type: "text", nullable: true),
+                    variables_schema = table.Column<string>(type: "jsonb", nullable: true),
+                    version = table.Column<int>(type: "integer", nullable: false, defaultValue: 1),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_templates", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_templates_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "webhooks",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    events = table.Column<string[]>(type: "text[]", nullable: false),
+                    secret = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    status = table.Column<WebhookStatus>(type: "webhook_status", nullable: false, defaultValue: WebhookStatus.Active),
+                    consecutive_failures = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_webhooks", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_webhooks_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "emails",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    api_key_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    message_id = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    batch_id = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    from_email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
+                    from_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    to_emails = table.Column<string>(type: "jsonb", nullable: false),
+                    cc_emails = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    bcc_emails = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    subject = table.Column<string>(type: "character varying(998)", maxLength: 998, nullable: false),
+                    html_body = table.Column<string>(type: "text", nullable: true),
+                    text_body = table.Column<string>(type: "text", nullable: true),
+                    template_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    variables = table.Column<string>(type: "jsonb", nullable: true),
+                    attachments = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    tags = table.Column<string[]>(type: "text[]", nullable: false, defaultValueSql: "'{}'"),
+                    metadata = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'{}'::jsonb"),
+                    track_opens = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    track_clicks = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    status = table.Column<EmailStatus>(type: "email_status", nullable: false, defaultValue: EmailStatus.Queued),
+                    ses_message_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    error_message = table.Column<string>(type: "text", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    sent_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    delivered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    opened_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    tracking_id = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    clicked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    scheduled_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_emails", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_emails_api_keys_api_key_id",
+                        column: x => x.api_key_id,
+                        principalTable: "api_keys",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_emails_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "dns_records",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    domain_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    record_type = table.Column<DnsRecordType>(type: "dns_record_type", nullable: false),
+                    record_name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    record_value = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
+                    purpose = table.Column<DnsRecordPurpose>(type: "dns_record_purpose", nullable: false),
+                    is_verified = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    verified_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    actual_value = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_dns_records", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_dns_records_domains_domain_id",
+                        column: x => x.domain_id,
+                        principalTable: "domains",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "inbound_rules",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    domain_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    match_pattern = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    action = table.Column<InboundRuleAction>(type: "inbound_rule_action", nullable: false, defaultValue: InboundRuleAction.Store),
+                    webhook_url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    forward_to = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
+                    priority = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_inbound_rules", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_inbound_rules_domains_domain_id",
+                        column: x => x.domain_id,
+                        principalTable: "domains",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_inbound_rules_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "invoices",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    subscription_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    invoice_number = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    amount_usd = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    currency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false, defaultValue: "USD"),
+                    status = table.Column<InvoiceStatus>(type: "invoice_status", nullable: false, defaultValue: InvoiceStatus.Pending),
+                    provider = table.Column<PaymentProvider>(type: "payment_provider", nullable: false),
+                    external_invoice_id = table.Column<string>(type: "text", nullable: true),
+                    external_payment_id = table.Column<string>(type: "text", nullable: true),
+                    payment_method = table.Column<string>(type: "text", nullable: true),
+                    period_start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    period_end = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    paid_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_invoices", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_invoices_subscriptions_subscription_id",
+                        column: x => x.subscription_id,
+                        principalTable: "subscriptions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_invoices_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "template_versions",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    template_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    version = table.Column<int>(type: "integer", nullable: false),
+                    name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    subject = table.Column<string>(type: "text", nullable: false),
+                    html_body = table.Column<string>(type: "text", nullable: true),
+                    text_body = table.Column<string>(type: "text", nullable: true),
+                    description = table.Column<string>(type: "text", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_template_versions", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_template_versions_templates_template_id",
+                        column: x => x.template_id,
+                        principalTable: "templates",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "webhook_delivery_logs",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    webhook_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    event_type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    status_code = table.Column<int>(type: "integer", nullable: false),
+                    success = table.Column<bool>(type: "boolean", nullable: false),
+                    error_message = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    attempt_number = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_webhook_delivery_logs", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_webhook_delivery_logs_webhooks_webhook_id",
+                        column: x => x.webhook_id,
+                        principalTable: "webhooks",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "email_events",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    email_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    event_type = table.Column<EventType>(type: "event_type", nullable: false),
+                    data = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'{}'::jsonb"),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_email_events", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_email_events_emails_email_id",
+                        column: x => x.email_id,
+                        principalTable: "emails",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "inbound_emails",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    tenant_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    message_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    from_email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    from_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    to_emails = table.Column<string>(type: "jsonb", nullable: false),
+                    cc_emails = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    bcc_emails = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'[]'::jsonb"),
+                    reply_to = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    subject = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    html_body = table.Column<string>(type: "text", nullable: true),
+                    text_body = table.Column<string>(type: "text", nullable: true),
+                    headers = table.Column<string>(type: "jsonb", nullable: true),
+                    tags = table.Column<string[]>(type: "text[]", nullable: false, defaultValueSql: "'{}'"),
+                    metadata = table.Column<string>(type: "jsonb", nullable: false, defaultValueSql: "'{}'::jsonb"),
+                    status = table.Column<InboundEmailStatus>(type: "inbound_email_status", nullable: false, defaultValue: InboundEmailStatus.Received),
+                    s3_key = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    spam_score = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
+                    spam_verdict = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    virus_verdict = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    spf_verdict = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    dkim_verdict = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    dmarc_verdict = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
+                    in_reply_to = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    references = table.Column<string>(type: "text", nullable: true),
+                    outbound_email_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    received_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()"),
+                    processed_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_inbound_emails", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_inbound_emails_emails_outbound_email_id",
+                        column: x => x.outbound_email_id,
+                        principalTable: "emails",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_inbound_emails_tenants_tenant_id",
+                        column: x => x.tenant_id,
+                        principalTable: "tenants",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tracking_links",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    email_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    token = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    original_url = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    clicked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tracking_links", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_tracking_links_emails_email_id",
+                        column: x => x.email_id,
+                        principalTable: "emails",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "inbound_attachments",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    inbound_email_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    filename = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    content_type = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    size_bytes = table.Column<long>(type: "bigint", nullable: false),
+                    s3_key = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    content_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    is_inline = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_inbound_attachments", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_inbound_attachments_inbound_emails_inbound_email_id",
+                        column: x => x.inbound_email_id,
+                        principalTable: "inbound_emails",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "tenants",
+                columns: new[] { "id", "company_name", "contact_email", "created_at", "legal_entity_name", "max_api_keys", "max_domains_count", "monthly_email_limit", "name", "notes", "password_hash", "postal_address", "updated_at" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), null, null, new DateTime(2026, 3, 27, 0, 0, 0, 0, DateTimeKind.Utc), null, null, null, null, "Default", null, null, null, new DateTime(2026, 3, 27, 0, 0, 0, 0, DateTimeKind.Utc) });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_admin_users_email",
+                table: "admin_users",
+                column: "email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_api_keys_status",
+                table: "api_keys",
+                columns: new[] { "tenant_id", "status" },
+                filter: "status = 'active'");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_api_keys_tenant",
+                table: "api_keys",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_api_keys_key_hash",
+                table: "api_keys",
+                column: "key_hash",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_audit_logs_action",
+                table: "audit_logs",
+                column: "action");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_audit_logs_admin_user",
+                table: "audit_logs",
+                column: "admin_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_audit_logs_created_at",
+                table: "audit_logs",
+                column: "created_at",
+                descending: new bool[0]);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_dns_records_domain",
+                table: "dns_records",
+                column: "domain_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_domains_status",
+                table: "domains",
+                columns: new[] { "tenant_id", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_domains_tenant",
+                table: "domains",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_domains_tenant_name",
+                table: "domains",
+                columns: new[] { "tenant_id", "domain_name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_email_events_email",
+                table: "email_events",
+                column: "email_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_email_events_type",
+                table: "email_events",
+                columns: new[] { "event_type", "created_at" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_api_key",
+                table: "emails",
+                column: "api_key_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_batch",
+                table: "emails",
+                column: "batch_id",
+                filter: "batch_id IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_from",
+                table: "emails",
+                column: "from_email");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_message_id",
+                table: "emails",
+                column: "message_id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_template",
+                table: "emails",
+                column: "template_id",
+                filter: "template_id IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_tenant_created",
+                table: "emails",
+                columns: new[] { "tenant_id", "created_at" },
+                descending: new[] { false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_emails_tenant_status",
+                table: "emails",
+                columns: new[] { "tenant_id", "status", "created_at" },
+                descending: new[] { false, false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_emails_scheduled",
+                table: "emails",
+                columns: new[] { "status", "scheduled_at" },
+                filter: "status = 'scheduled'");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_attachments_email",
+                table: "inbound_attachments",
+                column: "inbound_email_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_from",
+                table: "inbound_emails",
+                columns: new[] { "tenant_id", "from_email" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_in_reply_to",
+                table: "inbound_emails",
+                column: "in_reply_to",
+                filter: "in_reply_to IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_message_id",
+                table: "inbound_emails",
+                column: "message_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_outbound",
+                table: "inbound_emails",
+                column: "outbound_email_id",
+                filter: "outbound_email_id IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_tenant",
+                table: "inbound_emails",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_emails_tenant_received",
+                table: "inbound_emails",
+                columns: new[] { "tenant_id", "received_at" },
+                descending: new[] { false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_rules_domain",
+                table: "inbound_rules",
+                column: "domain_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_inbound_rules_tenant",
+                table: "inbound_rules",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_invoices_tenant_created",
+                table: "invoices",
+                columns: new[] { "tenant_id", "created_at" },
+                descending: new[] { false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_invoices_subscription_id",
+                table: "invoices",
+                column: "subscription_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_invoices_invoice_number",
+                table: "invoices",
+                column: "invoice_number",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_plans_tier_active",
+                table: "plans",
+                columns: new[] { "tier", "is_active" });
+
+            migrationBuilder.CreateIndex(
+                name: "uq_plans_name",
+                table: "plans",
+                column: "name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_subscriptions_period_end",
+                table: "subscriptions",
+                column: "current_period_end");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_subscriptions_tenant_status",
+                table: "subscriptions",
+                columns: new[] { "tenant_id", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_subscriptions_plan_id",
+                table: "subscriptions",
+                column: "plan_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_suppression_email",
+                table: "suppression_list",
+                column: "email_address");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_suppression_tenant",
+                table: "suppression_list",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_suppression_tenant_email",
+                table: "suppression_list",
+                columns: new[] { "tenant_id", "email_address" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_template_versions_template_created",
+                table: "template_versions",
+                columns: new[] { "template_id", "created_at" },
+                descending: new[] { false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "ix_template_versions_template_version",
+                table: "template_versions",
+                columns: new[] { "template_id", "version" },
+                descending: new[] { false, true });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_templates_deleted",
+                table: "templates",
+                columns: new[] { "tenant_id", "deleted_at" },
+                filter: "deleted_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_templates_tenant",
+                table: "templates",
+                column: "tenant_id");
+
+            migrationBuilder.CreateIndex(
+                name: "uq_templates_tenant_name_active",
+                table: "templates",
+                columns: new[] { "tenant_id", "name" },
+                unique: true,
+                filter: "deleted_at IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_tracking_links_email",
+                table: "tracking_links",
+                column: "email_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_tracking_links_token",
+                table: "tracking_links",
+                column: "token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "idx_webhook_delivery_logs_created",
+                table: "webhook_delivery_logs",
+                column: "created_at");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_webhook_delivery_logs_email",
+                table: "webhook_delivery_logs",
+                column: "email_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_webhook_delivery_logs_webhook",
+                table: "webhook_delivery_logs",
+                column: "webhook_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_webhooks_tenant",
+                table: "webhooks",
+                column: "tenant_id");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "audit_logs");
+
+            migrationBuilder.DropTable(
+                name: "dns_records");
+
+            migrationBuilder.DropTable(
+                name: "email_events");
+
+            migrationBuilder.DropTable(
+                name: "inbound_attachments");
+
+            migrationBuilder.DropTable(
+                name: "inbound_rules");
+
+            migrationBuilder.DropTable(
+                name: "invoices");
+
+            migrationBuilder.DropTable(
+                name: "suppression_list");
+
+            migrationBuilder.DropTable(
+                name: "template_versions");
+
+            migrationBuilder.DropTable(
+                name: "tracking_links");
+
+            migrationBuilder.DropTable(
+                name: "webhook_delivery_logs");
+
+            migrationBuilder.DropTable(
+                name: "admin_users");
+
+            migrationBuilder.DropTable(
+                name: "inbound_emails");
+
+            migrationBuilder.DropTable(
+                name: "domains");
+
+            migrationBuilder.DropTable(
+                name: "subscriptions");
+
+            migrationBuilder.DropTable(
+                name: "templates");
+
+            migrationBuilder.DropTable(
+                name: "webhooks");
+
+            migrationBuilder.DropTable(
+                name: "emails");
+
+            migrationBuilder.DropTable(
+                name: "plans");
+
+            migrationBuilder.DropTable(
+                name: "api_keys");
+
+            migrationBuilder.DropTable(
+                name: "tenants");
+        }
+    }
+}
