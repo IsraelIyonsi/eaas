@@ -1,0 +1,47 @@
+name: SNS Diagnose (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    name: Tail webhook-processor logs + SNS state
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH + dump diagnostic info
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "=== webhook-processor last 500 log lines (grep sns/403/reject/verif) ==="
+            docker logs --tail 500 eaas-webhook-processor 2>&1 | grep -iE "(sns|403|reject|verif|signature|cert)" | tail -80 || true
+            echo ""
+            echo "=== nginx access log last 10 POST /hooks/sns ==="
+            docker exec eaas-nginx sh -c "tail -n 2000 /var/log/nginx/access.log 2>/dev/null | grep 'POST /hooks/sns' | tail -10" || true
+            echo ""
+            echo "=== webhook_delivery_logs row count ==="
+            docker exec -e PGPASSWORD="$(grep ^POSTGRES_PASSWORD /opt/eaas/.env | cut -d= -f2-)" eaas-postgres psql -U eaas_app -d eaas -c "SELECT COUNT(*) FROM webhook_delivery_logs;" || true
+            echo ""
+            echo "=== webhook-processor env (Sns* only, redacted) ==="
+            docker exec eaas-webhook-processor sh -c 'env | grep -i "^Sns__" | sed "s/=.*/=<redacted>/"' || true
+            echo ""
+            echo "=== Trigger SES bounce simulator send to force a fresh SNS event ==="
+            AWS_KEY=$(grep ^AWS_ACCESS_KEY_ID /opt/eaas/.env | cut -d= -f2-)
+            AWS_SECRET=$(grep ^AWS_SECRET_ACCESS_KEY /opt/eaas/.env | cut -d= -f2-)
+            AWS_REG=$(grep ^AWS_REGION /opt/eaas/.env | cut -d= -f2-)
+            docker run --rm \
+              -e AWS_ACCESS_KEY_ID="$AWS_KEY" \
+              -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET" \
+              -e AWS_DEFAULT_REGION="${AWS_REG:-eu-west-1}" \
+              amazon/aws-cli ses send-email \
+              --from noreply@sendnex.xyz \
+              --to bounce@simulator.amazonses.com \
+              --subject "sns-diagnose" \
+              --text "sns-diagnose" \
+              --configuration-set-name sendnex-production 2>&1 | head -5 || true
+            echo ""
+            echo "=== wait 30s then tail fresh logs ==="
+            sleep 30
+            docker logs --since 60s eaas-webhook-processor 2>&1 | tail -60 || true
