@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using EaaS.Domain.Entities;
+using EaaS.Domain.Enums;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
@@ -72,6 +73,49 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         WebhookDispatchMessage message,
         CancellationToken cancellationToken)
     {
+        // H11 idempotency: short-circuit if a prior attempt for this exact
+        // (webhook, email, event_type) tuple already succeeded. MassTransit retries
+        // must never hit a customer endpoint twice.
+        var deliveryRow = await _dbContext.WebhookDeliveries
+            .FirstOrDefaultAsync(
+                d => d.WebhookId == webhook.Id
+                     && d.EmailId == message.EmailId
+                     && d.EventType == message.EventType,
+                cancellationToken);
+
+        if (deliveryRow is { Status: WebhookDeliveryStatus.Succeeded })
+        {
+            LogDeliverySkippedDuplicate(_logger, webhook.Id, message.EventType, message.EmailId);
+            return;
+        }
+
+        var nowUtc = DateTime.UtcNow;
+        if (deliveryRow is null)
+        {
+            deliveryRow = new WebhookDelivery
+            {
+                Id = Guid.NewGuid(),
+                WebhookId = webhook.Id,
+                EmailId = message.EmailId,
+                EventType = message.EventType,
+                Status = WebhookDeliveryStatus.Pending,
+                FirstAttemptAt = nowUtc,
+                LastAttemptAt = nowUtc,
+                AttemptCount = 1
+            };
+            _dbContext.WebhookDeliveries.Add(deliveryRow);
+        }
+        else
+        {
+            deliveryRow.Status = WebhookDeliveryStatus.Pending;
+            deliveryRow.LastAttemptAt = nowUtc;
+            deliveryRow.AttemptCount++;
+        }
+
+        // Persist the pending row *before* the HTTP call so that replays / crashes
+        // between the call and the post-write find a row on disk.
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
         EaaS.Shared.Utilities.WebhookSigner.ApplyHeaders(content, webhook.Secret, payload, message.EventType, deliveryId);
@@ -79,6 +123,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
         int statusCode = 0;
         bool success = false;
         string? errorMessage = null;
+        string? responseSnippet = null;
 
         try
         {
@@ -90,6 +135,8 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
                 LogDeliveryException(_logger, webhook.Id, new InvalidOperationException(errorMessage));
                 EmailMetrics.WebhookDispatched.WithLabels("failed").Inc();
                 SsrfGuard.RecordSsrfRejection("syntactic");
+                deliveryRow.Status = WebhookDeliveryStatus.Failed;
+                deliveryRow.ResponseStatusCode = null;
                 await PersistDeliveryLog(webhook, message, 0, false, errorMessage, cancellationToken);
                 return;
             }
@@ -107,8 +154,12 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
 
             // Drain up to 64 KB of the body (truncated). Customer endpoints may legitimately
             // return a larger response but we only log a prefix for diagnostics (C3 rev-3).
-            _ = await SsrfGuard.ReadBoundedStringAsync(
+            var body = await SsrfGuard.ReadBoundedStringAsync(
                 response, truncate: true, cancellationToken: cancellationToken);
+            if (!string.IsNullOrEmpty(body))
+            {
+                responseSnippet = body.Length > 1024 ? body[..1024] : body;
+            }
 
             statusCode = (int)response.StatusCode;
             success = response.IsSuccessStatusCode;
@@ -160,6 +211,11 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
             }
         }
 
+        // Finalise idempotency row — replays will now see Succeeded and skip.
+        deliveryRow.Status = success ? WebhookDeliveryStatus.Succeeded : WebhookDeliveryStatus.Failed;
+        deliveryRow.ResponseStatusCode = statusCode == 0 ? null : statusCode;
+        deliveryRow.ResponseBodySnippet = responseSnippet;
+
         await PersistDeliveryLog(webhook, message, statusCode, success, errorMessage, cancellationToken);
 
         if (!success)
@@ -207,4 +263,7 @@ public sealed partial class WebhookDispatchConsumer : IConsumer<WebhookDispatchM
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Webhook {WebhookId} auto-disabled after {ConsecutiveFailures} consecutive delivery failures")]
     private static partial void LogWebhookAutoDisabled(ILogger logger, Guid webhookId, int consecutiveFailures);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Webhook {WebhookId} dispatch for event {EventType} email {EmailId} skipped — prior delivery already succeeded (H11 idempotency)")]
+    private static partial void LogDeliverySkippedDuplicate(ILogger logger, Guid webhookId, string eventType, Guid emailId);
 }
