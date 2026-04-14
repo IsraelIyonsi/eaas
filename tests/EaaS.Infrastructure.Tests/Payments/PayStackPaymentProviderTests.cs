@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -32,6 +34,7 @@ public sealed class PayStackPaymentProviderTests
             }
         });
         _logger = Substitute.For<ILogger<PayStackPaymentProvider>>();
+        _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
     }
 
     private PayStackPaymentProvider CreateSut(HttpClient httpClient)
@@ -163,6 +166,131 @@ public sealed class PayStackPaymentProviderTests
         var result = await sut.VerifyPaymentAsync("ref_test_123");
 
         result.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Should_CreateSubscription_ParsePeriodDatesFromResponse()
+    {
+        var createdAt = new DateTime(2026, 4, 14, 10, 0, 0, DateTimeKind.Utc);
+        var nextPaymentDate = createdAt.AddDays(30);
+
+        var httpClient = CreateMockHttpClient(HttpStatusCode.OK, new
+        {
+            status = true,
+            message = "Subscription created",
+            data = new
+            {
+                subscription_code = "SUB_abc123",
+                status = "active",
+                email_token = "tok_xyz",
+                next_payment_date = nextPaymentDate.ToString("o"),
+                createdAt = createdAt.ToString("o")
+            }
+        });
+
+        var sut = CreateSut(httpClient);
+        var request = new CreateSubscriptionRequest("CUS_test123", "PLN_test");
+
+        var result = await sut.CreateSubscriptionAsync(request);
+
+        result.Should().NotBeNull();
+        result.ExternalSubscriptionId.Should().Be("SUB_abc123");
+        result.Status.Should().Be("active");
+        result.CurrentPeriodStart.Should().Be(createdAt);
+        result.CurrentPeriodEnd.Should().Be(nextPaymentDate);
+    }
+
+    [Fact]
+    public async Task Should_CreateSubscription_FallbackToUtcNowStart_WhenCreatedAtMissing()
+    {
+        var nextPaymentDate = new DateTime(2026, 5, 14, 10, 0, 0, DateTimeKind.Utc);
+
+        var httpClient = CreateMockHttpClient(HttpStatusCode.OK, new
+        {
+            status = true,
+            message = "Subscription created",
+            data = new
+            {
+                subscription_code = "SUB_abc123",
+                status = "active",
+                next_payment_date = nextPaymentDate.ToString("o")
+                // createdAt intentionally omitted
+            }
+        });
+
+        var before = DateTime.UtcNow;
+        var sut = CreateSut(httpClient);
+
+        var result = await sut.CreateSubscriptionAsync(
+            new CreateSubscriptionRequest("CUS_test123", "PLN_test"));
+
+        var after = DateTime.UtcNow;
+
+        result.CurrentPeriodEnd.Should().Be(nextPaymentDate);
+        result.CurrentPeriodStart.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
+    }
+
+    [Fact]
+    public async Task Should_CreateSubscription_FallbackAndWarn_WhenNextPaymentDateMissing()
+    {
+        var httpClient = CreateMockHttpClient(HttpStatusCode.OK, new
+        {
+            status = true,
+            message = "Subscription created",
+            data = new
+            {
+                subscription_code = "SUB_missing_date",
+                status = "active"
+                // next_payment_date omitted
+            }
+        });
+
+        var before = DateTime.UtcNow;
+        var sut = CreateSut(httpClient);
+
+        var result = await sut.CreateSubscriptionAsync(
+            new CreateSubscriptionRequest("CUS_test123", "PLN_test"));
+
+        var after = DateTime.UtcNow;
+
+        // Falls back to UtcNow + 30 days
+        result.CurrentPeriodStart.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
+        result.CurrentPeriodEnd.Should().BeCloseTo(before.AddDays(30), TimeSpan.FromSeconds(5));
+
+        // Warning logged via LoggerMessage source generator
+        _logger.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == "Log")
+            .Any(c => (LogLevel)c.GetArguments()[0]! == LogLevel.Warning)
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_CreateSubscription_FallbackAndWarn_WhenNextPaymentDateMalformed()
+    {
+        var httpClient = CreateMockHttpClient(HttpStatusCode.OK, new
+        {
+            status = true,
+            message = "Subscription created",
+            data = new
+            {
+                subscription_code = "SUB_malformed",
+                status = "active",
+                next_payment_date = "not-a-real-date"
+            }
+        });
+
+        var before = DateTime.UtcNow;
+        var sut = CreateSut(httpClient);
+
+        var result = await sut.CreateSubscriptionAsync(
+            new CreateSubscriptionRequest("CUS_test123", "PLN_test"));
+
+        result.CurrentPeriodEnd.Should().BeCloseTo(before.AddDays(30), TimeSpan.FromSeconds(5));
+
+        _logger.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == "Log")
+            .Any(c => (LogLevel)c.GetArguments()[0]! == LogLevel.Warning)
+            .Should().BeTrue();
     }
 
     [Fact]

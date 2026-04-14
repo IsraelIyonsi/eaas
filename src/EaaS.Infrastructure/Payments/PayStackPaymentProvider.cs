@@ -95,12 +95,54 @@ public sealed partial class PayStackPaymentProvider : IPaymentProvider
 
         EnsureSuccess(response, json);
 
+        var data = json!.Data!;
+        var (periodStart, periodEnd) = ResolveSubscriptionPeriod(data);
+
         return new CreateSubscriptionResult(
-            json!.Data!.SubscriptionCode,
-            json.Data.Status,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddDays(30),
+            data.SubscriptionCode,
+            data.Status,
+            periodStart,
+            periodEnd,
             null);
+    }
+
+    /// <summary>
+    /// Resolves the current subscription billing period from PayStack's response.
+    /// PayStack returns <c>next_payment_date</c> (end of current period) and often
+    /// <c>createdAt</c> (start of current period). If the end date is missing or
+    /// malformed, we log a warning and fall back to <c>UtcNow</c> + 30 days so the
+    /// caller still receives a coherent period. If only the end date is available
+    /// we use <c>UtcNow</c> as the start — this is a known limitation documented
+    /// in PayStack's API where period interval is not always echoed back.
+    /// </summary>
+    private (DateTime Start, DateTime End) ResolveSubscriptionPeriod(PayStackSubscriptionData data)
+    {
+        var now = DateTime.UtcNow;
+
+        if (!TryParseUtc(data.NextPaymentDate, out var end))
+        {
+            LogMissingPeriodDate(_logger, data.SubscriptionCode, data.NextPaymentDate ?? "<null>");
+            return (now, now.AddDays(30));
+        }
+
+        var start = TryParseUtc(data.CreatedAt, out var parsedStart) ? parsedStart : now;
+        return (start, end);
+    }
+
+    private static bool TryParseUtc(string? value, out DateTime parsed)
+    {
+        if (!string.IsNullOrWhiteSpace(value) &&
+            DateTime.TryParse(
+                value,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal,
+                out parsed))
+        {
+            return true;
+        }
+
+        parsed = default;
+        return false;
     }
 
     public async Task<bool> CancelSubscriptionAsync(string externalSubscriptionId, bool immediate, CancellationToken ct = default)
@@ -124,11 +166,14 @@ public sealed partial class PayStackPaymentProvider : IPaymentProvider
 
         EnsureSuccess(response, json);
 
+        var data = json!.Data!;
+        var (periodStart, periodEnd) = ResolveSubscriptionPeriod(data);
+
         return new SubscriptionInfo(
-            json!.Data!.SubscriptionCode,
-            json.Data.Status,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddDays(30),
+            data.SubscriptionCode,
+            data.Status,
+            periodStart,
+            periodEnd,
             null);
     }
 
@@ -272,6 +317,9 @@ public sealed partial class PayStackPaymentProvider : IPaymentProvider
     [LoggerMessage(Level = LogLevel.Warning, Message = "PayStack: Webhook signature verification failed")]
     private static partial void LogWebhookSignatureFailure(ILogger logger);
 
+    [LoggerMessage(Level = LogLevel.Warning, Message = "PayStack: Subscription {SubscriptionCode} response missing or malformed next_payment_date ('{RawValue}'); falling back to UtcNow + 30 days")]
+    private static partial void LogMissingPeriodDate(ILogger logger, string subscriptionCode, string rawValue);
+
     // --- PayStack response models ---
 
     private sealed class PayStackResponse<T>
@@ -332,5 +380,19 @@ public sealed partial class PayStackPaymentProvider : IPaymentProvider
 
         [JsonPropertyName("email_token")]
         public string? EmailToken { get; set; }
+
+        /// <summary>
+        /// ISO-8601 timestamp of the next scheduled charge — used as the end of the
+        /// current billing period.
+        /// </summary>
+        [JsonPropertyName("next_payment_date")]
+        public string? NextPaymentDate { get; set; }
+
+        /// <summary>
+        /// ISO-8601 subscription creation timestamp — used as the start of the
+        /// current billing period when available.
+        /// </summary>
+        [JsonPropertyName("createdAt")]
+        public string? CreatedAt { get; set; }
     }
 }
