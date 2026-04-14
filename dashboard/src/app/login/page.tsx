@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,10 @@ export default function LoginPage() {
 function LoginPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl");
+  // Prefer ?return=... (set by middleware) and fall back to the legacy
+  // ?callbackUrl=... for any bookmarked links.
+  const callbackUrl =
+    searchParams.get("return") ?? searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -72,9 +75,12 @@ function LoginPageInner() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
             <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-xl font-bold text-foreground">
+          <h1
+            data-slot="card-title"
+            className="font-heading text-xl leading-snug font-bold text-foreground"
+          >
             Sign in to SendNex
-          </CardTitle>
+          </h1>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

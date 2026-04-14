@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SENDNEX_LEGAL_ENTITY, SENDNEX_POSTAL_ADDRESS } from "@/lib/constants/legal";
+import {
+  SENDNEX_CONTACT_EMAIL,
+  SENDNEX_LEGAL_ENTITY,
+  SENDNEX_POSTAL_ADDRESS,
+} from "@/lib/constants/legal";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - SendNex",
-  description: "How SendNex collects, uses, and protects your data.",
+  title: "Privacy Policy — SendNex",
+  description:
+    "How SendNex collects, uses, retains, and protects personal data under the NDPR and GDPR.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -240,15 +245,18 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
+          <a href={`mailto:${SENDNEX_CONTACT_EMAIL}`}>{SENDNEX_CONTACT_EMAIL}</a>
         </li>
         <li>
           <strong>Legal entity:</strong> {SENDNEX_LEGAL_ENTITY}
         </li>
-        <li>
-          <strong>Postal address:</strong>{" "}
-          <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
-        </li>
+        {SENDNEX_POSTAL_ADDRESS ? (
+          <li>
+            <strong>Postal address:</strong>{" "}
+            <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
+          </li>
+        ) : null}
+        {/* TODO: add registered postal address once company registration completes */}
       </ul>
     </>
   );
