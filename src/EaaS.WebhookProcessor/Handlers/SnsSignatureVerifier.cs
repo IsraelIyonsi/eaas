@@ -166,17 +166,21 @@ public sealed partial class SnsSignatureVerifier
             return false;
         }
 
-        // SignatureVersion selects the canonical-string layout, not the crypto algorithm — the
-        // algorithm is driven by the signing cert's public-key type (RSA-SHA256 for classic AWS SNS
-        // signing certs; ECDSA only if AWS issues an EC cert for the topic). AWS SigV2 on FIFO
-        // topics is still RSA today. Prefer RSA; fall back to ECDSA if the cert happens to be EC.
+        // SignatureVersion selects BOTH the canonical-string layout AND the hash algorithm:
+        //   - SignatureVersion "1" → SHA1 with RSA (legacy, still default for many topics)
+        //   - SignatureVersion "2" → SHA256 with RSA (opt-in per topic)
+        // AWS signing certs for SNS are RSA; ECDSA would only appear if AWS ever issues EC certs.
+        // Prefer RSA; fall back to ECDSA if the cert happens to be EC (use the same hash).
+        var hashAlgorithm = message.SignatureVersion == "2"
+            ? HashAlgorithmName.SHA256
+            : HashAlgorithmName.SHA1;
         var payload = Encoding.UTF8.GetBytes(canonical);
         bool valid;
         using (var rsa = cert.GetRSAPublicKey())
         {
             if (rsa is not null)
             {
-                valid = rsa.VerifyData(payload, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                valid = rsa.VerifyData(payload, signature, hashAlgorithm, RSASignaturePadding.Pkcs1);
             }
             else
             {
@@ -187,7 +191,7 @@ public sealed partial class SnsSignatureVerifier
                     LogNonRsaCert(_logger, requestId);
                     return false;
                 }
-                valid = ecdsa.VerifyData(payload, signature, HashAlgorithmName.SHA256);
+                valid = ecdsa.VerifyData(payload, signature, hashAlgorithm);
             }
         }
 
