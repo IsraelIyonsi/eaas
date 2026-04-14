@@ -1,5 +1,6 @@
 using EaaS.Api.Features.Webhooks;
 using EaaS.Api.Tests.Helpers;
+using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
 
@@ -102,6 +103,45 @@ public sealed class CreateWebhookValidatorTests
         var result = _sut.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Url);
+    }
+
+    // BUG-M4: SSRF rejection reason must be passed through from SsrfGuard — the
+    // caller should see a specific class-of-rejection message, not the old canned
+    // "private, loopback, metadata, or reserved" line for every case.
+    [Fact]
+    public void BugM4_Should_SurfaceSpecificReason_When_HostnameBlocked()
+    {
+        var command = TestDataBuilders.CreateWebhook()
+            .WithUrl("https://localhost/hook")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Url);
+        // SsrfGuard's host-based rejection reason should come through verbatim.
+        result.Errors.Should().Contain(e =>
+            e.PropertyName == nameof(CreateWebhookCommand.Url)
+            && e.ErrorMessage.Contains("hostname", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void BugM4_Should_SurfaceSpecificReason_When_PrivateIp()
+    {
+        var command = TestDataBuilders.CreateWebhook()
+            .WithUrl("https://10.0.0.1/hook")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Url);
+        // SsrfGuard's IP-class reason should come through — mentions the class, not the raw IP.
+        result.Errors.Should().Contain(e =>
+            e.PropertyName == nameof(CreateWebhookCommand.Url)
+            && (e.ErrorMessage.Contains("private", StringComparison.OrdinalIgnoreCase)
+                || e.ErrorMessage.Contains("reserved", StringComparison.OrdinalIgnoreCase)));
+        // Must not echo the raw IP literal back at the customer.
+        result.Errors.Where(e => e.PropertyName == nameof(CreateWebhookCommand.Url))
+            .Should().NotContain(e => e.ErrorMessage.Contains("10.0.0.1"));
     }
 
     [Fact]

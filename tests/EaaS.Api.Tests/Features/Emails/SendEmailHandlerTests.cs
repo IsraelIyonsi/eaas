@@ -22,6 +22,7 @@ public sealed class SendEmailHandlerTests : IDisposable
     private readonly ISuppressionCache _suppressionCache;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ISubscriptionLimitService _subscriptionLimitService;
+    private readonly ITemplateRenderingService _templateRenderingService;
     private readonly SendEmailHandler _sut;
     private readonly Guid _tenantId = Guid.NewGuid();
 
@@ -44,7 +45,8 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         var suppressionChecker = new SuppressionChecker(_suppressionCache, _dbContext);
         var logger = Substitute.For<Microsoft.Extensions.Logging.ILogger<EaaS.Api.Features.Emails.SendEmailHandler>>();
-        _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker, _subscriptionLimitService, logger);
+        _templateRenderingService = Substitute.For<ITemplateRenderingService>();
+        _sut = new SendEmailHandler(_dbContext, _rateLimiter, _idempotencyStore, _publishEndpoint, suppressionChecker, _subscriptionLimitService, _templateRenderingService, logger);
 
         // Seed a verified domain
         _dbContext.Domains.Add(new SendingDomain
@@ -198,6 +200,143 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         await act.Should().ThrowAsync<QuotaExceededException>()
             .WithMessage("*email limit exceeded*");
+    }
+
+    // ---------------------------------------------------------------------
+    // BUG-H1: template hydration in the handler (not the validator).
+    // ---------------------------------------------------------------------
+
+    [Fact]
+    public async Task BugH1_Should_HydrateBodyFromTemplate_When_TemplateOnly()
+    {
+        // Arrange: template with body + subject, no inline body on the request.
+        var templateId = Guid.NewGuid();
+        _dbContext.Templates.Add(new Template
+        {
+            Id = templateId,
+            TenantId = _tenantId,
+            Name = "welcome",
+            SubjectTemplate = "Hi {{ name }}",
+            HtmlBody = "<p>Hello {{ name }}</p>",
+            TextBody = "Hello {{ name }}",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync();
+
+        _templateRenderingService.RenderAsync(
+            "Hi {{ name }}", "<p>Hello {{ name }}</p>", "Hello {{ name }}",
+            Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(new RenderedTemplate("Hi Ada", "<p>Hello Ada</p>", "Hello Ada"));
+
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .WithSubject(null)
+            .WithHtmlBody(null)
+            .WithTextBody(null)
+            .WithTemplateId(templateId)
+            .WithVariables(new Dictionary<string, object> { ["name"] = "Ada" })
+            .Build();
+
+        // Act
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        // Assert: persisted Email has the rendered body — no null/"failed" downstream.
+        var saved = await _dbContext.Emails.FindAsync(result.Id);
+        saved!.Subject.Should().Be("Hi Ada");
+        saved.HtmlBody.Should().Be("<p>Hello Ada</p>");
+        saved.TextBody.Should().Be("Hello Ada");
+        saved.TemplateId.Should().Be(templateId); // audit trail preserved.
+    }
+
+    [Fact]
+    public async Task BugH1_Should_PreferInlineBody_When_TemplateAndInlineProvided()
+    {
+        var templateId = Guid.NewGuid();
+        _dbContext.Templates.Add(new Template
+        {
+            Id = templateId,
+            TenantId = _tenantId,
+            Name = "welcome",
+            SubjectTemplate = "Template Subject",
+            HtmlBody = "<p>From template</p>",
+            TextBody = "From template",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync();
+
+        _templateRenderingService.RenderAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>(),
+            Arg.Any<Dictionary<string, object>>(), Arg.Any<CancellationToken>())
+            .Returns(new RenderedTemplate("Template Subject", "<p>From template</p>", "From template"));
+
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .WithSubject("Inline Wins")
+            .WithHtmlBody("<p>Inline HTML</p>")
+            .WithTextBody("Inline text")
+            .WithTemplateId(templateId)
+            .Build();
+
+        var result = await _sut.Handle(command, CancellationToken.None);
+
+        var saved = await _dbContext.Emails.FindAsync(result.Id);
+        saved!.Subject.Should().Be("Inline Wins");
+        saved.HtmlBody.Should().Be("<p>Inline HTML</p>");
+        saved.TextBody.Should().Be("Inline text");
+    }
+
+    [Fact]
+    public async Task BugH1_Should_Throw404_When_TemplateDoesNotExist()
+    {
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .WithHtmlBody(null)
+            .WithTextBody(null)
+            .WithTemplateId(Guid.NewGuid())
+            .Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*Template*not found*");
+    }
+
+    [Fact]
+    public async Task BugH1_Should_Throw404_When_TemplateBelongsToDifferentTenant()
+    {
+        // Template owned by a different tenant — must not be visible to _tenantId.
+        var otherTenantId = Guid.NewGuid();
+        var templateId = Guid.NewGuid();
+        _dbContext.Templates.Add(new Template
+        {
+            Id = templateId,
+            TenantId = otherTenantId,
+            Name = "leaky",
+            SubjectTemplate = "s",
+            HtmlBody = "h",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await _dbContext.SaveChangesAsync();
+
+        var command = TestDataBuilders.SendEmail()
+            .WithTenantId(_tenantId)
+            .WithFrom("sender@verified.com")
+            .WithHtmlBody(null)
+            .WithTextBody(null)
+            .WithTemplateId(templateId)
+            .Build();
+
+        var act = () => _sut.Handle(command, CancellationToken.None);
+
+        // Same 404 as missing — do NOT leak that the template exists under another tenant.
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*Template*not found*");
     }
 
     public void Dispose()

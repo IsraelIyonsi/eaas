@@ -17,14 +17,34 @@ public sealed class GetEmailHandler : IRequestHandler<GetEmailQuery, EmailDetail
 
     public async Task<EmailDetailResult> Handle(GetEmailQuery request, CancellationToken cancellationToken)
     {
-        var email = await _dbContext.Emails
+        // BUG-M3: accept either the internal GUID or the public `snx_` MessageId.
+        // `snx_` is the documented prefix for send-side message identifiers; anything
+        // else must be a GUID or the caller gets a clean 404 (no internal id enumeration).
+        var query = _dbContext.Emails
             .AsNoTracking()
             .Include(e => e.Events)
-            .Where(e => e.Id == request.Id && e.TenantId == request.TenantId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(e => e.TenantId == request.TenantId);
+
+        var identifier = request.Identifier ?? string.Empty;
+        if (identifier.StartsWith("snx_", StringComparison.Ordinal))
+        {
+            query = query.Where(e => e.MessageId == identifier);
+        }
+        else if (Guid.TryParse(identifier, out var guid))
+        {
+            query = query.Where(e => e.Id == guid);
+        }
+        else
+        {
+            // Intentionally the same 404 surface as a missing record — do not echo
+            // which lookup path the id failed against.
+            throw new NotFoundException($"Email with id '{identifier}' not found.");
+        }
+
+        var email = await query.FirstOrDefaultAsync(cancellationToken);
 
         if (email is null)
-            throw new NotFoundException($"Email with id '{request.Id}' not found.");
+            throw new NotFoundException($"Email with id '{identifier}' not found.");
 
         var toList = JsonSerializer.Deserialize<List<string>>(email.ToEmails) ?? new List<string>();
         var ccList = !string.IsNullOrWhiteSpace(email.CcEmails) && email.CcEmails != "[]"

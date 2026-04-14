@@ -15,9 +15,22 @@ public sealed class UpdateWebhookValidator : AbstractValidator<UpdateWebhookComm
             RuleFor(x => x.Url!)
                 .MaximumLength(2048).WithMessage("URL must not exceed 2048 characters.")
                 .Must(url => Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == "https")
-                .WithMessage("URL must be a valid HTTPS URL.")
-                .Must(url => SsrfGuard.IsSyntacticallySafe(url, out _))
-                .WithMessage("URL must not point to a private, loopback, metadata, or reserved address.");
+                .WithMessage("URL must be a valid HTTPS URL.");
+
+            // BUG-M4: surface the SsrfGuard's structured rejection reason.
+            RuleFor(x => x.Url!)
+                .Custom((url, ctx) =>
+                {
+                    if (string.IsNullOrWhiteSpace(url)) return;
+                    if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != "https")
+                        return;
+
+                    if (!SsrfGuard.IsSyntacticallySafe(url, out var reason))
+                    {
+                        ctx.AddFailure(nameof(UpdateWebhookCommand.Url),
+                            reason ?? "URL must not point to a private, loopback, metadata, or reserved address.");
+                    }
+                });
         });
 
         When(x => x.Events is not null, () =>

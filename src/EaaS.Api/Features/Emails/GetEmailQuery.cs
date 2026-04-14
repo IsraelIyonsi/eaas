@@ -2,7 +2,13 @@ using MediatR;
 
 namespace EaaS.Api.Features.Emails;
 
-public sealed record GetEmailQuery(Guid TenantId, Guid Id) : IRequest<EmailDetailResult>;
+/// <summary>
+/// Fetches a single email for a tenant. The <paramref name="Identifier"/> can be either
+/// the internal GUID (as returned by the repository) or the public <c>snx_</c>-prefixed
+/// MessageId (as returned by <c>POST /emails</c>). The handler dispatches on the prefix
+/// so callers can round-trip the id they got back from send without conversion (BUG-M3).
+/// </summary>
+public sealed record GetEmailQuery(Guid TenantId, string Identifier) : IRequest<EmailDetailResult>;
 
 public sealed record EmailDetailResult(
     Guid Id,

@@ -23,6 +23,7 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly SuppressionChecker _suppressionChecker;
     private readonly ISubscriptionLimitService _subscriptionLimitService;
+    private readonly ITemplateRenderingService _templateRenderingService;
     private readonly ILogger<SendEmailHandler> _logger;
 
     public SendEmailHandler(
@@ -32,6 +33,7 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
         IPublishEndpoint publishEndpoint,
         SuppressionChecker suppressionChecker,
         ISubscriptionLimitService subscriptionLimitService,
+        ITemplateRenderingService templateRenderingService,
         ILogger<SendEmailHandler> logger)
     {
         _dbContext = dbContext;
@@ -40,6 +42,7 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
         _publishEndpoint = publishEndpoint;
         _suppressionChecker = suppressionChecker;
         _subscriptionLimitService = subscriptionLimitService;
+        _templateRenderingService = templateRenderingService;
         _logger = logger;
     }
 
@@ -90,6 +93,58 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
         await _suppressionChecker.EnsureNoneSuppressedOrThrowAsync(
             request.TenantId, allRecipients, cancellationToken);
 
+        // 3b. Hydrate body/subject from template BEFORE body-null validation (BUG-H1).
+        //
+        // Precedence rule: inline wins.
+        //   - If caller supplied `HtmlBody`/`TextBody`/`Subject` inline AND a `TemplateId`,
+        //     the inline values override the rendered-template values. This preserves the
+        //     "last-minute override" use case (e.g., A/B variants, personalised subject
+        //     lines) without forcing the caller to clone + mutate a template.
+        //   - If only `TemplateId` is supplied, hydrate all three from the rendered template.
+        //
+        // Template lookup is scoped to the tenant: a template belonging to a different
+        // tenant — or one that doesn't exist — returns 404 at send time instead of leaking
+        // template ownership or silently landing the email in `failed`.
+        var finalSubject = request.Subject;
+        var finalHtmlBody = request.HtmlBody;
+        var finalTextBody = request.TextBody;
+
+        if (request.TemplateId is { } templateId)
+        {
+            var template = await _dbContext.Templates
+                .AsNoTracking()
+                .Where(t => t.Id == templateId
+                            && t.TenantId == request.TenantId
+                            && t.DeletedAt == null)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (template is null)
+                throw new NotFoundException($"Template with id '{templateId}' not found.");
+
+            var variables = request.Variables ?? new Dictionary<string, object>();
+
+            var rendered = await _templateRenderingService.RenderAsync(
+                template.SubjectTemplate,
+                template.HtmlBody,
+                template.TextBody,
+                variables,
+                cancellationToken);
+
+            // Inline wins — only fill in fields the caller did NOT supply.
+            if (string.IsNullOrWhiteSpace(finalSubject))
+                finalSubject = rendered.Subject;
+            if (string.IsNullOrWhiteSpace(finalHtmlBody))
+                finalHtmlBody = rendered.HtmlBody;
+            if (string.IsNullOrWhiteSpace(finalTextBody))
+                finalTextBody = rendered.TextBody;
+        }
+
+        // Post-hydration body guard: the SES SDK rejects messages with both Html and Text null
+        // at Body-of-the-envelope time (producing the opaque "Value null at both body.text
+        // and body.html" error). Catch it here with a clear 400 instead.
+        if (string.IsNullOrWhiteSpace(finalHtmlBody) && string.IsNullOrWhiteSpace(finalTextBody))
+            throw new ValidationException("Either htmlBody, textBody, or a template with body content is required.");
+
         // 4. Create Email entity
         var email = new Email
         {
@@ -101,9 +156,9 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
             ToEmails = JsonSerializer.Serialize(request.To),
             CcEmails = request.Cc is not null ? JsonSerializer.Serialize(request.Cc) : "[]",
             BccEmails = request.Bcc is not null ? JsonSerializer.Serialize(request.Bcc) : "[]",
-            Subject = request.Subject ?? string.Empty,
-            HtmlBody = request.HtmlBody,
-            TextBody = request.TextBody,
+            Subject = finalSubject ?? string.Empty,
+            HtmlBody = finalHtmlBody,
+            TextBody = finalTextBody,
             TemplateId = request.TemplateId,
             Variables = request.Variables is not null ? JsonSerializer.Serialize(request.Variables) : null,
             Tags = request.Tags?.ToArray() ?? Array.Empty<string>(),
@@ -140,7 +195,10 @@ public sealed partial class SendEmailHandler : IRequestHandler<SendEmailCommand,
             Subject = email.Subject,
             HtmlBody = email.HtmlBody,
             TextBody = email.TextBody,
-            TemplateId = email.TemplateId,
+            // BUG-H1: TemplateId was already hydrated above, so we null it on the message —
+            // the consumer won't redundantly re-render. Keeping the Email.TemplateId column
+            // populated preserves the audit trail of which template produced the body.
+            TemplateId = null,
             Variables = email.Variables,
             Tags = email.Tags,
             Metadata = email.Metadata

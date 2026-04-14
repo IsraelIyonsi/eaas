@@ -8,7 +8,10 @@ public static class GetEmailEndpoint
 {
     public static void Map(RouteGroupBuilder group)
     {
-        group.MapGet("/{id:guid}", async (Guid id, HttpContext httpContext, IMediator mediator) =>
+        // BUG-M3: route constraint removed so we can accept EITHER the internal GUID
+        // or the public `snx_`-prefixed MessageId returned by POST /emails. The handler
+        // dispatches on the prefix.
+        group.MapGet("/{id}", async (string id, HttpContext httpContext, IMediator mediator) =>
         {
             var tenantId = GetTenantId(httpContext);
             var query = new GetEmailQuery(tenantId, id);
@@ -18,7 +21,7 @@ public static class GetEmailEndpoint
         })
         .WithName("GetEmail")
         .WithSummary("Get email detail")
-        .WithDescription("Returns a single email by its UUID.")
+        .WithDescription("Returns a single email by its internal UUID or its public snx_ message id.")
         .Produces<ApiResponse<EmailDetailResult>>(StatusCodes.Status200OK)
         .Produces<ApiErrorResponse>(StatusCodes.Status404NotFound);
     }
