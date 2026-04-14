@@ -42,4 +42,11 @@ public sealed class SnsWebhookOptions
     /// Short window keeps us resilient to transient blips without hammering AWS on persistent errors.
     /// </summary>
     public TimeSpan NegativeCacheTtl { get; set; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// TEMPORARY diagnostic toggle. When true, on a signature mismatch we emit the full canonical
+    /// string, its SHA256 and per-field metadata to logs. MUST be disabled in normal operation
+    /// because canonical strings include the SNS Message body. Env: <c>Sns__DebugCanonical=true</c>.
+    /// </summary>
+    public bool DebugCanonical { get; set; }
 }

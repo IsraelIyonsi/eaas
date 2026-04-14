@@ -195,6 +195,7 @@ services:
       - Tracking__BaseUrl=https://sendnex.xyz
       - Tracking__HmacSecret=${TRACKING_HMAC_SECRET}
       - Tracking__FallbackRedirectUrl=https://sendnex.xyz
+      - Sns__DebugCanonical=${Sns__DebugCanonical:-false}
     depends_on:
       postgres:
         condition: service_healthy
