@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,13 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (!agreedToTerms) {
+      setError(
+        "Please agree to the Terms of Service, Privacy Policy, and Acceptable Use Policy to continue.",
+      );
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -99,9 +106,12 @@ export default function SignupPage() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
             <Zap className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-xl font-bold text-foreground">
+          <h1
+            data-slot="card-title"
+            className="font-heading text-xl leading-snug font-bold text-foreground"
+          >
             Create your SendNex account
-          </CardTitle>
+          </h1>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -270,7 +280,7 @@ export default function SignupPage() {
             )}
             <Button
               type="submit"
-              disabled={loading || !agreedToTerms}
+              disabled={loading}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {loading ? (

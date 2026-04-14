@@ -127,6 +127,35 @@
     .nav-cta{display:flex;align-items:center;gap:8px}
     @media(min-width:768px){.nav-links{display:flex}}
 
+    /* Mobile nav disclosure (CSS-only via checkbox hack) */
+    .nav-toggle{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+    .nav-toggle-btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:44px;height:44px;border-radius:8px;color:var(--muted-2);
+      border:1px solid var(--line-2);background:rgba(255,255,255,.03);
+    }
+    .nav-toggle-btn:hover{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-toggle-btn .icon-close{display:none}
+    #nav-toggle:checked ~ .wrap .nav-toggle-btn .icon-open{display:none}
+    #nav-toggle:checked ~ .wrap .nav-toggle-btn .icon-close{display:block}
+    .nav-mobile{
+      display:none;border-top:1px solid var(--line);
+      background:rgba(11,16,32,.96);backdrop-filter:blur(10px);
+      padding:12px 24px 20px;
+    }
+    .nav-mobile a{
+      display:block;padding:12px 4px;min-height:44px;
+      color:var(--muted-2);font-size:15px;
+      border-bottom:1px solid var(--line);
+    }
+    .nav-mobile a:last-child{border-bottom:none}
+    .nav-mobile a:hover{color:#fff}
+    #nav-toggle:checked ~ .nav-mobile{display:block}
+    @media(min-width:768px){
+      .nav-toggle-btn{display:none}
+      .nav-mobile{display:none!important}
+    }
+
     /* Hero */
     .hero{padding:72px 0 56px;position:relative}
     .eyebrow{
@@ -153,6 +182,7 @@
     .hero-meta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:18px}
     .hero-meta span{display:inline-flex;align-items:center;gap:6px}
     .hero-grid{display:grid;gap:40px;grid-template-columns:1fr;align-items:center}
+    .hero-grid > *{min-width:0}
     @media(min-width:1024px){
       .hero-grid{grid-template-columns:1.05fr .95fr;gap:56px}
     }
@@ -162,7 +192,7 @@
       background:linear-gradient(180deg,var(--surface),var(--surface-2));
       border:1px solid var(--line-2);border-radius:var(--r-lg);
       box-shadow:0 30px 60px -30px rgba(0,0,0,.6), 0 0 0 1px rgba(99,102,241,.05);
-      overflow:hidden;
+      overflow:hidden;max-width:100%;
     }
     .code-head{
       display:flex;align-items:center;gap:8px;
@@ -207,6 +237,7 @@
 
     /* Code section */
     .code-section{display:grid;gap:28px;grid-template-columns:1fr;align-items:center}
+    .code-section > *{min-width:0}
     @media(min-width:1024px){.code-section{grid-template-columns:1fr 1fr;gap:48px}}
     .response{
       margin-top:14px;padding:14px;background:rgba(0,0,0,.25);
@@ -348,6 +379,7 @@
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="site" role="banner">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true" />
     <div class="wrap nav">
       <a class="brand" href="/" aria-label="SendNex home">
         <span class="brand-mark" aria-hidden="true">
@@ -365,8 +397,19 @@
       <div class="nav-cta">
         <a class="btn btn-ghost" href="https://app.sendnex.xyz/login">Sign in</a>
         <a class="btn btn-primary" href="https://app.sendnex.xyz/signup">Get started</a>
+        <label for="nav-toggle" class="nav-toggle-btn" aria-label="Open menu" role="button" tabindex="0">
+          <svg class="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+          <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+        </label>
       </div>
     </div>
+    <nav class="nav-mobile" aria-label="Mobile">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#trust">Deliverability</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://docs.sendnex.xyz">Docs</a>
+    </nav>
   </header>
 
   <main id="main">

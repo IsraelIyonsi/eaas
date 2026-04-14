@@ -96,7 +96,15 @@ export async function middleware(request: NextRequest) {
     if (isRSC) {
       return new NextResponse(null, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    // Preserve the originally requested path (plus query) so the login page
+    // can bounce the user back there after successful auth, instead of
+    // dumping everyone on /overview.
+    const loginUrl = new URL("/login", request.url);
+    const returnTo = request.nextUrl.pathname + request.nextUrl.search;
+    if (returnTo && returnTo !== "/" && returnTo !== "/login") {
+      loginUrl.searchParams.set("return", returnTo);
+    }
+    return NextResponse.redirect(loginUrl);
   }
 
   // If authenticated and visiting /login or /signup, redirect to dashboard
