@@ -61,10 +61,21 @@ export async function POST(request: NextRequest) {
 
     const data = backendData.data ?? backendData;
 
+    const resolvedUserId: unknown = data.tenantId ?? data.userId;
+    if (typeof resolvedUserId !== "string" || resolvedUserId.length === 0) {
+      // Backend returned 2xx but no recognizable tenantId/userId — refuse to
+      // fabricate an ID. A session tied to a made-up user corrupts every
+      // downstream request.
+      return NextResponse.json(
+        { error: "Registration succeeded but the server response was invalid." },
+        { status: 502 },
+      );
+    }
+
     const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours
 
     const sessionPayload: SessionData = {
-      userId: data.tenantId ?? data.userId ?? "user-001",
+      userId: resolvedUserId,
       email,
       displayName: name,
       role: "tenant",
