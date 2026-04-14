@@ -40,13 +40,12 @@ if [ -f /root/.env.backup ]; then
   cp /root/.env.backup /opt/eaas/.env
 fi
 
-# Ensure SECURE_COOKIES is always set correctly.
-# The site runs behind nginx SSL termination; the dashboard itself is plain HTTP.
-# Secure=true on the cookie is not needed — nginx handles HTTPS.
-# If the backup is missing this setting, the docker-compose default would incorrectly
-# mark cookies as Secure, causing the browser to silently drop them → login loop.
+# Cookie Secure flag is now derived from NODE_ENV in the dashboard
+# (see dashboard/src/lib/auth/cookie-flags.ts). The legacy SECURE_COOKIES
+# override is removed here so it cannot regress production security.
+# nginx terminates TLS and forwards to the Next.js container; NODE_ENV=production
+# is set by the Next.js image build, so the browser receives Secure cookies.
 sed -i '/^SECURE_COOKIES=/d' /opt/eaas/.env
-echo "SECURE_COOKIES=false" >> /opt/eaas/.env
 
 # Rebuild and restart application containers only (infra stays up)
 echo "[deploy] Building Docker images..."

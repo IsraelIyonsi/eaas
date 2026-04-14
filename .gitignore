@@ -34,7 +34,16 @@ Thumbs.db
 
 ## Environment & Secrets
 .env
+.env.local
+.env.*.local
+.env.production
+.env.development
+dashboard/.env
+dashboard/.env.local
+dashboard/.env.*.local
+dashboard/.env.production
 !.env.example
+!dashboard/.env.example
 appsettings.Production.json
 *.pfx
 *.key

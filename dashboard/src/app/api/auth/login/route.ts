@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signSession } from "@/lib/auth/session";
 import type { SessionData } from "@/lib/auth/types";
-import { getSecureCookieFlag } from "@/lib/auth/cookie-flags";
+import { getSessionCookieFlags } from "@/lib/auth/cookie-flags";
 
 const API_INTERNAL_URL =
   process.env.EAAS_API_INTERNAL_URL ?? "http://localhost:5000";
@@ -145,10 +145,7 @@ function createSessionResponse(
   const response = NextResponse.json({ success: true });
 
   response.cookies.set("sendnex_session", sessionToken, {
-    httpOnly: true,
-    secure: getSecureCookieFlag(),
-    sameSite: "lax",
-    path: "/",
+    ...getSessionCookieFlags(),
     maxAge: SESSION_TTL_SECONDS,
   });
 

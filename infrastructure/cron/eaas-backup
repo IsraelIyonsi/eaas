@@ -1,0 +1,20 @@
+# =============================================================================
+# EaaS automated backups — install on the VPS at /etc/cron.d/eaas-backup
+#
+# Provision with:
+#   scp infrastructure/cron/eaas-backup root@178.104.141.21:/etc/cron.d/eaas-backup
+#   ssh root@178.104.141.21 'chown root:root /etc/cron.d/eaas-backup && chmod 644 /etc/cron.d/eaas-backup'
+#
+# Runs the Postgres backup every 6 hours (00:07, 06:07, 12:07, 18:07 UTC) to
+# hit the 6h RPO target, and a monthly restore-drill on the newest backup.
+# =============================================================================
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=ops@sendnex.xyz
+
+# m  h  dom mon dow user command
+  7  */6  *   *   *  root  /opt/eaas/scripts/backup-postgres.sh >> /var/log/eaas-backup.log 2>&1
+
+# Monthly restore-drill: pick the newest backup and restore it to a throwaway container.
+  37 3   1   *   *  root  /opt/eaas/scripts/test-restore.sh "$(ls -t /root/backups/eaas-*.sql.gz 2>/dev/null | head -n1)" >> /var/log/eaas-restore-drill.log 2>&1
