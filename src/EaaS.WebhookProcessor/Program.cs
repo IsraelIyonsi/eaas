@@ -19,10 +19,14 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    // Console sink is ALWAYS active so `docker logs eaas-webhook-processor` surfaces rejection
+    // reasons even when Loki isn't deployed. Operability bug: previously a missing Loki backend
+    // silenced the entire service, masking 403 root causes behind zero log output.
     builder.Services.AddSerilog((services, configuration) => configuration
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
+        .WriteTo.Console(new CompactJsonFormatter())
         .WriteTo.GrafanaLoki(
             Environment.GetEnvironmentVariable("LOKI_URL") ?? "http://loki:3100",
             labels: new[]
