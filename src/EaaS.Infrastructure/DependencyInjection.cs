@@ -104,6 +104,12 @@ public static class DependencyInjection
         services.AddSingleton<ListUnsubscribeService>();
         services.AddSingleton<EmailFooterInjector>();
 
+        // Password reset
+        services.Configure<PasswordResetSettings>(configuration.GetSection(PasswordResetSettings.SectionName));
+        services.AddSingleton<IPasswordResetTokenStore, RedisPasswordResetTokenStore>();
+        services.AddSingleton<PasswordResetTokenService>();
+        services.AddSingleton<IPasswordResetEmailSender, PasswordResetEmailSender>();
+
         // MassTransit with RabbitMQ
         if (includeMassTransit && publishOnly)
             services.AddMassTransitPublishOnly();

@@ -8,6 +8,7 @@ using EaaS.Api.Features.Admin.Users;
 using EaaS.Api.Features.Analytics;
 using EaaS.Api.Features.ApiKeys;
 using EaaS.Api.Features.CustomerAuth;
+using EaaS.Api.Features.PasswordReset;
 using EaaS.Api.Features.Domains;
 using EaaS.Api.Features.Emails;
 using EaaS.Api.Features.Suppressions;
@@ -140,6 +141,8 @@ public static class EndpointMappingExtensions
         RegisterEndpoint.Map(customerAuthGroup);
         CustomerLoginEndpoint.Map(customerAuthGroup);
         CustomerLogoutEndpoint.Map(customerAuthGroup);
+        ForgotPasswordEndpoint.Map(customerAuthGroup);
+        ResetPasswordEndpoint.Map(customerAuthGroup);
 
         // Admin auth endpoints (no AdminPolicy — this IS the login)
         var adminAuthGroup = app.MapGroup(RouteConstants.AdminAuth)

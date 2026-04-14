@@ -26,6 +26,8 @@ export const Routes = {
   DOCS_SANDBOX: '/docs/sandbox',
   LOGIN: '/login',
   SIGNUP: '/signup',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
   PRIVACY: '/privacy',
   TERMS: '/terms',
   COOKIES: '/cookies',

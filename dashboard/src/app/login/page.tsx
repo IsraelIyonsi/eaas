@@ -138,12 +138,12 @@ function LoginPageInner() {
               </Link>
             </p>
             <p>
-              <a
-                href="mailto:support@sendnex.xyz"
+              <Link
+                href={Routes.FORGOT_PASSWORD}
                 className="text-primary hover:underline"
               >
                 Forgot your password?
-              </a>
+              </Link>
             </p>
             <p className="pt-2">
               <Link
