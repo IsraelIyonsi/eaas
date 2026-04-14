@@ -80,7 +80,7 @@ jobs:
                 image: ${IMAGE_PREFIX}-webhook:${VERSION}
                 build: !reset null
                 environment:
-                  - Sns__DebugCanonical=true
+                  - Sns__DebugCanonical=false
             EOF
             docker compose up -d --no-deps --force-recreate webhook-processor
             sleep 8
