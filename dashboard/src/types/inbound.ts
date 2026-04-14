@@ -6,6 +6,14 @@ import type { PaginationParams, DateRangeParams } from './common';
 
 export type InboundEmailStatus = 'received' | 'processing' | 'processed' | 'forwarded' | 'failed';
 export type InboundRuleAction = 'webhook' | 'forward' | 'store';
+/**
+ * Normalized verdict status used throughout the UI.
+ *
+ * The API returns raw SES verdict strings (`PASS`, `FAIL`, `GRAY`,
+ * `PROCESSING_FAILED`, `DISABLED`, ...). Normalization to this union
+ * happens at the API boundary in `InboundEmailRepository` — anything
+ * outside pass/fail collapses to `unknown`.
+ */
 export type VerdictStatus = 'pass' | 'fail' | 'unknown';
 
 export interface InboundEmail {

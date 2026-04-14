@@ -37,7 +37,7 @@ function VerdictBadge({
   label: string;
   status?: VerdictStatus;
 }) {
-  const resolved = (status?.toLowerCase() as VerdictStatus) ?? "unknown";
+  const resolved = status ?? "unknown";
   const Icon = verdictIcon[resolved];
 
   return (

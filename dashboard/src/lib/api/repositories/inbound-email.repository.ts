@@ -4,8 +4,33 @@
 
 import { HttpClient } from '../client';
 import { ApiPaths } from '@/lib/constants/api-paths';
-import type { InboundEmail, InboundEmailListParams } from '@/types/inbound';
+import type { InboundEmail, InboundEmailListParams, VerdictStatus } from '@/types/inbound';
 import type { PaginatedResponse } from '@/types/common';
+
+/**
+ * SES delivers verdicts as freeform strings ("PASS", "FAIL", "GRAY",
+ * "PROCESSING_FAILED", "DISABLED", ...). The backend stores them untouched.
+ * We quarantine that raw shape at the API boundary: anything that isn't
+ * clearly a pass or fail collapses to "unknown" for the UI.
+ */
+function normalizeVerdict(raw: unknown): VerdictStatus | undefined {
+  if (raw == null) return undefined;
+  const value = String(raw).toLowerCase();
+  if (value === 'pass') return 'pass';
+  if (value === 'fail') return 'fail';
+  return 'unknown';
+}
+
+function mapInboundEmail(raw: InboundEmail): InboundEmail {
+  return {
+    ...raw,
+    spamVerdict: normalizeVerdict(raw.spamVerdict),
+    virusVerdict: normalizeVerdict(raw.virusVerdict),
+    spfVerdict: normalizeVerdict(raw.spfVerdict),
+    dkimVerdict: normalizeVerdict(raw.dkimVerdict),
+    dmarcVerdict: normalizeVerdict(raw.dmarcVerdict),
+  };
+}
 
 export class InboundEmailRepository extends HttpClient {
   async list(params?: InboundEmailListParams): Promise<PaginatedResponse<InboundEmail>> {
@@ -18,11 +43,13 @@ export class InboundEmailRepository extends HttpClient {
     if (params?.has_attachments != null) queryParams.has_attachments = String(params.has_attachments);
     if (params?.page) queryParams.page = String(params.page);
     if (params?.page_size) queryParams.page_size = String(params.page_size);
-    return this.get<PaginatedResponse<InboundEmail>>(ApiPaths.INBOUND_EMAILS, queryParams);
+    const response = await this.get<PaginatedResponse<InboundEmail>>(ApiPaths.INBOUND_EMAILS, queryParams);
+    return { ...response, items: response.items.map(mapInboundEmail) };
   }
 
   async getById(id: string): Promise<InboundEmail> {
-    return this.get<InboundEmail>(ApiPaths.INBOUND_EMAIL_BY_ID(id));
+    const raw = await this.get<InboundEmail>(ApiPaths.INBOUND_EMAIL_BY_ID(id));
+    return mapInboundEmail(raw);
   }
 
   async getRawUrl(id: string): Promise<string> {
