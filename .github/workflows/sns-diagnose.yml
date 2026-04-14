@@ -5,8 +5,9 @@ on:
 
 jobs:
   diagnose:
-    name: Tail webhook-processor logs + SNS state
+    name: Trigger SES + tail webhook-processor
     runs-on: ubuntu-latest
+    timeout-minutes: 4
     steps:
       - name: SSH + dump diagnostic info
         uses: appleboy/ssh-action@v1.0.3
@@ -14,24 +15,18 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 3m
           script: |
-            echo "=== webhook-processor last 500 log lines (grep sns/403/reject/verif) ==="
-            docker logs --tail 500 eaas-webhook-processor 2>&1 | grep -iE "(sns|403|reject|verif|signature|cert)" | tail -80 || true
+            set -e
+            echo "=== webhook_delivery_logs BEFORE ==="
+            PGPASS=$(grep ^POSTGRES_PASSWORD /opt/eaas/.env | cut -d= -f2-)
+            docker exec -e PGPASSWORD="$PGPASS" eaas-postgres psql -U eaas_app -d eaas -tAc "SELECT COUNT(*) FROM webhook_delivery_logs;" || true
             echo ""
-            echo "=== nginx access log last 10 POST /hooks/sns ==="
-            docker exec eaas-nginx sh -c "tail -n 2000 /var/log/nginx/access.log 2>/dev/null | grep 'POST /hooks/sns' | tail -10" || true
-            echo ""
-            echo "=== webhook_delivery_logs row count ==="
-            docker exec -e PGPASSWORD="$(grep ^POSTGRES_PASSWORD /opt/eaas/.env | cut -d= -f2-)" eaas-postgres psql -U eaas_app -d eaas -c "SELECT COUNT(*) FROM webhook_delivery_logs;" || true
-            echo ""
-            echo "=== webhook-processor env (Sns* only, redacted) ==="
-            docker exec eaas-webhook-processor sh -c 'env | grep -i "^Sns__" | sed "s/=.*/=<redacted>/"' || true
-            echo ""
-            echo "=== Trigger SES bounce simulator send to force a fresh SNS event ==="
+            echo "=== Trigger SES bounce simulator send ==="
             AWS_KEY=$(grep ^AWS_ACCESS_KEY_ID /opt/eaas/.env | cut -d= -f2-)
             AWS_SECRET=$(grep ^AWS_SECRET_ACCESS_KEY /opt/eaas/.env | cut -d= -f2-)
             AWS_REG=$(grep ^AWS_REGION /opt/eaas/.env | cut -d= -f2-)
-            docker run --rm \
+            timeout 30 docker run --rm \
               -e AWS_ACCESS_KEY_ID="$AWS_KEY" \
               -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET" \
               -e AWS_DEFAULT_REGION="${AWS_REG:-eu-west-1}" \
@@ -42,6 +37,17 @@ jobs:
               --text "sns-diagnose" \
               --configuration-set-name sendnex-production 2>&1 | head -5 || true
             echo ""
-            echo "=== wait 30s then tail fresh logs ==="
-            sleep 30
-            docker logs --since 60s eaas-webhook-processor 2>&1 | tail -60 || true
+            echo "=== Sleep 45s for SNS delivery ==="
+            sleep 45
+            echo ""
+            echo "=== webhook-processor logs (last 90s, SNS-relevant) ==="
+            docker logs --since 90s eaas-webhook-processor 2>&1 | grep -iE "(sns|403|reject|verif|signature|cert|hooks)" | tail -80 || true
+            echo ""
+            echo "=== webhook-processor last 40 raw log lines ==="
+            docker logs --tail 40 eaas-webhook-processor 2>&1 | tail -40 || true
+            echo ""
+            echo "=== webhook_delivery_logs AFTER ==="
+            docker exec -e PGPASSWORD="$PGPASS" eaas-postgres psql -U eaas_app -d eaas -tAc "SELECT COUNT(*) FROM webhook_delivery_logs;" || true
+            echo ""
+            echo "=== webhook-processor Sns__* env (redacted) ==="
+            docker exec eaas-webhook-processor sh -c 'env | grep -i "^Sns__" | sed "s/=.*/=<redacted>/"' || true
