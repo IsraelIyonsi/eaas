@@ -195,6 +195,30 @@ public sealed partial class SnsSignatureVerifier
         {
             SnsMetrics.RejectForReason(SnsMetrics.ReasonSignatureMismatch);
             LogSignatureMismatch(_logger, requestId, message.MessageId);
+
+            // TEMP diagnostic: when Sns__DebugCanonical=true, dump the canonical string byte length,
+            // per-field lengths, SHA256, and a short SigningCertURL tail so we can pinpoint the
+            // canonical-construction bug without leaking full payloads.
+            if (_options.CurrentValue.DebugCanonical)
+            {
+                var sha = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(payload));
+                var sigB64First16 = message.Signature is { Length: > 16 } s ? s[..16] : message.Signature ?? "";
+                LogCanonicalDebug(
+                    _logger,
+                    requestId,
+                    message.MessageId,
+                    message.Type ?? "null",
+                    message.SignatureVersion ?? "null",
+                    payload.Length,
+                    sha,
+                    message.Message?.Length ?? -1,
+                    message.Subject is null ? "null" : (message.Subject.Length == 0 ? "empty" : $"len={message.Subject.Length}"),
+                    message.Timestamp ?? "null",
+                    message.TopicArn ?? "null",
+                    sigB64First16,
+                    message.SigningCertUrl ?? "null",
+                    canonical);
+            }
         }
         else
         {
@@ -436,4 +460,7 @@ public sealed partial class SnsSignatureVerifier
 
     [LoggerMessage(Level = LogLevel.Error, Message = "SNS cert parse error (invalid PEM). Url={Url}")]
     private static partial void LogCertParseError(ILogger logger, string url, Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "SNS_CANONICAL_DEBUG RequestId={RequestId} MessageId={MessageId} Type={Type} SigVer={SigVer} CanonLen={CanonLen} CanonSha256={CanonSha256} MessageLen={MessageLen} Subject={SubjectState} Timestamp={Timestamp} TopicArn={TopicArn} SigPrefix={SigPrefix} CertUrl={CertUrl} Canonical={Canonical}")]
+    private static partial void LogCanonicalDebug(ILogger logger, string requestId, string messageId, string type, string sigVer, int canonLen, string canonSha256, int messageLen, string subjectState, string timestamp, string topicArn, string sigPrefix, string certUrl, string canonical);
 }
