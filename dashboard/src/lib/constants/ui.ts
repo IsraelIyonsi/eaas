@@ -11,6 +11,8 @@ export const DETAIL_STALE_TIME_MS = 5 * 60 * 1000;
 export const REFETCH_INTERVAL_MS = 60_000;
 export const MAX_ATTACHMENT_SIZE_MB = 30;
 export const TOAST_DURATION_MS = 4_000;
+export const GENERIC_MUTATION_ERROR_MESSAGE =
+  "Something went wrong. Please try again.";
 export const TOOLTIP_DELAY_MS = 300;
 export const DATA_TABLE_SKELETON_ROWS = 5;
 export const STATS_SKELETON_COUNT = 6;

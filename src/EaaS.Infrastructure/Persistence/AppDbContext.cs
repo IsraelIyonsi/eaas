@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<SuppressionEntry> SuppressionEntries => Set<SuppressionEntry>();
     public DbSet<Webhook> Webhooks => Set<Webhook>();
     public DbSet<WebhookDeliveryLog> WebhookDeliveryLogs => Set<WebhookDeliveryLog>();
+    public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
     public DbSet<TrackingLink> TrackingLinks => Set<TrackingLink>();
     public DbSet<InboundEmail> InboundEmails => Set<InboundEmail>();
     public DbSet<InboundAttachment> InboundAttachments => Set<InboundAttachment>();

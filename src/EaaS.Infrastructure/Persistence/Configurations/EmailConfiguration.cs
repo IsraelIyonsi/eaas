@@ -109,6 +109,14 @@ public sealed class EmailConfiguration : IEntityTypeConfiguration<Email>
             .HasColumnName("ses_message_id")
             .HasMaxLength(255);
 
+        builder.Property(e => e.ProviderMessageId)
+            .HasColumnName("provider_message_id")
+            .HasMaxLength(255);
+
+        builder.Property(e => e.ProviderKey)
+            .HasColumnName("provider_key")
+            .HasMaxLength(32);
+
         builder.Property(e => e.ErrorMessage)
             .HasColumnName("error_message")
             .HasColumnType("text");

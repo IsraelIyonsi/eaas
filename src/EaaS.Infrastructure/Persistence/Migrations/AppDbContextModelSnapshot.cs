@@ -402,6 +402,16 @@ namespace EaaS.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("opened_at");
 
+                    b.Property<string>("ProviderKey")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("provider_key");
+
+                    b.Property<string>("ProviderMessageId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("provider_message_id");
+
                     b.Property<DateTime?>("ScheduledAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("scheduled_at");
@@ -1449,6 +1459,11 @@ namespace EaaS.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("postal_address");
 
+                    b.Property<string>("PreferredEmailProviderKey")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("preferred_email_provider_key");
+
                     b.Property<TenantStatus>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tenant_status")
@@ -1580,6 +1595,68 @@ namespace EaaS.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("idx_webhooks_tenant");
 
                     b.ToTable("webhooks", (string)null);
+                });
+
+            modelBuilder.Entity("EaaS.Domain.Entities.WebhookDelivery", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("AttemptCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempt_count");
+
+                    b.Property<Guid>("EmailId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("email_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("event_type");
+
+                    b.Property<DateTime>("FirstAttemptAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_attempt_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<DateTime>("LastAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_attempt_at");
+
+                    b.Property<string>("ResponseBodySnippet")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("response_body_snippet");
+
+                    b.Property<int?>("ResponseStatusCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("response_status_code");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("WebhookId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("webhook_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebhookId", "EmailId", "EventType")
+                        .IsUnique()
+                        .HasDatabaseName("ux_webhook_deliveries_dedup");
+
+                    b.ToTable("webhook_deliveries", (string)null);
                 });
 
             modelBuilder.Entity("EaaS.Domain.Entities.WebhookDeliveryLog", b =>
@@ -1854,6 +1931,17 @@ namespace EaaS.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("EaaS.Domain.Entities.WebhookDelivery", b =>
+                {
+                    b.HasOne("EaaS.Domain.Entities.Webhook", "Webhook")
+                        .WithMany()
+                        .HasForeignKey("WebhookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Webhook");
                 });
 
             modelBuilder.Entity("EaaS.Domain.Entities.WebhookDeliveryLog", b =>

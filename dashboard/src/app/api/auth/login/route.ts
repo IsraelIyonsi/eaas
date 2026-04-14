@@ -125,12 +125,36 @@ export async function POST(request: NextRequest) {
     const message =
       errorBody?.error?.message ?? "Invalid email or password.";
     return NextResponse.json({ error: message }, { status: adminRes.status });
-  } catch {
+  } catch (err) {
+    // Network/transport failures (aborted timeout, DNS, connection refused,
+    // malformed response) must not be reported as 401 — that would lock a
+    // legitimate user out during a backend outage. The !response.ok path
+    // above is the only place that translates to auth-failure status codes.
+    if (isNetworkOrTimeoutError(err)) {
+      return NextResponse.json(
+        { error: "Authentication service is temporarily unavailable. Please try again." },
+        { status: 502 },
+      );
+    }
+    // Unknown error — surface as 500 so it is actionable in logs, not
+    // disguised as a credential problem.
     return NextResponse.json(
-      { error: "Invalid email or password." },
-      { status: 401 },
+      { error: "An unexpected error occurred. Please try again." },
+      { status: 500 },
     );
   }
+}
+
+function isNetworkOrTimeoutError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  // AbortError fires when our 10s timeout controller aborts the fetch.
+  // TimeoutError is thrown by some runtimes on socket timeout.
+  // TypeError ("fetch failed") is Node's undici signal for DNS/connect failures.
+  return (
+    err.name === "AbortError" ||
+    err.name === "TimeoutError" ||
+    err instanceof TypeError
+  );
 }
 
 function createSessionResponse(

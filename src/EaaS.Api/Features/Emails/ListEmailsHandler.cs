@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EaaS.Domain.Enums;
+using EaaS.Infrastructure.Data;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
 using MediatR;
@@ -51,18 +52,20 @@ public sealed class ListEmailsHandler : IRequestHandler<ListEmailsQuery, ListEma
             }
         }
 
-        // Filter by from email (partial match)
+        // Filter by from email (partial match).
+        // User input is escaped so '%'/'_'/'\' are matched literally (H4).
         if (!string.IsNullOrWhiteSpace(request.FromEmail))
         {
-            var fromPattern = $"%{request.FromEmail}%";
-            query = query.Where(e => EF.Functions.ILike(e.FromEmail, fromPattern));
+            var fromPattern = $"%{SqlLikeEscape.Escape(request.FromEmail)}%";
+            query = query.Where(e => EF.Functions.ILike(e.FromEmail, fromPattern, SqlLikeEscape.EscapeCharacter));
         }
 
-        // Filter by to email (partial match in JSON)
+        // Filter by to email (partial match in JSON).
+        // User input is escaped so '%'/'_'/'\' are matched literally (H4).
         if (!string.IsNullOrWhiteSpace(request.ToEmail))
         {
-            var toPattern = $"%{request.ToEmail}%";
-            query = query.Where(e => EF.Functions.ILike(e.ToEmails, toPattern));
+            var toPattern = $"%{SqlLikeEscape.Escape(request.ToEmail)}%";
+            query = query.Where(e => EF.Functions.ILike(e.ToEmails, toPattern, SqlLikeEscape.EscapeCharacter));
         }
 
         // Filter by template ID

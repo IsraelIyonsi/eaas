@@ -51,8 +51,8 @@ try
     // Infrastructure services (DbContext, Redis, MassTransit)
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    // Email delivery: SMTP (Mailpit) for local dev, SES for production
-    builder.Services.AddEmailProvider(builder.Configuration);
+    // Email delivery: provider-agnostic abstraction (SES default, SMTP for local dev).
+    builder.Services.AddEmailProviders(builder.Configuration);
 
     // Inbound email services (S3 storage, MIME parser)
     builder.Services.AddInboundServices(builder.Configuration);

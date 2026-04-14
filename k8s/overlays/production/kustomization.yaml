@@ -1,5 +1,28 @@
 # Production overlay: full resources, all replicas, HPA at max capacity
 # Designed for 100M emails across 100 customers
+#
+# =====================================================================
+# IMAGE TAG PLACEHOLDERS — MUST BE SET BY CI/CD BEFORE `kubectl apply -k`
+# =====================================================================
+# The image tags below are literal placeholders (`CHANGE_ME_IN_CI`).
+# They are NOT parameterised at apply time — Kustomize does not expand
+# environment variables or templates in strategic-merge/json patches.
+#
+# The CI/CD pipeline MUST substitute a real tag before applying, e.g.:
+#
+#   cd k8s/overlays/production
+#   kustomize edit set image \
+#     eaas/api=eaas/api:$TAG \
+#     eaas/worker=eaas/worker:$TAG \
+#     eaas/webhook-processor=eaas/webhook-processor:$TAG \
+#     eaas/migration=eaas/migration:$TAG
+#   kubectl apply -k .
+#
+# If you skip this step the pods will ImagePullBackOff because
+# `CHANGE_ME_IN_CI` is not a valid tag in any registry. That is
+# intentional — a loud fail-fast is safer than accidentally rolling
+# out a stale or wrong-tagged image.
+# =====================================================================
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -50,7 +73,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: "eaas/api:RELEASE_TAG"
+        value: "eaas/api:CHANGE_ME_IN_CI"
 
   - target:
       kind: Deployment
@@ -58,7 +81,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: "eaas/worker:RELEASE_TAG"
+        value: "eaas/worker:CHANGE_ME_IN_CI"
 
   - target:
       kind: Deployment
@@ -66,7 +89,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: "eaas/webhook-processor:RELEASE_TAG"
+        value: "eaas/webhook-processor:CHANGE_ME_IN_CI"
 
   - target:
       kind: Job
@@ -74,7 +97,7 @@ patches:
     patch: |
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: "eaas/migration:RELEASE_TAG"
+        value: "eaas/migration:CHANGE_ME_IN_CI"
 
   # Pod Disruption Budgets are enforced in production via separate resources below
 

@@ -1,3 +1,4 @@
+using EaaS.Infrastructure.Data;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Shared.Constants;
 using MediatR;
@@ -53,8 +54,10 @@ public sealed class GetAnalyticsTimelineHandler : IRequestHandler<GetAnalyticsTi
 
         if (!string.IsNullOrWhiteSpace(request.Domain))
         {
-            sql += " AND e.from_email ILIKE {" + paramIndex + "}";
-            parameters.Add("%" + "@" + request.Domain);
+            // Escape LIKE metacharacters in user-supplied domain and use an
+            // explicit ESCAPE clause so '%'/'_' can't expand the match (H4).
+            sql += " AND e.from_email ILIKE {" + paramIndex + "} ESCAPE '\\'";
+            parameters.Add("%@" + SqlLikeEscape.Escape(request.Domain));
             paramIndex++;
         }
 

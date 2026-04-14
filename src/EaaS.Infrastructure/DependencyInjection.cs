@@ -1,19 +1,34 @@
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
+using EaaS.Domain.Providers;
 using EaaS.Infrastructure.Configuration;
+using EaaS.Infrastructure.EmailProviders;
+using EaaS.Infrastructure.EmailProviders.Configuration;
+using EaaS.Infrastructure.EmailProviders.Providers.Ses;
+using EaaS.Infrastructure.EmailProviders.Providers.Smtp;
 using EaaS.Infrastructure.Messaging;
 using EaaS.Infrastructure.Persistence;
 using EaaS.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using StackExchange.Redis;
 
 namespace EaaS.Infrastructure;
 
-public static class DependencyInjection
+public static partial class DependencyInjection
 {
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "AWS {Service} client configured with static credentials from configuration (region: {Region}).")]
+    private static partial void LogAwsStaticCredentials(ILogger logger, string service, string region);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "AWS {Service} client configured with SDK default credential chain (env/shared/IAM-role) (region: {Region}).")]
+    private static partial void LogAwsDefaultCredentialChain(ILogger logger, string service, string region);
+
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -26,7 +41,7 @@ public static class DependencyInjection
         services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
         services.Configure<RateLimitingSettings>(configuration.GetSection(RateLimitingSettings.SectionName));
 
-        // PostgreSQL with NpgsqlDataSourceBuilder (Gate 2 fix: MapEnum via data source builder)
+        // PostgreSQL
         var connectionString = configuration.GetConnectionString("PostgreSQL")
             ?? throw new InvalidOperationException("PostgreSQL connection string is required.");
 
@@ -130,11 +145,35 @@ public static class DependencyInjection
         var sesSettings = configuration.GetSection(SesSettings.SectionName).Get<SesSettings>()
             ?? new SesSettings();
 
-        services.AddSingleton<Amazon.S3.IAmazonS3>(_ =>
-            new Amazon.S3.AmazonS3Client(
-                sesSettings.AccessKeyId,
-                sesSettings.SecretAccessKey,
-                Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region)));
+        services.AddSingleton<Amazon.S3.IAmazonS3>(sp =>
+        {
+            var region = Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region);
+            var logger = sp.GetService<ILogger<Amazon.S3.AmazonS3Client>>();
+
+            // Only use explicit static credentials when BOTH keys are
+            // non-empty. Otherwise fall back to the AWS SDK default
+            // credential chain (env vars → shared creds → IAM role on
+            // EKS/EC2 instance profile). This is what allows pod-level
+            // IAM roles (IRSA) to work without leaking secrets into env.
+            if (!string.IsNullOrWhiteSpace(sesSettings.AccessKeyId)
+                && !string.IsNullOrWhiteSpace(sesSettings.SecretAccessKey))
+            {
+                if (logger is not null)
+                {
+                    LogAwsStaticCredentials(logger, "S3", inboundSettings.S3Region);
+                }
+                return new Amazon.S3.AmazonS3Client(
+                    sesSettings.AccessKeyId,
+                    sesSettings.SecretAccessKey,
+                    region);
+            }
+
+            if (logger is not null)
+            {
+                LogAwsDefaultCredentialChain(logger, "S3", inboundSettings.S3Region);
+            }
+            return new Amazon.S3.AmazonS3Client(region);
+        });
 
         services.AddSingleton<IInboundEmailStorage, S3InboundEmailStorage>();
         services.AddSingleton<IInboundEmailParser, MimeKitInboundParser>();
@@ -142,30 +181,151 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddEmailProvider(
+    /// <summary>
+    /// Registers the <see cref="IEmailProvider"/> abstraction (Phase 0):
+    /// <list type="bullet">
+    /// <item>Binds <see cref="SesOptions"/> from <c>EmailProviders:Ses</c> with validation.</item>
+    /// <item>Registers the SES and SMTP adapters keyed by <see cref="EmailProviderConfigKeys.ProviderKeys"/>.</item>
+    /// <item>Registers a single shared <see cref="IEmailProviderFactory"/>.</item>
+    /// <item>Registers <see cref="IDomainIdentityService"/> pointed at the matching adapter.</item>
+    /// <item>Logs the state of <see cref="EmailProviderConfigKeys.FeatureFlag"/> at startup.</item>
+    /// </list>
+    /// The legacy <c>EMAIL_PROVIDER</c> env var is honoured for back-compat with local-dev compose files.
+    /// </summary>
+    public static IServiceCollection AddEmailProviders(
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var emailProvider = configuration["EMAIL_PROVIDER"] ?? "ses";
-        if (string.Equals(emailProvider, "smtp", StringComparison.OrdinalIgnoreCase))
+        // Feature flag — read once at startup, logged via hosted service.
+        var featureFlagValue = configuration.GetValue<bool?>(EmailProviderConfigKeys.FeatureFlag) ?? true;
+        services.AddSingleton(new EmailProviderFeatureFlag(featureFlagValue));
+        services.AddHostedService<EmailProviderFeatureFlagLogger>();
+
+        // Strongly-typed options — validated, fail-fast at startup.
+        // Bind from the canonical section first, with a fallback read of the legacy "Ses" section
+        // so existing appsettings (which use "Ses") continue to work until a separate config migration PR.
+        services.AddOptions<SesOptions>()
+            .Configure<IConfiguration>((opts, cfg) =>
+            {
+                var newSection = cfg.GetSection(EmailProviderConfigKeys.Ses.Section);
+                if (newSection.Exists())
+                {
+                    newSection.Bind(opts);
+                    return;
+                }
+                // Fall back to the legacy Ses settings shape.
+                var legacy = cfg.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
+                opts.AccessKeyId = legacy.AccessKeyId;
+                opts.SecretAccessKey = legacy.SecretAccessKey;
+                opts.Region = legacy.Region;
+                opts.ConfigurationSetName = legacy.ConfigurationSetName;
+                opts.MaxSendRate = legacy.MaxSendRate;
+            })
+            // Region is always required; access keys are optional so that
+            // pods running under IAM roles (IRSA/EC2 instance profile) can
+            // use the AWS SDK default credential chain. If one key is set
+            // but not the other that's a misconfiguration, so we reject it.
+            .Validate(o =>
+                !string.IsNullOrWhiteSpace(o.Region)
+                && string.IsNullOrWhiteSpace(o.AccessKeyId)
+                    == string.IsNullOrWhiteSpace(o.SecretAccessKey),
+                "SES Region is required. AccessKeyId and SecretAccessKey must be either BOTH set (static credentials) or BOTH empty (use AWS SDK default credential chain / IAM role).");
+
+        // Back-compat: the legacy "EMAIL_PROVIDER" env var still selects SMTP (Mailpit) in local dev.
+        // When unset (production / staging), we register SES as the default — same behaviour as before.
+        var legacyProviderKey = configuration["EMAIL_PROVIDER"];
+        var routingDefault = configuration[EmailProviderConfigKeys.Routing.DefaultProvider];
+        var defaultKey = routingDefault
+            ?? (string.Equals(legacyProviderKey, "smtp", StringComparison.OrdinalIgnoreCase)
+                ? EmailProviderConfigKeys.ProviderKeys.Smtp
+                : EmailProviderConfigKeys.ProviderKeys.Ses);
+
+        // Register adapters. We always register SMTP (cheap stub) and whatever set includes the default.
+        services.AddSingleton<SmtpEmailProvider>();
+        services.AddSingleton<SmtpDomainIdentityService>();
+
+        if (string.Equals(defaultKey, EmailProviderConfigKeys.ProviderKeys.Smtp, StringComparison.OrdinalIgnoreCase))
         {
-            services.AddSingleton<SmtpEmailService>();
-            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SmtpEmailService>());
-            services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SmtpEmailService>());
+            services.AddSingleton<IEmailProvider>(sp => sp.GetRequiredService<SmtpEmailProvider>());
+            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SmtpDomainIdentityService>());
         }
         else
         {
-            var sesSettings = configuration.GetSection(SesSettings.SectionName).Get<SesSettings>() ?? new SesSettings();
-            services.AddSingleton<Amazon.SimpleEmailV2.IAmazonSimpleEmailServiceV2>(_ =>
-                new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(
-                    sesSettings.AccessKeyId,
-                    sesSettings.SecretAccessKey,
-                    Amazon.RegionEndpoint.GetBySystemName(sesSettings.Region)));
-            services.AddSingleton<SesEmailService>();
-            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SesEmailService>());
-            services.AddSingleton<IEmailSender>(sp => sp.GetRequiredService<SesEmailService>());
+            // Register the SES adapter.
+            services.AddSingleton<Amazon.SimpleEmailV2.IAmazonSimpleEmailServiceV2>(sp =>
+            {
+                var opts = sp.GetRequiredService<IOptions<SesOptions>>().Value;
+                var region = Amazon.RegionEndpoint.GetBySystemName(opts.Region);
+                var logger = sp.GetService<ILogger<Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client>>();
+
+                // Same pattern as the S3 client in AddInboundServices: only
+                // pass explicit static credentials when BOTH keys are
+                // present. Otherwise use the AWS SDK default credential
+                // chain so IAM roles on EKS (IRSA) and EC2 instance
+                // profiles work as intended.
+                if (!string.IsNullOrWhiteSpace(opts.AccessKeyId)
+                    && !string.IsNullOrWhiteSpace(opts.SecretAccessKey))
+                {
+                    if (logger is not null)
+                    {
+                        LogAwsStaticCredentials(logger, "SES", opts.Region);
+                    }
+                    return new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(
+                        opts.AccessKeyId,
+                        opts.SecretAccessKey,
+                        region);
+                }
+
+                if (logger is not null)
+                {
+                    LogAwsDefaultCredentialChain(logger, "SES", opts.Region);
+                }
+                return new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(region);
+            });
+
+            services.AddSingleton<SesEmailProvider>();
+            services.AddSingleton<SesDomainIdentityService>();
+            services.AddSingleton<IEmailProvider>(sp => sp.GetRequiredService<SesEmailProvider>());
+            services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SesDomainIdentityService>());
         }
+
+        // The factory is keyed off the final default-provider string. The optional
+        // ITenantProviderKeyResolver is consumed when Mailgun (or another alt adapter)
+        // has registered one — present from Phase 1 onward.
+        services.AddSingleton<IEmailProviderFactory>(sp =>
+            new EmailProviderFactory(
+                sp.GetServices<IEmailProvider>(),
+                defaultKey,
+                sp.GetRequiredService<ILogger<EmailProviderFactory>>(),
+                sp.GetService<EaaS.Infrastructure.EmailProviders.ITenantProviderKeyResolver>()));
 
         return services;
     }
+}
+
+/// <summary>Startup-time record of the email-provider feature-flag value.</summary>
+internal sealed record EmailProviderFeatureFlag(bool Enabled);
+
+/// <summary>Logs the feature flag exactly once at startup — runbook §4 requirement.</summary>
+internal sealed partial class EmailProviderFeatureFlagLogger : Microsoft.Extensions.Hosting.IHostedService
+{
+    private readonly EmailProviderFeatureFlag _flag;
+    private readonly ILogger<EmailProviderFeatureFlagLogger> _logger;
+
+    public EmailProviderFeatureFlagLogger(EmailProviderFeatureFlag flag, ILogger<EmailProviderFeatureFlagLogger> logger)
+    {
+        _flag = flag;
+        _logger = logger;
+    }
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        LogFeatureFlag(_logger, EmailProviderConfigKeys.FeatureFlag, _flag.Enabled);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Feature flag {Key} = {Enabled}")]
+    private static partial void LogFeatureFlag(ILogger logger, string key, bool enabled);
 }
