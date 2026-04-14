@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/cookie-flags";
 
 const SESSION_SECRET = process.env.SESSION_SECRET ?? "";
+
+// Domain-separation prefix — MUST match `COOKIE_HMAC_DOMAIN` in
+// `src/lib/auth/session.ts`. If these two constants drift apart the
+// middleware will reject every valid cookie and bounce users back to
+// /login (that was the Gate 5 production bug). Do not edit one without
+// editing the other.
+const COOKIE_HMAC_DOMAIN = "eaas.cookie.v1\n";
 
 interface SessionPayload {
   userId: string;
@@ -45,7 +53,11 @@ async function verifySessionEdge(
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(encoded));
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(COOKIE_HMAC_DOMAIN + encoded),
+  );
   const expected = Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
@@ -64,7 +76,7 @@ async function verifySessionEdge(
 export async function middleware(request: NextRequest) {
   const isRSC = request.headers.get("RSC") === "1";
 
-  const token = request.cookies.get("sendnex_session")?.value;
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const session = token ? await verifySessionEdge(token) : null;
 
   const isPublicPath =

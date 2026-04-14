@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,8 @@ import { Routes } from "@/lib/constants/routes";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -35,7 +37,17 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/overview";
+      // Only accept relative callback URLs to prevent open-redirect.
+      const safeCallback =
+        callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+          ? callbackUrl
+          : "/overview";
+      // router.refresh() forces Next.js to re-run server components (and the
+      // middleware) against the fresh Set-Cookie we just received, so the
+      // subsequent router.push lands on the protected route with the session
+      // attached instead of being bounced back to /login.
+      router.refresh();
+      router.push(safeCallback);
     } catch {
       setError(
         "Unable to connect. Please check your connection and try again.",

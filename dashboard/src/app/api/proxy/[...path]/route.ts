@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession, getSessionData } from "@/lib/auth/session";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/cookie-flags";
 
 /**
  * Builds a short-lived HMAC-signed proxy token bound to the admin user id AND
@@ -48,7 +49,7 @@ async function proxyRequest(
   }
 
   // Verify dashboard session
-  const sessionCookie = request.cookies.get("sendnex_session");
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   if (!sessionCookie || !verifySession(sessionCookie.value)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

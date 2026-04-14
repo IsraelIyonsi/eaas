@@ -5,7 +5,10 @@ import { test, expect } from "@playwright/test";
  *
  * The session cookie MUST be:
  *   - HttpOnly   (not readable via document.cookie)
- *   - SameSite=Strict (blocks CSRF)
+ *   - SameSite=Lax   (blocks CSRF on state-changing requests while keeping
+ *                    top-level cross-site navigation working — required so
+ *                    the marketing site link sendnex.xyz -> app.sendnex.xyz
+ *                    and email verification links do not drop the cookie)
  *   - Path=/
  *   - Secure     (only when the dashboard is served over https://)
  *
@@ -35,7 +38,7 @@ test.describe("Session cookie security flags", () => {
     const attrs = sessionCookie!.toLowerCase();
 
     expect(attrs).toContain("httponly");
-    expect(attrs).toContain("samesite=strict");
+    expect(attrs).toContain("samesite=lax");
     expect(attrs).toContain("path=/");
 
     // Secure MUST be present when the dashboard is served over HTTPS.
@@ -59,7 +62,7 @@ test.describe("Session cookie security flags", () => {
     expect(sessionCookie).toBeTruthy();
     const attrs = sessionCookie!.toLowerCase();
     expect(attrs).toContain("httponly");
-    expect(attrs).toContain("samesite=strict");
+    expect(attrs).toContain("samesite=lax");
     expect(attrs).toContain("path=/");
     // Cleared cookie must have Max-Age=0 or an expiry in the past.
     expect(/max-age=0|expires=/i.test(sessionCookie!)).toBe(true);

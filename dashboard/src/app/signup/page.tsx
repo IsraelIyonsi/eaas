@@ -71,7 +71,8 @@ export default function SignupPage() {
         setApiKey(data.data.apiKey);
         setShowApiKeyDialog(true);
       } else {
-        window.location.href = "/overview";
+        router.refresh();
+      router.push("/overview");
       }
     } catch {
       setError(
