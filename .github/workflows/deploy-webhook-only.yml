@@ -79,6 +79,8 @@ jobs:
               webhook-processor:
                 image: ${IMAGE_PREFIX}-webhook:${VERSION}
                 build: !reset null
+                environment:
+                  - Sns__DebugCanonical=true
             EOF
             docker compose up -d --no-deps --force-recreate webhook-processor
             sleep 8
