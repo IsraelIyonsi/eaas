@@ -2,6 +2,7 @@ using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
+using EaaS.Domain.Providers;
 using EaaS.Infrastructure.Messaging.Contracts;
 using EaaS.Infrastructure.Metrics;
 using EaaS.Infrastructure.Persistence;
@@ -16,7 +17,7 @@ namespace EaaS.Infrastructure.Messaging;
 public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailSender _emailDeliveryService;
+    private readonly IEmailProviderFactory _providerFactory;
     private readonly ITemplateRenderingService _templateRenderingService;
     private readonly TrackingPixelInjector? _pixelInjector;
     private readonly ClickTrackingLinkRewriter? _linkRewriter;
@@ -26,7 +27,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
     public SendEmailConsumer(
         AppDbContext dbContext,
-        IEmailSender emailDeliveryService,
+        IEmailProviderFactory providerFactory,
         ITemplateRenderingService templateRenderingService,
         ILogger<SendEmailConsumer> logger,
         TrackingPixelInjector? pixelInjector = null,
@@ -35,7 +36,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         EmailFooterInjector? footerInjector = null)
     {
         _dbContext = dbContext;
-        _emailDeliveryService = emailDeliveryService;
+        _providerFactory = providerFactory;
         _templateRenderingService = templateRenderingService;
         _logger = logger;
         _pixelInjector = pixelInjector;
@@ -59,7 +60,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             return;
         }
 
-        // Idempotency guard — skip if in a terminal state (already delivered, bounced, or complained)
+        // Idempotency guard
         if (email.Status is EmailStatus.Delivered or EmailStatus.Bounced or EmailStatus.Complained)
         {
             LogSkippingDuplicate(_logger, message.EmailId, email.Status);
@@ -75,7 +76,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
         try
         {
-            // 2. If templateId provided: load template and render
+            // 2. Template rendering
             if (message.TemplateId.HasValue)
             {
                 var template = await _dbContext.Templates
@@ -105,22 +106,21 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                 textBody = rendered.TextBody;
             }
 
-            // 3. Open tracking: inject tracking pixel
+            // 3. Open tracking
             if (message.TrackOpens && !string.IsNullOrWhiteSpace(htmlBody) && _pixelInjector is not null)
             {
                 htmlBody = _pixelInjector.InjectTrackingPixel(htmlBody, message.EmailId);
                 LogTrackingPixelInjected(_logger, message.EmailId);
             }
 
-            // 4. Click tracking: rewrite links
+            // 4. Click tracking
             if (message.TrackClicks && !string.IsNullOrWhiteSpace(htmlBody) && _linkRewriter is not null)
             {
                 htmlBody = await _linkRewriter.RewriteLinksAsync(htmlBody, message.EmailId, context.CancellationToken);
                 LogClickTrackingApplied(_logger, message.EmailId);
             }
 
-            // 4b. CAN-SPAM §7704(a)(5) footer + RFC 8058 List-Unsubscribe (injected for ALL
-            // emails until we introduce an explicit Category field — safe default).
+            // 4b. CAN-SPAM + List-Unsubscribe
             string? mailtoUnsub = null;
             string? httpsUnsub = null;
             if (_unsubscribeService is not null && _footerInjector is not null)
@@ -151,7 +151,7 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             // 5. Update status to Sending
             await UpdateEmailStatus(email, EmailStatus.Sending, null, context.CancellationToken);
 
-            // 6. Parse recipients (To, CC, BCC)
+            // 6. Parse recipients
             var recipients = JsonSerializer.Deserialize<List<string>>(message.To) ?? new List<string>();
             var ccRecipients = !string.IsNullOrWhiteSpace(message.CcEmails) && message.CcEmails != "[]"
                 ? JsonSerializer.Deserialize<List<string>>(message.CcEmails)
@@ -165,17 +165,19 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                 ? JsonSerializer.Deserialize<List<AttachmentMetadata>>(message.Attachments) ?? new List<AttachmentMetadata>()
                 : new List<AttachmentMetadata>();
 
-            // Collect temp file paths for cleanup
             foreach (var att in attachments)
             {
                 if (!string.IsNullOrWhiteSpace(att.TempPath))
                     tempFiles.Add(att.TempPath);
             }
 
-            SendEmailResult result;
+            // Resolve the adapter for this tenant (Phase 0: always the default)
+            var provider = _providerFactory.GetForTenant(message.TenantId);
+
+            EmailSendOutcome outcome;
 
             // Whenever we need custom headers (List-Unsubscribe) OR have attachments,
-            // we must use the raw-MIME path — SES SendEmail does not support custom headers.
+            // we must use the raw-MIME path — providers' simple send does not carry custom headers.
             var needsRaw = attachments.Count > 0 || mailtoUnsub is not null;
 
             if (needsRaw)
@@ -193,38 +195,47 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
                     mailtoUnsub,
                     httpsUnsub);
 
-                result = await _emailDeliveryService.SendRawEmailAsync(mimeStream, context.CancellationToken);
+                outcome = await provider.SendRawAsync(
+                    new SendRawEmailRequest(
+                        TenantId: message.TenantId,
+                        MimeMessage: mimeStream),
+                    context.CancellationToken);
             }
             else
             {
-                // Standard simple send (no headers needed)
-                result = await _emailDeliveryService.SendEmailAsync(
-                    message.From,
-                    recipients,
-                    ccRecipients,
-                    bccRecipients,
-                    subject,
-                    htmlBody,
-                    textBody,
+                outcome = await provider.SendAsync(
+                    new SendEmailRequest(
+                        TenantId: message.TenantId,
+                        From: message.From,
+                        FromName: message.FromName,
+                        To: recipients,
+                        Cc: ccRecipients,
+                        Bcc: bccRecipients,
+                        Subject: subject,
+                        HtmlBody: htmlBody,
+                        TextBody: textBody),
                     context.CancellationToken);
             }
 
-            if (result.Success)
+            if (outcome.Success)
             {
-                email.SesMessageId = result.MessageId;
+                // Dual-write: legacy ses_message_id + provider-neutral columns. Phase 3 drops ses_message_id.
+                email.SesMessageId = outcome.ProviderMessageId;
+                email.ProviderMessageId = outcome.ProviderMessageId;
+                email.ProviderKey = provider.ProviderKey;
                 email.SentAt = DateTime.UtcNow;
                 await UpdateEmailStatus(email, EmailStatus.Sent, null, context.CancellationToken);
 
                 EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "success").Inc();
-                LogEmailSent(_logger, message.EmailId, result.MessageId!);
+                LogEmailSent(_logger, provider.ProviderKey, message.EmailId, outcome.ProviderMessageId!);
             }
             else
             {
-                await UpdateEmailStatus(email, EmailStatus.Failed, result.ErrorMessage, context.CancellationToken);
+                await UpdateEmailStatus(email, EmailStatus.Failed, outcome.ErrorMessage, context.CancellationToken);
                 EmailMetrics.EmailsSent.WithLabels(message.TenantId.ToString(), "failed").Inc();
-                LogEmailFailed(_logger, message.EmailId, result.ErrorMessage ?? "Unknown error");
+                LogEmailFailed(_logger, message.EmailId, outcome.ErrorMessage ?? "Unknown error");
 
-                throw new InvalidOperationException($"SES delivery failed: {result.ErrorMessage}");
+                throw new InvalidOperationException($"SES delivery failed: {outcome.ErrorMessage}");
             }
         }
         catch (InvalidOperationException)
@@ -239,7 +250,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         }
         finally
         {
-            // Clean up temp attachment files
             CleanupTempFiles(tempFiles);
         }
     }
@@ -260,7 +270,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
         var mimeMessage = new MimeMessage();
         mimeMessage.From.Add(new MailboxAddress(fromName ?? string.Empty, from));
 
-        // RFC 2369 List-Unsubscribe + RFC 8058 One-Click
         if (listUnsubscribeMailto is not null || listUnsubscribeHttps is not null)
         {
             var parts = new List<string>(2);
@@ -289,7 +298,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
 
         var multipart = new Multipart("mixed");
 
-        // Add body
         if (!string.IsNullOrWhiteSpace(htmlBody))
         {
             var htmlPart = new TextPart("html") { Text = htmlBody };
@@ -310,7 +318,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             multipart.Add(new TextPart("plain") { Text = textBody });
         }
 
-        // Add attachments — read into MemoryStreams to avoid leaking FileStream handles
         foreach (var attachment in attachments)
         {
             if (!File.Exists(attachment.TempPath))
@@ -354,7 +361,6 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
             }
         }
 
-        // Try to clean up the parent directory if empty
         if (tempFiles.Count > 0)
         {
             try
@@ -414,8 +420,8 @@ public sealed partial class SendEmailConsumer : IConsumer<SendEmailMessage>
     [LoggerMessage(Level = LogLevel.Information, Message = "Click tracking applied for EmailId={EmailId}")]
     private static partial void LogClickTrackingApplied(ILogger logger, Guid emailId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Email sent to SES for EmailId={EmailId}, SesMessageId={SesMessageId}")]
-    private static partial void LogEmailSent(ILogger logger, Guid emailId, string sesMessageId);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email sent via provider={Provider} for EmailId={EmailId}, ProviderMessageId={ProviderMessageId}")]
+    private static partial void LogEmailSent(ILogger logger, string provider, Guid emailId, string providerMessageId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Email delivery failed for EmailId={EmailId}: {Error}")]
     private static partial void LogEmailFailed(ILogger logger, Guid emailId, string error);

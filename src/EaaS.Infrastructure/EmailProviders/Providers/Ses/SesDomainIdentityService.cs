@@ -1,23 +1,26 @@
 using Amazon.SimpleEmailV2;
 using Amazon.SimpleEmailV2.Model;
 using EaaS.Domain.Interfaces;
-using EaaS.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace EaaS.Infrastructure.Services;
+namespace EaaS.Infrastructure.EmailProviders.Providers.Ses;
 
-public sealed partial class SesEmailService : IDomainIdentityService, IEmailSender
+/// <summary>
+/// SES-backed implementation of <see cref="IDomainIdentityService"/>. Split out from
+/// the legacy <c>SesEmailService</c> for Interface Segregation — a provider can ship
+/// outbound send without ever implementing domain identity.
+/// </summary>
+public sealed partial class SesDomainIdentityService : IDomainIdentityService
 {
     private readonly IAmazonSimpleEmailServiceV2 _sesClient;
-    private readonly ILogger<SesEmailService> _logger;
-    private readonly string? _configurationSetName;
+    private readonly ILogger<SesDomainIdentityService> _logger;
 
-    public SesEmailService(IAmazonSimpleEmailServiceV2 sesClient, IOptions<SesSettings> sesSettings, ILogger<SesEmailService> logger)
+    public SesDomainIdentityService(
+        IAmazonSimpleEmailServiceV2 sesClient,
+        ILogger<SesDomainIdentityService> logger)
     {
         _sesClient = sesClient;
         _logger = logger;
-        _configurationSetName = sesSettings.Value.ConfigurationSetName;
     }
 
     public async Task<DomainIdentityResult> CreateDomainIdentityAsync(string domain, CancellationToken cancellationToken = default)
@@ -41,11 +44,7 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
 
             LogDomainIdentityCreated(_logger, domain, dkimTokens.Count);
 
-            return new DomainIdentityResult(
-                Success: true,
-                IdentityArn: null, // SES v2 CreateEmailIdentity doesn't return ARN directly
-                DkimTokens: dkimTokens,
-                ErrorMessage: null);
+            return new DomainIdentityResult(true, null, dkimTokens, null);
         }
         catch (AlreadyExistsException)
         {
@@ -74,11 +73,7 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
 
             LogDomainVerificationChecked(_logger, domain, isVerified);
 
-            return new DomainVerificationResult(
-                Success: true,
-                IsVerified: isVerified,
-                DkimStatuses: dkimStatuses,
-                ErrorMessage: null);
+            return new DomainVerificationResult(true, isVerified, dkimStatuses, null);
         }
         catch (NotFoundException)
         {
@@ -88,90 +83,6 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
         {
             LogDomainVerificationFailed(_logger, ex, domain);
             return new DomainVerificationResult(false, false, Array.Empty<DkimTokenStatus>(), ex.Message);
-        }
-    }
-
-    public async Task<SendEmailResult> SendEmailAsync(
-        string from,
-        IReadOnlyList<string> recipients,
-        IReadOnlyList<string>? ccRecipients,
-        IReadOnlyList<string>? bccRecipients,
-        string subject,
-        string? htmlBody,
-        string? textBody,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var destination = new Destination { ToAddresses = recipients.ToList() };
-
-            if (ccRecipients is { Count: > 0 })
-                destination.CcAddresses = ccRecipients.ToList();
-
-            if (bccRecipients is { Count: > 0 })
-                destination.BccAddresses = bccRecipients.ToList();
-
-            var request = new SendEmailRequest
-            {
-                FromEmailAddress = from,
-                Destination = destination,
-                Content = new EmailContent
-                {
-                    Simple = new Message
-                    {
-                        Subject = new Content { Data = subject },
-                        Body = new Body
-                        {
-                            Html = htmlBody != null ? new Content { Data = htmlBody } : null,
-                            Text = textBody != null ? new Content { Data = textBody } : null
-                        }
-                    }
-                },
-                ConfigurationSetName = _configurationSetName
-            };
-
-            var response = await _sesClient.SendEmailAsync(request, cancellationToken);
-
-            LogEmailSent(_logger, response.MessageId);
-
-            return new SendEmailResult(true, response.MessageId, null);
-        }
-        catch (Exception ex)
-        {
-            LogEmailSendFailed(_logger, ex);
-            return new SendEmailResult(false, null, ex.Message);
-        }
-    }
-
-    public async Task<SendEmailResult> SendRawEmailAsync(Stream mimeMessage, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var memoryStream = new MemoryStream();
-            await mimeMessage.CopyToAsync(memoryStream, cancellationToken);
-
-            var request = new SendEmailRequest
-            {
-                Content = new EmailContent
-                {
-                    Raw = new RawMessage
-                    {
-                        Data = memoryStream
-                    }
-                },
-                ConfigurationSetName = _configurationSetName
-            };
-
-            var response = await _sesClient.SendEmailAsync(request, cancellationToken);
-
-            LogRawEmailSent(_logger, response.MessageId);
-
-            return new SendEmailResult(true, response.MessageId, null);
-        }
-        catch (Exception ex)
-        {
-            LogRawEmailSendFailed(_logger, ex);
-            return new SendEmailResult(false, null, ex.Message);
         }
     }
 
@@ -204,18 +115,6 @@ public sealed partial class SesEmailService : IDomainIdentityService, IEmailSend
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to check domain verification for {Domain}")]
     private static partial void LogDomainVerificationFailed(ILogger logger, Exception ex, string domain);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Email sent via SES, MessageId: {MessageId}")]
-    private static partial void LogEmailSent(ILogger logger, string messageId);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send email via SES")]
-    private static partial void LogEmailSendFailed(ILogger logger, Exception ex);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Raw email sent via SES, MessageId: {MessageId}")]
-    private static partial void LogRawEmailSent(ILogger logger, string messageId);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send raw email via SES")]
-    private static partial void LogRawEmailSendFailed(ILogger logger, Exception ex);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "SES domain identity deleted for {Domain}")]
     private static partial void LogDomainIdentityDeleted(ILogger logger, string domain);
