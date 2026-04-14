@@ -117,6 +117,8 @@ services:
       - Ses__SecretAccessKey=${AWS_SECRET_ACCESS_KEY}
       - Ses__ConfigurationSetName=sendnex-production
       - AdminSession__SessionSecret=${SESSION_SECRET}
+      - Authentication__AdminSession__SessionSecret=${SESSION_SECRET}
+      - Authentication__AdminSession__RequireProxyToken=true
     depends_on:
       postgres:
         condition: service_healthy
