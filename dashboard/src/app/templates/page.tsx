@@ -7,6 +7,7 @@ import {
   useUpdateTemplate,
   useDeleteTemplate,
 } from "@/lib/hooks/use-templates";
+import { repositories } from "@/lib/api";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
@@ -69,7 +70,10 @@ export default function TemplatesPage() {
     setDialogOpen(true);
   }
 
-  function openEdit(tpl: Template) {
+  async function openEdit(tpl: Template) {
+    // List endpoint returns a summary without htmlTemplate/textTemplate, so fetch
+    // the full template to pre-populate body fields — otherwise saving would
+    // wipe the existing body content.
     setEditingTemplate(tpl);
     setForm({
       name: tpl.name,
@@ -78,6 +82,18 @@ export default function TemplatesPage() {
       textTemplate: tpl.textTemplate ?? "",
     });
     setDialogOpen(true);
+    try {
+      const full = await repositories.template.getById(tpl.id);
+      setEditingTemplate(full);
+      setForm({
+        name: full.name,
+        subjectTemplate: full.subjectTemplate,
+        htmlTemplate: full.htmlTemplate ?? "",
+        textTemplate: full.textTemplate ?? "",
+      });
+    } catch {
+      toast.error("Failed to load template content. Please close and retry.");
+    }
   }
 
   function closeDialog() {

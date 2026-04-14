@@ -111,4 +111,33 @@ test.describe("Templates Page", () => {
       await expect(page.getByText("Edit Template")).toBeVisible();
     }
   });
+
+  test("should prepopulate HTML Body and Text Body when editing a template", async ({
+    page,
+  }) => {
+    // Wait for table to render
+    await expect(page.locator("table")).toBeVisible({ timeout: 10000 });
+
+    // Open the actions menu on the first row and click Edit
+    await page
+      .locator("table tbody tr")
+      .first()
+      .getByRole("button")
+      .first()
+      .click();
+    await page.getByRole("menuitem", { name: "Edit" }).click();
+
+    // Dialog opens
+    await expect(page.getByText(/Edit Template/)).toBeVisible();
+
+    // HTML Body textarea should be populated via the detail fetch
+    const htmlBody = page.getByPlaceholder(
+      "<html><body>Your email here...</body></html>",
+    );
+    await expect(htmlBody).toHaveValue(/<html>.*<\/html>/s, { timeout: 5000 });
+
+    // Text Body textarea should also be populated
+    const textBody = page.getByPlaceholder("Plain text version...");
+    await expect(textBody).not.toHaveValue("");
+  });
 });
