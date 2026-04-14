@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { SENDNEX_LEGAL_ENTITY, SENDNEX_POSTAL_ADDRESS } from "@/lib/constants/legal";
+import {
+  SENDNEX_CONTACT_EMAIL,
+  SENDNEX_LEGAL_ENTITY,
+  SENDNEX_POSTAL_ADDRESS,
+} from "@/lib/constants/legal";
 
 export const metadata: Metadata = {
-  title: "Terms of Service - SendNex",
-  description: "Terms and conditions for using the SendNex platform.",
+  title: "Terms of Service — SendNex",
+  description:
+    "The terms and conditions that govern your use of the SendNex transactional email platform.",
 };
 
 export default function TermsOfServicePage() {
@@ -215,15 +220,18 @@ export default function TermsOfServicePage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:legal@sendnex.xyz">legal@sendnex.xyz</a>
+          <a href={`mailto:${SENDNEX_CONTACT_EMAIL}`}>{SENDNEX_CONTACT_EMAIL}</a>
         </li>
         <li>
           <strong>Legal entity:</strong> {SENDNEX_LEGAL_ENTITY}
         </li>
-        <li>
-          <strong>Postal address:</strong>{" "}
-          <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
-        </li>
+        {SENDNEX_POSTAL_ADDRESS ? (
+          <li>
+            <strong>Postal address:</strong>{" "}
+            <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
+          </li>
+        ) : null}
+        {/* TODO: add registered postal address once company registration completes */}
       </ul>
     </>
   );

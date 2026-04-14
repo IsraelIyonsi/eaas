@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { SENDNEX_LEGAL_ENTITY, SENDNEX_POSTAL_ADDRESS } from "@/lib/constants/legal";
+import {
+  SENDNEX_CONTACT_EMAIL,
+  SENDNEX_LEGAL_ENTITY,
+  SENDNEX_POSTAL_ADDRESS,
+} from "@/lib/constants/legal";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy - SendNex",
-  description: "How SendNex uses cookies.",
+  title: "Cookie Policy — SendNex",
+  description:
+    "How SendNex uses essential cookies and why we do not track you for analytics or advertising.",
 };
 
 export default function CookiePolicyPage() {
@@ -100,15 +105,18 @@ export default function CookiePolicyPage() {
       <ul>
         <li>
           <strong>Email:</strong>{" "}
-          <a href="mailto:privacy@sendnex.xyz">privacy@sendnex.xyz</a>
+          <a href={`mailto:${SENDNEX_CONTACT_EMAIL}`}>{SENDNEX_CONTACT_EMAIL}</a>
         </li>
         <li>
           <strong>Legal entity:</strong> {SENDNEX_LEGAL_ENTITY}
         </li>
-        <li>
-          <strong>Postal address:</strong>{" "}
-          <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
-        </li>
+        {SENDNEX_POSTAL_ADDRESS ? (
+          <li>
+            <strong>Postal address:</strong>{" "}
+            <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
+          </li>
+        ) : null}
+        {/* TODO: add registered postal address once company registration completes */}
       </ul>
     </>
   );
