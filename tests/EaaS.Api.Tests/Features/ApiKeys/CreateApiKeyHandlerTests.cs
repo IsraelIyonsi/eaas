@@ -57,8 +57,8 @@ public sealed class CreateApiKeyHandlerTests : IDisposable
         result.Key.Length.Should().BeGreaterThan(10);
         result.Key.Should().StartWith("snx_live_");
 
-        // Verify the key is 50 chars total (10 prefix + 40 random)
-        result.Key.Should().HaveLength(50);
+        // Verify the key is 49 chars total (9-char "snx_live_" prefix + 40 random)
+        result.Key.Should().HaveLength(49);
     }
 
     [Fact]

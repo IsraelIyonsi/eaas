@@ -72,7 +72,7 @@ public sealed class RegisterHandlerTests
 
         var result = await sut.Handle(command, CancellationToken.None);
 
-        result.ApiKey.Should().StartWith("eaas_live_");
+        result.ApiKey.Should().StartWith("snx_live_");
         apiKeys.Should().ContainSingle();
         apiKeys[0].KeyHash.Should().NotBeNullOrEmpty();
         apiKeys[0].Prefix.Should().Be(result.ApiKey[..8]);
