@@ -37,7 +37,7 @@ public sealed class CreateApiKeyHandlerTests : IDisposable
 
         result.Should().NotBeNull();
         result.Name.Should().Be(command.Name);
-        result.Key.Should().StartWith("eaas_live_");
+        result.Key.Should().StartWith("snx_live_");
         result.KeyPrefix.Should().Be(result.Key[..8]);
 
         var storedKey = await _dbContext.ApiKeys.FirstOrDefaultAsync();
@@ -55,7 +55,7 @@ public sealed class CreateApiKeyHandlerTests : IDisposable
 
         result.Key.Should().NotBeNullOrEmpty();
         result.Key.Length.Should().BeGreaterThan(10);
-        result.Key.Should().StartWith("eaas_live_");
+        result.Key.Should().StartWith("snx_live_");
 
         // Verify the key is 50 chars total (10 prefix + 40 random)
         result.Key.Should().HaveLength(50);

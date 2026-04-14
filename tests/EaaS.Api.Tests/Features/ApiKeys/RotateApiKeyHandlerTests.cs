@@ -29,7 +29,7 @@ public sealed class RotateApiKeyHandlerTests
             TenantId = tenantId,
             Name = "Original Key",
             KeyHash = "oldhash123",
-            Prefix = "eaas_liv",
+            Prefix = "snx_live",
             Status = ApiKeyStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
@@ -77,7 +77,7 @@ public sealed class RotateApiKeyHandlerTests
             TenantId = tenantId,
             Name = "Original Key",
             KeyHash = "oldhash123",
-            Prefix = "eaas_liv",
+            Prefix = "snx_live",
             Status = ApiKeyStatus.Active,
             CreatedAt = DateTime.UtcNow
         };
@@ -91,7 +91,7 @@ public sealed class RotateApiKeyHandlerTests
         var result = await sut.Handle(command, CancellationToken.None);
 
         result.ApiKey.Should().NotBeNullOrEmpty();
-        result.ApiKey.Should().StartWith("eaas_live_");
+        result.ApiKey.Should().StartWith("snx_live_");
         result.Prefix.Should().Be(result.ApiKey[..8]);
         result.KeyId.Should().NotBeEmpty();
         result.OldKeyExpiresAt.Should().BeAfter(DateTime.UtcNow);

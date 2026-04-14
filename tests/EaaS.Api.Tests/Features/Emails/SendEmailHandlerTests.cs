@@ -73,7 +73,7 @@ public sealed class SendEmailHandlerTests : IDisposable
 
         result.Should().NotBeNull();
         result.Status.Should().Be("queued");
-        result.MessageId.Should().StartWith("eaas_");
+        result.MessageId.Should().StartWith("snx_");
 
         var savedEmail = await _dbContext.Emails.FindAsync(result.Id);
         savedEmail.Should().NotBeNull();
@@ -120,7 +120,7 @@ public sealed class SendEmailHandlerTests : IDisposable
     public async Task Should_ReturnCachedResult_When_IdempotencyKeyExists()
     {
         var cachedId = Guid.NewGuid();
-        var cachedMessageId = "eaas_cached123";
+        var cachedMessageId = "snx_cached123";
         var cachedData = JsonSerializer.Serialize(new { Id = cachedId, MessageId = cachedMessageId });
 
         var command = TestDataBuilders.SendEmail()

@@ -66,7 +66,7 @@ public sealed class SendEmailConsumerTests : IDisposable
             Arg.Any<CancellationToken>());
 
         var updated = await _dbContext.Emails.FindAsync(email.Id);
-        updated!.Status.Should().Be(EmailStatus.Sending);
+        updated!.Status.Should().Be(EmailStatus.Sent);
         updated.SesMessageId.Should().Be("ses-msg-123");
     }
 
@@ -126,7 +126,7 @@ public sealed class SendEmailConsumerTests : IDisposable
     }
 
     [Fact]
-    public async Task Should_UpdateStatusToSending_When_SesSucceeds()
+    public async Task Should_UpdateStatusToSent_When_SesSucceeds()
     {
         var email = SeedEmail();
         var message = CreateMessage(email);
@@ -142,7 +142,7 @@ public sealed class SendEmailConsumerTests : IDisposable
         await _sut.Consume(context);
 
         var updated = await _dbContext.Emails.FindAsync(email.Id);
-        updated!.Status.Should().Be(EmailStatus.Sending);
+        updated!.Status.Should().Be(EmailStatus.Sent);
         updated.SentAt.Should().NotBeNull();
     }
 

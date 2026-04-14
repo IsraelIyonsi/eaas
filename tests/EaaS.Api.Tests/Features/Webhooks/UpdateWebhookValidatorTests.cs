@@ -95,6 +95,6 @@ public sealed class UpdateWebhookValidatorTests
         var result = _sut.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Events)
-            .WithErrorMessage("Events must be one of: sent, delivered, bounced, complained, opened, clicked, failed.");
+            .WithErrorMessage("Events must be one of: queued, sent, delivered, bounced, complained, opened, clicked, failed.");
     }
 }
