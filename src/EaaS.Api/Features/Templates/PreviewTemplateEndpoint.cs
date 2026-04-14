@@ -25,8 +25,8 @@ public static class PreviewTemplateEndpoint
             return Results.Ok(ApiResponse.Ok(new
             {
                 subject = result.Subject,
-                html_body = result.HtmlBody,
-                text_body = result.TextBody
+                htmlTemplate = result.HtmlTemplate,
+                textTemplate = result.TextTemplate
             }));
         })
         .WithName("PreviewTemplate")

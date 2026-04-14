@@ -43,7 +43,8 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
                 throw new ConflictException($"Template with name '{request.Name}' already exists.");
         }
 
-        // Snapshot current state before applying update
+        // Snapshot current state before applying update.
+        // MED-6: public contract uses HtmlTemplate/TextTemplate; entity stores HtmlBody/TextBody.
         var snapshot = new TemplateVersion
         {
             Id = Guid.NewGuid(),
@@ -64,11 +65,11 @@ public sealed class UpdateTemplateHandler : IRequestHandler<UpdateTemplateComman
         if (request.SubjectTemplate is not null)
             template.SubjectTemplate = request.SubjectTemplate;
 
-        if (request.HtmlBody is not null)
-            template.HtmlBody = request.HtmlBody;
+        if (request.HtmlTemplate is not null)
+            template.HtmlBody = request.HtmlTemplate;
 
-        if (request.TextBody is not null)
-            template.TextBody = request.TextBody;
+        if (request.TextTemplate is not null)
+            template.TextBody = request.TextTemplate;
 
         template.Version++;
         template.UpdatedAt = DateTime.UtcNow;

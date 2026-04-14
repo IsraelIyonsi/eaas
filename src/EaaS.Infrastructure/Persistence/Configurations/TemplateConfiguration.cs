@@ -30,6 +30,10 @@ public sealed class TemplateConfiguration : IEntityTypeConfiguration<Template>
             .HasMaxLength(1024)
             .IsRequired();
 
+        // NOTE (MED-6): Public API exposes these fields as `htmlTemplate` / `textTemplate`
+        // for consistency with `subjectTemplate`. The CLR property + DB column names
+        // retain the legacy `HtmlBody` / `TextBody` / `html_body` / `text_body` to avoid
+        // a destructive rename; the mapping happens in the API DTO layer.
         builder.Property(t => t.HtmlBody)
             .HasColumnName("html_body")
             .HasColumnType("text")

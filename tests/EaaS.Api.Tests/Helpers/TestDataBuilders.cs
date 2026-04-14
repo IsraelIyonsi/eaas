@@ -111,16 +111,16 @@ public static class TestDataBuilders
         private Guid _tenantId = DefaultTenantId;
         private string _name = "Welcome Email";
         private string _subjectTemplate = "Hello {{ name }}";
-        private string _htmlBody = "<h1>Welcome {{ name }}</h1>";
-        private string? _textBody = "Welcome {{ name }}";
+        private string _htmlTemplate = "<h1>Welcome {{ name }}</h1>";
+        private string? _textTemplate = "Welcome {{ name }}";
 
         public CreateTemplateCommandBuilder WithTenantId(Guid tenantId) { _tenantId = tenantId; return this; }
         public CreateTemplateCommandBuilder WithName(string name) { _name = name; return this; }
         public CreateTemplateCommandBuilder WithSubjectTemplate(string subject) { _subjectTemplate = subject; return this; }
-        public CreateTemplateCommandBuilder WithHtmlBody(string htmlBody) { _htmlBody = htmlBody; return this; }
-        public CreateTemplateCommandBuilder WithTextBody(string? textBody) { _textBody = textBody; return this; }
+        public CreateTemplateCommandBuilder WithHtmlTemplate(string htmlTemplate) { _htmlTemplate = htmlTemplate; return this; }
+        public CreateTemplateCommandBuilder WithTextTemplate(string? textTemplate) { _textTemplate = textTemplate; return this; }
 
-        public CreateTemplateCommand Build() => new(_tenantId, _name, _subjectTemplate, _htmlBody, _textBody);
+        public CreateTemplateCommand Build() => new(_tenantId, _name, _subjectTemplate, _htmlTemplate, _textTemplate);
     }
 
     public sealed class EmailEntityBuilder

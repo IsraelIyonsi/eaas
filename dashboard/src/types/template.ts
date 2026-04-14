@@ -6,8 +6,8 @@ export interface Template {
   id: string;
   name: string;
   subjectTemplate: string;
-  htmlBody?: string;
-  textBody?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
   variablesSchema?: string;
   version: number;
   createdAt: string;
@@ -18,16 +18,16 @@ export interface Template {
 export interface CreateTemplateRequest {
   name: string;
   subjectTemplate: string;
-  htmlBody?: string;
-  textBody?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
   variablesSchema?: string;
 }
 
 export interface UpdateTemplateRequest {
   name?: string;
   subjectTemplate?: string;
-  htmlBody?: string;
-  textBody?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
   variablesSchema?: string;
 }
 
@@ -36,8 +36,8 @@ export interface TemplateVersion {
   version: number;
   name: string;
   subject: string;
-  htmlBody?: string;
-  textBody?: string;
+  htmlTemplate?: string;
+  textTemplate?: string;
   description?: string;
   createdAt: string;
 }

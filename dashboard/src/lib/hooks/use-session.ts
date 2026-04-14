@@ -13,17 +13,33 @@ interface SessionResponse {
   data: SessionData;
 }
 
-export function useSession() {
-  const query = useQuery<SessionResponse>({
+interface UseSessionOptions {
+  /**
+   * When false, the session fetch is skipped. Use on public routes
+   * (login, signup, legal pages) to avoid a noisy 401 on `/api/auth/me`.
+   */
+  enabled?: boolean;
+}
+
+export function useSession(options: UseSessionOptions = {}) {
+  const { enabled = true } = options;
+
+  const query = useQuery<SessionResponse | null>({
     queryKey: ['session'],
     queryFn: async () => {
       const r = await fetch('/api/auth/me');
+      // LOW-9: 401 is expected on public routes if the hook is invoked
+      // before the `enabled` guard short-circuits (e.g. hydration races).
+      // Treat it as "no session" rather than a hard error so the console
+      // stays clean for unauthenticated visitors.
+      if (r.status === 401) return null;
       if (!r.ok) throw new Error(`Session fetch failed: ${r.status}`);
       return r.json();
     },
     retry: false,
     staleTime: DETAIL_STALE_TIME_MS,
     refetchOnWindowFocus: true,
+    enabled,
   });
 
   return {

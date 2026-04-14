@@ -120,9 +120,9 @@ const ENDPOINT_GROUPS: EndpointGroup[] = [
           {
             name: "Welcome Email",
             subjectTemplate: "Welcome {{name}}!",
-            htmlBody:
+            htmlTemplate:
               "<h1>Welcome {{name}}</h1><p>Thanks for signing up.</p>",
-            textBody: "Welcome {{name}}! Thanks for signing up.",
+            textTemplate: "Welcome {{name}}! Thanks for signing up.",
           },
           null,
           2,

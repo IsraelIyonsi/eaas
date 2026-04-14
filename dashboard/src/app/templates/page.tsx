@@ -45,8 +45,8 @@ import type { Template } from "@/types";
 const emptyTemplate = {
   name: "",
   subjectTemplate: "",
-  htmlBody: "",
-  textBody: "",
+  htmlTemplate: "",
+  textTemplate: "",
 };
 
 export default function TemplatesPage() {
@@ -74,8 +74,8 @@ export default function TemplatesPage() {
     setForm({
       name: tpl.name,
       subjectTemplate: tpl.subjectTemplate,
-      htmlBody: tpl.htmlBody ?? "",
-      textBody: tpl.textBody ?? "",
+      htmlTemplate: tpl.htmlTemplate ?? "",
+      textTemplate: tpl.textTemplate ?? "",
     });
     setDialogOpen(true);
   }
@@ -275,9 +275,9 @@ export default function TemplatesPage() {
               <div className="space-y-2">
                 <Label className="text-foreground/80">HTML Body</Label>
                 <Textarea
-                  value={form.htmlBody}
+                  value={form.htmlTemplate}
                   onChange={(e) =>
-                    setForm({ ...form, htmlBody: e.target.value })
+                    setForm({ ...form, htmlTemplate: e.target.value })
                   }
                   placeholder="<html><body>Your email here...</body></html>"
                   className="min-h-[220px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-[var(--chart-1)] leading-relaxed tracking-wide"
@@ -286,9 +286,9 @@ export default function TemplatesPage() {
               <div className="space-y-2">
                 <Label className="text-foreground/80">Text Body</Label>
                 <Textarea
-                  value={form.textBody}
+                  value={form.textTemplate}
                   onChange={(e) =>
-                    setForm({ ...form, textBody: e.target.value })
+                    setForm({ ...form, textTemplate: e.target.value })
                   }
                   placeholder="Plain text version..."
                   className="min-h-[120px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-foreground leading-relaxed"
@@ -298,7 +298,7 @@ export default function TemplatesPage() {
             <TabsContent value="preview" className="mt-6">
               <div className="rounded-lg border border-border bg-white overflow-hidden">
                 <iframe
-                  srcDoc={form.htmlBody || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}
+                  srcDoc={form.htmlTemplate || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}
                   title="Template preview"
                   className="h-[340px] w-full"
                   sandbox=""
@@ -331,7 +331,7 @@ export default function TemplatesPage() {
           </DialogHeader>
           <div className="mt-4 rounded-lg border border-border bg-white overflow-hidden">
             <iframe
-              srcDoc={previewTemplate?.htmlBody ?? ""}
+              srcDoc={previewTemplate?.htmlTemplate ?? ""}
               title="Template preview"
               className="h-[400px] w-full"
               sandbox=""

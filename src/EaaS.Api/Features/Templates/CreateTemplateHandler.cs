@@ -34,8 +34,9 @@ public sealed class CreateTemplateHandler : IRequestHandler<CreateTemplateComman
             TenantId = request.TenantId,
             Name = request.Name,
             SubjectTemplate = request.SubjectTemplate,
-            HtmlBody = request.HtmlBody,
-            TextBody = request.TextBody,
+            // MED-6: public contract uses HtmlTemplate/TextTemplate; entity stores as HtmlBody/TextBody.
+            HtmlBody = request.HtmlTemplate,
+            TextBody = request.TextTemplate,
             Version = 1,
             CreatedAt = now,
             UpdatedAt = now

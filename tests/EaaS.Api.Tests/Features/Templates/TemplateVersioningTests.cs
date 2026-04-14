@@ -36,8 +36,8 @@ public sealed class TemplateVersioningTests : IDisposable
             _tenantId, template.Id,
             Name: "Updated Name",
             SubjectTemplate: "Updated Subject",
-            HtmlBody: "<p>Updated</p>",
-            TextBody: "Updated");
+            HtmlTemplate: "<p>Updated</p>",
+            TextTemplate: "Updated");
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -138,8 +138,8 @@ public sealed class TemplateVersioningTests : IDisposable
         // Assert
         result.Name.Should().Be("V1 Name");
         result.SubjectTemplate.Should().Be("V1 Subject");
-        result.HtmlBody.Should().Be("<p>V1</p>");
-        result.TextBody.Should().Be("V1 text");
+        result.HtmlTemplate.Should().Be("<p>V1</p>");
+        result.TextTemplate.Should().Be("V1 text");
     }
 
     [Fact]

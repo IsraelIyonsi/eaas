@@ -7,5 +7,5 @@ public sealed record UpdateTemplateCommand(
     Guid TemplateId,
     string? Name,
     string? SubjectTemplate,
-    string? HtmlBody,
-    string? TextBody) : IRequest<TemplateResult>;
+    string? HtmlTemplate,
+    string? TextTemplate) : IRequest<TemplateResult>;

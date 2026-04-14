@@ -5,7 +5,7 @@ public sealed record TemplateVersionResult(
     int Version,
     string Name,
     string Subject,
-    string? HtmlBody,
-    string? TextBody,
+    string? HtmlTemplate,
+    string? TextTemplate,
     string? Description,
     DateTime CreatedAt);

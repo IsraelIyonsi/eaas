@@ -6,6 +6,10 @@ public class Template
     public Guid TenantId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string SubjectTemplate { get; set; } = string.Empty;
+    // NOTE (MED-6): Public API exposes these as `htmlTemplate` / `textTemplate`.
+    // The CLR property + DB column names retain the legacy `HtmlBody` / `TextBody`
+    // to avoid a destructive internal rename / schema migration. Public API DTOs
+    // (CreateTemplateRequest/TemplateResult/etc.) use the new names; handlers bridge.
     public string HtmlBody { get; set; } = string.Empty;
     public string? TextBody { get; set; }
     public string? VariablesSchema { get; set; }

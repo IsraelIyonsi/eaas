@@ -9,5 +9,5 @@ public sealed record PreviewTemplateCommand(
 
 public sealed record PreviewTemplateResult(
     string Subject,
-    string HtmlBody,
-    string? TextBody);
+    string HtmlTemplate,
+    string? TextTemplate);

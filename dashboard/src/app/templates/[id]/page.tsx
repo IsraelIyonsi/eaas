@@ -41,8 +41,8 @@ export default function TemplateEditorPage() {
   const [form, setForm] = useState<{
     name: string;
     subjectTemplate: string;
-    htmlBody: string;
-    textBody: string;
+    htmlTemplate: string;
+    textTemplate: string;
   } | null>(null);
 
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
@@ -54,8 +54,8 @@ export default function TemplateEditorPage() {
     setForm({
       name: template.name,
       subjectTemplate: template.subjectTemplate,
-      htmlBody: template.htmlBody ?? "",
-      textBody: template.textBody ?? "",
+      htmlTemplate: template.htmlTemplate ?? "",
+      textTemplate: template.textTemplate ?? "",
     });
   }
 
@@ -79,7 +79,7 @@ export default function TemplateEditorPage() {
       { id, variables: {} },
       {
         onSuccess: (result) => {
-          setPreviewHtml(result.htmlBody);
+          setPreviewHtml(result.htmlTemplate);
           setPreviewOpen(true);
         },
         onError: () => {
@@ -100,8 +100,8 @@ export default function TemplateEditorPage() {
           setForm({
             name: tpl.name,
             subjectTemplate: tpl.subjectTemplate,
-            htmlBody: tpl.htmlBody ?? "",
-            textBody: tpl.textBody ?? "",
+            htmlTemplate: tpl.htmlTemplate ?? "",
+            textTemplate: tpl.textTemplate ?? "",
           });
         },
         onError: () => {
@@ -213,16 +213,16 @@ export default function TemplateEditorPage() {
                 </TabsList>
                 <TabsContent value="html" className="mt-4">
                   <Textarea
-                    value={form.htmlBody}
-                    onChange={(e) => setForm({ ...form, htmlBody: e.target.value })}
+                    value={form.htmlTemplate}
+                    onChange={(e) => setForm({ ...form, htmlTemplate: e.target.value })}
                     placeholder="<html><body>Your email here...</body></html>"
                     className="min-h-[360px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-[var(--chart-1)] leading-relaxed tracking-wide"
                   />
                 </TabsContent>
                 <TabsContent value="text" className="mt-4">
                   <Textarea
-                    value={form.textBody}
-                    onChange={(e) => setForm({ ...form, textBody: e.target.value })}
+                    value={form.textTemplate}
+                    onChange={(e) => setForm({ ...form, textTemplate: e.target.value })}
                     placeholder="Plain text version of your email..."
                     className="min-h-[360px] border-border bg-background font-[var(--font-jetbrains-mono)] text-sm text-foreground leading-relaxed"
                   />

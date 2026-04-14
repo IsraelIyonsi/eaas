@@ -141,9 +141,9 @@ const mockTemplates = [
     id: "tpl-001",
     name: "Invoice Notification",
     subjectTemplate: "Invoice #{{invoice_number}} from {{company_name}}",
-    htmlBody:
+    htmlTemplate:
       "<html><body><h1>Invoice</h1><p>Amount: {{amount}}</p></body></html>",
-    textBody: "Invoice #{{invoice_number}} - Amount: {{amount}}",
+    textTemplate: "Invoice #{{invoice_number}} - Amount: {{amount}}",
     version: 3,
     createdAt: "2026-03-01T10:00:00Z",
     updatedAt: "2026-03-25T14:30:00Z",
@@ -152,9 +152,9 @@ const mockTemplates = [
     id: "tpl-002",
     name: "Welcome Email",
     subjectTemplate: "Welcome to {{app_name}}, {{first_name}}!",
-    htmlBody:
+    htmlTemplate:
       "<html><body><h1>Welcome!</h1><p>Thanks for signing up.</p></body></html>",
-    textBody: "Welcome to {{app_name}}!",
+    textTemplate: "Welcome to {{app_name}}!",
     version: 1,
     createdAt: "2026-03-10T08:00:00Z",
     updatedAt: "2026-03-10T08:00:00Z",

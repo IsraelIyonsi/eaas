@@ -6,15 +6,15 @@ public sealed record CreateTemplateCommand(
     Guid TenantId,
     string Name,
     string SubjectTemplate,
-    string HtmlBody,
-    string? TextBody) : IRequest<TemplateResult>;
+    string HtmlTemplate,
+    string? TextTemplate) : IRequest<TemplateResult>;
 
 public sealed record TemplateResult(
     Guid Id,
     string Name,
     string SubjectTemplate,
-    string HtmlBody,
-    string? TextBody,
+    string HtmlTemplate,
+    string? TextTemplate,
     int Version,
     DateTime CreatedAt,
     DateTime UpdatedAt);

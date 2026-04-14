@@ -9,8 +9,8 @@ public static class CreateTemplateEndpoint
     public sealed record CreateTemplateRequest(
         string Name,
         string SubjectTemplate,
-        string HtmlBody,
-        string? TextBody);
+        string HtmlTemplate,
+        string? TextTemplate);
 
     public static void Map(RouteGroupBuilder group)
     {
@@ -22,8 +22,8 @@ public static class CreateTemplateEndpoint
                 tenantId,
                 request.Name,
                 request.SubjectTemplate,
-                request.HtmlBody,
-                request.TextBody);
+                request.HtmlTemplate,
+                request.TextTemplate);
 
             var result = await mediator.Send(command);
 

@@ -32,8 +32,8 @@ export class TemplateRepository extends HttpClient {
     return this.del(ApiPaths.TEMPLATE_BY_ID(id));
   }
 
-  async preview(id: string, variables?: Record<string, unknown>): Promise<{ subject: string; htmlBody: string; textBody: string }> {
-    return this.post<{ subject: string; htmlBody: string; textBody: string }>(
+  async preview(id: string, variables?: Record<string, unknown>): Promise<{ subject: string; htmlTemplate: string; textTemplate: string }> {
+    return this.post<{ subject: string; htmlTemplate: string; textTemplate: string }>(
       ApiPaths.TEMPLATE_PREVIEW(id),
       { variables },
     );

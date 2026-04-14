@@ -13,9 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  const { session: userData } = useSession();
-
-  if (
+  const isPublicRoute =
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname.startsWith("/admin") ||
@@ -24,8 +22,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/cookies" ||
     pathname === "/dpa" ||
     pathname === "/sub-processors" ||
-    pathname === "/acceptable-use"
-  ) {
+    pathname === "/acceptable-use";
+
+  // LOW-9: Skip `/api/auth/me` on public routes (login, signup, legal) so
+  // unauthenticated visitors don't see a 401 in the console.
+  const { session: userData } = useSession({ enabled: !isPublicRoute });
+
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 

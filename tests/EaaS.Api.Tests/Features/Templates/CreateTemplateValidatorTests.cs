@@ -33,15 +33,15 @@ public sealed class CreateTemplateValidatorTests
     }
 
     [Fact]
-    public void Should_Fail_When_HtmlBodyEmpty()
+    public void Should_Fail_When_HtmlTemplateEmpty()
     {
         var command = TestDataBuilders.CreateTemplate()
-            .WithHtmlBody(string.Empty)
+            .WithHtmlTemplate(string.Empty)
             .Build();
 
         var result = _sut.TestValidate(command);
 
-        result.ShouldHaveValidationErrorFor(x => x.HtmlBody)
-            .WithErrorMessage("HTML body is required.");
+        result.ShouldHaveValidationErrorFor(x => x.HtmlTemplate)
+            .WithErrorMessage("HTML template is required.");
     }
 }

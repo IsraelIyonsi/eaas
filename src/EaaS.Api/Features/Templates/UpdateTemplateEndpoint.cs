@@ -9,8 +9,8 @@ public static class UpdateTemplateEndpoint
     public sealed record UpdateTemplateRequest(
         string? Name,
         string? SubjectTemplate,
-        string? HtmlBody,
-        string? TextBody);
+        string? HtmlTemplate,
+        string? TextTemplate);
 
     public static void Map(RouteGroupBuilder group)
     {
@@ -23,8 +23,8 @@ public static class UpdateTemplateEndpoint
                 id,
                 request.Name,
                 request.SubjectTemplate,
-                request.HtmlBody,
-                request.TextBody);
+                request.HtmlTemplate,
+                request.TextTemplate);
 
             var result = await mediator.Send(command);
 

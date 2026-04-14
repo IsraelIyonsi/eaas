@@ -34,6 +34,7 @@ public sealed class TemplateVersionConfiguration : IEntityTypeConfiguration<Temp
             .HasColumnType("text")
             .IsRequired();
 
+        // NOTE (MED-6): see TemplateConfiguration — CLR + DB names kept as HtmlBody/TextBody.
         builder.Property(v => v.HtmlBody)
             .HasColumnName("html_body")
             .HasColumnType("text");

@@ -14,9 +14,9 @@ public sealed class CreateTemplateValidator : AbstractValidator<CreateTemplateCo
         RuleFor(x => x.SubjectTemplate)
             .NotEmpty().WithMessage("Subject template is required.");
 
-        RuleFor(x => x.HtmlBody)
-            .NotEmpty().WithMessage("HTML body is required.")
+        RuleFor(x => x.HtmlTemplate)
+            .NotEmpty().WithMessage("HTML template is required.")
             .Must(h => h is null || h.Length <= 524288)
-            .WithMessage("HTML body must not exceed 512KB.");
+            .WithMessage("HTML template must not exceed 512KB.");
     }
 }
