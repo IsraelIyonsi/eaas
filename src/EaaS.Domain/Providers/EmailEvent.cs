@@ -9,16 +9,16 @@ namespace EaaS.Domain.Providers;
 /// </summary>
 public enum EmailEventType
 {
-    Accepted     = 0,
-    Delivered    = 1,
-    Bounced      = 2,
-    TempFailed   = 3,
-    PermFailed   = 4,
-    Complained   = 5,
-    Opened       = 6,
-    Clicked      = 7,
+    Accepted = 0,
+    Delivered = 1,
+    Bounced = 2,
+    TempFailed = 3,
+    PermFailed = 4,
+    Complained = 5,
+    Opened = 6,
+    Clicked = 7,
     Unsubscribed = 8,
-    Stored       = 9
+    Stored = 9
 }
 
 public sealed record ProviderEmailEvent(

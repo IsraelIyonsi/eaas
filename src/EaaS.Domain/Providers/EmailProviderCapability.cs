@@ -10,13 +10,13 @@ namespace EaaS.Domain.Providers;
 [System.Flags]
 public enum EmailProviderCapability
 {
-    None            = 0,
-    Attachments     = 1 << 0,
-    Tags            = 1 << 1,
+    None = 0,
+    Attachments = 1 << 0,
+    Tags = 1 << 1,
     CustomVariables = 1 << 2,
-    Templates       = 1 << 3,
-    Batch           = 1 << 4,
-    Nonces          = 1 << 5,
-    SendRaw         = 1 << 6,
-    DomainIdentity  = 1 << 7
+    Templates = 1 << 3,
+    Batch = 1 << 4,
+    Nonces = 1 << 5,
+    SendRaw = 1 << 6,
+    DomainIdentity = 1 << 7
 }

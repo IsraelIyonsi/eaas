@@ -14,32 +14,32 @@ public static class EmailProviderConfigKeys
 
     public static class ProviderKeys
     {
-        public const string Ses     = "ses";
+        public const string Ses = "ses";
         public const string Mailgun = "mailgun";
-        public const string Smtp    = "smtp";
+        public const string Smtp = "smtp";
     }
 
     public static class Routing
     {
-        public const string Section          = "EmailProviders:Routing";
-        public const string DefaultProvider  = "EmailProviders:Routing:DefaultProvider";
+        public const string Section = "EmailProviders:Routing";
+        public const string DefaultProvider = "EmailProviders:Routing:DefaultProvider";
     }
 
     public static class Ses
     {
-        public const string Section          = "EmailProviders:Ses";
-        public const string AccessKeyId      = "EmailProviders:Ses:AccessKeyId";
-        public const string SecretAccessKey  = "EmailProviders:Ses:SecretAccessKey";
-        public const string Region           = "EmailProviders:Ses:Region";
+        public const string Section = "EmailProviders:Ses";
+        public const string AccessKeyId = "EmailProviders:Ses:AccessKeyId";
+        public const string SecretAccessKey = "EmailProviders:Ses:SecretAccessKey";
+        public const string Region = "EmailProviders:Ses:Region";
         public const string ConfigurationSet = "EmailProviders:Ses:ConfigurationSetName";
     }
 
     public static class Mailgun
     {
-        public const string Section           = "EmailProviders:Mailgun";
-        public const string ApiKey            = "EmailProviders:Mailgun:ApiKey";
-        public const string Region            = "EmailProviders:Mailgun:Region";
+        public const string Section = "EmailProviders:Mailgun";
+        public const string ApiKey = "EmailProviders:Mailgun:ApiKey";
+        public const string Region = "EmailProviders:Mailgun:Region";
         public const string WebhookSigningKey = "EmailProviders:Mailgun:WebhookSigningKey";
-        public const string DefaultDomain     = "EmailProviders:Mailgun:DefaultDomain";
+        public const string DefaultDomain = "EmailProviders:Mailgun:DefaultDomain";
     }
 }
