@@ -37,7 +37,8 @@ public sealed class InboundRuleConfiguration : IEntityTypeConfiguration<InboundR
 
         builder.Property(r => r.Action)
             .HasColumnName("action")
-            .HasDefaultValue(InboundRuleAction.Store);
+            .HasDefaultValue(InboundRuleAction.Store)
+            .HasSentinel(InboundRuleAction.Store);
 
         builder.Property(r => r.WebhookUrl)
             .HasColumnName("webhook_url")

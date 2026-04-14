@@ -31,7 +31,8 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
 
         builder.Property(s => s.Provider)
             .HasColumnName("provider")
-            .HasDefaultValue(PaymentProvider.Stripe);
+            .HasDefaultValue(PaymentProvider.Stripe)
+            .HasSentinel(PaymentProvider.Stripe);
 
         builder.Property(s => s.ExternalSubscriptionId)
             .HasColumnName("external_subscription_id");
