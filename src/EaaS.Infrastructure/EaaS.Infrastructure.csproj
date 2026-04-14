@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EaaS.Domain\EaaS.Domain.csproj" />
     <ProjectReference Include="..\EaaS.Shared\EaaS.Shared.csproj" />
+    <ProjectReference Include="..\SendNex.Mailgun\SendNex.Mailgun.csproj" />
   </ItemGroup>
 
 </Project>

@@ -231,12 +231,15 @@ public static class DependencyInjection
             services.AddSingleton<IDomainIdentityService>(sp => sp.GetRequiredService<SesDomainIdentityService>());
         }
 
-        // The factory is keyed off the final default-provider string.
+        // The factory is keyed off the final default-provider string. The optional
+        // ITenantProviderKeyResolver is consumed when Mailgun (or another alt adapter)
+        // has registered one — present from Phase 1 onward.
         services.AddSingleton<IEmailProviderFactory>(sp =>
             new EmailProviderFactory(
                 sp.GetServices<IEmailProvider>(),
                 defaultKey,
-                sp.GetRequiredService<ILogger<EmailProviderFactory>>()));
+                sp.GetRequiredService<ILogger<EmailProviderFactory>>(),
+                sp.GetService<EaaS.Infrastructure.EmailProviders.ITenantProviderKeyResolver>()));
 
         return services;
     }
