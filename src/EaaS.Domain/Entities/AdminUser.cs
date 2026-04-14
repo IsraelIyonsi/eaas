@@ -12,6 +12,7 @@ public class AdminUser
     public Guid Id { get; set; }
     public string Email { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
+    [System.Text.Json.Serialization.JsonIgnore]
     public string PasswordHash { get; set; } = string.Empty;
     public AdminRole Role { get; set; } = AdminRole.Admin;
     public bool IsActive { get; set; } = true;
