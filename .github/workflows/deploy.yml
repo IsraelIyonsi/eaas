@@ -13,7 +13,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/eaas
+  # Owner handle must be lowercase for GHCR — lowercase here so workflow_dispatch from non-canonical casing still works.
+  IMAGE_PREFIX: ghcr.io/israeliyonsi/eaas
 
 jobs:
   build-and-push:
