@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaaS.WebhookProcessor.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendNex.Mailgun", "src\SendNex.Mailgun\SendNex.Mailgun.csproj", "{F8D64385-0A0A-46F0-81C5-E144C34B8C2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaaS.Domain.Providers.Tests", "tests\EaaS.Domain.Providers.Tests\EaaS.Domain.Providers.Tests.csproj", "{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -185,6 +187,18 @@ Global
 		{F8D64385-0A0A-46F0-81C5-E144C34B8C2C}.Release|x64.Build.0 = Release|Any CPU
 		{F8D64385-0A0A-46F0-81C5-E144C34B8C2C}.Release|x86.ActiveCfg = Release|Any CPU
 		{F8D64385-0A0A-46F0-81C5-E144C34B8C2C}.Release|x86.Build.0 = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|x64.Build.0 = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Debug|x86.Build.0 = Debug|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|x64.ActiveCfg = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|x64.Build.0 = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|x86.ActiveCfg = Release|Any CPU
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -202,5 +216,6 @@ Global
 		{FD94E5EA-DED4-4298-B72B-A46FACAF3710} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{D8A2B1AF-5A0A-45B4-B56D-BFFC53EFE886} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{F8D64385-0A0A-46F0-81C5-E144C34B8C2C} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{AD2B2480-F156-4FB3-8BD8-BE0BA63A8D67} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
