@@ -36,13 +36,77 @@ public sealed class CreateAdminUserValidatorTests
     public void Should_Fail_WhenPasswordTooShort()
     {
         var command = TestDataBuilders.CreateAdminUser()
-            .WithPassword("short")
+            .WithPassword("Abc1!xyz") // 8 chars — below admin 12-char minimum
             .Build();
 
         var result = _sut.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("Password must be at least 8 characters.");
+            .WithErrorMessage("Password must be at least 12 characters.");
+    }
+
+    [Fact]
+    public void Should_Fail_WhenPasswordMissingUppercase()
+    {
+        var command = TestDataBuilders.CreateAdminUser()
+            .WithPassword("nouppercase1!xyz")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Password)
+            .WithErrorMessage("Password must contain at least one uppercase letter.");
+    }
+
+    [Fact]
+    public void Should_Fail_WhenPasswordMissingLowercase()
+    {
+        var command = TestDataBuilders.CreateAdminUser()
+            .WithPassword("NOLOWERCASE1!XYZ")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Password)
+            .WithErrorMessage("Password must contain at least one lowercase letter.");
+    }
+
+    [Fact]
+    public void Should_Fail_WhenPasswordMissingDigit()
+    {
+        var command = TestDataBuilders.CreateAdminUser()
+            .WithPassword("NoDigitsHere!xyz")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Password)
+            .WithErrorMessage("Password must contain at least one digit.");
+    }
+
+    [Fact]
+    public void Should_Fail_WhenPasswordMissingSymbol()
+    {
+        var command = TestDataBuilders.CreateAdminUser()
+            .WithPassword("NoSymbols123abcd")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldHaveValidationErrorFor(x => x.Password)
+            .WithErrorMessage("Password must contain at least one symbol.");
+    }
+
+    [Fact]
+    public void Should_Pass_WhenPasswordIsStrong()
+    {
+        var command = TestDataBuilders.CreateAdminUser()
+            .WithPassword("StrongPassw0rd!")
+            .Build();
+
+        var result = _sut.TestValidate(command);
+
+        result.ShouldNotHaveValidationErrorFor(x => x.Password);
     }
 
     [Fact]
