@@ -463,7 +463,8 @@ public sealed class SsrfGuardService
                             ? AddressFamily.InterNetworkV6
                             : AddressFamily.InterNetwork,
                         SocketType.Stream,
-                        ProtocolType.Tcp) { NoDelay = true };
+                        ProtocolType.Tcp)
+                    { NoDelay = true };
 
                     using var attemptCts = CancellationTokenSource.CreateLinkedTokenSource(totalCts.Token);
                     attemptCts.CancelAfter(SsrfGuard.PerAttemptConnectTimeout);
