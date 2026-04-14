@@ -8,6 +8,7 @@ public class Webhook
     public Guid TenantId { get; set; }
     public string Url { get; set; } = string.Empty;
     public string[] Events { get; set; } = Array.Empty<string>();
+    [System.Text.Json.Serialization.JsonIgnore]
     public string? Secret { get; set; }
     public WebhookStatus Status { get; set; } = WebhookStatus.Active;
 
