@@ -1174,16 +1174,30 @@ export async function setupMockApi(page: Page) {
       });
     }
 
-    // Templates
+    // Templates — detail (GET /api/v1/templates/:id)
+    const templateDetailMatch = url.match(/\/api\/v1\/templates\/([^/?]+)$/);
+    if (templateDetailMatch && method === "GET") {
+      const id = templateDetailMatch[1];
+      const tpl = mockTemplates.find((t) => t.id === id) ?? mockTemplates[0];
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: tpl }),
+      });
+    }
+
+    // Templates — list
     if (url.includes("/api/v1/templates") && method === "GET") {
+      // Strip body fields to emulate backend TemplateSummaryDto
+      const summaries = mockTemplates.map(({ htmlTemplate: _h, textTemplate: _t, ...rest }) => rest);
       return route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
           success: true,
           data: {
-            items: mockTemplates,
-            totalCount: mockTemplates.length,
+            items: summaries,
+            totalCount: summaries.length,
             page: 1,
             pageSize: 20,
           },
