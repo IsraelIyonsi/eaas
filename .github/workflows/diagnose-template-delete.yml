@@ -1,0 +1,89 @@
+name: Diagnose Template DELETE 502 (manual, one-shot)
+
+# One-shot diagnostic for the HIGH-severity prod bug where
+# DELETE /api/v1/templates/{id} returns 502 Bad Gateway from the BFF.
+# Tails nginx access/error logs and the eaas-api container stdout for
+# any line matching the delete route, so we can see the actual upstream
+# failure mode (exception stack trace, upstream connection reset, etc.).
+#
+# Delete this workflow file once the root cause is confirmed in logs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tail_seconds:
+        description: "Seconds of log history to scan"
+        required: false
+        default: "600"
+
+jobs:
+  diagnose:
+    name: Tail template DELETE logs from VPS
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: SSH + dump prod logs for template DELETE
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 3m
+          script: |
+            set +e
+            WINDOW=${{ github.event.inputs.tail_seconds || '600' }}
+            echo "=== WINDOW=${WINDOW}s NOW=$(date -u --iso-8601=seconds) ==="
+            echo ""
+
+            echo "=== eaas-api container status ==="
+            docker ps --filter "name=eaas-api" --format "table {{.Names}}\t{{.Status}}\t{{.State}}"
+            echo ""
+
+            echo "=== eaas-api restart count (process crash => 502) ==="
+            docker inspect eaas-api --format '{{.RestartCount}} restarts, started {{.State.StartedAt}}' 2>/dev/null || echo "(container missing)"
+            echo ""
+
+            echo "=== eaas-api stdout lines matching DELETE /api/v1/templates ==="
+            docker logs --since ${WINDOW}s eaas-api 2>&1 \
+              | grep -E "DELETE /api/v1/templates|DeleteTemplate|NotFoundException|DbUpdateException|TaskCanceledException|StackOverflow|OutOfMemory" \
+              | tail -80 || echo "(no matching lines)"
+            echo ""
+
+            echo "=== eaas-api recent ERROR/FATAL lines ==="
+            docker logs --since ${WINDOW}s eaas-api 2>&1 \
+              | grep -iE "(error|fatal|unhandled|exception)" \
+              | grep -vE "^$" \
+              | tail -60 || echo "(no matching lines)"
+            echo ""
+
+            echo "=== nginx access log — DELETE /api/v1/templates ==="
+            docker logs --since ${WINDOW}s eaas-nginx 2>&1 \
+              | grep -E 'DELETE /api/v1/templates' \
+              | tail -30 || echo "(no matching lines)"
+            echo ""
+
+            echo "=== nginx error log tail (upstream errors, 502 sources) ==="
+            docker exec eaas-nginx sh -c 'tail -n 80 /var/log/nginx/error.log 2>/dev/null' \
+              | grep -iE "upstream|502|reset|template|api:8080" || echo "(no matching lines)"
+            echo ""
+
+            echo "=== Postgres: confirm templates.deleted_at column exists ==="
+            PGPASS=$(grep ^POSTGRES_PASSWORD /opt/eaas/.env | cut -d= -f2-)
+            docker exec -e PGPASSWORD="$PGPASS" eaas-postgres psql -U eaas_app -d eaas -tAc \
+              "SELECT column_name FROM information_schema.columns WHERE table_name='templates' ORDER BY ordinal_position;" \
+              || true
+            echo ""
+
+            echo "=== Postgres: confirm template_versions table exists (cascade FK) ==="
+            docker exec -e PGPASSWORD="$PGPASS" eaas-postgres psql -U eaas_app -d eaas -tAc \
+              "SELECT COUNT(*) FROM template_versions;" \
+              || echo "(template_versions missing — DELETE may 500 on FK introspection)"
+            echo ""
+
+            echo "=== Postgres: active/pending locks on templates table ==="
+            docker exec -e PGPASSWORD="$PGPASS" eaas-postgres psql -U eaas_app -d eaas -tAc \
+              "SELECT relation::regclass, mode, granted FROM pg_locks WHERE relation = 'templates'::regclass;" \
+              || true
+            echo ""
+
+            echo "=== DONE ==="
