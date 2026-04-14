@@ -19,8 +19,16 @@ using StackExchange.Redis;
 
 namespace EaaS.Infrastructure;
 
-public static class DependencyInjection
+public static partial class DependencyInjection
 {
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "AWS {Service} client configured with static credentials from configuration (region: {Region}).")]
+    private static partial void LogAwsStaticCredentials(ILogger logger, string service, string region);
+
+    [LoggerMessage(Level = LogLevel.Information,
+        Message = "AWS {Service} client configured with SDK default credential chain (env/shared/IAM-role) (region: {Region}).")]
+    private static partial void LogAwsDefaultCredentialChain(ILogger logger, string service, string region);
+
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -137,11 +145,35 @@ public static class DependencyInjection
         var sesSettings = configuration.GetSection(SesSettings.SectionName).Get<SesSettings>()
             ?? new SesSettings();
 
-        services.AddSingleton<Amazon.S3.IAmazonS3>(_ =>
-            new Amazon.S3.AmazonS3Client(
-                sesSettings.AccessKeyId,
-                sesSettings.SecretAccessKey,
-                Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region)));
+        services.AddSingleton<Amazon.S3.IAmazonS3>(sp =>
+        {
+            var region = Amazon.RegionEndpoint.GetBySystemName(inboundSettings.S3Region);
+            var logger = sp.GetService<ILogger<Amazon.S3.AmazonS3Client>>();
+
+            // Only use explicit static credentials when BOTH keys are
+            // non-empty. Otherwise fall back to the AWS SDK default
+            // credential chain (env vars → shared creds → IAM role on
+            // EKS/EC2 instance profile). This is what allows pod-level
+            // IAM roles (IRSA) to work without leaking secrets into env.
+            if (!string.IsNullOrWhiteSpace(sesSettings.AccessKeyId)
+                && !string.IsNullOrWhiteSpace(sesSettings.SecretAccessKey))
+            {
+                if (logger is not null)
+                {
+                    LogAwsStaticCredentials(logger, "S3", inboundSettings.S3Region);
+                }
+                return new Amazon.S3.AmazonS3Client(
+                    sesSettings.AccessKeyId,
+                    sesSettings.SecretAccessKey,
+                    region);
+            }
+
+            if (logger is not null)
+            {
+                LogAwsDefaultCredentialChain(logger, "S3", inboundSettings.S3Region);
+            }
+            return new Amazon.S3.AmazonS3Client(region);
+        });
 
         services.AddSingleton<IInboundEmailStorage, S3InboundEmailStorage>();
         services.AddSingleton<IInboundEmailParser, MimeKitInboundParser>();
@@ -189,11 +221,15 @@ public static class DependencyInjection
                 opts.ConfigurationSetName = legacy.ConfigurationSetName;
                 opts.MaxSendRate = legacy.MaxSendRate;
             })
+            // Region is always required; access keys are optional so that
+            // pods running under IAM roles (IRSA/EC2 instance profile) can
+            // use the AWS SDK default credential chain. If one key is set
+            // but not the other that's a misconfiguration, so we reject it.
             .Validate(o =>
-                !string.IsNullOrWhiteSpace(o.AccessKeyId)
-                && !string.IsNullOrWhiteSpace(o.SecretAccessKey)
-                && !string.IsNullOrWhiteSpace(o.Region),
-                "SES credentials (AccessKeyId, SecretAccessKey, Region) are required.");
+                !string.IsNullOrWhiteSpace(o.Region)
+                && string.IsNullOrWhiteSpace(o.AccessKeyId)
+                    == string.IsNullOrWhiteSpace(o.SecretAccessKey),
+                "SES Region is required. AccessKeyId and SecretAccessKey must be either BOTH set (static credentials) or BOTH empty (use AWS SDK default credential chain / IAM role).");
 
         // Back-compat: the legacy "EMAIL_PROVIDER" env var still selects SMTP (Mailpit) in local dev.
         // When unset (production / staging), we register SES as the default — same behaviour as before.
@@ -219,10 +255,32 @@ public static class DependencyInjection
             services.AddSingleton<Amazon.SimpleEmailV2.IAmazonSimpleEmailServiceV2>(sp =>
             {
                 var opts = sp.GetRequiredService<IOptions<SesOptions>>().Value;
-                return new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(
-                    opts.AccessKeyId,
-                    opts.SecretAccessKey,
-                    Amazon.RegionEndpoint.GetBySystemName(opts.Region));
+                var region = Amazon.RegionEndpoint.GetBySystemName(opts.Region);
+                var logger = sp.GetService<ILogger<Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client>>();
+
+                // Same pattern as the S3 client in AddInboundServices: only
+                // pass explicit static credentials when BOTH keys are
+                // present. Otherwise use the AWS SDK default credential
+                // chain so IAM roles on EKS (IRSA) and EC2 instance
+                // profiles work as intended.
+                if (!string.IsNullOrWhiteSpace(opts.AccessKeyId)
+                    && !string.IsNullOrWhiteSpace(opts.SecretAccessKey))
+                {
+                    if (logger is not null)
+                    {
+                        LogAwsStaticCredentials(logger, "SES", opts.Region);
+                    }
+                    return new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(
+                        opts.AccessKeyId,
+                        opts.SecretAccessKey,
+                        region);
+                }
+
+                if (logger is not null)
+                {
+                    LogAwsDefaultCredentialChain(logger, "SES", opts.Region);
+                }
+                return new Amazon.SimpleEmailV2.AmazonSimpleEmailServiceV2Client(region);
             });
 
             services.AddSingleton<SesEmailProvider>();
