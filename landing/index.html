@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b1020" />
   <title>SendNex — Transactional Email API. Fast, simple, fairly priced.</title>
-  <meta name="description" content="SendNex is a developer-first transactional email API. Send your first email in under five minutes. Flex pay-as-you-go pricing, no monthly commitment." />
+  <meta name="description" content="SendNex is a developer-first transactional email API. Send your first email in under five minutes. $0.40 per 1,000 emails. First 3,000 emails every month are free. No monthly fee." />
   <link rel="canonical" href="https://sendnex.xyz/" />
 
   <!-- Open Graph -->
@@ -13,14 +13,14 @@
   <meta property="og:url" content="https://sendnex.xyz/" />
   <meta property="og:title" content="SendNex — Transactional Email API. Fast, simple, fairly priced." />
   <meta property="og:description" content="Developer-first transactional email API. Flex PAYG pricing, no monthly fee. Send your first email in under five minutes." />
-  <meta property="og:image" content="https://sendnex.xyz/og.png" />
+  <!-- og:image pending asset upload -->
   <meta property="og:site_name" content="SendNex" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="SendNex — Transactional Email API" />
   <meta name="twitter:description" content="Developer-first transactional email API. Flex PAYG pricing, no monthly fee." />
-  <meta name="twitter:image" content="https://sendnex.xyz/og.png" />
+  <!-- twitter:image pending asset upload -->
 
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234f46e5'/%3E%3Cpath d='M8 12l8 6 8-6v10H8z' fill='%23fff'/%3E%3C/svg%3E" />
 
@@ -35,7 +35,6 @@
     "@type": "Organization",
     "name": "SendNex",
     "url": "https://sendnex.xyz",
-    "logo": "https://sendnex.xyz/logo.png",
     "description": "Developer-first transactional email API with pay-as-you-go pricing.",
     "sameAs": ["https://twitter.com/sendnex"]
   }
@@ -174,12 +173,6 @@
     .dot-r{width:11px;height:11px;border-radius:50%;background:#ff5f57}
     .dot-y{width:11px;height:11px;border-radius:50%;background:#febc2e}
     .dot-g{width:11px;height:11px;border-radius:50%;background:#28c840}
-    .code-tabs{margin-left:14px;display:flex;gap:4px}
-    .code-tab{
-      font-family:var(--mono);font-size:12px;color:var(--muted);
-      padding:4px 10px;border-radius:6px;
-    }
-    .code-tab[aria-selected="true"]{background:rgba(255,255,255,.06);color:#fff}
     pre.code{
       margin:0;padding:20px;overflow-x:auto;
       font-family:var(--mono);font-size:13px;line-height:1.7;color:#dbe4ff;
@@ -193,22 +186,6 @@
     .sec-lead{color:var(--muted-2);max-width:60ch;font-size:16px}
     .sec-head{margin-bottom:48px;text-align:center}
     .sec-head .sec-lead{margin:0 auto}
-
-    /* Logos strip */
-    .logos{padding:36px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-    .logos-title{text-align:center;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:22px}
-    .logos-row{
-      display:grid;gap:24px;align-items:center;
-      grid-template-columns:repeat(2,1fr);
-      opacity:.75;
-    }
-    @media(min-width:640px){.logos-row{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:1024px){.logos-row{grid-template-columns:repeat(6,1fr)}}
-    .logo-placeholder{
-      height:28px;display:flex;align-items:center;justify-content:center;
-      color:var(--muted-2);font-weight:600;font-size:14px;letter-spacing:.04em;
-      filter:grayscale(1);
-    }
 
     /* Feature grid */
     .grid-3{display:grid;gap:18px;grid-template-columns:1fr}
@@ -332,6 +309,36 @@
     }
     .legal{font-style:normal}
 
+    /* Code card: copy button + language label */
+    .code-head{position:relative}
+    .code-lang{
+      font-family:var(--mono);font-size:12px;color:#fff;
+      padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.06);
+      margin-left:14px;
+    }
+    .code-copy{
+      position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      width:32px;height:32px;border-radius:6px;
+      display:inline-flex;align-items:center;justify-content:center;
+      color:var(--muted-2);background:transparent;border:1px solid transparent;
+      transition:background .15s, color .15s, border-color .15s;
+    }
+    .code-copy:hover{background:rgba(255,255,255,.06);color:#fff;border-color:var(--line-2)}
+    .code-copy:focus-visible{outline:2px solid var(--brand-2);outline-offset:2px}
+    .code-docs-link{
+      display:inline-flex;align-items:center;gap:6px;margin-top:14px;
+      font-size:13.5px;color:#a5b4fc;
+    }
+    .code-docs-link:hover{color:#fff}
+
+    /* Mobile tap targets >=44px */
+    @media (max-width: 480px){
+      .btn{padding:13px 20px;min-height:44px}
+      .btn-lg{padding:14px 24px;min-height:48px}
+      .btn-ghost{padding:12px 14px;min-height:44px}
+      .nav-cta .btn{min-height:44px}
+    }
+
     /* Small utility */
     .center{text-align:center}
     .mt-24{margin-top:24px}
@@ -369,42 +376,42 @@
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow"><span class="dot"></span> Flex PAYG is live, no monthly fee</span>
-          <h1 class="h">Transactional email that ships in <span class="grad">five minutes</span>, priced like it should be.</h1>
-          <p class="lead">SendNex is a developer-first email API. One POST, deliverable inboxes, real analytics. Pay only for what you send, starting at $0.40 per 1,000 emails.</p>
+          <h1 class="h">Transactional email at $0.40 per 1,000. Ship in <span class="grad">five minutes</span>, not five meetings.</h1>
+          <p class="lead">SendNex is a developer-first email API. One POST, deliverable inboxes, real analytics. $0.40 per 1,000 emails. First 3,000 emails every month are free. No monthly fee.</p>
           <div class="hero-cta">
             <a class="btn btn-primary btn-lg" href="https://app.sendnex.xyz/signup">Start sending free
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>
             <a class="btn btn-secondary btn-lg" href="https://docs.sendnex.xyz">Read the docs</a>
           </div>
           <div class="hero-meta">
             <span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
               No credit card to start
             </span>
             <span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
               SDKs for Node, Python, .NET
             </span>
             <span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
               DKIM, SPF, DMARC out of the box
             </span>
           </div>
         </div>
 
-        <div class="code-card" role="img" aria-label="Example cURL request to the SendNex send endpoint">
-          <div class="code-head">
-            <span class="dot-r" aria-hidden="true"></span>
-            <span class="dot-y" aria-hidden="true"></span>
-            <span class="dot-g" aria-hidden="true"></span>
-            <div class="code-tabs" role="tablist" aria-label="Example language">
-              <span class="code-tab" role="tab" aria-selected="true">curl</span>
-              <span class="code-tab" role="tab" aria-selected="false">node.js</span>
-              <span class="code-tab" role="tab" aria-selected="false">python</span>
+        <div>
+          <div class="code-card" role="img" aria-label="Example cURL request to the SendNex send endpoint">
+            <div class="code-head">
+              <span class="dot-r" aria-hidden="true"></span>
+              <span class="dot-y" aria-hidden="true"></span>
+              <span class="dot-g" aria-hidden="true"></span>
+              <span class="code-lang">Language: cURL</span>
+              <button type="button" class="code-copy" id="copyCodeBtn" aria-label="Copy code to clipboard">
+                <svg id="copyIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
             </div>
-          </div>
-<pre class="code"><span class="tk-c"># Send your first email</span>
+<pre class="code" id="heroCode"><span class="tk-c"># Send your first email</span>
 curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
   -H <span class="tk-s">"Authorization: Bearer sk_live_..."</span> \
   -H <span class="tk-s">"Content-Type: application/json"</span> \
@@ -414,22 +421,10 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
     "subject": "Welcome to YourApp",
     "html": "&lt;h1&gt;Hi Alice 👋&lt;/h1&gt;"
   }'</span></pre>
-        </div>
-      </div>
-    </section>
-
-    <!-- LOGOS -->
-    <section class="logos" aria-label="Trusted by">
-      <div class="wrap">
-        <p class="logos-title">Powering email for teams building on</p>
-        <!-- TODO: real logos -->
-        <div class="logos-row">
-          <div class="logo-placeholder">NORTHWIND</div>
-          <div class="logo-placeholder">PAYSTACK</div>
-          <div class="logo-placeholder">LOOPCRM</div>
-          <div class="logo-placeholder">FORMIO</div>
-          <div class="logo-placeholder">STACKLY</div>
-          <div class="logo-placeholder">QUILLPAD</div>
+          </div>
+          <a class="code-docs-link" href="https://docs.sendnex.xyz/sdks">See Node.js, Python, Go examples in the docs
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
         </div>
       </div>
     </section>
@@ -514,7 +509,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
                 <span class="dot-r" aria-hidden="true"></span>
                 <span class="dot-y" aria-hidden="true"></span>
                 <span class="dot-g" aria-hidden="true"></span>
-                <div class="code-tabs"><span class="code-tab" aria-selected="true">node.js</span></div>
+                <span class="code-lang">Language: Node.js</span>
               </div>
 <pre class="code"><span class="tk-k">const</span> res = <span class="tk-k">await</span> fetch(<span class="tk-s">"https://api.sendnex.xyz/v1/emails"</span>, {
   method: <span class="tk-s">"POST"</span>,
@@ -560,7 +555,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
               <strong>$0.40</strong>
               <em>per 1,000 emails</em>
             </div>
-            <p class="price-sub">Or $0.0004 per email. Billed monthly, only for what you send. First 3,000 emails each month are free.</p>
+            <p class="price-sub">$0.40 per 1,000 emails. First 3,000 emails every month are free. No monthly fee.</p>
 
             <ul class="price-list">
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Unlimited domains and API keys</li>
@@ -590,7 +585,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
               <span>Mailgun Foundation</span><span>~$0.80</span>
             </div>
             <p style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5">
-              Competitor rates are public list prices at the time of writing and may include monthly minimums. SendNex Flex PAYG has no monthly commitment.
+              Competitor list prices as of April 2026. Subject to change; verify on provider sites.
             </p>
           </aside>
         </div>
@@ -640,7 +635,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
           </details>
           <details class="qa">
             <summary>Is there a free tier?</summary>
-            <p>Yes. The first 3,000 emails each month are free on Flex PAYG. After that you pay $0.40 per 1,000 emails with no monthly commitment.</p>
+            <p>Yes. The first 3,000 emails every month are free on Flex PAYG. After that you pay $0.40 per 1,000 emails with no monthly fee.</p>
           </details>
           <details class="qa">
             <summary>How does Flex PAYG compare to Resend, Postmark, and SendGrid?</summary>
@@ -675,7 +670,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
       <div class="wrap">
         <div class="final-cta">
           <h2>Send your first email in five minutes.</h2>
-          <p>No credit card required. Free for the first 3,000 emails each month, forever.</p>
+          <p>$0.40 per 1,000 emails. First 3,000 emails every month are free. No monthly fee.</p>
           <div class="hero-cta">
             <a class="btn btn-primary btn-lg" href="https://app.sendnex.xyz/signup">Get started</a>
             <a class="btn btn-secondary btn-lg" href="https://docs.sendnex.xyz">Read the docs</a>
@@ -705,32 +700,26 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
             <li><a href="#features">Features</a></li>
             <li><a href="#pricing">Pricing</a></li>
             <li><a href="https://docs.sendnex.xyz">Docs</a></li>
-            <li><a href="https://status.sendnex.xyz">Status</a></li>
           </ul>
         </div>
         <div>
           <h5>Company</h5>
           <ul>
-            <li><a href="/about">About</a></li>
-            <li><a href="/blog">Blog</a></li>
-            <li><a href="/contact">Contact</a></li>
+            <li><a href="mailto:hello@sendnex.xyz">Contact</a></li>
           </ul>
         </div>
         <div>
           <h5>Legal</h5>
           <ul>
-            <li><a href="/privacy">Privacy</a></li>
-            <li><a href="/terms">Terms</a></li>
-            <li><a href="/cookies">Cookies</a></li>
-            <li><a href="/dpa">DPA</a></li>
+            <li><a href="https://app.sendnex.xyz/privacy">Privacy</a></li>
+            <li><a href="https://app.sendnex.xyz/terms">Terms</a></li>
+            <li><a href="https://app.sendnex.xyz/cookies">Cookies</a></li>
           </ul>
         </div>
       </div>
 
       <div class="foot-bottom">
-        <address class="legal">
-          SendNex Technologies Ltd. &middot; {LEGAL_ADDRESS} &middot; Lagos, Nigeria
-        </address>
+        <span class="legal">SendNex Technologies Ltd. &middot; Lagos, Nigeria</span>
         <span>&copy; <span id="yr"></span> SendNex. All rights reserved.</span>
       </div>
     </div>
@@ -738,6 +727,24 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
 
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
+
+    (function(){
+      var btn = document.getElementById('copyCodeBtn');
+      var pre = document.getElementById('heroCode');
+      if(!btn || !pre || !navigator.clipboard) return;
+      var clipboardSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      var checkSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+      btn.addEventListener('click', function(){
+        navigator.clipboard.writeText(pre.textContent).then(function(){
+          btn.innerHTML = checkSvg;
+          btn.setAttribute('aria-label','Copied');
+          setTimeout(function(){
+            btn.innerHTML = clipboardSvg;
+            btn.setAttribute('aria-label','Copy code to clipboard');
+          }, 2000);
+        });
+      });
+    })();
   </script>
 </body>
 </html>

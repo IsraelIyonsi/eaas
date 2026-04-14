@@ -52,3 +52,21 @@ Size: ~36.5 KB (target was <100 KB)
 ## Would I ship this?
 
 Yes, with the gaps above resolved. The page is honest about what SendNex is, leads with the price advantage without sounding desperate, and gets a developer to a working request in two scrolls. The remaining work is content (logos, address, OG image), not engineering.
+
+## Post-review fixes applied (round 1)
+
+All three parallel review agents came back unanimous on SHIP-WITH-FIXES. The following changes were applied in a single commit on `feat/landing-overhaul-v2`:
+
+1. Removed `{LEGAL_ADDRESS}` placeholder from footer; `<address>` collapsed to a plain legal span with company name and Lagos, Nigeria.
+2. Removed the fake customer logos strip (NORTHWIND / PAYSTACK / LOOPCRM / FORMIO / STACKLY / QUILLPAD) and the supporting `.logos`, `.logos-title`, `.logos-row`, `.logo-placeholder` CSS. Using "PAYSTACK" without permission was a legal risk.
+3. Fixed dead code-tab affordances. Stripped `role="tablist"`, `role="tab"`, `aria-selected` attributes and the related `.code-tabs`/`.code-tab` CSS. Replaced with a static `Language: cURL` / `Language: Node.js` label and a "See Node.js, Python, Go examples in the docs →" link to `https://docs.sendnex.xyz/sdks` under the hero code card.
+4. Footer links reconciled: `/privacy`, `/terms`, `/cookies` now point to the dashboard-hosted pages at `https://app.sendnex.xyz/*`. Removed `/dpa`, `/about`, `/blog`, and the `https://status.sendnex.xyz` link since those pages do not exist yet. `/contact` replaced with `mailto:hello@sendnex.xyz`.
+5. Hero headline now leads with price: "Transactional email at $0.40 per 1,000. Ship in five minutes, not five meetings." (gradient span preserved on "five minutes").
+6. Pricing messaging normalised across hero lead, pricing card sub, and final CTA: "$0.40 per 1,000 emails. First 3,000 emails every month are free. No monthly fee." FAQ and meta description updated too.
+7. Copy-to-clipboard icon button added to the hero code card's `.code-head`. Uses `navigator.clipboard.writeText()` on the `<pre>` text content and swaps to a green checkmark for 2 seconds on success. Implemented in the existing inline `<script>`.
+8. Mobile tap targets bumped via a new `@media (max-width: 480px)` rule: `.btn` min-height 44px, `.btn-lg` 48px, `.btn-ghost` 44px, `.nav-cta .btn` 44px.
+9. `og:image`, `twitter:image`, and the JSON-LD `logo` reference removed pending real assets. Left `<!-- og:image pending asset upload -->` comment.
+10. Competitor pricing footnote updated to "Competitor list prices as of April 2026. Subject to change; verify on provider sites."
+11. SVG stroke-widths normalised: all 14px and 16px icons now use `stroke-width="2.4"`, all 20px icons use `stroke-width="2"`, and existing 18px/12px icons already used `2.4`.
+
+Follow-up (out of scope for round 1): self-host Google Fonts (Inter + JetBrains Mono) to drop the render-blocking stylesheet, and replace the mailto with a proper `/contact` form once the dashboard exposes it.
