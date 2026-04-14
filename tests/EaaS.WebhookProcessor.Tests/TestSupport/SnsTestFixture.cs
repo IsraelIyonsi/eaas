@@ -51,7 +51,7 @@ internal sealed class SnsTestFixture : IDisposable
         _rsa.Dispose();
     }
 
-    internal SnsMessage BuildSignedNotification(string messageBody = "{\"notificationType\":\"Bounce\"}", string? messageId = null)
+    internal SnsMessage BuildSignedNotification(string messageBody = "{\"notificationType\":\"Bounce\"}", string? messageId = null, string signatureVersion = "1")
     {
         var msg = new SnsMessage
         {
@@ -60,14 +60,14 @@ internal sealed class SnsTestFixture : IDisposable
             TopicArn = "arn:aws:sns:us-east-1:123456789012:ses-events",
             Message = messageBody,
             Timestamp = TestNow.ToString(IsoFormat, CultureInfo.InvariantCulture),
-            SignatureVersion = "1",
+            SignatureVersion = signatureVersion,
             SigningCertUrl = ValidCertUrl
         };
-        msg.Signature = Sign(SnsSignatureVerifier.BuildCanonicalString(msg)!);
+        msg.Signature = Sign(SnsSignatureVerifier.BuildCanonicalString(msg)!, signatureVersion);
         return msg;
     }
 
-    internal SnsMessage BuildSignedSubscriptionConfirmation(string subscribeUrl = "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn&Token=abc")
+    internal SnsMessage BuildSignedSubscriptionConfirmation(string subscribeUrl = "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn&Token=abc", string signatureVersion = "1")
     {
         var msg = new SnsMessage
         {
@@ -78,16 +78,18 @@ internal sealed class SnsTestFixture : IDisposable
             Message = "confirm",
             SubscribeUrl = subscribeUrl,
             Timestamp = TestNow.ToString(IsoFormat, CultureInfo.InvariantCulture),
-            SignatureVersion = "1",
+            SignatureVersion = signatureVersion,
             SigningCertUrl = ValidCertUrl
         };
-        msg.Signature = Sign(SnsSignatureVerifier.BuildCanonicalString(msg)!);
+        msg.Signature = Sign(SnsSignatureVerifier.BuildCanonicalString(msg)!, signatureVersion);
         return msg;
     }
 
-    private string Sign(string canonical)
+    private string Sign(string canonical, string signatureVersion)
     {
-        var sig = _rsa.SignData(Encoding.UTF8.GetBytes(canonical), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        // SigVer "1" → SHA1, SigVer "2" → SHA256 (AWS SNS spec).
+        var hash = signatureVersion == "2" ? HashAlgorithmName.SHA256 : HashAlgorithmName.SHA1;
+        var sig = _rsa.SignData(Encoding.UTF8.GetBytes(canonical), hash, RSASignaturePadding.Pkcs1);
         return Convert.ToBase64String(sig);
     }
 

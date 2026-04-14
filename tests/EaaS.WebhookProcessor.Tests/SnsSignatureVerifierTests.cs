@@ -55,10 +55,11 @@ public class SnsSignatureVerifierTests : IDisposable
         return new SnsSignatureVerifier(factory, NullLogger<SnsSignatureVerifier>.Instance, _timeProvider);
     }
 
-    private string Sign(string canonical)
+    private string Sign(string canonical, HashAlgorithmName? hash = null)
     {
         var bytes = Encoding.UTF8.GetBytes(canonical);
-        var sig = _rsa.SignData(bytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        // Default SigVer "1" → SHA1; tests using SigVer "2" pass SHA256 explicitly.
+        var sig = _rsa.SignData(bytes, hash ?? HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
         return Convert.ToBase64String(sig);
     }
 
