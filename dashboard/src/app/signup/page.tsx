@@ -26,6 +26,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [legalEntityName, setLegalEntityName] = useState("");
+  const [postalAddress, setPostalAddress] = useState("");
   const [error, setError] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,8 @@ export default function SignupPage() {
           email,
           password,
           companyName: companyName || undefined,
+          legalEntityName,
+          postalAddress,
         }),
       });
 
@@ -178,6 +182,47 @@ export default function SignupPage() {
                 placeholder="Your company"
                 className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
               />
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="legalEntityName"
+                className="text-sm text-foreground/80"
+              >
+                Legal Entity Name
+              </Label>
+              <Input
+                id="legalEntityName"
+                type="text"
+                value={legalEntityName}
+                onChange={(e) => setLegalEntityName(e.target.value)}
+                placeholder="Acme, Inc."
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                required
+              />
+              <p className="text-xs text-muted-foreground/60">
+                Required by CAN-SPAM §7704(a)(5). Appears in compliance
+                footers of your emails.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label
+                htmlFor="postalAddress"
+                className="text-sm text-foreground/80"
+              >
+                Postal Address
+              </Label>
+              <Input
+                id="postalAddress"
+                type="text"
+                value={postalAddress}
+                onChange={(e) => setPostalAddress(e.target.value)}
+                placeholder="123 Main St, City, State, ZIP, Country"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                required
+              />
+              <p className="text-xs text-muted-foreground/60">
+                A valid physical postal address required by CAN-SPAM.
+              </p>
             </div>
             <div className="flex items-start gap-2">
               <input

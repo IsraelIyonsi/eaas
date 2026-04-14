@@ -8,11 +8,15 @@ const API_INTERNAL_URL =
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { name, email, password, companyName } = body;
+  const { name, email, password, companyName, legalEntityName, postalAddress } =
+    body;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !legalEntityName || !postalAddress) {
     return NextResponse.json(
-      { error: "Name, email, and password are required." },
+      {
+        error:
+          "Name, email, password, legal entity name, and postal address are required.",
+      },
       { status: 400 },
     );
   }
@@ -23,15 +27,34 @@ export async function POST(request: NextRequest) {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, companyName }),
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          companyName,
+          legalEntityName,
+          postalAddress,
+        }),
       },
     );
 
     const backendData = await backendRes.json().catch(() => ({}));
 
     if (!backendRes.ok) {
+      // Surface FluentValidation/ProblemDetails field errors when present,
+      // so users see "Password must contain at least one uppercase letter."
+      // instead of the opaque "One or more validation errors occurred."
+      let message: string | undefined =
+        backendData.error?.message ?? backendData.error;
+      if (!message && backendData.errors) {
+        const firstField = Object.keys(backendData.errors)[0];
+        const firstMessages = backendData.errors[firstField];
+        if (Array.isArray(firstMessages) && firstMessages.length > 0) {
+          message = firstMessages[0];
+        }
+      }
       return NextResponse.json(
-        { error: backendData.error?.message ?? backendData.error ?? "Registration failed." },
+        { error: message ?? backendData.title ?? "Registration failed." },
         { status: backendRes.status },
       );
     }
