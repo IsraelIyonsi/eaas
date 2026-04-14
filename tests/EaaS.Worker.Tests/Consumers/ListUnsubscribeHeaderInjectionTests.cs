@@ -1,6 +1,7 @@
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
 using EaaS.Domain.Interfaces;
+using EaaS.Domain.Providers;
 using EaaS.Infrastructure.Configuration;
 using EaaS.Infrastructure.Messaging;
 using EaaS.Infrastructure.Messaging.Contracts;
@@ -20,7 +21,8 @@ namespace EaaS.Worker.Tests.Consumers;
 public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailProvider _provider;
+    private readonly IEmailProviderFactory _providerFactory;
     private readonly SendEmailConsumer _sut;
 
     public ListUnsubscribeHeaderInjectionTests()
@@ -31,9 +33,13 @@ public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
         _dbContext = new AppDbContext(options);
         _dbContext.Database.EnsureCreated();
 
-        _emailSender = Substitute.For<IEmailSender>();
-        _emailSender.SendRawEmailAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
-            .Returns(new SendEmailResult(true, "ses-raw-1", null));
+        _provider = Substitute.For<IEmailProvider>();
+        _provider.ProviderKey.Returns("ses");
+        _provider.SendRawAsync(Arg.Any<SendRawEmailRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new EmailSendOutcome(true, "ses-raw-1", null, null, false));
+
+        _providerFactory = Substitute.For<IEmailProviderFactory>();
+        _providerFactory.GetForTenant(Arg.Any<Guid>()).Returns(_provider);
 
         var unsubSettings = Options.Create(new ListUnsubscribeSettings
         {
@@ -46,7 +52,7 @@ public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
 
         _sut = new SendEmailConsumer(
             _dbContext,
-            _emailSender,
+            _providerFactory,
             Substitute.For<ITemplateRenderingService>(),
             Substitute.For<ILogger<SendEmailConsumer>>(),
             pixelInjector: null,
@@ -64,14 +70,14 @@ public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
         var context = CreateContext(message);
 
         Stream? captured = null;
-        _emailSender
-            .When(x => x.SendRawEmailAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>()))
+        _provider
+            .When(x => x.SendRawAsync(Arg.Any<SendRawEmailRequest>(), Arg.Any<CancellationToken>()))
             .Do(call =>
             {
-                var src = call.Arg<Stream>();
+                var req = call.Arg<SendRawEmailRequest>();
                 var copy = new MemoryStream();
-                src.Position = 0;
-                src.CopyTo(copy);
+                req.MimeMessage.Position = 0;
+                req.MimeMessage.CopyTo(copy);
                 copy.Position = 0;
                 captured = copy;
             });
@@ -103,16 +109,10 @@ public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
         var email = SeedEmail(tenant.Id);
         await _sut.Consume(CreateContext(CreateMessage(email)));
 
-        await _emailSender.Received(1).SendRawEmailAsync(
-            Arg.Any<Stream>(), Arg.Any<CancellationToken>());
-        await _emailSender.DidNotReceive().SendEmailAsync(
-            Arg.Any<string>(),
-            Arg.Any<IReadOnlyList<string>>(),
-            Arg.Any<IReadOnlyList<string>?>(),
-            Arg.Any<IReadOnlyList<string>?>(),
-            Arg.Any<string>(),
-            Arg.Any<string?>(),
-            Arg.Any<string?>(),
+        await _provider.Received(1).SendRawAsync(
+            Arg.Any<SendRawEmailRequest>(), Arg.Any<CancellationToken>());
+        await _provider.DidNotReceive().SendAsync(
+            Arg.Any<SendEmailRequest>(),
             Arg.Any<CancellationToken>());
     }
 
@@ -122,14 +122,14 @@ public sealed class ListUnsubscribeHeaderInjectionTests : IDisposable
         var tenant = SeedTenant("Foo Ltd.", "99 Baz");
         var email = SeedEmail(tenant.Id);
         Stream? captured = null;
-        _emailSender
-            .When(x => x.SendRawEmailAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>()))
+        _provider
+            .When(x => x.SendRawAsync(Arg.Any<SendRawEmailRequest>(), Arg.Any<CancellationToken>()))
             .Do(call =>
             {
-                var src = call.Arg<Stream>();
+                var req = call.Arg<SendRawEmailRequest>();
                 var copy = new MemoryStream();
-                src.Position = 0;
-                src.CopyTo(copy);
+                req.MimeMessage.Position = 0;
+                req.MimeMessage.CopyTo(copy);
                 copy.Position = 0;
                 captured = copy;
             });

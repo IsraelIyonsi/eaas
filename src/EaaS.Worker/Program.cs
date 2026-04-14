@@ -43,8 +43,8 @@ try
         services.Configure<SsrfGuardOptions>(context.Configuration.GetSection(SsrfGuardOptions.SectionName));
         services.AddSingleton<SsrfGuardService>();
 
-        // Email delivery: SMTP (Mailpit) for local dev, SES for production
-        services.AddEmailProvider(context.Configuration);
+        // Email delivery: provider-agnostic abstraction (SES default, SMTP for local dev).
+        services.AddEmailProviders(context.Configuration);
 
         // Inbound email services (S3 storage, MIME parser)
         services.AddInboundServices(context.Configuration);

@@ -26,6 +26,10 @@ public class Email
     public bool TrackClicks { get; set; } = true;
     public EmailStatus Status { get; set; } = EmailStatus.Queued;
     public string? SesMessageId { get; set; }
+    /// <summary>Provider-neutral message identifier returned by <see cref="EaaS.Domain.Providers.IEmailProvider"/>. Dual-written alongside <see cref="SesMessageId"/> during Phase 0.</summary>
+    public string? ProviderMessageId { get; set; }
+    /// <summary>Key of the provider that accepted the send (e.g. <c>"ses"</c>, <c>"mailgun"</c>).</summary>
+    public string? ProviderKey { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? SentAt { get; set; }

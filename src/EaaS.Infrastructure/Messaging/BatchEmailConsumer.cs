@@ -1,8 +1,9 @@
 using System.Text.Json;
 using EaaS.Domain.Entities;
 using EaaS.Domain.Enums;
-using EaaS.Domain.Interfaces;
+using EaaS.Domain.Providers;
 using EaaS.Infrastructure.Messaging.Contracts;
+using SendEmailRequest = EaaS.Domain.Providers.SendEmailRequest;
 using EaaS.Infrastructure.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -15,24 +16,21 @@ namespace EaaS.Infrastructure.Messaging;
 /// Processes up to 50 messages per batch to amortize DB round-trip overhead:
 /// - Single DB query to load all Email entities instead of N individual queries
 /// - Batched status updates with a single SaveChangesAsync call
-/// - Reduces connection churn on both PostgreSQL and SES
-///
-/// At 140+ emails/second, individual DB calls per message would saturate the connection pool.
-/// Batching keeps DB load predictable regardless of throughput.
+/// - Reduces connection churn on both PostgreSQL and the provider
 /// </summary>
 public sealed partial class BatchEmailConsumer : IConsumer<Batch<SendEmailMessage>>
 {
     private readonly AppDbContext _dbContext;
-    private readonly IEmailSender _emailDeliveryService;
+    private readonly IEmailProviderFactory _providerFactory;
     private readonly ILogger<BatchEmailConsumer> _logger;
 
     public BatchEmailConsumer(
         AppDbContext dbContext,
-        IEmailSender emailDeliveryService,
+        IEmailProviderFactory providerFactory,
         ILogger<BatchEmailConsumer> logger)
     {
         _dbContext = dbContext;
-        _emailDeliveryService = emailDeliveryService;
+        _providerFactory = providerFactory;
         _logger = logger;
     }
 
@@ -74,19 +72,27 @@ public sealed partial class BatchEmailConsumer : IConsumer<Batch<SendEmailMessag
                     ? JsonSerializer.Deserialize<List<string>>(message.BccEmails)
                     : null;
 
-                var result = await _emailDeliveryService.SendEmailAsync(
-                    message.From,
-                    recipients,
-                    ccRecipients,
-                    bccRecipients,
-                    email.Subject,
-                    email.HtmlBody,
-                    email.TextBody,
+                var provider = _providerFactory.GetForTenant(message.TenantId);
+
+                var outcome = await provider.SendAsync(
+                    new SendEmailRequest(
+                        TenantId: message.TenantId,
+                        From: message.From,
+                        FromName: message.FromName,
+                        To: recipients,
+                        Cc: ccRecipients,
+                        Bcc: bccRecipients,
+                        Subject: email.Subject,
+                        HtmlBody: email.HtmlBody,
+                        TextBody: email.TextBody),
                     context.CancellationToken);
 
-                if (result.Success)
+                if (outcome.Success)
                 {
-                    email.SesMessageId = result.MessageId;
+                    // Dual-write during Phase 0 — SesMessageId preserved until Phase 3 drop.
+                    email.SesMessageId = outcome.ProviderMessageId;
+                    email.ProviderMessageId = outcome.ProviderMessageId;
+                    email.ProviderKey = provider.ProviderKey;
                     email.SentAt = DateTime.UtcNow;
                     email.Status = EmailStatus.Sending;
                     successCount++;
@@ -103,7 +109,7 @@ public sealed partial class BatchEmailConsumer : IConsumer<Batch<SendEmailMessag
                 else
                 {
                     email.Status = EmailStatus.Failed;
-                    email.ErrorMessage = result.ErrorMessage;
+                    email.ErrorMessage = outcome.ErrorMessage;
                     failCount++;
 
                     _dbContext.EmailEvents.Add(new EmailEvent
@@ -111,7 +117,7 @@ public sealed partial class BatchEmailConsumer : IConsumer<Batch<SendEmailMessag
                         Id = Guid.NewGuid(),
                         EmailId = email.Id,
                         EventType = EventType.Failed,
-                        Data = JsonSerializer.Serialize(new { error = result.ErrorMessage }),
+                        Data = JsonSerializer.Serialize(new { error = outcome.ErrorMessage }),
                         CreatedAt = DateTime.UtcNow
                     });
                 }
@@ -135,11 +141,8 @@ public sealed partial class BatchEmailConsumer : IConsumer<Batch<SendEmailMessag
             }
         }
 
-        // 3. Single batched DB write for all status updates and events
         await _dbContext.SaveChangesAsync(context.CancellationToken);
 
-        // If ALL items failed, throw to trigger MassTransit retry — otherwise the message
-        // is ACK'd and all emails are silently lost
         if (failCount > 0 && failCount == batch.Length)
         {
             throw new InvalidOperationException(

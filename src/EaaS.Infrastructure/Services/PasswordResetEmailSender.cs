@@ -1,4 +1,5 @@
 using EaaS.Domain.Interfaces;
+using EaaS.Domain.Providers;
 using EaaS.Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,22 +7,22 @@ using Microsoft.Extensions.Options;
 namespace EaaS.Infrastructure.Services;
 
 /// <summary>
-/// Sends password reset emails through the same SES/SMTP pipeline used for customer mail
+/// Sends password reset emails through the same provider pipeline used for customer mail
 /// (dogfooding), but bypasses the tenant-domain verification check — this is a system email
 /// from the SendNex-operations sender.
 /// </summary>
 public sealed partial class PasswordResetEmailSender : IPasswordResetEmailSender
 {
-    private readonly IEmailSender _emailSender;
+    private readonly IEmailProviderFactory _providerFactory;
     private readonly PasswordResetSettings _settings;
     private readonly ILogger<PasswordResetEmailSender> _logger;
 
     public PasswordResetEmailSender(
-        IEmailSender emailSender,
+        IEmailProviderFactory providerFactory,
         IOptions<PasswordResetSettings> settings,
         ILogger<PasswordResetEmailSender> logger)
     {
-        _emailSender = emailSender;
+        _providerFactory = providerFactory;
         _settings = settings.Value;
         _logger = logger;
     }
@@ -36,23 +37,25 @@ public sealed partial class PasswordResetEmailSender : IPasswordResetEmailSender
         var htmlBody = BuildHtmlBody(link, expiryMinutes);
         var textBody = BuildTextBody(link, expiryMinutes);
 
-        var from = string.IsNullOrWhiteSpace(_settings.SystemSenderName)
-            ? _settings.SystemSender
-            : $"{_settings.SystemSenderName} <{_settings.SystemSender}>";
+        // System email — no tenant scoping. Use Guid.Empty to resolve the platform default adapter.
+        var provider = _providerFactory.GetForTenant(Guid.Empty);
 
-        var result = await _emailSender.SendEmailAsync(
-            from,
-            new[] { recipientEmail },
-            ccRecipients: null,
-            bccRecipients: null,
-            subject,
-            htmlBody,
-            textBody,
-            cancellationToken);
+        var request = new SendEmailRequest(
+            TenantId: Guid.Empty,
+            From: _settings.SystemSender,
+            FromName: string.IsNullOrWhiteSpace(_settings.SystemSenderName) ? null : _settings.SystemSenderName,
+            To: new[] { recipientEmail },
+            Cc: null,
+            Bcc: null,
+            Subject: subject,
+            HtmlBody: htmlBody,
+            TextBody: textBody);
 
-        if (!result.Success)
+        var outcome = await provider.SendAsync(request, cancellationToken);
+
+        if (!outcome.Success)
         {
-            LogSendFailed(_logger, recipientEmail, result.ErrorMessage ?? "unknown error");
+            LogSendFailed(_logger, recipientEmail, outcome.ErrorMessage ?? "unknown error");
         }
         else
         {

@@ -58,6 +58,10 @@ public sealed class TenantConfiguration : IEntityTypeConfiguration<Tenant>
             .HasColumnName("notes")
             .HasColumnType("text");
 
+        builder.Property(t => t.PreferredEmailProviderKey)
+            .HasColumnName("preferred_email_provider_key")
+            .HasMaxLength(32);
+
         builder.Property(t => t.CreatedAt)
             .HasColumnName("created_at")
             .HasDefaultValueSql("NOW()");

@@ -18,6 +18,8 @@ public class Tenant
     public long? MonthlyEmailLimit { get; set; }
     public string? PasswordHash { get; set; }
     public string? Notes { get; set; }
+    /// <summary>Preferred email-provider key for this tenant's outbound sends (e.g. <c>"ses"</c>, <c>"mailgun"</c>). Nullable — when <c>null</c>, the global default from <c>EmailProviders:Routing:DefaultProvider</c> is used.</summary>
+    public string? PreferredEmailProviderKey { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
