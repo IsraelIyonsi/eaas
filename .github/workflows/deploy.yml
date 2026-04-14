@@ -137,13 +137,38 @@ jobs:
             docker pull "${IMAGE_PREFIX}-worker:${VERSION}"
             docker pull "${IMAGE_PREFIX}-webhook:${VERSION}"
 
-            # Run database migrations
+            # Run database migrations.
+            #
+            # Historical bug: we used to spin up an ephemeral API container
+            # (`docker run ... dotnet ef database update`) to apply EF migrations.
+            # That was broken two ways:
+            #   1. The API runtime image (aspnet:10.0-alpine) has no .NET SDK
+            #      and no `dotnet-ef` tool — the command cannot exist there.
+            #   2. Starting the API binary eagerly tries to connect to RabbitMQ;
+            #      the ephemeral container's env resolved the broker to 127.0.0.1
+            #      instead of the `rabbitmq` compose service, so boot failed
+            #      before migrations ever ran.
+            #
+            # Fix: use the same pattern `scripts/deploy.sh` already uses — apply
+            # idempotent SQL migrations directly via `psql` against the running
+            # postgres container. No EF tooling required, no RabbitMQ dependency,
+            # no ephemeral container needed. All migration files are guarded with
+            # IF NOT EXISTS / idempotent semantics, so re-running is safe.
             echo "Running database migrations..."
-            docker run --rm \
-              --network eaas_default \
-              --env-file "$APP_DIR/.env" \
-              "${IMAGE_PREFIX}-api:${VERSION}" \
-              dotnet ef database update
+            MIGRATIONS=(
+              "migrate_review_gate.sql"
+              "migrate_service_keys.sql"
+            )
+            for m in "${MIGRATIONS[@]}"; do
+              MIG_PATH="$APP_DIR/scripts/$m"
+              if [ -f "$MIG_PATH" ]; then
+                echo "  applying $m ..."
+                docker exec -i eaas-postgres psql -U eaas_app -d eaas < "$MIG_PATH" 2>&1 \
+                  | tail -3 || echo "  warning: $m had issues (continuing)"
+              else
+                echo "  skipping $m (not present on VPS checkout)"
+              fi
+            done
 
             # Recreate containers with new images (zero-downtime via rolling update)
             echo "Recreating containers..."
