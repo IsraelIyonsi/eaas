@@ -40,6 +40,15 @@ jobs:
             echo "=== Sleep 45s for SNS delivery ==="
             sleep 45
             echo ""
+            echo "=== nginx access log (last 90s, sns/hooks/403/404/413) ==="
+            docker logs --since 90s eaas-nginx 2>&1 | grep -iE "(sns|hooks|webhooks| 403 | 404 | 413 )" | tail -60 || true
+            echo ""
+            echo "=== nginx error log tail ==="
+            docker exec eaas-nginx sh -c 'tail -n 120 /var/log/nginx/error.log 2>/dev/null' | tail -60 || true
+            echo ""
+            echo "=== nginx resolved config (server_name + /hooks|/webhooks locations) ==="
+            docker exec eaas-nginx sh -c 'nginx -T 2>/dev/null' | grep -iE "(server_name|location\s+/(hooks|webhooks)|sendnex)" | head -30 || true
+            echo ""
             echo "=== webhook-processor logs (last 90s, SNS-relevant) ==="
             docker logs --since 90s eaas-webhook-processor 2>&1 | grep -iE "(sns|403|reject|verif|signature|cert|hooks)" | tail -80 || true
             echo ""
