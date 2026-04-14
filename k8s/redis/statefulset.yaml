@@ -43,26 +43,45 @@ spec:
                     app.kubernetes.io/name: eaas-redis
                 topologyKey: kubernetes.io/hostname
       initContainers:
-        # Configure this node as master or replica based on its ordinal index
+        # Render redis.conf by substituting ${REDIS_PASSWORD} into the
+        # template from the ConfigMap, then pick master vs replica based on
+        # the pod's ordinal index. The rendered file is written to an
+        # emptyDir (/rendered) so the main container (readOnlyRootFilesystem)
+        # can still read it without mutating the persistent data volume.
         - name: init-redis
           image: redis:7-alpine
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: eaas-secrets
+                  key: Redis__Password
           command:
             - /bin/sh
             - -c
             - |
-              ORDINAL=$(echo $HOSTNAME | rev | cut -d'-' -f1 | rev)
+              set -eu
+              ORDINAL=$(echo "$HOSTNAME" | rev | cut -d'-' -f1 | rev)
               if [ "$ORDINAL" = "0" ]; then
-                cp /config/redis-master.conf /data/redis.conf
+                SRC=/config-source/redis-master.conf
               else
-                cp /config/redis-replica.conf /data/redis.conf
+                SRC=/config-source/redis-replica.conf
               fi
+              # Substitute ${REDIS_PASSWORD} using awk (envsubst is not in
+              # redis:7-alpine). Passing the password as an awk -v variable
+              # keeps it out of the awk program source, and the output file
+              # is chmod 0400 so only the redis user (uid 999) can read it.
+              awk -v pw="$REDIS_PASSWORD" '{ gsub(/\$\{REDIS_PASSWORD\}/, pw); print }' \
+                "$SRC" > /rendered/redis.conf
+              chmod 0400 /rendered/redis.conf
           volumeMounts:
-            - name: data
-              mountPath: /data
+            - name: rendered-config
+              mountPath: /rendered
             - name: config
-              mountPath: /config
+              mountPath: /config-source
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
@@ -75,7 +94,7 @@ spec:
               protocol: TCP
           command:
             - redis-server
-            - /data/redis.conf
+            - /rendered/redis.conf
           env:
             - name: REDIS_PASSWORD
               valueFrom:
@@ -118,6 +137,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: rendered-config
+              mountPath: /rendered
+              readOnly: true
         # Sentinel sidecar for automatic failover
         - name: sentinel
           image: redis:7-alpine
@@ -150,6 +172,13 @@ spec:
         - name: sentinel-config
           configMap:
             name: eaas-redis-sentinel-config
+        # Holds the redis.conf rendered by the init container with
+        # ${REDIS_PASSWORD} substituted in. Not persisted — re-rendered on
+        # every pod start, which is correct: the secret is the source of truth.
+        - name: rendered-config
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
   volumeClaimTemplates:
     - metadata:
         name: data

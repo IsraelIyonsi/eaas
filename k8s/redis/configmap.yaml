@@ -9,7 +9,11 @@ metadata:
     app.kubernetes.io/component: cache
     app.kubernetes.io/part-of: eaas
 data:
-  # NOTE: Requires init container to substitute secrets before use
+  # NOTE: ${REDIS_PASSWORD} is a placeholder — the `init-redis` init container
+  # in k8s/redis/statefulset.yaml substitutes it against the value from the
+  # `eaas-secrets` Secret (key: Redis__Password) and writes the rendered
+  # redis.conf into an in-memory emptyDir before the main container starts.
+  # Do NOT expect Kubernetes to expand this — it won't.
   redis-master.conf: |
     bind 0.0.0.0
     port 6379
