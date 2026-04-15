@@ -356,6 +356,7 @@ services:
       - ./docker/nginx/ssl:/etc/letsencrypt:ro
       - certbot_data:/var/www/certbot:ro
       - ./landing:/usr/share/nginx/landing:ro
+      - ./docs-site:/usr/share/nginx/docs:ro
     depends_on:
       - api
       - webhook-processor
