@@ -41,6 +41,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Plus, MoreVertical, Pencil, Eye, Trash2, Search, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useRouter } from "next/navigation";
+import { Routes } from "@/lib/constants/routes";
 import type { Template } from "@/types";
 
 const emptyTemplate = {
@@ -51,6 +53,7 @@ const emptyTemplate = {
 };
 
 export default function TemplatesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -197,7 +200,8 @@ export default function TemplatesPage() {
               {data?.items.map((tpl) => (
                 <TableRow
                   key={tpl.id}
-                  className="border-border transition-colors hover:bg-muted even:bg-muted/30"
+                  className="cursor-pointer border-border transition-colors hover:bg-muted even:bg-muted/30"
+                  onClick={() => router.push(Routes.TEMPLATE_EDITOR(tpl.id))}
                 >
                   <TableCell className="font-medium text-foreground">
                     {tpl.name}
@@ -211,7 +215,7 @@ export default function TemplatesPage() {
                   <TableCell className="hidden text-xs text-muted-foreground/60 whitespace-nowrap sm:table-cell">
                     {format(parseISO(tpl.updatedAt), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-muted"

@@ -84,7 +84,7 @@ export function DataTable<T>({
   if (loading) {
     return (
       <div className="data-table-wrap bg-background">
-        <table className="w-full border-collapse">
+        <table className="w-full min-w-[640px] border-collapse">
           <thead>
             <tr className="bg-muted/50">
               {selectable && <th className="w-10 px-[14px] py-[10px]" />}
@@ -132,7 +132,7 @@ export function DataTable<T>({
 
   return (
     <div className="data-table-wrap bg-background">
-      <table className="w-full border-collapse">
+      <table className="w-full min-w-[640px] border-collapse">
         {/* thead: bg-surface (bg-muted/50) */}
         <thead>
           <tr className="bg-muted/50">
