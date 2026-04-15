@@ -90,11 +90,13 @@ function LoginPageInner() {
               </Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -104,12 +106,13 @@ function LoginPageInner() {
               </Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -121,7 +124,7 @@ function LoginPageInner() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:h-10"
             >
               {loading ? (
                 <>
