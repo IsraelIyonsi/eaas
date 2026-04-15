@@ -106,11 +106,8 @@ export default function SettingsPage() {
                     Manage API Keys
                   </Button>
                 </Link>
-                <a
-                  href="https://docs.sendnex.xyz"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                {/* TODO: once docs.sendnex.xyz DNS is live, swap href back to https://docs.sendnex.xyz */}
+                <Link href={Routes.DOCS} prefetch={false}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -119,7 +116,7 @@ export default function SettingsPage() {
                     <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
                     API Documentation
                   </Button>
-                </a>
+                </Link>
               </div>
             </div>
 

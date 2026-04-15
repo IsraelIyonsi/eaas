@@ -13,18 +13,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
+  // Use startsWith (matching middleware.ts) so trailing-slash variants like
+  // `/terms/` do NOT fall through to the authed shell — which would kick
+  // unauthed visitors out via the 401 redirect path. UAT r3 caught /terms
+  // bouncing to /login after hydration because `pathname === "/terms"` failed
+  // when Next delivered `/terms/` during client-side routing.
   const isPublicRoute =
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/forgot-password" ||
-    pathname === "/reset-password" ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/reset-password") ||
     pathname.startsWith("/admin") ||
-    pathname === "/privacy" ||
-    pathname === "/terms" ||
-    pathname === "/cookies" ||
-    pathname === "/dpa" ||
-    pathname === "/sub-processors" ||
-    pathname === "/acceptable-use";
+    pathname.startsWith("/privacy") ||
+    pathname.startsWith("/terms") ||
+    pathname.startsWith("/cookies") ||
+    pathname.startsWith("/dpa") ||
+    pathname.startsWith("/sub-processors") ||
+    pathname.startsWith("/acceptable-use");
 
   // LOW-9: Skip `/api/auth/me` on public routes (login, signup, legal) so
   // unauthenticated visitors don't see a 401 in the console.
