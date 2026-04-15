@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "@/lib/hooks/use-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,8 +38,29 @@ const retentionOptions = [
 ];
 
 export function GeneralForm() {
-  const [companyName, setCompanyName] = useState("");
-  const [accountEmail, setAccountEmail] = useState("");
+  const { session } = useSession();
+  // Track session identity so the derived-default pattern below picks up the
+  // real tenant profile the moment /api/auth/me resolves (without setState
+  // in an effect). If the user edits the field, their input wins.
+  const sessionKey = session?.userId ?? "anon";
+  const [companyNameByUser, setCompanyName] = useState<string | null>(null);
+  const [accountEmailByUser, setAccountEmail] = useState<string | null>(null);
+  const [companyKey, setCompanyKey] = useState(sessionKey);
+  const [emailKey, setEmailKey] = useState(sessionKey);
+
+  // Reset user-overrides when the logged-in identity changes (e.g. after
+  // a /me refetch returns a different session).
+  if (companyKey !== sessionKey) {
+    setCompanyKey(sessionKey);
+    setCompanyName(null);
+  }
+  if (emailKey !== sessionKey) {
+    setEmailKey(sessionKey);
+    setAccountEmail(null);
+  }
+
+  const companyName = companyNameByUser ?? session?.displayName ?? "";
+  const accountEmail = accountEmailByUser ?? session?.email ?? "";
   const [timezone, setTimezone] = useState("UTC");
   const [defaultFromName, setDefaultFromName] = useState("");
   const [defaultReplyTo, setDefaultReplyTo] = useState("");

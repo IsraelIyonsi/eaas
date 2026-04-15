@@ -35,7 +35,7 @@ export const ApiPaths = {
 
   // API Keys
   API_KEYS: '/api/v1/keys',
-  API_KEY_REVOKE: (id: string) => `/api/v1/keys/${id}/revoke`,
+  API_KEY_BY_ID: (id: string) => `/api/v1/keys/${id}`,
   API_KEY_ROTATE: (id: string) => `/api/v1/keys/${id}/rotate`,
 
   // Webhooks
