@@ -125,7 +125,14 @@
     .nav-links{display:none;gap:28px;font-size:14px;color:var(--muted-2)}
     .nav-links a:hover{color:#fff}
     .nav-cta{display:flex;align-items:center;gap:8px}
-    @media(min-width:768px){.nav-links{display:flex}}
+    /* Hide the desktop Sign in / Get started buttons below the hamburger breakpoint
+       so they don't render alongside the mobile toggle and overflow 375px viewports.
+       The mobile drawer (.nav-mobile) carries equivalent links at <768px. */
+    .nav-cta .btn{display:none}
+    @media(min-width:768px){
+      .nav-links{display:flex}
+      .nav-cta .btn{display:inline-flex}
+    }
 
     /* Mobile nav disclosure (CSS-only via checkbox hack) */
     .nav-toggle{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
@@ -291,7 +298,7 @@
       padding:22px;border:1px solid var(--line);border-radius:var(--r-lg);
       background:rgba(255,255,255,.02);
     }
-    .trust-card h4{font-size:15px;font-weight:600;margin-bottom:6px}
+    .trust-card h3{font-size:15px;font-weight:600;margin-bottom:6px}
     .trust-card p{color:var(--muted);font-size:13.5px}
 
     /* FAQ */
@@ -331,7 +338,7 @@
     footer.site{border-top:1px solid var(--line);padding:48px 0 32px;margin-top:40px;color:var(--muted)}
     .foot-grid{display:grid;gap:32px;grid-template-columns:1fr;margin-bottom:32px}
     @media(min-width:768px){.foot-grid{grid-template-columns:2fr repeat(3,1fr)}}
-    .foot-grid h5{color:#fff;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
+    .foot-grid .foot-label{color:#fff;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px}
     .foot-grid li{margin-bottom:10px;font-size:14px}
     .foot-grid a:hover{color:#fff}
     .foot-bottom{
@@ -409,6 +416,8 @@
       <a href="#trust">Deliverability</a>
       <a href="#faq">FAQ</a>
       <a href="https://docs.sendnex.xyz">Docs</a>
+      <a href="https://app.sendnex.xyz/login">Sign in</a>
+      <a href="https://app.sendnex.xyz/signup">Get started</a>
     </nav>
   </header>
 
@@ -604,7 +613,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Unlimited domains and API keys</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Inbound parsing and webhooks included</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> 30-day delivery log retention</li>
-              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Community Slack and email support</li>
+              <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Email support from engineering team</li>
               <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Dedicated IP available as add-on</li>
             </ul>
             <a class="btn btn-primary btn-lg" href="https://app.sendnex.xyz/signup">Start sending today</a>
@@ -645,20 +654,20 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
         </div>
         <div class="trust-grid">
           <div class="trust-card">
-            <h4>DKIM, SPF, DMARC</h4>
+            <h3>DKIM, SPF, DMARC</h3>
             <p>Guided setup, auto-rotation of DKIM keys, DMARC report aggregation in your dashboard.</p>
           </div>
           <div class="trust-card">
-            <h4>Dedicated IPs</h4>
+            <h3>Dedicated IPs</h3>
             <p>Optional dedicated IPs with managed warm-up schedules for high-volume senders.</p>
           </div>
           <div class="trust-card">
-            <h4>Bounce and complaint handling</h4>
+            <h3>Bounce and complaint handling</h3>
             <p>Automatic suppression lists, replayable webhooks, and per-recipient delivery history.</p>
           </div>
           <div class="trust-card">
-            <h4>Security and compliance</h4>
-            <p>TLS in transit, encryption at rest, scoped API keys, and audit logs. SOC 2 Type II committed for 2026.</p>
+            <h3>Security and compliance</h3>
+            <p>TLS in transit, encryption at rest, scoped API keys, and audit logs. SOC 2 Type II in progress.</p>
           </div>
         </div>
       </div>
@@ -702,7 +711,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
           </details>
           <details class="qa">
             <summary>Can I migrate from another provider?</summary>
-            <p>Yes. Most teams switch in an afternoon: verify your domain, swap the API base URL, and replay your webhooks. We are happy to help in our community Slack.</p>
+            <p>Yes. Most teams switch in an afternoon: verify your domain, swap the API base URL, and replay your webhooks. Email us at hello@sendnex.xyz and our engineering team will help.</p>
           </details>
         </div>
       </div>
@@ -738,7 +747,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
           </p>
         </div>
         <div>
-          <h5>Product</h5>
+          <p class="foot-label">Product</p>
           <ul>
             <li><a href="#features">Features</a></li>
             <li><a href="#pricing">Pricing</a></li>
@@ -746,13 +755,13 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
           </ul>
         </div>
         <div>
-          <h5>Company</h5>
+          <p class="foot-label">Company</p>
           <ul>
             <li><a href="mailto:hello@sendnex.xyz">Contact</a></li>
           </ul>
         </div>
         <div>
-          <h5>Legal</h5>
+          <p class="foot-label">Legal</p>
           <ul>
             <li><a href="https://app.sendnex.xyz/privacy">Privacy</a></li>
             <li><a href="https://app.sendnex.xyz/terms">Terms</a></li>
@@ -762,7 +771,7 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
       </div>
 
       <div class="foot-bottom">
-        <span class="legal">SendNex Technologies Ltd. &middot; Lagos, Nigeria</span>
+        <span class="legal">SendNex Ltd. &middot; Lagos, Nigeria</span>
         <span>&copy; <span id="yr"></span> SendNex. All rights reserved.</span>
       </div>
     </div>
