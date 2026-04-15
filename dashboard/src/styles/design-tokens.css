@@ -41,6 +41,6 @@
 
   /* Nav Section Header */
   .nav-section-header {
-    @apply px-3 pt-4 pb-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-[0.06em];
+    @apply px-3 pt-4 pb-1.5 text-[11px] font-semibold text-slate-600 uppercase tracking-[0.06em];
   }
 }

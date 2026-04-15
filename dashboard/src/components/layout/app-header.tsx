@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { PanelLeftClose, PanelLeftOpen, Search, Bell, LogOut, Settings, User } from "lucide-react";
 import { Routes } from "@/lib/constants/routes";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -86,12 +87,16 @@ export function AppHeader({ sidebarCollapsed, onSidebarToggle, userName, userEma
           <Search className="h-4 w-4" />
         </Button>
 
+        {/* Theme toggle (light / dark / system) */}
+        <ThemeToggle />
+
         {/* Notification bell */}
         <Link
           href={Routes.NOTIFICATIONS}
           className="relative inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Notifications"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4" aria-hidden="true" />
         </Link>
 
         {/* User avatar + dropdown */}

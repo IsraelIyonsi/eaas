@@ -383,7 +383,7 @@
   </style>
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
+  <a class="skip" href="#main" aria-label="Skip to main content">Skip to content</a>
 
   <header class="site" role="banner">
     <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-hidden="true" />
@@ -404,13 +404,13 @@
       <div class="nav-cta">
         <a class="btn btn-ghost" href="https://app.sendnex.xyz/login">Sign in</a>
         <a class="btn btn-primary" href="https://app.sendnex.xyz/signup">Get started</a>
-        <label for="nav-toggle" class="nav-toggle-btn" aria-label="Open menu" role="button" tabindex="0">
+        <label for="nav-toggle" class="nav-toggle-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-mobile" role="button" tabindex="0">
           <svg class="icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
           <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
         </label>
       </div>
     </div>
-    <nav class="nav-mobile" aria-label="Mobile">
+    <nav id="nav-mobile" class="nav-mobile" aria-label="Mobile">
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
       <a href="#trust">Deliverability</a>
@@ -802,6 +802,23 @@ curl <span class="tk-p">https://api.sendnex.xyz/v1/emails</span> \
           }, 2000);
         });
       });
+    })();
+
+    /* Mobile nav a11y — keep aria-expanded in sync with the checkbox-driven
+       drawer so assistive tech announces the open/closed state (WCAG 4.1.2). */
+    (function(){
+      var toggle = document.getElementById('nav-toggle');
+      var labels = document.querySelectorAll('label.nav-toggle-btn[for="nav-toggle"]');
+      if (!toggle || !labels.length) return;
+      function sync(){
+        var open = toggle.checked;
+        labels.forEach(function(l){
+          l.setAttribute('aria-expanded', open ? 'true' : 'false');
+          l.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+        });
+      }
+      toggle.addEventListener('change', sync);
+      sync();
     })();
   </script>
 </body>
