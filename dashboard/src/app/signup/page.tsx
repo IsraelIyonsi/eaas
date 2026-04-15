@@ -121,11 +121,13 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="name"
+                name="name"
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -135,11 +137,13 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -149,12 +153,13 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -167,12 +172,13 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="confirmPassword"
+                name="confirmPassword"
                 type="password"
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repeat your password"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
             </div>
@@ -186,11 +192,13 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="companyName"
+                name="companyName"
                 type="text"
+                autoComplete="organization"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="Your company"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
               />
             </div>
             <div className="space-y-2">
@@ -202,11 +210,12 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="legalEntityName"
+                name="legalEntityName"
                 type="text"
                 value={legalEntityName}
                 onChange={(e) => setLegalEntityName(e.target.value)}
                 placeholder="Acme, Inc."
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
               <p className="text-xs text-muted-foreground/60">
@@ -223,29 +232,40 @@ export default function SignupPage() {
               </Label>
               <Input
                 id="postalAddress"
+                name="postalAddress"
                 type="text"
+                autoComplete="street-address"
                 value={postalAddress}
                 onChange={(e) => setPostalAddress(e.target.value)}
                 placeholder="123 Main St, City, State, ZIP, Country"
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground/40"
+                className="h-11 border-border bg-muted text-foreground placeholder:text-muted-foreground/40 sm:h-10"
                 required
               />
               <p className="text-xs text-muted-foreground/60">
                 A valid physical postal address required by CAN-SPAM.
               </p>
             </div>
+            {/* 44x44 hit area on the checkbox per WCAG 2.5.5 Target Size (AAA)
+                — wrap the visual 16x16 input in a padded label so the whole
+                bounding box is tappable on mobile. */}
             <div className="flex items-start gap-2">
-              <input
-                id="agreeToTerms"
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
-                required
-              />
               <label
                 htmlFor="agreeToTerms"
-                className="text-xs leading-relaxed text-muted-foreground"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center -my-1 -ml-1 cursor-pointer sm:h-9 sm:w-9"
+              >
+                <input
+                  id="agreeToTerms"
+                  name="agreeToTerms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="h-4 w-4 shrink-0 rounded border-border accent-primary"
+                  required
+                />
+              </label>
+              <label
+                htmlFor="agreeToTerms"
+                className="pt-2.5 text-xs leading-relaxed text-muted-foreground sm:pt-1.5"
               >
                 I agree to the{" "}
                 <Link
@@ -281,7 +301,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:h-10"
             >
               {loading ? (
                 <>

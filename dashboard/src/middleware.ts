@@ -73,6 +73,31 @@ async function verifySessionEdge(
   return mismatch === 0 ? payload : null;
 }
 
+/**
+ * Apply the full baseline security header set to every response. Keeping this
+ * here (instead of only in `next.config.ts` headers()) guarantees HSTS and
+ * friends ship on redirects, 401 RSC responses, and any other response that
+ * doesn't flow through the normal page pipeline — which is the gap UAT r2
+ * flagged against /signup and /privacy.
+ */
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload",
+  );
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set(
+    "Referrer-Policy",
+    "strict-origin-when-cross-origin",
+  );
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const isRSC = request.headers.get("RSC") === "1";
 
@@ -94,7 +119,7 @@ export async function middleware(request: NextRequest) {
   if (!session && !isPublicPath) {
     // RSC prefetch: return 401 instead of redirect to avoid ERR_TOO_MANY_REDIRECTS
     if (isRSC) {
-      return new NextResponse(null, { status: 401 });
+      return applySecurityHeaders(new NextResponse(null, { status: 401 }));
     }
     // Preserve the originally requested path (plus query) so the login page
     // can bounce the user back there after successful auth, instead of
@@ -104,7 +129,7 @@ export async function middleware(request: NextRequest) {
     if (returnTo && returnTo !== "/" && returnTo !== "/login") {
       loginUrl.searchParams.set("return", returnTo);
     }
-    return NextResponse.redirect(loginUrl);
+    return applySecurityHeaders(NextResponse.redirect(loginUrl));
   }
 
   // If authenticated and visiting /login or /signup, redirect to dashboard
@@ -113,7 +138,9 @@ export async function middleware(request: NextRequest) {
     (request.nextUrl.pathname.startsWith("/login") ||
       request.nextUrl.pathname.startsWith("/signup"))
   ) {
-    return NextResponse.redirect(new URL("/overview", request.url));
+    return applySecurityHeaders(
+      NextResponse.redirect(new URL("/overview", request.url)),
+    );
   }
 
   // Role-based access: /admin/* pages are restricted to admin users only (superadmin or admin from AdminUsers table).
@@ -124,10 +151,12 @@ export async function middleware(request: NextRequest) {
     session.role !== "superadmin" &&
     session.role !== "admin"
   ) {
-    return NextResponse.redirect(new URL("/overview", request.url));
+    return applySecurityHeaders(
+      NextResponse.redirect(new URL("/overview", request.url)),
+    );
   }
 
-  return NextResponse.next();
+  return applySecurityHeaders(NextResponse.next());
 }
 
 export const config = {
