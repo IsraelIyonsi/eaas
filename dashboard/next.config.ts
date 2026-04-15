@@ -50,9 +50,13 @@ const nextConfig: NextConfig = {
     return [
       // Landing advertises docs.sendnex.xyz — make the in-app /docs path route
       // to the public docs site instead of a login-gated dead-end.
+      // Single-hop 308 → docs.sendnex.xyz (skip the apex to avoid the
+      // app → apex → docs double hop the UAT r2 sweep flagged).
+      // TODO (user action): add DNS A record for docs.sendnex.xyz -> 178.104.141.21
+      // and issue an SSL cert; until then this redirect lands on a dead host.
       {
         source: "/docs",
-        destination: "https://docs.sendnex.xyz",
+        destination: "https://docs.sendnex.xyz/",
         permanent: true,
       },
       {
