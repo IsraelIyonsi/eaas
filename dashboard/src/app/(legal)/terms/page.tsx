@@ -230,7 +230,17 @@ export default function TermsOfServicePage() {
             <strong>Postal address:</strong>{" "}
             <span style={{ whiteSpace: "pre-line" }}>{SENDNEX_POSTAL_ADDRESS}</span>
           </li>
-        ) : null}
+        ) : (
+          <li>
+            <strong>Postal address:</strong> Registered postal address will be
+            published on this page once {SENDNEX_LEGAL_ENTITY} registration
+            completes. For legal notice, contact{" "}
+            <a href={`mailto:${SENDNEX_CONTACT_EMAIL}`}>
+              {SENDNEX_CONTACT_EMAIL}
+            </a>
+            .
+          </li>
+        )}
         {/* TODO: add registered postal address once company registration completes */}
       </ul>
     </>
