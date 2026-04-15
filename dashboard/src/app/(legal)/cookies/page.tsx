@@ -32,29 +32,34 @@ export default function CookiePolicyPage() {
         tracking cookies, analytics cookies, or third-party cookies.
       </p>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Cookie Name</th>
-            <th>Purpose</th>
-            <th>Type</th>
-            <th>Expiry</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>sendnex_session</code>
-            </td>
-            <td>
-              Authenticates your session after login. Required for the dashboard
-              to function.
-            </td>
-            <td>Essential, httpOnly, secure</td>
-            <td>8 hours</td>
-          </tr>
-        </tbody>
-      </table>
+      {/* UAT r3: wrap table in overflow-x-auto to prevent 67px horizontal
+          overflow at 375px viewport. Sibling legal pages have no tables, so
+          only /cookies needed the scroll container. */}
+      <div className="overflow-x-auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Cookie Name</th>
+              <th>Purpose</th>
+              <th>Type</th>
+              <th>Expiry</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>sendnex_session</code>
+              </td>
+              <td>
+                Authenticates your session after login. Required for the dashboard
+                to function.
+              </td>
+              <td>Essential, httpOnly, secure</td>
+              <td>8 hours</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2 id="no-tracking">3. No Tracking Cookies</h2>
       <p>We want to be clear about what we do <strong>not</strong> do:</p>
