@@ -30,6 +30,13 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   badge?: string;
+  /**
+   * When false, disables Next.js prefetch for this link. Needed for `/docs`
+   * while the external docs.sendnex.xyz subdomain is pre-DNS — Next's
+   * automatic prefetch follows the 308 redirect and triggers CSP
+   * connect-src violations because the target host does not resolve.
+   */
+  prefetch?: boolean;
 }
 
 interface NavSection {
@@ -78,7 +85,7 @@ const navSections: NavSection[] = [
     items: [
       { href: Routes.NOTIFICATIONS, label: "Notifications", icon: Bell },
       { href: Routes.SETTINGS, label: "Settings", icon: Settings },
-      { href: "/docs", label: "Documentation", icon: BookOpen },
+      { href: "/docs", label: "Documentation", icon: BookOpen, prefetch: false },
     ],
   },
 ];
@@ -146,6 +153,7 @@ export function Sidebar({ collapsed, onToggle, userName, userEmail, userRole }: 
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={item.prefetch}
                     title={collapsed ? item.label : undefined}
                     className={cn(
                       "flex items-center gap-2.5 rounded-[6px] px-3 py-[7px] text-[13px] transition-all duration-150",

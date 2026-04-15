@@ -21,7 +21,11 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
       <p className="mb-6 max-w-sm text-sm text-muted-foreground">{description}</p>
       {action && (
         action.href ? (
-          <Link href={action.href}>
+          // prefetch={false} — some callers pass hrefs that resolve to
+          // external redirects (e.g. /docs → docs.sendnex.xyz). Prefetching
+          // those triggers CSP connect-src violations while the docs
+          // subdomain is pre-DNS. Disable until docs.sendnex.xyz is live.
+          <Link href={action.href} prefetch={false}>
             <Button>{action.label}</Button>
           </Link>
         ) : (
