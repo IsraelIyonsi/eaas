@@ -245,14 +245,17 @@ export default function SignupPage() {
                 A valid physical postal address required by CAN-SPAM.
               </p>
             </div>
-            {/* 44x44 hit area on the checkbox per WCAG 2.5.5 Target Size (AAA)
-                — wrap the visual 16x16 input in a padded label so the whole
-                bounding box is tappable on mobile. */}
-            <div className="flex items-start gap-2">
-              <label
-                htmlFor="agreeToTerms"
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center -my-1 -ml-1 cursor-pointer sm:h-9 sm:w-9"
-              >
+            {/* Single <label> wraps input + consent text so screen readers
+                announce the full terms/privacy/AUP copy when focusing the
+                checkbox (WCAG 1.3.1 / 4.1.2 — UAT r4). The flex row keeps a
+                44x44 hit area around the visual 16x16 input for WCAG 2.5.5
+                Target Size (AAA). Inline <Link>s remain clickable and open
+                the legal pages in new tabs. */}
+            <label
+              htmlFor="agreeToTerms"
+              className="flex items-start gap-2 text-xs leading-relaxed text-muted-foreground"
+            >
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center -my-1 -ml-1 cursor-pointer sm:h-9 sm:w-9">
                 <input
                   id="agreeToTerms"
                   name="agreeToTerms"
@@ -262,11 +265,8 @@ export default function SignupPage() {
                   className="h-4 w-4 shrink-0 rounded border-border accent-primary"
                   required
                 />
-              </label>
-              <label
-                htmlFor="agreeToTerms"
-                className="pt-2.5 text-xs leading-relaxed text-muted-foreground sm:pt-1.5"
-              >
+              </span>
+              <span className="pt-2.5 sm:pt-1.5">
                 I agree to the{" "}
                 <Link
                   href={Routes.TERMS}
@@ -291,8 +291,8 @@ export default function SignupPage() {
                 >
                   Acceptable Use Policy
                 </Link>
-              </label>
-            </div>
+              </span>
+            </label>
             {error && (
               <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400">
                 {error}
