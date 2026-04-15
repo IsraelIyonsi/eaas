@@ -20,6 +20,6 @@ export class ApiKeyRepository extends HttpClient {
   }
 
   async revoke(id: string): Promise<void> {
-    return this.post<void>(ApiPaths.API_KEY_REVOKE(id));
+    return this.del(ApiPaths.API_KEY_BY_ID(id));
   }
 }
