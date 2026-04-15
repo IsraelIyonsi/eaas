@@ -66,11 +66,22 @@ docker compose -f docker-compose.yml up -d --force-recreate api worker webhook-p
 # Run idempotent database migrations that may not have been applied
 # (Docker init scripts only run on first DB creation; these handle schema drift)
 # Only include migrations that are safe to re-run (idempotent with IF NOT EXISTS guards)
+#
+# TODO(deploy): this hardcoded list is a stopgap. The real fix is to run
+#   `dotnet ef database update` against prod Postgres on every deploy — either
+#   as an init-container/one-shot command inside the api container on startup,
+#   or as a dedicated deploy step before `docker compose up`. The signup 500
+#   outage on 2026-04-15 happened because two EF migrations
+#   (AddEmailProviderColumns, AddWebhookDeliveriesDedup) were committed but
+#   never applied to prod. Until EF migrations are wired into the pipeline,
+#   every new migration must also be added as an idempotent .sql file here.
 echo "[deploy] Running database migrations..."
 docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/migrate_review_gate.sql" 2>&1 \
   | tail -3 || echo "[deploy] Warning: migrate_review_gate.sql had issues"
 docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/migrate_service_keys.sql" 2>&1 \
   | tail -3 || echo "[deploy] Warning: migrate_service_keys.sql had issues"
+docker exec -i eaas-postgres psql -U eaas_app -d eaas < "/opt/eaas/scripts/migrate_mailgun_webhooks_dedup.sql" 2>&1 \
+  | tail -3 || echo "[deploy] Warning: migrate_mailgun_webhooks_dedup.sql had issues"
 
 echo "[deploy] Waiting for health checks..."
 sleep 20
