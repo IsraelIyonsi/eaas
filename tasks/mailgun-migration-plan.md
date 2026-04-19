@@ -324,13 +324,109 @@ DKIM options: 1024-bit or 2048-bit; up to 3 active keys per domain (round-robin 
 
 **Risk:** Double-send bug double-bills recipients. **Mitigation:** Shadow mode uses test-mode sends (`o:testmode=yes`) or a dedicated `shadow@` recipient. **Rollback:** Feature flag `providerRouterEnabled=false`.
 
-### Phase 2 — Tenant Feature Flag (week 3-4)
-- [ ] Admin UI: per-tenant toggle "Switch to Mailgun" with domain verification wizard.
-- [ ] Onboarding wizard (Flex path — no subaccount create): `POST /v4/domains` (with `use_automatic_sender_security=true`) under the master key -> render DNS records to copy -> poll `PUT /v4/domains/{name}/verify` every 60s -> green check on success. The subaccount create step is skipped in Phase 1–5 and only invoked in Phase 6 for upgraded tenants.
-- [ ] Migrate 1 pilot tenant (internal/friendly). Measure deliverability for 7 days against SES baseline.
-- [ ] Roll out to 10% then 50% then 100% of tenants over 3 weeks.
+### Phase 2 — Tenant Feature Flag (week 3-4) — **REVISED 2026-04-19** after dual-architect BLOCK
 
-**Risk:** Tenant DNS misconfiguration -> outage for that tenant. **Mitigation:** Only flip tenant to Mailgun after `verify` returns 200; keep SES fallback active until 7-day stability period elapses. **Rollback:** Toggle tenant back to SES; DNS records (CNAME tracking, MX) can stay — SES won't use them.
+The original one-paragraph scope (browser-polled verify, flip-on-admin-click, master key in appsettings) failed both Senior and Independent architect review. See `tasks/phase2-architect-findings.md` for the 12 blockers. The revised scope below is what goes into the architect re-submission.
+
+#### 2.a Pre-flight audit (must pass before any code)
+
+- [x] **Schema-drift check on PR #49 hotfix**: `scripts/migrate_mailgun_webhooks_dedup.sql` byte-for-byte matches the `Up()` method of EF migrations `20260414154548_AddEmailProviderColumns` and `20260414185323_AddWebhookDeliveriesDedup`. Both are recorded in `__EFMigrationsHistory` so the next `dotnet ef database update` will skip them cleanly. **Verified 2026-04-19.**
+- [ ] **Deploy pipeline gap (carry-over blocker for Phase 2 migration)**: the pipeline runs a hardcoded list of legacy SQL files and never invokes `dotnet ef database update`. Before Phase 2 ships a new migration, either wire `dotnet ef database update --idempotent` into `deploy.sh`, or reproduce the new migration as raw SQL + `__EFMigrationsHistory` insert exactly as #49 did. Decide which path before writing the migration.
+
+#### 2.b Data model — new EF migration `AddSendingDomainsProviderColumns`
+
+Extend existing `sending_domains` (do NOT introduce a parallel `TenantDomain` table):
+
+| Column | Type | Nullable | Default | Notes |
+|---|---|---|---|---|
+| `provider_key` | varchar(32) | NOT NULL | `'ses'` | Matches `tenants.preferred_email_provider_key` value space. |
+| `mailgun_domain_state` | varchar(16) | NULL | — | `unverified` \| `active` \| `disabled`. NULL for SES rows. |
+| `verification_last_error` | text | NULL | — | Populated by `DomainVerificationJob` on failed verify. |
+| `kill_switch_suspended_at` | timestamptz | NULL | — | Set by admin suspend; blocks sends for that domain. |
+
+Rename of `ses_identity_arn` is deferred — keep the column, ignore it for Mailgun rows.
+
+Enum addition: `DnsRecordPurpose.TrackingCname` for Mailgun's `email.<domain> → mailgun.org` CNAME.
+
+#### 2.c Abstractions
+
+- **`IDomainIdentityProviderFactory`** in `EaaS.Domain/Providers/` — mirror of `IEmailProviderFactory.GetForTenant`. `GetForProvider(string providerKey)` returns the right `IDomainIdentityService`.
+- **`MailgunDomainIdentityService : IDomainIdentityService`** in `EaaS.Infrastructure/EmailProviders/Providers/Mailgun/` — implements `CreateDomainAsync`, `VerifyDomainAsync`, `GetDomainAsync`, emits the correct SPF + DKIM CNAME + tracking CNAME + MX `DnsRecord` rows.
+- **`AddDomainHandler` refactor**: route by `tenant.PreferredEmailProviderKey` (or explicit `request.ProviderKey` when admin specifies), invoke the factory, persist provider-specific identity ref.
+- `MailgunClient` gains `CreateDomainAsync` (POST /v4/domains with `use_automatic_sender_security=true`) and `VerifyDomainAsync` (PUT /v4/domains/{name}/verify). Existing Phase-1 wire-level test pattern (HttpMessageHandler fake) is the model for new tests.
+
+#### 2.d Verification pipeline (browser → server)
+
+- **Verify polling moves to `EaaS.Worker`** as `DomainVerificationJob`. Exponential backoff: 60s → 5m → 15m → 1h, capped at 48h total. Writes `mailgun_domain_state`, `verification_last_error`, `LastCheckedAt`.
+- **Server-side single-flight lock** keyed on `(tenantId, domainName)` for `POST /v4/domains` and verify attempts. Redis-backed (SET NX PX with a watchdog) so two admins / tabs / job attempts cannot race.
+- **Reconcile on 4xx-conflict**: `POST /v4/domains` returning "domain exists" falls through to `GET /v4/domains/{name}` and writes whatever Mailgun already has into `sending_domains`. Handles the dropped-response orphan state.
+- **Frontend polls our API, not Mailgun**: `GET /api/v1/domains/{id}` every 60s until `Status` flips, then stops. Browser closing the tab does not lose state.
+
+#### 2.e Provider flip — guards and pinning
+
+- **Admin endpoint `PATCH /api/v1/admin/tenants/{id}/provider`** writes `tenants.preferred_email_provider_key`. Writes `AuditLog` row with new enum `AuditAction.TenantProviderChanged` (before + after values, actor admin id, timestamp). Idempotent (flipping to the same value is a no-op).
+- **Pre-flip guard**: reject the flip unless `SELECT EXISTS (... WHERE tenant_id = X AND provider_key = <target> AND status = 'Verified')` returns true. Error: `DomainNotVerifiedForProvider`.
+- **Bidirectional**: the same endpoint handles `ses → mailgun` and `mailgun → ses`. Same guard logic (target provider must have a verified domain).
+- **Email-row provider pinning**: `SendEmailHandler` sets `Email.ProviderKey` at enqueue, reading `tenant.PreferredEmailProviderKey` once. Retries + MassTransit consumers read from the email row, not the tenant — so a mid-flight flip cannot cause dual-provider delivery.
+- **From-domain ownership check in `MailgunEmailProvider.SendAsync`**: reject (throw domain exception → 403 or 400) when the request's `From` address domain ≠ tenant's verified `sending_domains.DomainName` for `provider_key = 'mailgun'`. Exact match, not suffix. This is the isolation boundary on the shared Flex account.
+- **Kill switch**: if `kill_switch_suspended_at IS NOT NULL` for the tenant's active mailgun domain, block sends at the same check-point.
+
+#### 2.f Secrets
+
+- **Master API key out of appsettings**. Today `MailgunOptions.ApiKey` binds `EmailProviders:Mailgun:ApiKey` directly. Move to a secret-store-backed configuration provider at path `Platform/Email/Mailgun/MasterApiKey` (Azure Key Vault / AWS Secrets Manager — pick one now and document).
+- **Rotation runbook**: zero-downtime dual-key window. Mailgun supports multiple active API keys; process is (1) issue new key, (2) deploy config pointing to new key, (3) observe for 24h, (4) revoke old key.
+- Block appsettings.Production.json from containing the key via a `MailgunOptions` validator: throw at startup if the value looks like it came from a static config file rather than the secret provider (e.g. reject if starts with `key-` AND the provider path is not populated).
+
+#### 2.g Input validation
+
+- `domainName` on create: `System.Uri.CheckHostName(value) == UriHostNameType.Dns` + punycode roundtrip (`System.Globalization.IdnMapping`) + length ≤ 253 + no `..`, no CR/LF, no leading/trailing dot.
+- Cross-tenant uniqueness on `sending_domains.domain_name` (case-insensitive) — a second tenant claiming a domain already verified elsewhere is rejected outright.
+- Admin-endpoint authz: acting admin must have a session whose `tenant_id` (or superadmin role) covers the target tenant. Reuse the existing admin proxy token verifier — do not introduce a new authz scheme.
+
+#### 2.h UI (thin layer)
+
+- Admin tenant detail page: "Switch to Mailgun" toggle + "Switch back to SES" variant.
+- Wizard step 1: show Mailgun DNS records (SPF, DKIM CNAME, tracking CNAME, MX).
+- Wizard step 2: poll our own `GET /domains/{id}` every 60s, render `mailgun_domain_state` + any `verification_last_error`.
+- Toggle is disabled (with tooltip) until at least one verified domain exists for the target provider.
+
+#### 2.i Test matrix (merge-blocking)
+
+Handler layer:
+- `UpdateTenantProviderHandler`: happy flip, rejection when no verified target domain, idempotent flip, `AuditLog` written.
+- `AddDomainHandler`: routes to the correct `IDomainIdentityService` per provider, persists returned DNS rows.
+
+Adapter layer (HttpMessageHandler fake, mirrors `MailgunClientHttpTests`):
+- `MailgunClient.CreateDomainAsync`: asserts `use_automatic_sender_security=yes`, 200 / 400-conflict / 404 / 5xx branches.
+- `MailgunClient.VerifyDomainAsync`: 200 / 4xx / 5xx branches.
+- `MailgunDomainIdentityService`: returns correctly shaped `DomainIdentityResult` with SPF + DKIM CNAME + tracking CNAME + MX.
+
+Worker:
+- `DomainVerificationJob` backoff schedule, failure-then-next-attempt, terminal state after 48h → `VerificationFailed`.
+- Single-flight lock: two concurrent attempts on same key → one runs, one waits/skips.
+
+Adversarial:
+- Mailgun 5xx on `POST /v4/domains` with dropped response → reconcile via `GET /v4/domains/{name}` (WireMock).
+- Provider-flip while `SendEmailHandler` holds an inflight enqueue → delivered via pinned provider, not the new one.
+- Tenant A submitting Tenant B's verified domain → 409 cross-tenant-uniqueness.
+- Domain-name fuzz: IDN, CRLF injection, `..`, trailing dot, > 253 chars, leading dot, all-numeric → all rejected at validator.
+- `MailgunEmailProvider.SendAsync` with `From: evil@other-tenant-domain` → rejected with domain-ownership error.
+
+E2E (Playwright against local stack):
+- Wizard happy path: toggle on → DNS rows shown → mock verify success → green tick → toggle enables.
+- DNS not propagated: verify returns 400 → retry UI shown → eventual success.
+- Provider-flip blocked when no verified domain → toggle disabled with tooltip.
+
+Regression:
+- Existing SES `AddDomainHandler` tests green after factory refactor.
+- Existing send path tests green with new `Email.ProviderKey` column populated.
+
+#### 2.j Rollout
+
+- [ ] Migrate 1 pilot tenant (internal). Measure 7-day deliverability vs SES.
+- [ ] Roll out to 10% → 50% → 100% over 3 weeks. Keep SES adapter registered and selectable until Phase 5 cutover.
+
+**Risk:** Tenant DNS misconfiguration → outage for that tenant. **Mitigation:** Pre-flip guard (2.e) prevents the flip from landing until a verified domain exists. **Rollback:** Flip `preferred_email_provider_key` back to `ses`; Email rows already enqueued under `provider_key='mailgun'` continue on Mailgun until drained (acceptable — deliverability, not correctness, is the risk).
 
 ### Phase 3 — Inbound Routes Cutover (week 5-6)
 - [ ] For each tenant, `POST /v3/routes` (account-global on Flex — no `X-Mailgun-On-Behalf-Of`) with a **tenant-discriminated** expression `match_recipient("^(.+)@inbound.<tenantslug>.sendnex.io$")` and action `forward("https://api.sendnex.io/inbound/mailgun?tenantId=<id>&mailbox=\\1")` + `stop()`. The tenant's slug in the match pattern is what keeps route matches isolated on the shared account.
