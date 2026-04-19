@@ -333,6 +333,8 @@ Revision history:
 #### 2.a Pre-flight audit (hard gate — all must be green before any Phase 2 code)
 
 - [x] **Schema-drift check on PR #49 hotfix**: `scripts/migrate_mailgun_webhooks_dedup.sql` byte-for-byte matches the `Up()` method of EF migrations `20260414154548_AddEmailProviderColumns` and `20260414185323_AddWebhookDeliveriesDedup`. Both are recorded in `__EFMigrationsHistory`. **Verified 2026-04-19.**
+- [x] **TargetFramework unified — VERIFIED 2026-04-20.** `Directory.Build.props` pins `net10.0` for all projects; Independent's `net8.0`/`net10.0` concern was stale `obj/` artifacts, not actual csproj drift. Pre-flight action: run `git clean -fdx src/*/bin src/*/obj tests/*/bin tests/*/obj` on the feature branch before CI to eliminate the stale-artifact false positive.
+- [ ] **`AuditAction` enum-mapping audit**: inspect `AuditLog` EF configuration (`src/EaaS.Infrastructure/Persistence/Configurations/*Audit*.cs`). If the column is stored as `int`, inserting new enum values between existing members shifts underlying ordinals and silently reinterprets every historical row. Decision rule: if `int`-stored and history is non-trivial → either (a) convert the column to `varchar` with `[EnumMemberAttribute]` string mapping via a data-migration, or (b) keep `int` and commit to append-only enum growth with explicit integer values on every member. §2.e commits to (b) unless this audit says otherwise.
 - [ ] **Deploy-pipeline decision — DECIDED: wire `dotnet ef database update --idempotent` into `deploy.sh`** (Option A). Rationale: Option B (reproduce migrations as raw SQL + `__EFMigrationsHistory` insert per #49 pattern) is tech debt that scales linearly with every future migration and keeps reintroducing drift risk. Option A requires the `dotnet-ef` tool be present in the build/deploy image — single-line `dotnet tool install --global dotnet-ef` in the Dockerfile or CI job. This lands as a **prerequisite commit before the Phase 2 migration**, not alongside it, so the pipeline change can be validated on an existing no-op deploy first.
 - [ ] **Secret store choice — DECIDED: AWS Secrets Manager**. Rationale: `AWSSDK.SimpleEmail` and related AWS SDK packages are already transitive dependencies from the SES era; adding `AWSSDK.SecretsManager` reuses the existing IAM credential chain and region config. No new cloud provider onboarding. Azure Key Vault stays as a theoretical alternative for Phase 6+ if a specific tenant demands it.
 
@@ -366,24 +368,29 @@ Enum additions:
 - **Global concurrency cap**: `DomainVerificationJob` uses a `SemaphoreSlim` (or bounded Channel) with configurable max-in-flight (default 10) so a surge of onboarding tenants cannot stampede Mailgun's shared-account rate limits. Setting lives in `MailgunOptions.MaxVerifyConcurrency`.
 - **429 + `Retry-After` honor**: on HTTP 429 the job reads `Retry-After` (seconds or HTTP-date) and schedules the next attempt at `max(Retry-After, next backoff step)`. On 503 with `Retry-After` ditto. No exponential backoff *reduction* on 5xx — we treat 5xx as transient and use the next scheduled step.
 - **Server-side single-flight lock** keyed on `(tenantId, domainName)` for `POST /v4/domains` and verify attempts. Redis `SET NX PX` with watchdog renewal (30s TTL, 10s renew) so crashed workers don't deadlock. Multiple admins / tabs / job attempts cannot race.
+  - **Watchdog renewal failure semantics**: the renewal loop runs as a separate `Task` linked to a `CancellationTokenSource`. On renewal failure (Redis timeout, ThreadPool starvation, network blip that misses the 10s window) the CTS cancels immediately, which propagates into the in-flight Mailgun call via its linked `CancellationToken`. The operation aborts cleanly rather than continuing under a lock it no longer holds. Losing the lock mid-operation is NOT fenced — on Flex this is acceptable because the worst case is a 4xx-conflict on the subsequent `POST /v4/domains`, which §2.d's reconcile path already handles. A fencing token would be a Phase 6 concern.
+- **`DomainVerificationJob` shutdown semantics**: every `await` inside the job honors `stoppingToken` (MassTransit-worker pattern already used by `ScheduledEmailJob.cs:43`). The global `SemaphoreSlim` (§2.d below) is released in a `finally` block so a cancelled attempt does not leak a permit. Per-domain scheduled attempts use `Task.Delay(backoff, stoppingToken)` so shutdown collapses all pending delays cleanly without leaving zombie waiters.
 - **Reconcile on 4xx-conflict**: `POST /v4/domains` returning "domain exists" falls through to `GET /v4/domains/{name}` and writes whatever Mailgun already has into `sending_domains`. Handles the dropped-response orphan state.
 - **Frontend polls our API, not Mailgun**: `GET /api/v1/domains/{id}` every 60s until `Status` flips, then stops. Browser closing the tab does not lose state — the worker continues independently.
 
 #### 2.e Provider flip — guards and pinning
 
 - **Admin endpoint `POST /api/v1/admin/tenants/{id}/provider`** writes `tenants.preferred_email_provider_key`. **Verb chosen `POST` (not `PATCH`) to match existing admin-tenant action-style slices** (`SuspendTenantEndpoint`, `ActivateTenantEndpoint`, `DeleteTenantEndpoint`). Body: `{ "providerKey": "mailgun" | "ses" }`.
-- **Audit-log row is written in the same DB transaction as the flip** (not deferred to outbox) — consistent with existing `SuspendTenantHandler` pattern. New enum values in `AuditAction`:
-  - `TenantProviderChanged` — the flip itself (before + after values, actor admin id, timestamp).
-  - `DomainKillSwitchSuspended` — admin or automated kill-switch fires.
-  - `DomainCrossTenantRejected` — a tenant tries to claim a domain already verified on another tenant.
-  - `MailgunApiKeyRotated` — ops invokes the rotation runbook (see §2.f).
-  - `DomainVerificationFailedTerminal` — `DomainVerificationJob` hits the 48h cap and marks `Failed`.
+- **Audit-log row is written in the same DB transaction as the flip** (not deferred to outbox) — consistent with existing `SuspendTenantHandler` pattern. New enum values in `AuditAction` — **append-only with explicit integer values** to prevent silent reinterpretation of historical rows when the enum is stored as `int` (see §2.a audit). Existing enum ends at `SettingsUpdated = 10`; new values extend from 11:
+  - `TenantProviderChanged = 11` — the flip itself (before + after values, actor admin id, timestamp).
+  - `DomainKillSwitchSuspended = 12` — admin or automated kill-switch fires.
+  - `DomainCrossTenantRejected = 13` — a tenant tries to claim a domain already verified on another tenant.
+  - `MailgunApiKeyRotated = 14` — ops invokes the rotation runbook (see §2.f).
+  - `DomainVerificationFailedTerminal = 15` — `DomainVerificationJob` hits the 48h cap and marks `Failed`.
+  - Existing values get retrofitted with explicit `= 0` … `= 10` in the same commit so the contract is self-documenting. Any future insertion between members is prohibited by review checklist.
 - **Pre-flip guard**: reject the flip unless `SELECT EXISTS (... WHERE tenant_id = X AND provider_key = <target> AND status = 'Verified' AND deleted_at IS NULL)` returns true. Error code `DomainNotVerifiedForProvider`, HTTP 409.
 - **Bidirectional**: the same endpoint handles `ses → mailgun` and `mailgun → ses`. Same guard logic. Idempotent — flipping to the same value is a no-op (no audit row, 204).
-- **Email-row provider pinning** — two-layer defense:
+- **Email-row provider pinning** — two-layer defense with deploy-safe contract evolution:
   1. `SendEmailHandler` sets `Email.ProviderKey` at enqueue, reading `tenant.PreferredEmailProviderKey` once.
-  2. `SendEmailMessage` MassTransit contract gains a `ProviderKey` field carrying the same value (needed for telemetry, routing visibility, and as a sanity check against the DB row).
-  3. `SendEmailConsumer` resolves the provider from `email.ProviderKey` (the DB row is authoritative — it already re-reads the `Email` by id at `SendEmailConsumer.cs:54-55`). The message-level `ProviderKey` is cross-checked against the DB value; mismatch → log + honor the DB value (conservative).
+  2. `SendEmailMessage` MassTransit contract gains `public string? ProviderKey { get; init; }` — **nullable** and with no default value. MassTransit/JSON treats missing fields as `null`, so messages enqueued under the old schema deserialize cleanly on a new consumer during rolling deploy.
+  3. `SendEmailConsumer` resolves the provider from `email.ProviderKey` (the DB row is authoritative — it already re-reads the `Email` by id at `SendEmailConsumer.cs:54-55`). The message-level `ProviderKey` is used as a **soft cross-check only when non-null**. Null (pre-deploy in-flight) → trust DB silently, emit a debug log, do NOT alert. Non-null mismatch → log at `Warning`, honor DB (conservative), emit `sendnex_mailgun_provider_pin_mismatch_total` counter.
+  - **Deploy ordering**: rolling deploy is safe on its own, but recommended to pair with a pre-deploy drain on the `eaas-emails-send*` queues (lower to zero in-flight count, then deploy). Not required — the nullable-trust-DB path makes it correctness-safe, just log-noisier for a few minutes during the crossover.
+  - Deliberately NOT introducing `SendEmailMessageV2` — MassTransit's JSON serializer handles additive changes natively and versioning doubles the consumer registration surface. Revisit only if we ever need a non-additive change.
 - **From-domain ownership check in `MailgunEmailProvider.SendAsync`**: reject (throw domain exception → 403) when the request's `From` address domain ≠ tenant's verified `sending_domains.DomainName` for `provider_key = 'mailgun'`. Exact match, case-insensitive, not suffix. This is the isolation boundary on the shared Flex account.
 - **Kill switch + soft-delete** block sends at the same check-point:
   - `kill_switch_suspended_at IS NOT NULL` on the tenant's active mailgun domain → reject.
@@ -392,15 +399,27 @@ Enum additions:
 
 #### 2.f Secrets
 
-- **Master API key out of appsettings, into AWS Secrets Manager** at secret id `sendnex/platform/email/mailgun/master-api-key`. Package: `AWSSDK.SecretsManager` (added to `EaaS.Infrastructure.csproj` — reuses existing AWS SDK credential chain). Registration: custom `IConfigurationSource` + `ConfigurationProvider` that fetches on startup with 5-minute in-memory cache and an `IHostedService` that refreshes on a 30-minute interval so mid-flight rotations propagate without a restart.
+- **Master API key out of appsettings, into AWS Secrets Manager** at secret id `sendnex/platform/email/mailgun/master-api-key`. Package: `AWSSDK.SecretsManager` (added to `EaaS.Infrastructure.csproj` — reuses existing AWS SDK credential chain).
+- **Startup must not hard-fail on Secrets Manager outage** (Independent pass-3 blocker). Registration is a custom `MailgunSecretProvider` that fetches with **three layers of resilience**:
+  1. **Primary**: live Secrets Manager fetch on startup + 30-min refresh loop for rotation pickup (5-min in-memory cache for read hot path).
+  2. **Last-known-good disk cache** at `/var/lib/sendnex/secrets/mailgun-master.cache` — AES-encrypted with a pod-local KMS-DEK (or an operator-provided `SENDNEX_LKG_KEY` env var, rotated quarterly). On every successful Secrets Manager fetch the value is written through to this cache. On cold-start if Secrets Manager is unreachable, the provider reads the LKG cache and continues with a startup `Warning` log + the `sendnex_mailgun_secret_source{source="lkg_disk"}` gauge set to 1. TTL on the LKG read is 7 days — older than that, refuse to start (prevents indefinitely-stale secrets in a long-dead region).
+  3. **Lazy circuit breaker for cold-start when no LKG exists** (first-ever deploy of a region): the `MailgunEmailProvider.SendAsync` path calls a lazy resolver. If the secret is still unavailable at first send, open a 30s circuit breaker, log + metric, and return a `ProviderTemporarilyUnavailable` domain error that the send pipeline translates to DLQ-for-retry — NOT to a send failure observable by the tenant as "delivery failed."
+  4. Net effect: a Secrets Manager regional incident degrades rotation (new keys don't propagate until SM comes back) but does NOT take down SendNex. Pods stay up, existing keys keep working, rotation queues.
 - **Rotation runbook** (zero-downtime dual-key window):
   1. Mint a new Mailgun API key in the Mailgun UI (Mailgun supports multiple active keys).
   2. Update AWS Secrets Manager secret value; do NOT deploy yet.
-  3. Wait 30 min for the hosted refresher to pick up the new value OR trigger an ops-only endpoint `POST /api/v1/admin/secrets/refresh-mailgun` that invalidates the cache.
+  3. Wait **up to 35 min** (5-min cache TTL + 30-min refresh interval) for the hosted refresher to pick up the new value OR trigger ops-only `POST /api/v1/admin/secrets/refresh-mailgun` for immediate invalidation.
   4. Observe traffic for 24h. Old key still valid on Mailgun side.
   5. Revoke the old key in the Mailgun UI.
   6. Write `AuditAction.MailgunApiKeyRotated` on every step.
-- **Startup validator — rewritten for correctness**. The pass-1 rule "reject if starts with `key-`" was inverted (real Mailgun keys start with `key-`). Correct rule: inspect the configuration binding's source `IConfigurationProvider`. If the key was resolved from `JsonConfigurationProvider` (appsettings.*.json) OR `EnvironmentVariablesConfigurationProvider` OR `CommandLineConfigurationProvider`, **throw at startup**. Only accept values resolved from the `SecretsManagerConfigurationProvider`. Exception for `Environment.IsDevelopment()` where env vars are allowed with a warning log. Implementation uses `IConfigurationRoot.Providers` introspection; unit test covers all four provider types.
+- **Startup validator — rewritten, provenance-sentinel-based** (Independent pass-3 blocker: the pass-2 rule rejected k8s-Secret-as-env, which is the industry-standard pod-secret pattern). Validator logic:
+  1. Read `SENDNEX_SECRET_SOURCE` environment variable. Must be one of: `aws-sm` | `k8s-secret` | `dev-local` | `lkg-fallback`.
+  2. If the variable is missing in any non-development environment → throw at startup. Dev environments default to `dev-local` with a warning.
+  3. If `aws-sm` → the configuration value must have originated from the `MailgunSecretProvider` (introspect `IConfigurationRoot.Providers`); else throw.
+  4. If `k8s-secret` → the configuration value must have originated from `EnvironmentVariablesConfigurationProvider` AND the env var name must start with the documented prefix `SENDNEX_SECRET__` (double-underscore matches .NET's standard env-var-to-section convention). This specifically whitelists the k8s-Secret-as-env-var deploy pattern without whitelisting every env var.
+  5. If `lkg-fallback` → the `MailgunSecretProvider` set this at runtime when primary failed and LKG served the value. Validator logs the `lkg_age_seconds` and continues; alerts fire via §2.k.
+  6. `dev-local` allows appsettings.Development.json + env vars with a warning log, `IsDevelopment()` only.
+  - Unit tests cover all five matrix cells (source × provenance match/mismatch) + the k8s-Secret-as-env happy path.
 
 #### 2.g Input validation
 
@@ -460,9 +479,11 @@ Metrics (Prometheus, registered on existing meter `EaaS.Api` / new meter `EaaS.W
 - `sendnex_mailgun_verify_failures_total` (counter, labels: `reason=dns_not_propagated|rate_limited|4xx|5xx|timeout`) — bucketed by HTTP-status-class + semantic reason.
 - `sendnex_mailgun_verify_terminal_total` (counter, labels: `outcome=verified|failed`) — increments once per domain at terminal state.
 - `sendnex_mailgun_singleflight_contention_total` (counter, labels: `resource=create|verify`) — incremented when `SET NX` returns false (a competing attempt is already running).
-- `sendnex_mailgun_send_killswitch_hit_total` (counter, labels: `tenant_id`) — send rejected because `kill_switch_suspended_at IS NOT NULL`.
-- `sendnex_mailgun_send_from_domain_mismatch_total` (counter, labels: `tenant_id`) — send rejected because From-domain ≠ verified sending_domain (§2.e isolation boundary). High rate on one tenant = compromised API key OR misconfigured integration; fires the oncall alert.
-- `sendnex_mailgun_api_key_refresh_total` (counter, labels: `source=hosted_service|manual_endpoint`) — tracks rotation cache refreshes.
+- `sendnex_mailgun_send_rejected_total` (counter, labels: `reason=killswitch|from_mismatch|domain_deleted|provider_unavailable|tenant_id`) — **consolidated** rejection counter replacing the pass-2 split metrics. Collapses killswitch + from-domain-mismatch + soft-delete + provider-circuit-breaker into one counter with `reason` label. Independent pass-3 noted `domain_deleted` had no metric at all; now covered here. `provider_unavailable` covers the §2.f circuit-breaker rejection.
+- `sendnex_mailgun_api_key_refresh_total` (counter, labels: `source=hosted_service|manual_endpoint|lkg_fallback`) — tracks rotation cache refreshes; `lkg_fallback` fires when the disk cache served.
+- `sendnex_mailgun_api_key_cache_age_seconds` (gauge) — time since last successful Secrets Manager fetch. A stalled refresh loop shows up here as a continuously-climbing value; alert if > 3600.
+- `sendnex_mailgun_secret_source` (gauge, labels: `source=aws_sm|lkg_disk|k8s_secret|dev_local`) — which secret source served the current value. Dashboard panel lights up when LKG is serving so ops can see a silent Secrets Manager outage.
+- `sendnex_mailgun_provider_pin_mismatch_total` (counter) — §2.e soft cross-check: message-level `ProviderKey` disagrees with DB row. Non-zero during rolling deploy is expected (old-schema messages in-flight); sustained non-zero outside a deploy window is an invariant violation.
 
 Structured log events (Serilog, at `Information` unless noted):
 - `mailgun.domain.create_requested` / `mailgun.domain.create_reconciled` (latter = 4xx-conflict fall-through, see §2.d)
@@ -472,12 +493,20 @@ Structured log events (Serilog, at `Information` unless noted):
 - `mailgun.provider.flip_completed`
 - `mailgun.send.rejected_from_domain_mismatch` (`Warning`)
 - `mailgun.send.rejected_killswitch` (`Warning`)
+- `mailgun.send.rejected_domain_deleted` (`Warning`) — soft-deleted domain hit at send-time; pairs with DLQ entry
+- `mailgun.send.rejected_provider_unavailable` (`Warning`) — Secrets Manager circuit-breaker open; DLQ-for-retry
 - `mailgun.apikey.rotated` (`Warning` — intentional so it's conspicuous in log search)
+- `mailgun.apikey.refresh_failed` (`Warning`) — primary fetch failed; includes `lkg_age_seconds` on fallback
+- `mailgun.secret.lkg_serving` (`Warning`) — LKG disk cache is currently authoritative because Secrets Manager is unreachable
 
 Alert hints for Grafana (not defined here, implementation ticket):
-- `sendnex_mailgun_send_from_domain_mismatch_total` rate > 0.1/s per tenant for 5min → page oncall.
+- `sendnex_mailgun_send_rejected_total{reason="from_mismatch"}` rate > 0.1/s per tenant for 5min → page oncall (compromised key / misconfigured integration).
+- `sendnex_mailgun_send_rejected_total{reason="domain_deleted"}` any non-zero sustained for 5min → ops investigates; soft-deleted-but-still-enqueued sends are DLQ'd and need triage (see runbook).
 - `sendnex_mailgun_verify_failures_total{reason="5xx"}` rate > 1/s for 5min → page oncall (Mailgun outage).
 - `sendnex_mailgun_singleflight_contention_total` sustained > 10/s → investigate runaway poller.
+- `sendnex_mailgun_api_key_cache_age_seconds` > 3600 → refresh loop dead; page oncall even if nothing else is failing (silent failure class).
+- `sendnex_mailgun_secret_source{source="lkg_disk"}` == 1 for > 15 min → Secrets Manager outage, escalate.
+- `sendnex_mailgun_provider_pin_mismatch_total` non-zero for > 15 min outside a deploy window → invariant violation; investigate.
 
 ### Phase 3 — Inbound Routes Cutover (week 5-6)
 - [ ] For each tenant, `POST /v3/routes` (account-global on Flex — no `X-Mailgun-On-Behalf-Of`) with a **tenant-discriminated** expression `match_recipient("^(.+)@inbound.<tenantslug>.sendnex.io$")` and action `forward("https://api.sendnex.io/inbound/mailgun?tenantId=<id>&mailbox=\\1")` + `stop()`. The tenant's slug in the match pattern is what keeps route matches isolated on the shared account.
