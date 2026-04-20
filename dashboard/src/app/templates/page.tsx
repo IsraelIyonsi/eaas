@@ -258,7 +258,7 @@ export default function TemplatesPage() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-        <DialogContent className="max-w-2xl border-border bg-card">
+        <DialogContent className="flex max-h-[90vh] max-w-2xl flex-col border-border bg-card">
           <DialogHeader>
             <DialogTitle className="text-foreground">
               {editingTemplate
@@ -266,12 +266,12 @@ export default function TemplatesPage() {
                 : "Create Template"}
             </DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="edit" className="mt-4">
+          <Tabs defaultValue="edit" className="mt-4 flex min-h-0 flex-1 flex-col">
             <TabsList className="bg-muted">
               <TabsTrigger value="edit">Edit</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
-            <TabsContent value="edit" className="mt-6 space-y-5">
+            <TabsContent value="edit" className="mt-6 flex-1 space-y-5 overflow-y-auto pr-1">
               <div className="space-y-2">
                 <Label className="text-foreground/80">Template Name</Label>
                 <Input
@@ -315,7 +315,7 @@ export default function TemplatesPage() {
                 />
               </div>
             </TabsContent>
-            <TabsContent value="preview" className="mt-6">
+            <TabsContent value="preview" className="mt-6 flex-1 overflow-y-auto pr-1">
               <div className="rounded-lg border border-border bg-white overflow-hidden">
                 <iframe
                   srcDoc={form.htmlTemplate || "<div style='padding:32px;color:#888;font-family:sans-serif;text-align:center'><p>Enter HTML in the editor to see a live preview here.</p></div>"}

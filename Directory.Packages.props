@@ -40,8 +40,8 @@
     <!-- HTML Parsing -->
     <PackageVersion Include="AngleSharp" Version="1.2.0" />
     <!-- MIME Email Construction + SMTP Client -->
-    <PackageVersion Include="MailKit" Version="4.15.0" />
-    <PackageVersion Include="MimeKit" Version="4.15.1" />
+    <PackageVersion Include="MailKit" Version="4.16.0" />
+    <PackageVersion Include="MimeKit" Version="4.16.0" />
     <!-- Health Checks -->
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.0" />
     <!-- Security -->

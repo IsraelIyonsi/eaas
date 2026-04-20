@@ -124,6 +124,7 @@ async function proxyRequest(
     }
   }
 
+  const startedAt = Date.now();
   try {
     const controller = new AbortController();
     const proxyTimeout = setTimeout(() => controller.abort(), 30000);
@@ -142,10 +143,24 @@ async function proxyRequest(
       },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to reach SendNex API";
+    const elapsedMs = Date.now() - startedAt;
+    const name = error instanceof Error ? error.name : "UnknownError";
+    const message = error instanceof Error ? error.message : "Failed to reach SendNex API";
+    const aborted = name === "AbortError" || message.toLowerCase().includes("abort");
+    console.error(
+      JSON.stringify({
+        event: "proxy.upstream_failure",
+        method: request.method,
+        path: apiPath,
+        upstream: url.toString(),
+        elapsedMs,
+        aborted,
+        errorName: name,
+        errorMessage: message,
+      }),
+    );
     return NextResponse.json(
-      { success: false, error: message },
+      { success: false, error: aborted ? "Upstream timeout" : message },
       { status: 502 },
     );
   }

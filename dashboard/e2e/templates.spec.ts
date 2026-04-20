@@ -140,4 +140,21 @@ test.describe("Templates Page", () => {
     const textBody = page.getByPlaceholder("Plain text version...");
     await expect(textBody).not.toHaveValue("");
   });
+
+  test("create dialog fits viewport at 1280x720 with header and footer both visible", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page
+      .getByRole("button", { name: "Create Template" })
+      .first()
+      .click();
+
+    const heading = page.getByRole("heading", { name: "Create Template" });
+    const cancel = page.getByRole("button", { name: "Cancel" });
+
+    await expect(heading).toBeVisible();
+    await expect(heading).toBeInViewport();
+    await expect(cancel).toBeInViewport();
+  });
 });
